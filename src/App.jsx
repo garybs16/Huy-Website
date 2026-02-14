@@ -1,15 +1,15 @@
 import "./App.css";
 
 const assets = {
-  logo: "https://allegiancecareer-institute.com/wp-content/uploads/2024/09/logo.png",
+  logo: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&q=80",
   professor:
-    "https://allegiancecareer-institute.com/wp-content/uploads/2024/09/professor-1.png",
+    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=900&q=80",
   student:
-    "https://allegiancecareer-institute.com/wp-content/uploads/2024/09/student.png",
+    "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=900&q=80",
   cna:
-    "https://allegiancecareer-institute.com/wp-content/uploads/2024/09/CNA-Orange12.png",
+    "https://images.unsplash.com/photo-1666214280391-8ff5bd3c0bf0?auto=format&fit=crop&w=900&q=80",
   care:
-    "https://allegiancecareer-institute.com/wp-content/uploads/2024/09/Nursing-Assistant-School-StrategicAlliance7555-1024x683-1.jpg",
+    "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1600&q=80",
 };
 
 const navItems = [
@@ -119,7 +119,7 @@ function App() {
     <div className="page">
       <header className="topbar">
         <div className="container topbar-inner">
-          <p>Professional Healthcare Training in South Carolina</p>
+          <p>Professional Healthcare Training in SoCal</p>
           <a href="#contact">Student Login</a>
         </div>
       </header>
@@ -127,7 +127,7 @@ function App() {
       <nav className="navbar">
         <div className="container nav-inner">
           <a className="brand" href="#top">
-            <img src={assets.logo} alt="Allegiance Career Institute" />
+            <img src={assets.logo} alt="Pacific Crest Allied Health Institute" />
           </a>
           <div className="menu">
             {navItems.map((item) => (
@@ -148,7 +148,7 @@ function App() {
       >
         <div className="container hero-content">
           <span className="kicker">Get your</span>
-          <h1>CNA Certification in South Carolina</h1>
+          <h1>CNA Certification in SoCal</h1>
           <p>
             Train with experienced instructors through weekday, weekend, or evening tracks and
             prepare for state CNA testing with confidence.
@@ -197,13 +197,13 @@ function App() {
       <section className="section about" id="about">
         <div className="container about-grid">
           <div className="about-copy">
-            <h2>Allegiance Career Institute in Brief</h2>
+            <h2>Pacific Crest Allied Health Institute in Brief</h2>
             <p>
-              Allegiance Career Institute is approved by the South Carolina Department of Health &
+              Pacific Crest Allied Health Institute is approved by the California Department of Public Health &
               Human Services and focused on workforce-ready nurse aide training.
             </p>
             <ul>
-              <li>South Carolina approved curriculum</li>
+              <li>California-focused curriculum</li>
               <li>Small class support and guided labs</li>
               <li>State exam preparation focus</li>
             </ul>
@@ -261,8 +261,8 @@ function App() {
               ))}
             </ul>
             <h3>Class Locations</h3>
-            <p>2905-A North Main St, Anderson, SC 29621</p>
-            <p>1804 Highway 72/221 East, Greenwood, SC 29649</p>
+            <p>420 S Main St, Orange, CA 92868</p>
+            <p>1540 Brookhollow Dr, Santa Ana, CA 92705</p>
           </article>
         </div>
       </section>
@@ -301,7 +301,7 @@ function App() {
           <article className="panel">
             <h2>Contact Us</h2>
             <p>Phone: (864) 385-4335</p>
-            <p>Email: allegiancecareerinstitute@outlook.com</p>
+            <p>Email: admissions@pacificcrestahi.com</p>
             <p>Hours: Mon - Fri, 8:00 AM - 5:00 PM</p>
           </article>
           <article className="panel">
@@ -322,7 +322,7 @@ function App() {
       <footer className="footer" id="gallery">
         <div className="container footer-grid">
           <div>
-            <img src={assets.logo} alt="Allegiance Career Institute logo" className="footer-logo" />
+            <img src={assets.logo} alt="Pacific Crest Allied Health Institute logo" className="footer-logo" />
             <p>Building compassionate healthcare professionals through practical training.</p>
           </div>
           <div>
@@ -347,13 +347,13 @@ function App() {
             <h3>Contact</h3>
             <ul>
               <li>(864) 385-4335</li>
-              <li>Anderson, SC</li>
-              <li>Greenwood, SC</li>
+              <li>Orange, CA</li>
+              <li>Santa Ana, CA</li>
             </ul>
           </div>
         </div>
         <div className="copyright">
-          <p>Copyright 2026 Allegiance Career Institute. Rough draft mirror in React.</p>
+          <p>Copyright 2026 Pacific Crest Allied Health Institute. All rights reserved.</p>
         </div>
       </footer>
     </div>
@@ -361,3 +361,4 @@ function App() {
 }
 
 export default App;
+
