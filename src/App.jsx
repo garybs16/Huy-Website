@@ -147,7 +147,9 @@ function App() {
         }}
       >
         <div className="container hero-content">
-          <span className="kicker">Get your</span>
+          <p className="credibility-line">
+            <strong>Approved by California Department of Public Health</strong>
+          </p>
           <h1>CNA Certification in SoCal</h1>
           <p>
             Train with experienced instructors through weekday, weekend, or evening tracks and
@@ -199,8 +201,8 @@ function App() {
           <div className="about-copy">
             <h2>Pacific Crest Allied Health Institute in Brief</h2>
             <p>
-              Pacific Crest Allied Health Institute is approved by the California Department of Public Health &
-              Human Services and focused on workforce-ready nurse aide training.
+              Pacific Crest Allied Health Institute provides workforce-ready nurse aide training
+              for students across Southern California.
             </p>
             <ul>
               <li>California-focused curriculum</li>
