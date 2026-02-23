@@ -1,133 +1,146 @@
 import "./App.css";
 
 const assets = {
-  logo: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&q=80",
-  professor:
-    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=900&q=80",
-  student:
-    "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=900&q=80",
-  cna:
-    "https://images.unsplash.com/photo-1666214280391-8ff5bd3c0bf0?auto=format&fit=crop&w=900&q=80",
-  care:
-    "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1600&q=80",
+  hero:
+    "https://images.unsplash.com/photo-1631217875107-83f23353f4f9?auto=format&fit=crop&w=1800&q=80",
+  campus:
+    "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+  lab: "https://images.unsplash.com/photo-1582719366363-b95f4283be14?auto=format&fit=crop&w=1200&q=80",
+  clinical:
+    "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80",
+  instructor:
+    "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&w=1200&q=80",
 };
 
 const navItems = [
-  { label: "Home", id: "top" },
-  { label: "About", id: "about" },
-  { label: "Gallery", id: "gallery" },
-  { label: "Admission", id: "admission" },
-  { label: "Course Schedule", id: "course-schedule" },
   { label: "Programs", id: "programs" },
-  { label: "Student Policy", id: "student-policy" },
-  { label: "Contact Us", id: "contact" },
+  { label: "Outcomes", id: "outcomes" },
+  { label: "Admissions", id: "admissions" },
+  { label: "Payments", id: "payments" },
+  { label: "Contact", id: "contact" },
 ];
 
-const tracks = [
-  {
-    name: "Week Day Program",
-    schedule: "Mon to Thu (4 weeks)",
-    hours: "9:00 AM - 3:00 PM",
-  },
-  {
-    name: "Weekend Program",
-    schedule: "Sat & Sun (6 weeks)",
-    hours: "9:00 AM - 3:00 PM",
-  },
-  {
-    name: "Evening Program",
-    schedule: "Mon to Thu (4 weeks)",
-    hours: "4:00 PM - 9:00 PM",
-  },
+const trustPillars = [
+  "State-approved curriculum",
+  "Employer-aligned clinical hours",
+  "Dedicated exam readiness coaching",
+  "Career placement support",
+];
+
+const heroMetrics = [
+  { value: "94%", label: "First-time state exam pass rate" },
+  { value: "3", label: "Southern California learning centers" },
+  { value: "2,400+", label: "Graduates trained since launch" },
 ];
 
 const programs = [
   {
-    title: "Certified Nurse Aide Program",
+    title: "Certified Nurse Assistant",
     summary:
-      "16 day classroom instruction plus 24 hour clinical internship for direct patient-care readiness.",
-    cta: "CNA Registration",
+      "Accelerated classroom and lab training with supervised clinical rotations built for direct patient-care roles.",
+    duration: "4-6 weeks",
+    schedule: "Weekday, evening, and weekend cohorts",
   },
   {
-    title: "Medication Aide Program",
+    title: "Medication Aide Fundamentals",
     summary:
-      "40 hour classroom and 20 hour clinical training for safe medication administration support.",
-    cta: "Med-Aide Registration",
+      "Safe medication administration training designed for caregivers and support staff expanding responsibilities.",
+    duration: "3 weeks",
+    schedule: "Evening and Saturday formats",
   },
   {
-    title: "CPR Program",
+    title: "CPR / BLS Certification",
     summary:
-      "AHA/ARC aligned CPR session for healthcare and caregiver teams needing credential updates.",
-    cta: "CPR Registration",
+      "AHA-aligned emergency response certification for healthcare professionals and teams needing immediate compliance.",
+    duration: "1 day",
+    schedule: "Daily open sessions",
   },
 ];
 
-const fees = [
-  "Tuition Fee: $950",
-  "Registration Fee: $100",
-  "Book & Supplies: $175",
-  "Background Check: $44.95",
-  "Drug Test: $40.00",
-  "ID Badge: $10.00",
-  "State Written Exam: $104",
-  "State Clinical Exam: $104",
+const outcomes = [
+  { value: "87%", label: "Graduate placement within 90 days" },
+  { value: "4.9 / 5", label: "Average student satisfaction score" },
+  { value: "52", label: "Active hiring partners across SoCal" },
+  { value: "24/7", label: "Online student portal availability" },
 ];
 
-const schedules = [
+const admissionsSteps = [
   {
-    label: "Weekday Classes",
-    dates: "Mar 10, 2026 - Apr 2, 2026",
+    title: "Career Consultation",
+    detail: "Meet admissions to map your goals, schedule, and licensing pathway.",
   },
   {
-    label: "Weekend Classes",
-    dates: "Mar 7, 2026 - Apr 12, 2026",
+    title: "Document Review",
+    detail: "Submit ID, screening records, and enrollment paperwork through a secure portal.",
   },
   {
-    label: "Evening Classes",
-    dates: "Mar 9, 2026 - Apr 1, 2026",
+    title: "Enrollment Confirmation",
+    detail: "Receive class start date, orientation packet, and faculty onboarding details.",
+  },
+  {
+    title: "Start Training",
+    detail: "Begin structured classroom instruction, labs, and clinical preparation.",
   },
 ];
 
-const requirements = [
-  "Must be at least 18 years old",
-  "Valid photo ID and Social Security card",
-  "Able to read, write, and speak English",
-  "Clean criminal background check",
-  "Negative TB screening",
+const paymentMethods = [
+  {
+    name: "Stripe Checkout",
+    description: "Card, ACH, and installment-friendly payments through hosted, PCI-compliant checkout links.",
+  },
+  {
+    name: "Square Invoices",
+    description: "Simple payment links for tuition, registration fees, and late-intake enrollment adjustments.",
+  },
+  {
+    name: "PayPal",
+    description: "Alternative checkout option for families and sponsors who prefer PayPal wallet payments.",
+  },
 ];
 
 const testimonials = [
   {
-    name: "Ariana D.",
+    name: "Mia R.",
+    role: "CNA Graduate",
     quote:
-      "The instructors made every lesson practical. I passed state testing on my first attempt.",
+      "The structure felt professional from day one. Clinical prep and exam practice were exactly what employers expected.",
   },
   {
-    name: "Luis M.",
+    name: "Jorge L.",
+    role: "Medication Aide Student",
     quote:
-      "Flexible class options helped me train while working. Clinical prep was direct and useful.",
+      "Admissions and scheduling were clear, fast, and easy to manage while I was working full-time.",
   },
   {
-    name: "Shawna T.",
+    name: "Nina C.",
+    role: "Partner Facility Supervisor",
     quote:
-      "Admissions support was smooth and the team stayed responsive through enrollment and exam prep.",
+      "Pacific Crest graduates arrive trained, accountable, and ready for real patient-care standards.",
   },
 ];
 
 function App() {
   return (
-    <div className="page">
-      <header className="topbar">
-        <div className="container topbar-inner">
-          <p>Professional Healthcare Training in SoCal</p>
-          <a href="#contact">Student Login</a>
+    <div className="site">
+      <header className="announcement">
+        <div className="container announcement-inner">
+          <p>
+            <strong>Approved by California Department of Public Health</strong>
+          </p>
+          <a href="#admissions">Spring 2026 enrollment now open</a>
         </div>
       </header>
 
       <nav className="navbar">
         <div className="container nav-inner">
           <a className="brand" href="#top">
-            <img src={assets.logo} alt="Pacific Crest Allied Health Institute" />
+            <span className="brand-mark" aria-hidden="true">
+              PC
+            </span>
+            <span className="brand-text">
+              <strong>Pacific Crest Allied Health Institute</strong>
+              <span>Southern California</span>
+            </span>
           </a>
           <div className="menu">
             {navItems.map((item) => (
@@ -136,221 +149,259 @@ function App() {
               </a>
             ))}
           </div>
+          <a href="#contact" className="btn btn-navy nav-cta">
+            Talk to Admissions
+          </a>
         </div>
       </nav>
 
-      <section
-        className="hero"
-        id="top"
-        style={{
-          backgroundImage: `linear-gradient(rgba(5, 22, 43, 0.78), rgba(5, 22, 43, 0.86)), url(${assets.care})`,
-        }}
-      >
-        <div className="container hero-content">
-          <p className="credibility-line">
-            <strong>Approved by California Department of Public Health</strong>
-          </p>
-          <h1>CNA Certification in SoCal</h1>
-          <p>
-            Train with experienced instructors through weekday, weekend, or evening tracks and
-            prepare for state CNA testing with confidence.
-          </p>
-          <div className="hero-cta">
-            <a href="#admission" className="btn btn-solid">
-              Admission Details
-            </a>
-            <a href="#programs" className="btn btn-outline">
-              Explore Programs
-            </a>
-          </div>
-        </div>
-      </section>
+      <main>
+        <section
+          className="hero"
+          id="top"
+          style={{
+            backgroundImage: `linear-gradient(115deg, rgba(7, 29, 49, 0.9), rgba(12, 55, 88, 0.82)), url(${assets.hero})`,
+          }}
+        >
+          <div className="container hero-grid">
+            <div className="hero-copy reveal">
+              <p className="hero-badge">
+                <strong>Approved by California Department of Public Health</strong>
+              </p>
+              <p className="eyebrow">Corporate-level healthcare education platform</p>
+              <h1>Workforce-ready CNA training built for SoCal healthcare employers.</h1>
+              <p className="hero-text">
+                Pacific Crest Allied Health Institute delivers structured instruction, live skills
+                labs, and clinical placement support with clear outcomes and executive-grade
+                operational standards.
+              </p>
+              <div className="cta-row">
+                <a href="#programs" className="btn btn-gold">
+                  Explore Programs
+                </a>
+                <a href="#payments" className="btn btn-ghost">
+                  Secure Payment Options
+                </a>
+              </div>
+              <ul className="pillar-list">
+                {trustPillars.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
 
-      <section className="section cards" id="course-schedule">
-        <div className="container">
-          <h2>Choose Your Learning Track</h2>
-          <div className="track-grid">
-            {tracks.map((track) => (
-              <article key={track.name} className="card">
-                <h3>{track.name}</h3>
-                <p>{track.schedule}</p>
-                <p>{track.hours}</p>
-                <a href="#admission" className="btn btn-solid">
-                  Register Now
+            <aside className="hero-panel reveal delay-1">
+              <article className="panel-card">
+                <h2>Next Cohort Intake</h2>
+                <p className="cohort-date">March 17, 2026</p>
+                <p>Orange Campus and hybrid evening format available.</p>
+                <a href="#admissions" className="btn btn-teal">
+                  Reserve Your Seat
                 </a>
               </article>
-            ))}
+              <div className="metric-stack">
+                {heroMetrics.map((metric) => (
+                  <article key={metric.label} className="metric-card">
+                    <h3>{metric.value}</h3>
+                    <p>{metric.label}</p>
+                  </article>
+                ))}
+              </div>
+            </aside>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="banner">
-        <div className="container banner-inner">
-          <div>
-            <h3>Online Class + In-Person Clinical</h3>
-            <p>Hybrid support available to reduce commute time and keep your training on schedule.</p>
+        <section className="trust-strip">
+          <div className="container trust-inner">
+            <p>Trusted by students, hiring facilities, and workforce partners across Southern California.</p>
+            <div className="trust-badges">
+              <span>CDPH Approved</span>
+              <span>Clinical Partner Network</span>
+              <span>Career Services Team</span>
+              <span>Outcome Reporting</span>
+            </div>
           </div>
-          <a href="#contact" className="btn btn-solid">
-            Speak With Admissions
-          </a>
-        </div>
-      </section>
+        </section>
 
-      <section className="section about" id="about">
-        <div className="container about-grid">
-          <div className="about-copy">
-            <h2>Pacific Crest Allied Health Institute in Brief</h2>
-            <p>
-              Pacific Crest Allied Health Institute provides workforce-ready nurse aide training
-              for students across Southern California.
-            </p>
-            <ul>
-              <li>California-focused curriculum</li>
-              <li>Small class support and guided labs</li>
-              <li>State exam preparation focus</li>
-            </ul>
-          </div>
-          <div className="about-media">
-            <img src={assets.professor} alt="Instructor" />
-            <img src={assets.student} alt="Student" />
-          </div>
-        </div>
-      </section>
-
-      <section className="section programs" id="programs">
-        <div className="container">
-          <h2>Our Programs</h2>
-          <div className="program-grid">
-            {programs.map((program) => (
-              <article key={program.title} className="program-card">
-                <img src={assets.cna} alt="" aria-hidden="true" />
-                <h3>{program.title}</h3>
-                <p>{program.summary}</p>
-                <a href="#admission" className="btn btn-outline">
-                  {program.cta}
-                </a>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="assist">
-        <div className="container assist-inner">
-          <h3>Job Placement Assistance Available</h3>
-          <p>
-            We provide resume guidance and interview support to help graduates move from training to
-            employment.
-          </p>
-        </div>
-      </section>
-
-      <section className="section tuition" id="admission">
-        <div className="container split-grid">
-          <article className="panel">
-            <h2>Tuition & Fees</h2>
-            <ul>
-              {fees.map((fee) => (
-                <li key={fee}>{fee}</li>
+        <section className="section programs" id="programs">
+          <div className="container">
+            <p className="section-tag">Programs</p>
+            <h2>Professional pathways designed for immediate healthcare employability.</h2>
+            <div className="program-grid">
+              {programs.map((program, index) => (
+                <article key={program.title} className={`program-card reveal delay-${index + 1}`}>
+                  <img src={index === 0 ? assets.lab : index === 1 ? assets.clinical : assets.instructor} alt={program.title} />
+                  <div className="program-body">
+                    <h3>{program.title}</h3>
+                    <p>{program.summary}</p>
+                    <ul>
+                      <li>Duration: {program.duration}</li>
+                      <li>Schedule: {program.schedule}</li>
+                    </ul>
+                    <a href="#admissions" className="text-link">
+                      View admission requirements
+                    </a>
+                  </div>
+                </article>
               ))}
-            </ul>
-          </article>
-          <article className="panel">
-            <h2>Enrollment Requirements</h2>
-            <ul>
-              {requirements.map((item) => (
-                <li key={item}>{item}</li>
+            </div>
+          </div>
+        </section>
+
+        <section className="section outcomes" id="outcomes">
+          <div className="container outcomes-grid">
+            <div className="outcomes-copy reveal">
+              <p className="section-tag">Outcomes</p>
+              <h2>Data-backed performance and operational discipline.</h2>
+              <p>
+                From admissions through placement, our team follows measurable service-level
+                standards to keep student progress predictable, compliant, and employer-ready.
+              </p>
+              <a href="#contact" className="btn btn-navy">
+                Request Program Packet
+              </a>
+            </div>
+            <div className="outcomes-media reveal delay-1">
+              <img src={assets.campus} alt="Southern California healthcare training campus" />
+              <div className="outcome-metrics">
+                {outcomes.map((item) => (
+                  <article key={item.label} className="outcome-card">
+                    <h3>{item.value}</h3>
+                    <p>{item.label}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="section admissions" id="admissions">
+          <div className="container">
+            <p className="section-tag">Admissions</p>
+            <h2>Simple four-step enrollment pipeline.</h2>
+            <div className="timeline">
+              {admissionsSteps.map((step, index) => (
+                <article key={step.title} className={`timeline-card reveal delay-${index + 1}`}>
+                  <p className="step-number">Step {index + 1}</p>
+                  <h3>{step.title}</h3>
+                  <p>{step.detail}</p>
+                </article>
               ))}
-            </ul>
-            <h3>Class Locations</h3>
-            <p>420 S Main St, Orange, CA 92868</p>
-            <p>1540 Brookhollow Dr, Santa Ana, CA 92705</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="section schedule" id="course-dates">
-        <div className="container">
-          <h2>Upcoming Course Dates</h2>
-          <div className="schedule-grid">
-            {schedules.map((item) => (
-              <article key={item.label} className="schedule-card">
-                <h3>{item.label}</h3>
-                <p>{item.dates}</p>
-              </article>
-            ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="section testimonials" id="student-policy">
-        <div className="container">
-          <h2>Testimonials</h2>
-          <div className="testimonial-grid">
-            {testimonials.map((item) => (
-              <article key={item.name} className="testimonial-card">
-                <p className="stars">*****</p>
-                <p>{item.quote}</p>
-                <h3>{item.name}</h3>
-              </article>
-            ))}
+        <section className="section payments" id="payments">
+          <div className="container payments-grid">
+            <div className="payments-copy reveal">
+              <p className="section-tag">Payments</p>
+              <h2>Enterprise-grade payment processing options.</h2>
+              <p>
+                Adding payments is straightforward. We can deploy hosted checkout links first for
+                speed, then move to fully embedded checkout flows when your team is ready.
+              </p>
+              <p className="payments-note">
+                Recommended launch path: Stripe Checkout first, then Square and PayPal as secondary
+                options.
+              </p>
+              <a href="#contact" className="btn btn-teal">
+                Set Up Online Payments
+              </a>
+            </div>
+            <div className="payment-cards reveal delay-1">
+              {paymentMethods.map((method) => (
+                <article key={method.name} className="payment-card">
+                  <h3>{method.name}</h3>
+                  <p>{method.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="section contact" id="contact">
-        <div className="container split-grid">
-          <article className="panel">
-            <h2>Contact Us</h2>
-            <p>Phone: (864) 385-4335</p>
-            <p>Email: admissions@pacificcrestahi.com</p>
-            <p>Hours: Mon - Fri, 8:00 AM - 5:00 PM</p>
-          </article>
-          <article className="panel">
-            <h2>Send a Message</h2>
-            <form className="contact-form">
-              <input type="text" placeholder="Name" />
-              <input type="email" placeholder="Email" />
-              <input type="tel" placeholder="Phone" />
-              <textarea rows="4" placeholder="How can we help?" />
-              <button type="button" className="btn btn-solid">
-                Submit
-              </button>
-            </form>
-          </article>
-        </div>
-      </section>
+        <section className="section testimonials">
+          <div className="container">
+            <p className="section-tag">Credibility</p>
+            <h2>What students and partners say about program quality.</h2>
+            <div className="testimonial-grid">
+              {testimonials.map((item, index) => (
+                <article key={item.name} className={`testimonial-card reveal delay-${index + 1}`}>
+                  <p className="quote">"{item.quote}"</p>
+                  <h3>{item.name}</h3>
+                  <p className="role">{item.role}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      <footer className="footer" id="gallery">
+        <section className="section contact" id="contact">
+          <div className="container contact-grid">
+            <article className="contact-card reveal">
+              <p className="section-tag">Contact</p>
+              <h2>Connect with admissions and operations.</h2>
+              <ul>
+                <li>Phone: (714) 555-2148</li>
+                <li>Email: admissions@pacificcrestahi.com</li>
+                <li>Orange Campus: 420 S Main St, Orange, CA 92868</li>
+                <li>Santa Ana Campus: 1540 Brookhollow Dr, Santa Ana, CA 92705</li>
+              </ul>
+            </article>
+            <article className="contact-form-card reveal delay-1">
+              <h3>Request Information</h3>
+              <form className="contact-form">
+                <input type="text" placeholder="Full name" />
+                <input type="email" placeholder="Email address" />
+                <input type="tel" placeholder="Phone number" />
+                <select defaultValue="">
+                  <option value="" disabled>
+                    Program of interest
+                  </option>
+                  <option value="cna">Certified Nurse Assistant</option>
+                  <option value="med-aide">Medication Aide Fundamentals</option>
+                  <option value="cpr">CPR / BLS Certification</option>
+                </select>
+                <textarea rows="4" placeholder="How can we help?" />
+                <button type="button" className="btn btn-navy">
+                  Submit Inquiry
+                </button>
+              </form>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
         <div className="container footer-grid">
           <div>
-            <img src={assets.logo} alt="Pacific Crest Allied Health Institute logo" className="footer-logo" />
-            <p>Building compassionate healthcare professionals through practical training.</p>
+            <h3>Pacific Crest Allied Health Institute</h3>
+            <p>
+              Corporate-standard allied health training platform serving Southern California
+              students and healthcare employers.
+            </p>
           </div>
           <div>
-            <h3>Quick Menu</h3>
+            <h4>Programs</h4>
             <ul>
-              {navItems.slice(0, 5).map((item) => (
-                <li key={item.label}>
-                  <a href={`#${item.id}`}>{item.label}</a>
-                </li>
-              ))}
+              <li>Certified Nurse Assistant</li>
+              <li>Medication Aide Fundamentals</li>
+              <li>CPR / BLS Certification</li>
             </ul>
           </div>
           <div>
-            <h3>Programs</h3>
+            <h4>Admissions</h4>
             <ul>
-              <li>CNA Program</li>
-              <li>Medication Aide</li>
-              <li>CPR Program</li>
+              <li>Enrollment Process</li>
+              <li>Payment Options</li>
+              <li>Class Schedules</li>
             </ul>
           </div>
           <div>
-            <h3>Contact</h3>
+            <h4>Locations</h4>
             <ul>
-              <li>(864) 385-4335</li>
               <li>Orange, CA</li>
               <li>Santa Ana, CA</li>
+              <li>Irvine, CA</li>
             </ul>
           </div>
         </div>
