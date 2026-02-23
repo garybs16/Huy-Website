@@ -21,16 +21,16 @@ const navItems = [
 ];
 
 const trustPillars = [
-  "State-approved curriculum",
-  "Employer-aligned clinical hours",
-  "Dedicated exam readiness coaching",
-  "Career placement support",
+  "Transparent launch updates",
+  "Founding-team support for early students",
+  "Curriculum build in progress",
+  "Partner outreach underway",
 ];
 
 const heroMetrics = [
-  { value: "94%", label: "First-time state exam pass rate" },
-  { value: "3", label: "Southern California learning centers" },
-  { value: "2,400+", label: "Graduates trained since launch" },
+  { value: "0", label: "Public reviews today (new company)" },
+  { value: "2026", label: "Target year for first cohort launch" },
+  { value: "1", label: "Founding cohort currently being planned" },
 ];
 
 const programs = [
@@ -58,10 +58,10 @@ const programs = [
 ];
 
 const outcomes = [
-  { value: "87%", label: "Graduate placement within 90 days" },
-  { value: "4.9 / 5", label: "Average student satisfaction score" },
-  { value: "52", label: "Active hiring partners across SoCal" },
-  { value: "24/7", label: "Online student portal availability" },
+  { value: "In Progress", label: "Program design and operations setup" },
+  { value: "In Progress", label: "Clinical and hiring partner outreach" },
+  { value: "Pending", label: "First cohort completion outcomes" },
+  { value: "Pending", label: "Verified public reviews" },
 ];
 
 const admissionsSteps = [
@@ -98,24 +98,24 @@ const paymentMethods = [
   },
 ];
 
-const testimonials = [
+const launchNotes = [
   {
-    name: "Mia R.",
-    role: "CNA Graduate",
+    name: "No Public Reviews Yet",
+    role: "Honest launch status",
     quote:
-      "The structure felt professional from day one. Clinical prep and exam practice were exactly what employers expected.",
+      "Pacific Crest is a new rising company. We are not claiming student reviews or graduate outcomes yet.",
   },
   {
-    name: "Jorge L.",
-    role: "Medication Aide Student",
+    name: "Execution Focus",
+    role: "Current priority",
     quote:
-      "Admissions and scheduling were clear, fast, and easy to manage while I was working full-time.",
+      "The current focus is building curriculum, operations, and enrollment systems the right way before launch.",
   },
   {
-    name: "Nina C.",
-    role: "Partner Facility Supervisor",
+    name: "Public Updates",
+    role: "Commitment",
     quote:
-      "Pacific Crest graduates arrive trained, accountable, and ready for real patient-care standards.",
+      "As milestones are completed, we will publish real results and real feedback with full transparency.",
   },
 ];
 
@@ -125,9 +125,9 @@ function App() {
       <header className="announcement">
         <div className="container announcement-inner">
           <p>
-            <strong>Approved by California Department of Public Health</strong>
+            <strong>New Rising Company: launch phase in progress</strong>
           </p>
-          <a href="#admissions">Spring 2026 enrollment now open</a>
+          <a href="#admissions">Founding cohort waitlist</a>
         </div>
       </header>
 
@@ -166,14 +166,14 @@ function App() {
           <div className="container hero-grid">
             <div className="hero-copy reveal">
               <p className="hero-badge">
-                <strong>Approved by California Department of Public Health</strong>
+                <strong>Early-stage institute | Building in public</strong>
               </p>
-              <p className="eyebrow">Corporate-level healthcare education platform</p>
-              <h1>Workforce-ready CNA training built for SoCal healthcare employers.</h1>
+              <p className="eyebrow">New rising healthcare education company</p>
+              <h1>Building a trusted CNA training pathway for SoCal from day one.</h1>
               <p className="hero-text">
-                Pacific Crest Allied Health Institute delivers structured instruction, live skills
-                labs, and clinical placement support with clear outcomes and executive-grade
-                operational standards.
+                Pacific Crest Allied Health Institute is currently an idea being executed into a
+                real training operation. We are intentionally transparent: no public reviews yet,
+                no inflated claims, and a clear build roadmap.
               </p>
               <div className="cta-row">
                 <a href="#programs" className="btn btn-gold">
@@ -192,11 +192,11 @@ function App() {
 
             <aside className="hero-panel reveal delay-1">
               <article className="panel-card">
-                <h2>Next Cohort Intake</h2>
-                <p className="cohort-date">March 17, 2026</p>
-                <p>Orange Campus and hybrid evening format available.</p>
+                <h2>Founding Cohort</h2>
+                <p className="cohort-date">Planning Stage</p>
+                <p>Join the waitlist for first-start updates and launch milestones.</p>
                 <a href="#admissions" className="btn btn-teal">
-                  Reserve Your Seat
+                  Join Waitlist
                 </a>
               </article>
               <div className="metric-stack">
@@ -213,12 +213,15 @@ function App() {
 
         <section className="trust-strip">
           <div className="container trust-inner">
-            <p>Trusted by students, hiring facilities, and workforce partners across Southern California.</p>
+            <p>
+              We are a new rising company in setup mode. This site reflects our current stage with
+              transparent messaging.
+            </p>
             <div className="trust-badges">
-              <span>CDPH Approved</span>
-              <span>Clinical Partner Network</span>
-              <span>Career Services Team</span>
-              <span>Outcome Reporting</span>
+              <span>Early-Stage Build</span>
+              <span>No Public Reviews Yet</span>
+              <span>Founding Cohort Planning</span>
+              <span>Open to Partners</span>
             </div>
           </div>
         </section>
@@ -251,14 +254,14 @@ function App() {
         <section className="section outcomes" id="outcomes">
           <div className="container outcomes-grid">
             <div className="outcomes-copy reveal">
-              <p className="section-tag">Outcomes</p>
-              <h2>Data-backed performance and operational discipline.</h2>
+              <p className="section-tag">Roadmap</p>
+              <h2>Transparent milestones for a new rising company.</h2>
               <p>
-                From admissions through placement, our team follows measurable service-level
-                standards to keep student progress predictable, compliant, and employer-ready.
+                Since we are pre-launch, these are status markers, not performance claims. Public
+                outcomes will be posted only after the first cohort is completed.
               </p>
               <a href="#contact" className="btn btn-navy">
-                Request Program Packet
+                Request Build Update
               </a>
             </div>
             <div className="outcomes-media reveal delay-1">
@@ -278,7 +281,7 @@ function App() {
         <section className="section admissions" id="admissions">
           <div className="container">
             <p className="section-tag">Admissions</p>
-            <h2>Simple four-step enrollment pipeline.</h2>
+            <h2>Simple four-step waitlist and enrollment pipeline.</h2>
             <div className="timeline">
               {admissionsSteps.map((step, index) => (
                 <article key={step.title} className={`timeline-card reveal delay-${index + 1}`}>
@@ -295,10 +298,10 @@ function App() {
           <div className="container payments-grid">
             <div className="payments-copy reveal">
               <p className="section-tag">Payments</p>
-              <h2>Enterprise-grade payment processing options.</h2>
+              <h2>Payment setup plan for launch.</h2>
               <p>
-                Adding payments is straightforward. We can deploy hosted checkout links first for
-                speed, then move to fully embedded checkout flows when your team is ready.
+                Payments are not live yet. The launch plan is to deploy secure hosted checkout
+                links first, then move to embedded flows after initial enrollment validation.
               </p>
               <p className="payments-note">
                 Recommended launch path: Stripe Checkout first, then Square and PayPal as secondary
@@ -321,10 +324,10 @@ function App() {
 
         <section className="section testimonials">
           <div className="container">
-            <p className="section-tag">Credibility</p>
-            <h2>What students and partners say about program quality.</h2>
+            <p className="section-tag">Launch Status</p>
+            <h2>No fake reviews. Clear status updates only.</h2>
             <div className="testimonial-grid">
-              {testimonials.map((item, index) => (
+              {launchNotes.map((item, index) => (
                 <article key={item.name} className={`testimonial-card reveal delay-${index + 1}`}>
                   <p className="quote">"{item.quote}"</p>
                   <h3>{item.name}</h3>
@@ -376,8 +379,8 @@ function App() {
           <div>
             <h3>Pacific Crest Allied Health Institute</h3>
             <p>
-              Corporate-standard allied health training platform serving Southern California
-              students and healthcare employers.
+              A new rising allied health company in Southern California, currently building toward
+              first-cohort execution.
             </p>
           </div>
           <div>
