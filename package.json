@@ -4,16 +4,31 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n api,web -c yellow,cyan \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "nodemon server/index.js",
+    "start": "node server/index.js",
+    "check:harmony": "node scripts/harmony-check.mjs",
+    "check:production": "node scripts/production-smoke.mjs",
+    "verify": "npm run build && npm run check:harmony && npm run check:production",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.11",
     "vite": "^5.4.10"
   }
 }

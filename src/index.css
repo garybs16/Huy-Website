@@ -1,18 +1,12 @@
-@import url("https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Urbanist:wght@600;700;800&display=swap");
 
 :root {
-  --bg: #edf3f8;
+  --bg: #f8f3ea;
   --surface: #ffffff;
-  --surface-alt: #f4f8fc;
-  --text: #122437;
-  --muted: #4f6174;
-  --navy: #103a60;
-  --navy-deep: #081d33;
-  --teal: #1d7a8b;
-  --teal-soft: #e3f3f6;
-  --gold: #cb8129;
-  --border: #d3dfeb;
-  --shadow: 0 16px 38px rgba(11, 33, 57, 0.14);
+  --ink: #102842;
+  --muted: #55677a;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
+  --font-display: "Urbanist", "Segoe UI", sans-serif;
 }
 
 *,
@@ -31,8 +25,8 @@ body,
 
 body {
   background: var(--bg);
-  color: var(--text);
-  font-family: "Public Sans", "Segoe UI", sans-serif;
+  color: var(--ink);
+  font-family: var(--font-body);
   line-height: 1.55;
 }
 
@@ -43,8 +37,8 @@ h4,
 h5,
 h6 {
   margin-top: 0;
-  font-family: "Sora", "Segoe UI", sans-serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
 }
 
 a {
