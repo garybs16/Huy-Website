@@ -71,6 +71,12 @@ const proofPoints = [
   "Inquiry and waitlist flows already live",
 ];
 
+const heroHighlights = [
+  { value: "4-week", label: "weekday CNA option" },
+  { value: "10-week", label: "weekend CNA option" },
+  { value: "Same site", label: "frontend + backend flow" },
+];
+
 const quickLinks = [
   {
     title: "Start with Programs",
@@ -157,15 +163,52 @@ const requirementItems = [
 ];
 
 const supportItems = [
-  "Admissions walkthrough from inquiry to enrollment packet",
-  "Partner outreach for employer-facing placement support",
-  "Transparent milestone updates instead of inflated claims",
+  {
+    title: "Admissions walkthrough",
+    detail: "Move from first inquiry to documents, track selection, and enrollment packet with clear guidance.",
+  },
+  {
+    title: "Career-facing support",
+    detail: "Position the school around practical outcomes and healthcare partner conversations instead of vague marketing.",
+  },
+  {
+    title: "Transparent updates",
+    detail: "Keep launch messaging honest so prospective students understand what is planned now and what comes next.",
+  },
 ];
 
 const locationItems = [
-  "Theory site planning in Orange, California",
-  "Clinical rotation routing across Orange County",
-  "Admissions guidance for IDs, health forms, and onboarding",
+  {
+    title: "Theory site",
+    detail: "Core classroom planning is centered in Orange, California for a stable admissions message.",
+  },
+  {
+    title: "Clinical routing",
+    detail: "Clinical locations can vary by cohort across Orange County depending on placement availability.",
+  },
+  {
+    title: "Student onboarding",
+    detail: "Admissions can help applicants confirm ID, health forms, screening steps, and track readiness.",
+  },
+];
+
+const journeySteps = [
+  {
+    title: "Choose a track",
+    detail: "Review weekday, weekend, and evening options first.",
+  },
+  {
+    title: "Submit your inquiry",
+    detail: "Use the interest or contact form so admissions can respond directly.",
+  },
+  {
+    title: "Prepare documents",
+    detail: "Complete identification, health, and screening requirements.",
+  },
+  {
+    title: "Confirm enrollment",
+    detail: "Lock your schedule and receive the next cohort update.",
+  },
 ];
 
 const initialInquiryState = {
@@ -357,6 +400,15 @@ function App() {
                 </a>
               </div>
 
+              <div className="hero-highlight-row">
+                {heroHighlights.map((item) => (
+                  <article key={item.label} className="hero-highlight-card">
+                    <strong>{item.value}</strong>
+                    <span>{item.label}</span>
+                  </article>
+                ))}
+              </div>
+
               <ul className="hero-points">
                 {proofPoints.map((item) => (
                   <li key={item}>{item}</li>
@@ -466,6 +518,7 @@ function App() {
             <div className="quick-grid">
               {quickLinks.map((item, index) => (
                 <a key={item.title} href={item.href} className={`quick-card reveal delay-${(index % 3) + 1}`}>
+                  <b>{`0${index + 1}`}</b>
                   <strong>{item.title}</strong>
                   <p>{item.detail}</p>
                   <span>Open section</span>
@@ -553,8 +606,9 @@ function App() {
             </div>
             <div className="support-list reveal delay-1">
               {supportItems.map((item) => (
-                <article key={item} className="support-card">
-                  <p>{item}</p>
+                <article key={item.title} className="support-card">
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
                 </article>
               ))}
             </div>
@@ -612,8 +666,9 @@ function App() {
 
             <div className="locations-stack reveal delay-1">
               {locationItems.map((item) => (
-                <article key={item} className="info-card">
-                  <h3>{item}</h3>
+                <article key={item.title} className="info-card">
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
                 </article>
               ))}
             </div>
@@ -621,6 +676,24 @@ function App() {
         </section>
 
         <section className="requirements section" id="admissions">
+          <div className="container">
+            <div className="journey-panel reveal">
+              <div className="journey-intro">
+                <p className="section-tag">Enrollment Path</p>
+                <h2>Make the next step obvious from the first scroll.</h2>
+              </div>
+              <div className="journey-grid">
+                {journeySteps.map((step, index) => (
+                  <article key={step.title} className="journey-card">
+                    <span>{`Step ${index + 1}`}</span>
+                    <h3>{step.title}</h3>
+                    <p>{step.detail}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="container requirements-grid">
             <article className="requirements-card reveal">
               <p className="section-tag">Admissions</p>
@@ -651,6 +724,18 @@ function App() {
                 </p>
               </article>
             </div>
+          </div>
+        </section>
+
+        <section className="cta-band">
+          <div className="container cta-band-inner">
+            <div>
+              <p className="section-tag">Ready To Ask Questions?</p>
+              <h2>Use the form below and keep the admissions process moving.</h2>
+            </div>
+            <a href="#contact" className="btn btn-accent">
+              Go To Contact Form
+            </a>
           </div>
         </section>
 
