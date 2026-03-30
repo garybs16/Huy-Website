@@ -3,6 +3,7 @@ import "./App.css";
 import { getPrograms, joinWaitlist, submitInquiry } from "./lib/api";
 import heroTraining from "./assets/hero-training.svg";
 import admissionsSupport from "./assets/admissions-support.svg";
+import firstStepLogo from "./assets/first-step-logo.svg";
 
 const navItems = [
   { label: "About", id: "about" },
@@ -66,7 +67,7 @@ const trackCards = [
 
 const proofPoints = [
   "Schedule-first admissions experience",
-  "Orange County training focus",
+  "First Step brand and coordinator contact integrated",
   "Transparent pre-launch communication",
   "Inquiry and waitlist flows already live",
 ];
@@ -102,7 +103,7 @@ const quickLinks = [
 
 const stats = [
   { value: "3", label: "launch schedule formats" },
-  { value: "2", label: "Orange County support points" },
+  { value: "1", label: "program coordinator contact" },
   { value: "15", label: "target seats per cohort" },
   { value: "1:1", label: "admissions guidance model" },
 ];
@@ -180,11 +181,11 @@ const supportItems = [
 const locationItems = [
   {
     title: "Theory site",
-    detail: "Core classroom planning is centered in Orange, California for a stable admissions message.",
+    detail: "Core classroom planning can be presented under the First Step Healthcare Academy brand.",
   },
   {
     title: "Clinical routing",
-    detail: "Clinical locations can vary by cohort across Orange County depending on placement availability.",
+    detail: "Clinical locations can vary by cohort depending on placement availability and partner routing.",
   },
   {
     title: "Student onboarding",
@@ -341,11 +342,11 @@ function App() {
       <header className="utility-bar">
         <div className="container utility-inner">
           <div className="utility-copy">
-            <span>Orange County allied health training</span>
-            <span>Founding cohort planning now open</span>
+            <span>First Step Healthcare Academy</span>
+            <span>Program coordinator support available</span>
           </div>
           <div className="utility-links">
-            <a href="#contact">Student support</a>
+            <a href="#contact">Contact Huy Hoang</a>
             <a href="#schedule">See class dates</a>
           </div>
         </div>
@@ -354,12 +355,10 @@ function App() {
       <nav className="navbar">
         <div className="container nav-inner">
           <a className="brand" href="#top">
-            <span className="brand-mark" aria-hidden="true">
-              PC
-            </span>
+            <img className="brand-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
             <span className="brand-text">
-              <strong>Pacific Crest Allied Health Institute</strong>
-              <span>Career Training in Orange County</span>
+              <strong>First Step Healthcare Academy</strong>
+              <span>Healthcare training with direct coordinator support</span>
             </span>
           </a>
 
@@ -386,8 +385,8 @@ function App() {
               <p className="eyebrow">Get your CNA training pathway started</p>
               <h1>Train for your CNA pathway with schedule options that fit real life.</h1>
               <p className="hero-text">
-                Pacific Crest Allied Health Institute is building a clear admissions experience for
-                future nurse assistant students across Orange County. Explore program formats,
+                First Step Healthcare Academy is building a clear admissions experience for future
+                nurse assistant students. Explore program formats,
                 projected class dates, tuition snapshots, and enrollment requirements in one place.
               </p>
 
@@ -416,7 +415,7 @@ function App() {
               </ul>
 
               <div className="hero-preview-card">
-                <img src={heroTraining} alt="Illustration of a healthcare training dashboard and class setup" />
+                <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
               </div>
             </div>
 
@@ -539,7 +538,7 @@ function App() {
                 before enrollment.
               </p>
               <p>
-                Pacific Crest is still in launch planning, so the site keeps transparent language
+                First Step Healthcare Academy is still in launch planning, so the site keeps transparent language
                 around projected dates and founding-cohort updates instead of making claims that
                 have not been earned yet.
               </p>
@@ -745,10 +744,10 @@ function App() {
               <p className="section-tag">Contact Us</p>
               <h2>Direct inquiry flow for admissions and operations questions.</h2>
               <ul className="contact-list">
-                <li>Phone: (714) 555-2148</li>
-                <li>Email: admissions@pacificcrestahi.com</li>
-                <li>Orange support hub: 420 S Main St, Orange, CA 92868</li>
-                <li>Santa Ana support hub: 1540 Brookhollow Dr, Santa Ana, CA 92705</li>
+                <li>Coordinator: Huy Hoang, Program Coordinator</li>
+                <li>Phone: (949) 407-9581</li>
+                <li>Email: huyh@firststepha.org</li>
+                <li>Brand: First Step Healthcare Academy</li>
               </ul>
               <a href="#top" className="btn btn-secondary">
                 Back to top
@@ -839,10 +838,10 @@ function App() {
       <footer className="footer">
         <div className="container footer-grid">
           <div>
-            <h3>Pacific Crest Allied Health Institute</h3>
+            <img className="footer-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
             <p>
-              Allied health training with a schedule-first admissions experience for future students
-              in Orange County.
+              First Step Healthcare Academy with a schedule-first admissions experience and direct
+              coordinator support.
             </p>
           </div>
           <div>
@@ -870,14 +869,14 @@ function App() {
           <div>
             <h4>Contact</h4>
             <ul>
-              <li>(714) 555-2148</li>
-              <li>admissions@pacificcrestahi.com</li>
-              <li>Orange County, California</li>
+              <li>Huy Hoang</li>
+              <li>(949) 407-9581</li>
+              <li>huyh@firststepha.org</li>
             </ul>
           </div>
         </div>
         <div className="footer-bar">
-          <p>Copyright 2026 Pacific Crest Allied Health Institute. All rights reserved.</p>
+          <p>Copyright 2026 First Step Healthcare Academy. All rights reserved.</p>
         </div>
       </footer>
     </div>

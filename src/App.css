@@ -84,23 +84,21 @@
   gap: 0.9rem;
 }
 
-.brand-mark {
-  width: 2.85rem;
-  height: 2.85rem;
-  display: grid;
-  place-items: center;
-  border-radius: 0.9rem;
-  background: linear-gradient(145deg, #1f2328, #a35b39);
-  color: #fff7eb;
-  font-family: var(--font-display);
-  font-size: 0.88rem;
-  font-weight: 800;
-  box-shadow: 0 14px 28px rgba(9, 25, 41, 0.24);
+.brand-logo {
+  width: 10.75rem;
+  max-width: 42vw;
+  height: auto;
+  display: block;
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: 0.2rem;
+  box-shadow: 0 12px 24px rgba(12, 30, 46, 0.14);
 }
 
 .brand-text {
   display: grid;
   gap: 0.08rem;
+  max-width: 17rem;
 }
 
 .brand-text strong {
@@ -340,6 +338,7 @@
   display: block;
   width: 100%;
   height: auto;
+  background: #fff;
 }
 
 .hero-rail {
@@ -1055,6 +1054,14 @@
   padding: 3.3rem 0;
 }
 
+.footer-logo {
+  width: min(16rem, 100%);
+  border-radius: 0.9rem;
+  background: #fff;
+  padding: 0.35rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
 .footer h3,
 .footer h4 {
   margin-top: 0;
@@ -1124,6 +1131,10 @@
     grid-template-columns: 1fr 1fr;
   }
 
+  .brand {
+    align-items: flex-start;
+  }
+
   .cta-band-inner {
     flex-direction: column;
     align-items: flex-start;
@@ -1164,6 +1175,10 @@
 
   .hero h1 {
     font-size: clamp(2.45rem, 12vw, 3.5rem);
+  }
+
+  .brand-logo {
+    width: min(12rem, 70vw);
   }
 
   .hero-points,
