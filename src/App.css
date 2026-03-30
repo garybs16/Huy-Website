@@ -71,10 +71,10 @@
   justify-content: space-between;
   gap: 1.25rem;
   padding: 0 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(17, 43, 68, 0.09);
   border-radius: 1.4rem;
-  background: rgba(21, 24, 28, 0.82);
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
+  background: rgba(251, 247, 241, 0.88);
+  box-shadow: 0 16px 42px rgba(17, 36, 57, 0.12);
   backdrop-filter: blur(14px);
 }
 
@@ -105,12 +105,12 @@
 
 .brand-text strong {
   font-size: 1rem;
-  color: #f7f8fa;
+  color: #17283a;
 }
 
 .brand-text span {
   font-size: 0.73rem;
-  color: #b0b7c0;
+  color: #627284;
   text-transform: uppercase;
   letter-spacing: 0.15em;
 }
@@ -122,7 +122,7 @@
 }
 
 .menu a {
-  color: #edf2f7;
+  color: #17283a;
   font-size: 0.92rem;
   font-weight: 800;
 }
@@ -162,9 +162,9 @@
 }
 
 .btn-secondary {
-  background: #2a2f35;
-  color: #f0f3f7;
-  border-color: rgba(255, 255, 255, 0.08);
+  background: #f3e3c3;
+  color: #17283a;
+  border-color: rgba(23, 40, 58, 0.08);
 }
 
 .btn-accent {
@@ -359,8 +359,8 @@
 .contact-panel,
 .contact-form-panel,
 .journey-panel {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(18, 41, 64, 0.1);
+  box-shadow: 0 22px 50px rgba(14, 37, 58, 0.14);
 }
 
 .register-card {
@@ -516,10 +516,10 @@
   min-height: 178px;
   padding: 1.2rem;
   border-radius: 1.4rem;
-  color: #f2f5f8;
-  background: linear-gradient(180deg, #202429 0%, #171a1e 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.22);
+  color: #17283a;
+  background: linear-gradient(180deg, #fffaf2 0%, #ffffff 100%);
+  border: 1px solid rgba(18, 41, 64, 0.08);
+  box-shadow: 0 20px 42px rgba(12, 33, 53, 0.14);
 }
 
 .quick-card b {
@@ -542,7 +542,7 @@
 
 .quick-card p {
   margin: 0.5rem 0 0.8rem;
-  color: #b7bec7;
+  color: #627284;
   font-size: 0.93rem;
 }
 
@@ -564,7 +564,7 @@
 
 .brief {
   background:
-    linear-gradient(180deg, #181b1f 0%, #20242a 100%);
+    linear-gradient(180deg, #f8f1e7 0%, #fffbf6 100%);
 }
 
 .brief-grid,
@@ -623,15 +623,15 @@
   padding: 1.3rem;
   border-radius: 1.35rem;
   background:
-    linear-gradient(180deg, #23272d 0%, #1a1d21 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    linear-gradient(180deg, #fff 0%, #fff8ef 100%);
+  border: 1px solid rgba(18, 41, 64, 0.08);
+  box-shadow: 0 18px 40px rgba(15, 36, 58, 0.08);
 }
 
 .stat-card h3 {
   margin: 0;
   font-size: 2.1rem;
-  color: #f6f8fb;
+  color: #17314b;
 }
 
 .stat-card p {
@@ -728,7 +728,7 @@
 
 .support-band {
   background:
-    linear-gradient(180deg, #20242a 0%, #171a1e 100%);
+    linear-gradient(180deg, #f6efe4 0%, #fff 100%);
   padding: 1.6rem 0 5.1rem;
 }
 
@@ -759,7 +759,7 @@
 .support-card {
   padding: 1.25rem;
   border-radius: 1.3rem;
-  background: linear-gradient(135deg, #2a2e35, #181c21);
+  background: linear-gradient(135deg, #15324f, #21486d);
   color: #eff7ff;
 }
 
@@ -776,7 +776,7 @@
 
 .schedule-section {
   background:
-    linear-gradient(180deg, #111316 0%, #1b1f24 100%);
+    linear-gradient(180deg, #fffaf2 0%, #fbf1e5 100%);
 }
 
 .schedule-layout {
@@ -796,7 +796,7 @@
 .journey-panel {
   padding: 1.4rem;
   border-radius: 1.55rem;
-  background: #1f2328;
+  background: #ffffff;
 }
 
 .tuition-stack,
@@ -812,8 +812,8 @@
 .journey-card {
   padding: 1rem;
   border-radius: 1.15rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, #252a30 0%, #1c2025 100%);
+  border: 1px solid #dde6ee;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
 }
 
 .tuition-card h3,
@@ -833,7 +833,7 @@
 .tuition-card span {
   display: inline-block;
   margin-top: 0.55rem;
-  color: #aeb5be;
+  color: #627284;
   font-size: 0.88rem;
 }
 
@@ -853,7 +853,7 @@
 }
 
 .locations {
-  background: linear-gradient(180deg, #1d2126 0%, #131518 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f6eee3 100%);
 }
 
 .locations-card {
@@ -874,7 +874,7 @@
 
 .locations-stack .info-card {
   background:
-    linear-gradient(180deg, #23272c 0%, #191c20 100%);
+    linear-gradient(180deg, #ffffff 0%, #fff8ef 100%);
 }
 
 .locations-stack .info-card p {
@@ -884,7 +884,7 @@
 
 .requirements {
   background:
-    linear-gradient(180deg, #131518 0%, #1a1d22 100%);
+    linear-gradient(180deg, #fff 0%, #f4ebe0 100%);
 }
 
 .journey-panel {
@@ -943,7 +943,7 @@
 .cta-band {
   padding: 0 0 1rem;
   background:
-    linear-gradient(180deg, #1a1d22 0%, #1a1d22 100%);
+    linear-gradient(180deg, #f4ebe0 0%, #f4ebe0 100%);
 }
 
 .cta-band-inner {
@@ -970,7 +970,7 @@
 
 .contact {
   background:
-    linear-gradient(180deg, #1a1d22 0%, #0f1113 100%);
+    linear-gradient(180deg, #f4ebe0 0%, #f8f1e8 100%);
 }
 
 .contact-panel {
@@ -995,7 +995,23 @@
 
 .contact-form-panel {
   background:
-    linear-gradient(180deg, #24282d 0%, #191c20 100%);
+    linear-gradient(180deg, #ffffff 0%, #fff8ef 100%);
+}
+
+.contact-form-panel h3 {
+  color: #17283a;
+}
+
+.contact-form-panel .contact-form span {
+  color: #304356;
+}
+
+.contact-form-panel .contact-form input,
+.contact-form-panel .contact-form select,
+.contact-form-panel .contact-form textarea {
+  border-color: #d7dfe8;
+  background: #ffffff;
+  color: #17283a;
 }
 
 .form-status {
@@ -1021,9 +1037,9 @@
   margin: 0 0 1rem;
   padding: 0.84rem 0.98rem;
   border-radius: 1rem;
-  border: 1px solid rgba(240, 179, 107, 0.34);
-  background: rgba(240, 179, 107, 0.12);
-  color: #ffd298;
+  border: 1px solid rgba(235, 179, 107, 0.48);
+  background: #fff3dc;
+  color: #8d5c22;
 }
 
 .footer {
