@@ -75,7 +75,7 @@ const proofPoints = [
 const heroHighlights = [
   { value: "4-week", label: "weekday CNA option" },
   { value: "10-week", label: "weekend CNA option" },
-  { value: "Same site", label: "frontend + backend flow" },
+  { value: "Direct", label: "coordinator-led admissions support" },
 ];
 
 const quickLinks = [
@@ -106,6 +106,21 @@ const stats = [
   { value: "1", label: "program coordinator contact" },
   { value: "15", label: "target seats per cohort" },
   { value: "1:1", label: "admissions guidance model" },
+];
+
+const trustSignals = [
+  {
+    title: "Coordinator-led communication",
+    detail: "A named program coordinator is shown clearly so prospective students know who they are speaking with.",
+  },
+  {
+    title: "Transparent pre-launch language",
+    detail: "The site avoids inflated claims and frames dates, operations, and milestones honestly.",
+  },
+  {
+    title: "Clear admissions structure",
+    detail: "Programs, schedules, requirements, and direct contact paths are visible in the first few sections.",
+  },
 ];
 
 const programMeta = {
@@ -382,12 +397,12 @@ function App() {
           <div className="hero-glow hero-glow-right" aria-hidden="true" />
           <div className="container hero-grid">
             <div className="hero-copy reveal">
-              <p className="eyebrow">Get your CNA training pathway started</p>
-              <h1>Train for your CNA pathway with schedule options that fit real life.</h1>
+              <p className="eyebrow">First Step Healthcare Academy</p>
+              <h1>Healthcare training presented with more clarity, structure, and trust.</h1>
               <p className="hero-text">
-                First Step Healthcare Academy is building a clear admissions experience for future
-                nurse assistant students. Explore program formats,
-                projected class dates, tuition snapshots, and enrollment requirements in one place.
+                First Step Healthcare Academy presents a cleaner admissions experience for future
+                nurse assistant students. Review program formats, projected class dates, tuition
+                snapshots, requirements, and direct coordinator contact in one place.
               </p>
 
               <div className="cta-row">
@@ -417,13 +432,13 @@ function App() {
               <div className="hero-preview-card">
                 <img src={heroTraining} alt="Illustration of a healthcare training dashboard and class setup" />
                 <div className="hero-brand-chip">
-                  <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
-                  <div>
-                    <strong>First Step Healthcare Academy</strong>
-                    <span>Program coordinator support by Huy Hoang</span>
-                  </div>
+                <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
+                <div>
+                  <strong>First Step Healthcare Academy</strong>
+                  <span>Program coordinator support led by Huy Hoang</span>
                 </div>
               </div>
+            </div>
             </div>
 
             <div className="hero-rail reveal delay-1">
@@ -534,11 +549,22 @@ function App() {
           </div>
         </section>
 
+        <section className="trust-bar">
+          <div className="container trust-grid">
+            {trustSignals.map((item) => (
+              <article key={item.title} className="trust-card">
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="brief section" id="about">
           <div className="container brief-grid">
             <div className="brief-copy reveal">
               <p className="section-tag">In Brief</p>
-              <h2>Career training information presented the way students actually shop for schools.</h2>
+              <h2>Present core school information the way prospective students and investors expect.</h2>
               <p>
                 We focus on the details prospective students ask first: which programs are
                 available, how long they run, what the schedule looks like, and what to prepare for
@@ -566,7 +592,7 @@ function App() {
           <div className="container">
             <div className="section-heading reveal">
               <p className="section-tag">Programs</p>
-              <h2>Core allied health pathways with the structure students expect from a school site.</h2>
+              <h2>Core allied health pathways with a more credible, school-first presentation.</h2>
               <p>
                 Review the format, duration, and admissions direction for each pathway before you
                 request class dates.
@@ -605,7 +631,7 @@ function App() {
           <div className="container support-grid">
             <div className="support-copy reveal">
               <p className="section-tag">Student Support</p>
-              <h2>Support students with a more practical admissions and launch experience.</h2>
+              <h2>Support students with coordinator-led communication and clearer next steps.</h2>
               <div className="support-visual">
                 <img src={admissionsSupport} alt="Illustration of an admissions support and student planning workflow" />
               </div>
@@ -625,7 +651,7 @@ function App() {
           <div className="container schedule-layout">
             <article className="tuition-panel reveal">
               <p className="section-tag">Tuition & Fees</p>
-              <h2>Tuition and fee blocks laid out in a direct, admissions-friendly format.</h2>
+              <h2>Tuition and fee blocks presented in a direct, professional format.</h2>
               <div className="tuition-stack">
                 {tuitionItems.map((item) => (
                   <div key={item.title} className="tuition-card">
@@ -640,7 +666,7 @@ function App() {
 
             <article className="dates-panel reveal delay-1">
               <p className="section-tag">Course Schedule</p>
-              <h2>Projected class dates presented in clear cohorts.</h2>
+              <h2>Projected class dates organized in clear cohort groups.</h2>
               <div className="dates-stack">
                 {scheduleGroups.map((group) => (
                   <div key={group.title} className="date-group">
@@ -662,7 +688,7 @@ function App() {
           <div className="container locations-grid">
             <article className="locations-card reveal">
               <p className="section-tag">Locations</p>
-              <h2>Theory and clinical location details are easy to find in the flow.</h2>
+              <h2>Location and training-delivery details stay easy to find in the page flow.</h2>
               <p>
                 Keep your location details separate from the admissions checklist so students can
                 quickly understand where classroom work happens and how clinical routing may vary by
@@ -686,7 +712,7 @@ function App() {
             <div className="journey-panel reveal">
               <div className="journey-intro">
                 <p className="section-tag">Enrollment Path</p>
-                <h2>Make the next step obvious from the first scroll.</h2>
+                <h2>Make the next step obvious from the first scroll to the final inquiry.</h2>
               </div>
               <div className="journey-grid">
                 {journeySteps.map((step, index) => (
@@ -703,7 +729,7 @@ function App() {
           <div className="container requirements-grid">
             <article className="requirements-card reveal">
               <p className="section-tag">Admissions</p>
-              <h2>Enrollment requirements and launch-readiness notes in one place.</h2>
+              <h2>Enrollment requirements and launch-readiness notes kept in one place.</h2>
               <ul className="check-list">
                 {requirementItems.map((item) => (
                   <li key={item}>{item}</li>
@@ -737,7 +763,7 @@ function App() {
           <div className="container cta-band-inner">
             <div>
               <p className="section-tag">Ready To Ask Questions?</p>
-              <h2>Use the form below and keep the admissions process moving.</h2>
+              <h2>Use the contact form below to start a direct admissions conversation.</h2>
             </div>
             <a href="#contact" className="btn btn-accent">
               Go To Contact Form
@@ -847,7 +873,7 @@ function App() {
           <div>
             <img className="footer-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
             <p>
-              First Step Healthcare Academy with a schedule-first admissions experience and direct
+              First Step Healthcare Academy with a structured admissions experience and direct
               coordinator support.
             </p>
           </div>

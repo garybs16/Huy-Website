@@ -541,6 +541,36 @@
   margin-top: -2.75rem;
 }
 
+.trust-bar {
+  padding: 1.35rem 0 0;
+  background: linear-gradient(180deg, #0d0f12 0%, #171b20 100%);
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.trust-card {
+  padding: 1.2rem 1.25rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, #1d2228 0%, #161a1f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+}
+
+.trust-card h3 {
+  margin: 0;
+  color: #f6f8fb;
+  font-size: 1.02rem;
+}
+
+.trust-card p {
+  margin: 0.5rem 0 0;
+  color: #c0c8d1;
+}
+
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -616,7 +646,7 @@
 
 .section-tag {
   margin: 0 0 0.65rem;
-  color: #e39863;
+  color: #c97243;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.75rem;
@@ -796,7 +826,7 @@
 .support-card {
   padding: 1.25rem;
   border-radius: 1.3rem;
-  background: linear-gradient(135deg, #15324f, #21486d);
+  background: linear-gradient(135deg, #13314c, #1a4264);
   color: #eff7ff;
 }
 
@@ -895,7 +925,7 @@
 
 .locations-card {
   background:
-    linear-gradient(180deg, #a35b39 0%, #6f3c26 100%);
+    linear-gradient(180deg, #16324d 0%, #1f466a 100%);
   color: #f4f9ff;
 }
 
@@ -906,7 +936,7 @@
 }
 
 .locations-card .section-tag {
-  color: #f7c27d;
+  color: #f3c489;
 }
 
 .locations-stack .info-card {
@@ -926,12 +956,12 @@
 
 .journey-panel {
   margin-bottom: 1.1rem;
-  background: linear-gradient(135deg, #23272c, #111316);
+  background: linear-gradient(135deg, #18212a, #10151b);
   color: #eff8ff;
 }
 
 .journey-panel .section-tag {
-  color: #f1b87b;
+  color: #f3c489;
 }
 
 .journey-grid {
@@ -991,9 +1021,9 @@
   padding: 1.45rem 1.55rem;
   border-radius: 1.6rem;
   background:
-    linear-gradient(135deg, #aa5d37 0%, #6d3a27 100%);
+    linear-gradient(135deg, #17324d 0%, #244e74 100%);
   color: #fffaf4;
-  box-shadow: 0 22px 44px rgba(183, 102, 54, 0.22);
+  box-shadow: 0 22px 44px rgba(20, 52, 80, 0.2);
 }
 
 .cta-band .section-tag,
@@ -1012,7 +1042,7 @@
 
 .contact-panel {
   background:
-    linear-gradient(180deg, #a35b39 0%, #6f3c26 100%);
+    linear-gradient(180deg, #15324d 0%, #21486b 100%);
   color: #edf7ff;
 }
 
@@ -1023,7 +1053,7 @@
 }
 
 .contact-panel .section-tag {
-  color: #fff1d8;
+  color: #f3c489;
 }
 
 .contact-list {
@@ -1165,7 +1195,8 @@
   .footer-grid,
   .quick-grid,
   .journey-grid,
-  .hero-highlight-row {
+  .hero-highlight-row,
+  .trust-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -1240,7 +1271,8 @@
   .footer-grid,
   .quick-grid,
   .journey-grid,
-  .hero-highlight-row {
+  .hero-highlight-row,
+  .trust-grid {
     grid-template-columns: 1fr;
   }
 
