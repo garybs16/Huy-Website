@@ -415,7 +415,14 @@ function App() {
               </ul>
 
               <div className="hero-preview-card">
-                <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
+                <img src={heroTraining} alt="Illustration of a healthcare training dashboard and class setup" />
+                <div className="hero-brand-chip">
+                  <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
+                  <div>
+                    <strong>First Step Healthcare Academy</strong>
+                    <span>Program coordinator support by Huy Hoang</span>
+                  </div>
+                </div>
               </div>
             </div>
 

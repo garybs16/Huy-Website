@@ -85,14 +85,15 @@
 }
 
 .brand-logo {
-  width: 10.75rem;
-  max-width: 42vw;
+  width: 7.6rem;
+  max-width: 34vw;
   height: auto;
   display: block;
-  border-radius: 0.75rem;
+  border-radius: 0.7rem;
   background: #fff;
-  padding: 0.2rem;
-  box-shadow: 0 12px 24px rgba(12, 30, 46, 0.14);
+  padding: 0.18rem 0.24rem;
+  border: 1px solid rgba(23, 40, 58, 0.08);
+  box-shadow: 0 10px 20px rgba(12, 30, 46, 0.1);
 }
 
 .brand-text {
@@ -325,6 +326,7 @@
 }
 
 .hero-preview-card {
+  position: relative;
   margin-top: 1.65rem;
   max-width: 640px;
   overflow: hidden;
@@ -338,7 +340,43 @@
   display: block;
   width: 100%;
   height: auto;
+}
+
+.hero-brand-chip {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 1.1rem;
+  background: rgba(19, 24, 30, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.24);
+}
+
+.hero-brand-chip img {
+  width: 8.4rem;
+  flex: 0 0 auto;
+  border-radius: 0.6rem;
   background: #fff;
+  padding: 0.18rem 0.24rem;
+}
+
+.hero-brand-chip strong {
+  display: block;
+  color: #fff7eb;
+  font-size: 0.98rem;
+}
+
+.hero-brand-chip span {
+  display: block;
+  margin-top: 0.18rem;
+  color: #d7dee6;
+  font-size: 0.84rem;
 }
 
 .hero-rail {
@@ -1055,11 +1093,11 @@
 }
 
 .footer-logo {
-  width: min(16rem, 100%);
-  border-radius: 0.9rem;
+  width: min(12.5rem, 100%);
+  border-radius: 0.8rem;
   background: #fff;
-  padding: 0.35rem;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  padding: 0.24rem 0.3rem;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
 }
 
 .footer h3,
@@ -1178,7 +1216,21 @@
   }
 
   .brand-logo {
-    width: min(12rem, 70vw);
+    width: min(8.6rem, 62vw);
+  }
+
+  .hero-brand-chip {
+    position: static;
+    margin: 0.9rem;
+  }
+
+  .hero-brand-chip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-brand-chip img {
+    width: min(9rem, 100%);
   }
 
   .hero-points,
