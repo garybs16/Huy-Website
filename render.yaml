@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: first-step-healthcare-academy
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_STATIC_APP
+        value: "true"
+      - key: TRUST_PROXY
+        value: "true"
+      - key: API_ADMIN_KEY
+        generateValue: true

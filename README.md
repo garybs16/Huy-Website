@@ -70,6 +70,11 @@ Submissions are stored in:
 
 These files are generated at runtime and ignored by git.
 
+Important:
+
+- The app will run in production with JSON-backed storage, but long-term lead retention is safer with persistent disk or a database.
+- If a JSON file becomes corrupted, the server now quarantines it and returns a temporary `503` instead of silently wiping records.
+
 ## Deployment note
 
 You now have two deployment modes:
@@ -95,3 +100,12 @@ You now have two deployment modes:
   - `npm run check:harmony`
   - `npm run check:production`
 - It no longer publishes a frontend-only GitHub Pages deploy by default, because that deploy mode does not include the backend
+
+## Render deploy
+
+This repo now includes [render.yaml](C:/Users/Admin/Documents/Huy_website/render.yaml) for a single-service deploy.
+
+- Create a Render `Web Service`, not a `Static Site`
+- Connect the repo and keep the root directory blank
+- Render can detect the build/start commands from `render.yaml`
+- Add persistent storage or move to a database if you need durable submission storage

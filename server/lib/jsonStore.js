@@ -3,6 +3,14 @@ import path from "node:path";
 
 const EMPTY_COLLECTION = "[]";
 
+export class StoreIntegrityError extends Error {
+  constructor(message, details = {}) {
+    super(message);
+    this.name = "StoreIntegrityError";
+    this.details = details;
+  }
+}
+
 export class JsonStore {
   constructor(filePath) {
     this.filePath = filePath;
@@ -31,7 +39,9 @@ export class JsonStore {
       const parsed = JSON.parse(content);
       return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return [];
+      const corruptPath = `${this.filePath}.corrupt-${Date.now()}`;
+      await fs.rename(this.filePath, corruptPath);
+      throw new StoreIntegrityError("Stored submission data is corrupted.", { corruptPath });
     }
   }
 

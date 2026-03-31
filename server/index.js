@@ -7,7 +7,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config.js";
-import { JsonStore } from "./lib/jsonStore.js";
+import { JsonStore, StoreIntegrityError } from "./lib/jsonStore.js";
 import { createHealthRouter } from "./routes/health.js";
 import { createInquiriesRouter } from "./routes/inquiries.js";
 import { createProgramsRouter } from "./routes/programs.js";
@@ -110,6 +110,13 @@ export function createApp() {
   app.use((error, _req, res, _next) => {
     if (error.message === "CORS origin not allowed") {
       return res.status(403).json({ error: error.message });
+    }
+
+    if (error instanceof StoreIntegrityError) {
+      console.error(`Store integrity error: ${error.message}`, error.details);
+      return res.status(503).json({
+        error: "Submission storage is temporarily unavailable. Please retry shortly.",
+      });
     }
 
     console.error(error);

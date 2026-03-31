@@ -108,6 +108,24 @@ const stats = [
   { value: "1:1", label: "admissions guidance model" },
 ];
 
+const announcementCards = [
+  {
+    label: "Admissions support",
+    value: "Coordinator-led",
+    detail: "Prospective students get a direct point of contact instead of a dead-end intake page.",
+  },
+  {
+    label: "Launch posture",
+    value: "Transparent",
+    detail: "Projected dates and pricing are framed honestly as founding-cohort planning.",
+  },
+  {
+    label: "Student path",
+    value: "Structured",
+    detail: "Programs, schedule, tuition, requirements, and contact live in one coherent flow.",
+  },
+];
+
 const trustSignals = [
   {
     title: "Coordinator-led communication",
@@ -193,6 +211,21 @@ const supportItems = [
   },
 ];
 
+const standardsItems = [
+  {
+    title: "Admissions clarity",
+    detail: "Program length, track format, requirements, and next steps are shown before asking for a commitment.",
+  },
+  {
+    title: "Operational honesty",
+    detail: "Projected dates stay labeled as projected until approvals, scheduling, and placements are fully confirmed.",
+  },
+  {
+    title: "Direct communication",
+    detail: "Students can reach a named coordinator rather than being pushed into a generic contact queue.",
+  },
+];
+
 const locationItems = [
   {
     title: "Theory site",
@@ -205,6 +238,24 @@ const locationItems = [
   {
     title: "Student onboarding",
     detail: "Admissions can help applicants confirm ID, health forms, screening steps, and track readiness.",
+  },
+];
+
+const faqItems = [
+  {
+    question: "When should a student submit an inquiry?",
+    answer:
+      "As soon as they know which training path or schedule format they want to explore. That lets admissions clarify timing, documents, and launch updates early.",
+  },
+  {
+    question: "Are the class dates final?",
+    answer:
+      "They are presented as founding-cohort projections until operations, placements, and final enrollment logistics are locked.",
+  },
+  {
+    question: "What should students prepare first?",
+    answer:
+      "Identification, education records, health forms, and background-screening readiness. Those are usually the first friction points in enrollment.",
   },
 ];
 
@@ -248,6 +299,7 @@ function App() {
   const [programLoadError, setProgramLoadError] = useState("");
   const [inquiryForm, setInquiryForm] = useState(initialInquiryState);
   const [waitlistForm, setWaitlistForm] = useState(initialWaitlistState);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [inquiryPending, setInquiryPending] = useState(false);
   const [waitlistPending, setWaitlistPending] = useState(false);
   const [inquiryStatus, setInquiryStatus] = useState({ type: "", text: "" });
@@ -281,6 +333,15 @@ function App() {
 
     return () => {
       active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const closeMenu = () => setMenuOpen(false);
+    window.addEventListener("hashchange", closeMenu);
+
+    return () => {
+      window.removeEventListener("hashchange", closeMenu);
     };
   }, []);
 
@@ -352,6 +413,10 @@ function App() {
     }
   };
 
+  const handleNavClick = () => {
+    setMenuOpen(false);
+  };
+
   return (
     <div className="site">
       <header className="utility-bar">
@@ -377,12 +442,28 @@ function App() {
             </span>
           </a>
 
-          <div className="menu" aria-label="Primary">
+          <button
+            type="button"
+            className="menu-toggle"
+            aria-expanded={menuOpen}
+            aria-controls="primary-menu"
+            onClick={() => setMenuOpen((current) => !current)}
+          >
+            <span />
+            <span />
+            <span />
+            <span className="sr-only">Toggle navigation</span>
+          </button>
+
+          <div className={`menu ${menuOpen ? "is-open" : ""}`} id="primary-menu" aria-label="Primary">
             {navItems.map((item) => (
-              <a key={item.id} href={`#${item.id}`}>
+              <a key={item.id} href={`#${item.id}`} onClick={handleNavClick}>
                 {item.label}
               </a>
             ))}
+            <a href="#contact" className="btn btn-primary menu-cta" onClick={handleNavClick}>
+              Talk to Admissions
+            </a>
           </div>
 
           <a href="#contact" className="btn btn-primary nav-cta">
@@ -400,9 +481,9 @@ function App() {
               <p className="eyebrow">First Step Healthcare Academy</p>
               <h1>Healthcare training presented with more clarity, structure, and trust.</h1>
               <p className="hero-text">
-                First Step Healthcare Academy presents a cleaner admissions experience for future
-                nurse assistant students. Review program formats, projected class dates, tuition
-                snapshots, requirements, and direct coordinator contact in one place.
+                First Step Healthcare Academy presents a clearer path for future nurse assistant
+                students. Review program formats, projected class dates, tuition snapshots,
+                requirements, and direct coordinator contact in one place.
               </p>
 
               <div className="cta-row">
@@ -432,13 +513,13 @@ function App() {
               <div className="hero-preview-card">
                 <img src={heroTraining} alt="Illustration of a healthcare training dashboard and class setup" />
                 <div className="hero-brand-chip">
-                <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
-                <div>
-                  <strong>First Step Healthcare Academy</strong>
-                  <span>Program coordinator support led by Huy Hoang</span>
+                  <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
+                  <div>
+                    <strong>First Step Healthcare Academy</strong>
+                    <span>Program coordinator support led by Huy Hoang</span>
+                  </div>
                 </div>
               </div>
-            </div>
             </div>
 
             <div className="hero-rail reveal delay-1">
@@ -458,6 +539,7 @@ function App() {
                       type="text"
                       value={waitlistForm.fullName}
                       onChange={handleWaitlistInput}
+                      autoComplete="name"
                       required
                     />
                   </label>
@@ -469,6 +551,7 @@ function App() {
                       type="email"
                       value={waitlistForm.email}
                       onChange={handleWaitlistInput}
+                      autoComplete="email"
                       required
                     />
                   </label>
@@ -480,6 +563,7 @@ function App() {
                       type="tel"
                       value={waitlistForm.phone}
                       onChange={handleWaitlistInput}
+                      autoComplete="tel"
                     />
                   </label>
 
@@ -513,7 +597,10 @@ function App() {
                 </form>
 
                 {waitlistStatus.text ? (
-                  <p className={`form-status ${waitlistStatus.type === "success" ? "is-success" : "is-error"}`}>
+                  <p
+                    className={`form-status ${waitlistStatus.type === "success" ? "is-success" : "is-error"}`}
+                    aria-live="polite"
+                  >
                     {waitlistStatus.text}
                   </p>
                 ) : null}
@@ -555,6 +642,18 @@ function App() {
               <article key={item.title} className="trust-card">
                 <h3>{item.title}</h3>
                 <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="announcements">
+          <div className="container announcement-grid">
+            {announcementCards.map((item, index) => (
+              <article key={item.label} className={`announcement-card reveal delay-${(index % 3) + 1}`}>
+                <p>{item.label}</p>
+                <strong>{item.value}</strong>
+                <span>{item.detail}</span>
               </article>
             ))}
           </div>
@@ -639,6 +738,29 @@ function App() {
             <div className="support-list reveal delay-1">
               {supportItems.map((item) => (
                 <article key={item.title} className="support-card">
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="standards section">
+          <div className="container standards-grid">
+            <article className="standards-panel reveal">
+              <p className="section-tag">Operating Standards</p>
+              <h2>Present the school like a serious operator, not a generic landing page.</h2>
+              <p>
+                The strongest trust signal at this stage is disciplined communication. The site is
+                designed to show what is known, what is projected, and how a student actually moves
+                from interest to enrollment.
+              </p>
+            </article>
+
+            <div className="standards-stack reveal delay-1">
+              {standardsItems.map((item) => (
+                <article key={item.title} className="standard-card">
                   <h3>{item.title}</h3>
                   <p>{item.detail}</p>
                 </article>
@@ -797,6 +919,7 @@ function App() {
                     type="text"
                     value={inquiryForm.fullName}
                     onChange={handleInquiryInput}
+                    autoComplete="name"
                     required
                   />
                 </label>
@@ -808,6 +931,7 @@ function App() {
                     type="email"
                     value={inquiryForm.email}
                     onChange={handleInquiryInput}
+                    autoComplete="email"
                     required
                   />
                 </label>
@@ -819,6 +943,7 @@ function App() {
                     type="tel"
                     value={inquiryForm.phone}
                     onChange={handleInquiryInput}
+                    autoComplete="tel"
                   />
                 </label>
 
@@ -859,10 +984,43 @@ function App() {
               </form>
 
               {inquiryStatus.text ? (
-                <p className={`form-status ${inquiryStatus.type === "success" ? "is-success" : "is-error"}`}>
+                <p
+                  className={`form-status ${inquiryStatus.type === "success" ? "is-success" : "is-error"}`}
+                  aria-live="polite"
+                >
                   {inquiryStatus.text}
                 </p>
               ) : null}
+            </article>
+          </div>
+
+          <div className="container faq-grid">
+            <article className="faq-panel reveal">
+              <p className="section-tag">Admissions FAQ</p>
+              <h2>Answer the practical questions that usually block conversion.</h2>
+              <div className="faq-stack">
+                {faqItems.map((item) => (
+                  <article key={item.question} className="faq-card">
+                    <h3>{item.question}</h3>
+                    <p>{item.answer}</p>
+                  </article>
+                ))}
+              </div>
+            </article>
+
+            <article className="profile-card reveal delay-1">
+              <p className="card-label">Coordinator Profile</p>
+              <h3>Huy Hoang</h3>
+              <p className="profile-role">Program Coordinator</p>
+              <p>
+                Front-facing admissions support is anchored to a named coordinator so students know
+                who is handling questions, updates, and follow-up.
+              </p>
+              <ul className="profile-points">
+                <li>Phone: (949) 407-9581</li>
+                <li>Email: huyh@firststepha.org</li>
+                <li>Brand: First Step Healthcare Academy</li>
+              </ul>
             </article>
           </div>
         </section>

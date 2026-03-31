@@ -5,6 +5,7 @@ export function createProgramsRouter() {
   const router = Router();
 
   router.get("/", (_req, res) => {
+    res.set("Cache-Control", "public, max-age=300");
     res.json({ items: programs });
   });
 
