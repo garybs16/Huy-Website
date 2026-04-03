@@ -24,6 +24,7 @@ function parseOrigins(value) {
 
 const dataDir = path.resolve(process.cwd(), process.env.DATA_DIR ?? "server/data");
 const staticDir = path.resolve(process.cwd(), process.env.STATIC_DIR ?? "dist");
+const databasePath = path.resolve(process.cwd(), process.env.DATABASE_URL ?? "server/data/enrollment.db");
 
 export const config = {
   port: parsePort(process.env.PORT, 4000),
@@ -33,7 +34,11 @@ export const config = {
     process.env.CORS_ORIGINS ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:5173")
   ),
   dataDir,
+  databasePath,
   staticDir,
+  publicAppUrl: (process.env.PUBLIC_APP_URL ?? "").trim().replace(/\/+$/, ""),
+  stripeSecretKey: (process.env.STRIPE_SECRET_KEY ?? "").trim(),
+  stripeWebhookSecret: (process.env.STRIPE_WEBHOOK_SECRET ?? "").trim(),
   serveStaticApp:
     process.env.SERVE_STATIC_APP === "true" ||
     (process.env.NODE_ENV === "production" && process.env.SERVE_STATIC_APP !== "false"),

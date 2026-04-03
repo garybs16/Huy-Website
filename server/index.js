@@ -7,9 +7,14 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config.js";
+import { EnrollmentDatabase } from "./lib/enrollmentDb.js";
 import { JsonStore, StoreIntegrityError } from "./lib/jsonStore.js";
+import { createStripeClient } from "./lib/stripe.js";
+import { createCohortsRouter } from "./routes/cohorts.js";
+import { createEnrollmentsRouter } from "./routes/enrollments.js";
 import { createHealthRouter } from "./routes/health.js";
 import { createInquiriesRouter } from "./routes/inquiries.js";
+import { createStripePaymentsRouter } from "./routes/payments.js";
 import { createProgramsRouter } from "./routes/programs.js";
 import { createWaitlistRouter } from "./routes/waitlist.js";
 
@@ -54,6 +59,10 @@ export function createApp() {
   });
   const inquiryStore = new JsonStore(path.join(config.dataDir, "inquiries.json"));
   const waitlistStore = new JsonStore(path.join(config.dataDir, "waitlist.json"));
+  const enrollmentDb = new EnrollmentDatabase(config.databasePath);
+  const stripeClient = createStripeClient(config.stripeSecretKey);
+  const paymentsEnabled = Boolean(stripeClient && config.stripeWebhookSecret);
+  app.locals.enrollmentDb = enrollmentDb;
 
   app.disable("x-powered-by");
   app.use(helmet());
@@ -69,11 +78,29 @@ export function createApp() {
       callback(new Error("CORS origin not allowed"));
     })
   );
+  app.use(
+    "/api/payments/stripe/webhook",
+    createStripePaymentsRouter({
+      stripeClient,
+      webhookSecret: config.stripeWebhookSecret,
+      enrollmentDb,
+    })
+  );
   app.use(express.json({ limit: "50kb" }));
   app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
   app.use("/api", generalLimiter);
   app.use("/api/health", createHealthRouter());
   app.use("/api/programs", createProgramsRouter());
+  app.use("/api/cohorts", createCohortsRouter({ enrollmentDb }));
+  app.use(
+    "/api/enrollments",
+    createEnrollmentsRouter({
+      enrollmentDb,
+      adminKey: config.adminKey,
+      stripeClient: paymentsEnabled ? stripeClient : null,
+      publicAppUrl: config.publicAppUrl,
+    })
+  );
   app.use(
     "/api/inquiries",
     createInquiriesRouter({
@@ -131,6 +158,10 @@ export function startServer(port = config.port) {
   const server = app.listen(port, () => {
     const mode = config.serveStaticApp ? "API + frontend" : "API";
     console.log(`${mode} listening on http://localhost:${port}`);
+  });
+
+  server.on("close", () => {
+    app.locals.enrollmentDb?.close();
   });
 
   return { app, server };

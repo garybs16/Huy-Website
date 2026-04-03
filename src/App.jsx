@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { getPrograms, joinWaitlist, submitInquiry } from "./lib/api";
+import { createEnrollment, getCohorts, getPrograms, joinWaitlist, submitInquiry } from "./lib/api";
 import heroTraining from "./assets/hero-training.svg";
 import admissionsSupport from "./assets/admissions-support.svg";
 import firstStepLogo from "./assets/first-step-logo.svg";
@@ -9,6 +9,7 @@ const navItems = [
   { label: "About", id: "about" },
   { label: "Programs", id: "programs" },
   { label: "Schedule", id: "schedule" },
+  { label: "Register", id: "register" },
   { label: "Locations", id: "locations" },
   { label: "Admissions", id: "admissions" },
   { label: "Contact", id: "contact" },
@@ -95,9 +96,9 @@ const quickLinks = [
     href: "#admissions",
   },
   {
-    title: "Talk to Admissions",
-    detail: "Send a direct inquiry for support and next steps.",
-    href: "#contact",
+    title: "Register Online",
+    detail: "Choose a cohort, submit enrollment, and continue to checkout.",
+    href: "#register",
   },
 ];
 
@@ -123,6 +124,51 @@ const announcementCards = [
     label: "Student path",
     value: "Structured",
     detail: "Programs, schedule, tuition, requirements, and contact live in one coherent flow.",
+  },
+];
+
+const defaultCohorts = [
+  {
+    id: "cna-weekday-apr-2026",
+    programId: "cna",
+    programTitle: "Certified Nurse Assistant",
+    title: "Weekday Cohort",
+    startDate: "2026-04-20",
+    endDate: "2026-05-18",
+    scheduleLabel: "Weekday",
+    meetingPattern: "Monday to Friday | 7:00 AM to 3:30 PM",
+    tuitionCents: 196000,
+    tuitionLabel: "$1,960.00",
+    capacity: 15,
+    remainingSeats: 15,
+  },
+  {
+    id: "cna-weekend-apr-2026",
+    programId: "cna",
+    programTitle: "Certified Nurse Assistant",
+    title: "Weekend Cohort",
+    startDate: "2026-04-25",
+    endDate: "2026-06-28",
+    scheduleLabel: "Weekend",
+    meetingPattern: "Saturday and Sunday | 7:00 AM to 3:30 PM",
+    tuitionCents: 196000,
+    tuitionLabel: "$1,960.00",
+    capacity: 15,
+    remainingSeats: 15,
+  },
+  {
+    id: "cna-evening-may-2026",
+    programId: "cna",
+    programTitle: "Certified Nurse Assistant",
+    title: "Evening Cohort",
+    startDate: "2026-05-25",
+    endDate: "2026-07-10",
+    scheduleLabel: "Evening",
+    meetingPattern: "Monday to Friday | 4:00 PM to 8:00 PM",
+    tuitionCents: 196000,
+    tuitionLabel: "$1,960.00",
+    capacity: 15,
+    remainingSeats: 15,
   },
 ];
 
@@ -294,42 +340,76 @@ const initialWaitlistState = {
   notes: "",
 };
 
+const initialEnrollmentState = {
+  studentFullName: "",
+  email: "",
+  phone: "",
+  dateOfBirth: "",
+  addressLine1: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  emergencyContactName: "",
+  emergencyContactPhone: "",
+  programId: "",
+  cohortId: "",
+  notes: "",
+};
+
+function formatDateLabel(value) {
+  if (!value) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${value}T12:00:00Z`));
+}
+
 function App() {
   const [programs, setPrograms] = useState(defaultPrograms);
+  const [cohorts, setCohorts] = useState(defaultCohorts);
   const [programLoadError, setProgramLoadError] = useState("");
+  const [cohortLoadError, setCohortLoadError] = useState("");
   const [inquiryForm, setInquiryForm] = useState(initialInquiryState);
   const [waitlistForm, setWaitlistForm] = useState(initialWaitlistState);
+  const [enrollmentForm, setEnrollmentForm] = useState(initialEnrollmentState);
   const [menuOpen, setMenuOpen] = useState(false);
   const [inquiryPending, setInquiryPending] = useState(false);
   const [waitlistPending, setWaitlistPending] = useState(false);
+  const [enrollmentPending, setEnrollmentPending] = useState(false);
   const [inquiryStatus, setInquiryStatus] = useState({ type: "", text: "" });
   const [waitlistStatus, setWaitlistStatus] = useState({ type: "", text: "" });
+  const [enrollmentStatus, setEnrollmentStatus] = useState({ type: "", text: "" });
 
   useEffect(() => {
     let active = true;
 
-    async function loadPrograms() {
-      try {
-        const items = await getPrograms();
+    async function loadCatalog() {
+      const [programResult, cohortResult] = await Promise.allSettled([getPrograms(), getCohorts()]);
 
-        if (!active) {
-          return;
-        }
+      if (!active) {
+        return;
+      }
 
-        if (items.length > 0) {
-          setPrograms(items);
-          setProgramLoadError("");
-        }
-      } catch {
-        if (!active) {
-          return;
-        }
-
+      if (programResult.status === "fulfilled" && programResult.value.length > 0) {
+        setPrograms(programResult.value);
+        setProgramLoadError("");
+      } else if (programResult.status === "rejected") {
         setProgramLoadError("Program data could not be refreshed from the API. Showing local fallback content.");
+      }
+
+      if (cohortResult.status === "fulfilled" && cohortResult.value.length > 0) {
+        setCohorts(cohortResult.value);
+        setCohortLoadError("");
+      } else if (cohortResult.status === "rejected") {
+        setCohortLoadError("Live cohort availability could not be refreshed. You can still review fallback dates below.");
       }
     }
 
-    loadPrograms();
+    loadCatalog();
 
     return () => {
       active = false;
@@ -345,6 +425,35 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkoutStatus = params.get("checkout");
+    const enrollmentId = params.get("enrollment");
+
+    if (checkoutStatus === "success") {
+      setEnrollmentStatus({
+        type: "success",
+        text: enrollmentId
+          ? `Payment received. Enrollment ${enrollmentId} has been recorded and admissions will follow up with next steps.`
+          : "Payment received. Your enrollment has been recorded and admissions will follow up with next steps.",
+      });
+    }
+
+    if (checkoutStatus === "cancelled") {
+      setEnrollmentStatus({
+        type: "error",
+        text: "Checkout was cancelled before payment completed. Your seat is not confirmed until payment succeeds.",
+      });
+    }
+
+    if (checkoutStatus) {
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.delete("checkout");
+      nextUrl.searchParams.delete("enrollment");
+      window.history.replaceState({}, document.title, `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+    }
+  }, []);
+
   const handleInquiryInput = (event) => {
     const { name, value } = event.target;
     setInquiryForm((current) => ({ ...current, [name]: value }));
@@ -353,6 +462,22 @@ function App() {
   const handleWaitlistInput = (event) => {
     const { name, value } = event.target;
     setWaitlistForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleEnrollmentInput = (event) => {
+    const { name, value } = event.target;
+
+    setEnrollmentForm((current) => {
+      if (name === "programId") {
+        return {
+          ...current,
+          programId: value,
+          cohortId: "",
+        };
+      }
+
+      return { ...current, [name]: value };
+    });
   };
 
   const handleInquirySubmit = async (event) => {
@@ -413,9 +538,55 @@ function App() {
     }
   };
 
+  const handleEnrollmentSubmit = async (event) => {
+    event.preventDefault();
+    setEnrollmentPending(true);
+    setEnrollmentStatus({ type: "", text: "" });
+
+    try {
+      const response = await createEnrollment({
+        studentFullName: enrollmentForm.studentFullName,
+        email: enrollmentForm.email,
+        phone: enrollmentForm.phone,
+        dateOfBirth: enrollmentForm.dateOfBirth,
+        addressLine1: enrollmentForm.addressLine1,
+        city: enrollmentForm.city,
+        state: enrollmentForm.state,
+        postalCode: enrollmentForm.postalCode,
+        emergencyContactName: enrollmentForm.emergencyContactName,
+        emergencyContactPhone: enrollmentForm.emergencyContactPhone,
+        cohortId: enrollmentForm.cohortId,
+        notes: enrollmentForm.notes,
+      });
+
+      if (response.paymentRequired && response.checkoutUrl) {
+        window.location.assign(response.checkoutUrl);
+        return;
+      }
+
+      setEnrollmentStatus({
+        type: "success",
+        text: response.message || "Registration submitted. Admissions will contact you to complete payment.",
+      });
+      setEnrollmentForm(initialEnrollmentState);
+    } catch (error) {
+      setEnrollmentStatus({
+        type: "error",
+        text: error.message || "Could not complete registration right now.",
+      });
+    } finally {
+      setEnrollmentPending(false);
+    }
+  };
+
   const handleNavClick = () => {
     setMenuOpen(false);
   };
+
+  const filteredCohorts = cohorts.filter(
+    (cohort) => !enrollmentForm.programId || cohort.programId === enrollmentForm.programId
+  );
+  const selectedCohort = cohorts.find((cohort) => cohort.id === enrollmentForm.cohortId) ?? null;
 
   return (
     <div className="site">
@@ -490,8 +661,8 @@ function App() {
                 <a href="#programs" className="btn btn-accent">
                   Explore Programs
                 </a>
-                <a href="#schedule" className="btn btn-outline">
-                  See Full Schedule
+                <a href="#register" className="btn btn-outline">
+                  Register & Pay
                 </a>
               </div>
 
@@ -802,6 +973,258 @@ function App() {
                   </div>
                 ))}
               </div>
+            </article>
+          </div>
+        </section>
+
+        <section className="registration section" id="register">
+          <div className="container registration-grid">
+            <article className="registration-panel reveal">
+              <p className="section-tag">Online Registration</p>
+              <h2>Students can now choose a class date, register, and continue to payment.</h2>
+              <p>
+                Use the enrollment form to capture the student record first. If online payment is
+                enabled, the student is redirected into secure checkout immediately after submitting.
+              </p>
+
+              <div className="registration-note-card">
+                <h3>How this flow works</h3>
+                <ul className="contact-list">
+                  <li>Select a program and live cohort</li>
+                  <li>Submit the student and emergency contact details</li>
+                  <li>Continue to secure payment checkout when available</li>
+                  <li>Receive admissions follow-up after registration is recorded</li>
+                </ul>
+              </div>
+
+              {selectedCohort ? (
+                <article className="cohort-summary-card">
+                  <p className="card-label">Selected Cohort</p>
+                  <h3>{selectedCohort.title}</h3>
+                  <p>{selectedCohort.programTitle}</p>
+                  <ul className="contact-list">
+                    <li>
+                      Dates: {formatDateLabel(selectedCohort.startDate)} to {formatDateLabel(selectedCohort.endDate)}
+                    </li>
+                    <li>Schedule: {selectedCohort.meetingPattern}</li>
+                    <li>Tuition: {selectedCohort.tuitionLabel}</li>
+                    <li>Remaining seats: {selectedCohort.remainingSeats}</li>
+                  </ul>
+                </article>
+              ) : (
+                <article className="cohort-summary-card">
+                  <p className="card-label">Seat Availability</p>
+                  <h3>Live cohorts</h3>
+                  <p>Choose a program first, then pick the class date the student wants.</p>
+                </article>
+              )}
+            </article>
+
+            <article className="registration-form-panel reveal delay-1">
+              <h3>Register Student</h3>
+              {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}
+
+              <form className="enrollment-form" onSubmit={handleEnrollmentSubmit}>
+                <div className="form-columns">
+                  <label>
+                    <span>Student full name</span>
+                    <input
+                      name="studentFullName"
+                      type="text"
+                      value={enrollmentForm.studentFullName}
+                      onChange={handleEnrollmentInput}
+                      autoComplete="name"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span>Date of birth</span>
+                    <input
+                      name="dateOfBirth"
+                      type="date"
+                      value={enrollmentForm.dateOfBirth}
+                      onChange={handleEnrollmentInput}
+                      required
+                    />
+                  </label>
+                </div>
+
+                <div className="form-columns">
+                  <label>
+                    <span>Email address</span>
+                    <input
+                      name="email"
+                      type="email"
+                      value={enrollmentForm.email}
+                      onChange={handleEnrollmentInput}
+                      autoComplete="email"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span>Phone number</span>
+                    <input
+                      name="phone"
+                      type="tel"
+                      value={enrollmentForm.phone}
+                      onChange={handleEnrollmentInput}
+                      autoComplete="tel"
+                    />
+                  </label>
+                </div>
+
+                <label>
+                  <span>Street address</span>
+                  <input
+                    name="addressLine1"
+                    type="text"
+                    value={enrollmentForm.addressLine1}
+                    onChange={handleEnrollmentInput}
+                    autoComplete="address-line1"
+                    required
+                  />
+                </label>
+
+                <div className="form-columns form-columns-thirds">
+                  <label>
+                    <span>City</span>
+                    <input
+                      name="city"
+                      type="text"
+                      value={enrollmentForm.city}
+                      onChange={handleEnrollmentInput}
+                      autoComplete="address-level2"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span>State</span>
+                    <input
+                      name="state"
+                      type="text"
+                      value={enrollmentForm.state}
+                      onChange={handleEnrollmentInput}
+                      autoComplete="address-level1"
+                      maxLength={2}
+                      placeholder="CA"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span>ZIP code</span>
+                    <input
+                      name="postalCode"
+                      type="text"
+                      value={enrollmentForm.postalCode}
+                      onChange={handleEnrollmentInput}
+                      autoComplete="postal-code"
+                      inputMode="numeric"
+                      required
+                    />
+                  </label>
+                </div>
+
+                <div className="form-columns">
+                  <label>
+                    <span>Emergency contact name</span>
+                    <input
+                      name="emergencyContactName"
+                      type="text"
+                      value={enrollmentForm.emergencyContactName}
+                      onChange={handleEnrollmentInput}
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span>Emergency contact phone</span>
+                    <input
+                      name="emergencyContactPhone"
+                      type="tel"
+                      value={enrollmentForm.emergencyContactPhone}
+                      onChange={handleEnrollmentInput}
+                      required
+                    />
+                  </label>
+                </div>
+
+                <div className="form-columns">
+                  <label>
+                    <span>Program</span>
+                    <select
+                      name="programId"
+                      value={enrollmentForm.programId}
+                      onChange={handleEnrollmentInput}
+                      required
+                    >
+                      <option value="" disabled>
+                        Select a program
+                      </option>
+                      {programs.map((program) => (
+                        <option key={program.id} value={program.id}>
+                          {program.title}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    <span>Cohort</span>
+                    <select
+                      name="cohortId"
+                      value={enrollmentForm.cohortId}
+                      onChange={handleEnrollmentInput}
+                      required
+                      disabled={!enrollmentForm.programId}
+                    >
+                      <option value="" disabled>
+                        {enrollmentForm.programId ? "Select a cohort" : "Choose a program first"}
+                      </option>
+                      {filteredCohorts.map((cohort) => (
+                        <option
+                          key={cohort.id}
+                          value={cohort.id}
+                          disabled={cohort.remainingSeats <= 0}
+                        >
+                          {`${cohort.title} | ${formatDateLabel(cohort.startDate)} | ${cohort.tuitionLabel} | ${cohort.remainingSeats} seats left`}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <label>
+                  <span>Admissions notes</span>
+                  <textarea
+                    name="notes"
+                    rows="4"
+                    value={enrollmentForm.notes}
+                    onChange={handleEnrollmentInput}
+                    placeholder="Add scheduling requests, document status, or any extra enrollment context."
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={enrollmentPending || cohorts.length === 0}
+                >
+                  {enrollmentPending ? "Preparing checkout..." : "Register Student"}
+                </button>
+              </form>
+
+              {enrollmentStatus.text ? (
+                <p
+                  className={`form-status ${enrollmentStatus.type === "success" ? "is-success" : "is-error"}`}
+                  aria-live="polite"
+                >
+                  {enrollmentStatus.text}
+                </p>
+              ) : null}
             </article>
           </div>
         </section>

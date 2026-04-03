@@ -414,6 +414,8 @@
 .track-card,
 .program-card,
 .support-card,
+.registration-panel,
+.registration-form-panel,
 .tuition-panel,
 .dates-panel,
 .locations-card,
@@ -468,7 +470,8 @@
 }
 
 .register-form,
-.contact-form {
+.contact-form,
+.enrollment-form {
   position: relative;
   z-index: 1;
   display: grid;
@@ -476,13 +479,15 @@
 }
 
 .register-form label,
-.contact-form label {
+.contact-form label,
+.enrollment-form label {
   display: grid;
   gap: 0.38rem;
 }
 
 .register-form span,
-.contact-form span {
+.contact-form span,
+.enrollment-form span {
   font-size: 0.83rem;
   font-weight: 800;
   color: #c7ced6;
@@ -493,7 +498,10 @@
 .register-form textarea,
 .contact-form input,
 .contact-form select,
-.contact-form textarea {
+.contact-form textarea,
+.enrollment-form input,
+.enrollment-form select,
+.enrollment-form textarea {
   width: 100%;
   min-height: 48px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -509,14 +517,18 @@
 .register-form textarea:focus,
 .contact-form input:focus,
 .contact-form select:focus,
-.contact-form textarea:focus {
+.contact-form textarea:focus,
+.enrollment-form input:focus,
+.enrollment-form select:focus,
+.enrollment-form textarea:focus {
   outline: none;
   border-color: #dc8451;
   box-shadow: 0 0 0 4px rgba(220, 132, 81, 0.18);
 }
 
 .register-form textarea,
-.contact-form textarea {
+.contact-form textarea,
+.enrollment-form textarea {
   min-height: 112px;
   resize: vertical;
 }
@@ -692,6 +704,7 @@
 }
 
 .brief,
+.registration,
 .standards,
 .schedule-section,
 .locations,
@@ -706,6 +719,7 @@
 }
 
 .brief-grid,
+.registration-grid,
 .locations-grid,
 .requirements-grid,
 .contact-grid {
@@ -727,6 +741,7 @@
 .brief h2,
 .section-heading h2,
 .support-copy h2,
+.registration-panel h2,
 .tuition-panel h2,
 .dates-panel h2,
 .locations-card h2,
@@ -743,6 +758,7 @@
 .brief-copy p:last-child,
 .section-heading p,
 .support-copy p,
+.registration-panel > p,
 .tuition-panel p,
 .dates-panel p,
 .locations-card p,
@@ -868,6 +884,79 @@
   background:
     linear-gradient(180deg, #f6efe4 0%, #fff 100%);
   padding: 1.6rem 0 5.1rem;
+}
+
+.registration {
+  background: linear-gradient(180deg, #fdf7ee 0%, #ffffff 100%);
+}
+
+.registration-grid {
+  grid-template-columns: 0.92fr 1.08fr;
+}
+
+.registration-panel,
+.registration-form-panel {
+  padding: 1.4rem;
+  border-radius: 1.55rem;
+  background: #ffffff;
+}
+
+.registration-panel {
+  background: linear-gradient(180deg, #17324d 0%, #21486b 100%);
+  color: #edf7ff;
+}
+
+.registration-panel .section-tag,
+.registration-panel h2,
+.registration-panel h3,
+.registration-panel p,
+.registration-panel li {
+  color: #edf7ff;
+}
+
+.registration-panel .section-tag,
+.registration-panel .card-label {
+  color: #f3c489;
+}
+
+.registration-note-card,
+.cohort-summary-card {
+  margin-top: 1rem;
+  padding: 1.05rem 1.1rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.registration-form-panel {
+  background: linear-gradient(180deg, #ffffff 0%, #fff8ef 100%);
+}
+
+.registration-form-panel h3 {
+  margin: 0 0 1rem;
+  color: #17283a;
+}
+
+.registration-form-panel .enrollment-form span {
+  color: #304356;
+}
+
+.registration-form-panel .enrollment-form input,
+.registration-form-panel .enrollment-form select,
+.registration-form-panel .enrollment-form textarea {
+  border-color: #d7dfe8;
+  background: #ffffff;
+  color: #17283a;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.form-columns-thirds {
+  grid-template-columns: 1.1fr 0.6fr 0.8fr;
 }
 
 .support-grid {
@@ -1374,6 +1463,7 @@
 
   .hero-grid,
   .brief-grid,
+  .registration-grid,
   .locations-grid,
   .support-grid,
   .standards-grid,
@@ -1402,6 +1492,11 @@
   .cta-band-inner {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .form-columns,
+  .form-columns-thirds {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1488,6 +1583,8 @@
   }
 
   .register-card,
+  .registration-panel,
+  .registration-form-panel,
   .tuition-panel,
   .dates-panel,
   .locations-card,

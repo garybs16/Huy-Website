@@ -11,6 +11,7 @@ function assert(condition, message) {
 async function run() {
   const tempDataDir = await mkdtemp(path.join(os.tmpdir(), "pcahi-harmony-"));
   process.env.DATA_DIR = tempDataDir;
+  process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
   const { startServer } = await import("../server/index.js");
   const port = 4020;
   const { server } = startServer(port);
@@ -22,7 +23,14 @@ async function run() {
     assert(Array.isArray(programsBody.items), "Programs payload must contain items array");
     assert(programsBody.items.length > 0, "Programs array cannot be empty");
 
+    const cohortsRes = await fetch(`http://localhost:${port}/api/cohorts`);
+    assert(cohortsRes.ok, "Failed to load cohorts from API");
+    const cohortsBody = await cohortsRes.json();
+    assert(Array.isArray(cohortsBody.items), "Cohorts payload must contain items array");
+    assert(cohortsBody.items.length > 0, "Cohorts array cannot be empty");
+
     const firstProgramId = programsBody.items[0].id;
+    const firstCohortId = cohortsBody.items[0].id;
 
     const inquiryRes = await fetch(`http://localhost:${port}/api/inquiries`, {
       method: "POST",
@@ -45,6 +53,28 @@ async function run() {
       }),
     });
     assert(waitlistRes.status === 201, "Waitlist submission failed contract check");
+
+    const enrollmentRes = await fetch(`http://localhost:${port}/api/enrollments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentFullName: "Enrollment Harmony",
+        email: "enrollment-harmony@example.com",
+        phone: "949-555-0100",
+        dateOfBirth: "2000-01-15",
+        addressLine1: "123 Main Street",
+        city: "Irvine",
+        state: "CA",
+        postalCode: "92614",
+        emergencyContactName: "Casey Harmony",
+        emergencyContactPhone: "949-555-0101",
+        cohortId: firstCohortId,
+        notes: `Interested in ${firstProgramId}`,
+      }),
+    });
+    assert(enrollmentRes.status === 201, "Enrollment submission failed contract check");
+    const enrollmentBody = await enrollmentRes.json();
+    assert(typeof enrollmentBody.enrollmentId === "string", "Enrollment response must contain enrollmentId");
 
     console.log("Harmony check passed.");
   } finally {

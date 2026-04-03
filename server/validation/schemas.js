@@ -60,6 +60,50 @@ export const waitlistSchema = z.object({
   source: sourceString,
 });
 
+const stateString = z.preprocess(
+  trimString,
+  z
+    .string({ required_error: "state is required" })
+    .length(2, "State must be a 2-letter code")
+    .transform((value) => value.toUpperCase())
+);
+
+const postalCodeString = z.preprocess(
+  trimString,
+  z
+    .string({ required_error: "postalCode is required" })
+    .regex(/^\d{5}(-\d{4})?$/, "Postal code must be a valid US ZIP code")
+);
+
+const birthDateString = z.preprocess(
+  trimString,
+  z
+    .string({ required_error: "dateOfBirth is required" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "dateOfBirth must use YYYY-MM-DD format")
+);
+
+export const enrollmentSchema = z.object({
+  studentFullName: requiredString("studentFullName", 2, 100),
+  email: emailString,
+  phone: phoneString,
+  dateOfBirth: birthDateString,
+  addressLine1: requiredString("addressLine1", 5, 160),
+  city: requiredString("city", 2, 80),
+  state: stateString,
+  postalCode: postalCodeString,
+  emergencyContactName: requiredString("emergencyContactName", 2, 100),
+  emergencyContactPhone: z.preprocess(
+    trimString,
+    z
+      .string({ required_error: "emergencyContactPhone is required" })
+      .min(7, "Emergency contact phone must be at least 7 characters")
+      .max(25, "Emergency contact phone must be at most 25 characters")
+      .refine((value) => phonePattern.test(value), "Emergency contact phone format is invalid")
+  ),
+  cohortId: requiredString("cohortId", 2, 100),
+  notes: optionalString(600),
+});
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),

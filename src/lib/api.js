@@ -47,10 +47,19 @@ export async function getPrograms() {
   return Array.isArray(data?.items) ? data.items : [];
 }
 
+export async function getCohorts() {
+  const data = await request("/api/cohorts");
+  return Array.isArray(data?.items) ? data.items : [];
+}
+
 export function submitInquiry(payload) {
   return request("/api/inquiries", { method: "POST", payload });
 }
 
 export function joinWaitlist(payload) {
   return request("/api/waitlist", { method: "POST", payload });
+}
+
+export function createEnrollment(payload) {
+  return request("/api/enrollments", { method: "POST", payload });
 }
