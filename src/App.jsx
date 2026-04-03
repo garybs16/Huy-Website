@@ -67,10 +67,10 @@ const trackCards = [
 ];
 
 const proofPoints = [
-  "Schedule-first admissions experience",
-  "First Step brand and coordinator contact integrated",
-  "Transparent pre-launch communication",
-  "Inquiry and waitlist flows already live",
+  "Live cohort seat tracking",
+  "Online registration and payment handoff",
+  "Direct enrollment support from a named contact",
+  "Projected schedules presented clearly",
 ];
 
 const heroHighlights = [
@@ -104,26 +104,26 @@ const quickLinks = [
 
 const stats = [
   { value: "3", label: "launch schedule formats" },
-  { value: "1", label: "program coordinator contact" },
+  { value: "5", label: "active registration cohorts" },
   { value: "15", label: "target seats per cohort" },
-  { value: "1:1", label: "admissions guidance model" },
+  { value: "24h", label: "target admissions response" },
 ];
 
 const announcementCards = [
   {
-    label: "Admissions support",
-    value: "Coordinator-led",
-    detail: "Prospective students get a direct point of contact instead of a dead-end intake page.",
+    label: "Registration",
+    value: "Now live",
+    detail: "Students can move from cohort selection to a real enrollment record without leaving the site.",
   },
   {
-    label: "Launch posture",
-    value: "Transparent",
-    detail: "Projected dates and pricing are framed honestly as founding-cohort planning.",
+    label: "Payments",
+    value: "Checkout-ready",
+    detail: "The enrollment flow supports a hosted payment handoff instead of only collecting interest.",
   },
   {
-    label: "Student path",
-    value: "Structured",
-    detail: "Programs, schedule, tuition, requirements, and contact live in one coherent flow.",
+    label: "Operations",
+    value: "Seat-aware",
+    detail: "Cohort availability can be shown with remaining seats so students know what is open now.",
   },
 ];
 
@@ -174,16 +174,16 @@ const defaultCohorts = [
 
 const trustSignals = [
   {
-    title: "Coordinator-led communication",
-    detail: "A named program coordinator is shown clearly so prospective students know who they are speaking with.",
+    title: "Cohort-first enrollment",
+    detail: "Students can choose a specific class date instead of submitting a generic contact request first.",
   },
   {
-    title: "Transparent pre-launch language",
-    detail: "The site avoids inflated claims and frames dates, operations, and milestones honestly.",
+    title: "Payment after registration",
+    detail: "The system captures the student record first, then sends them into secure hosted checkout.",
   },
   {
-    title: "Clear admissions structure",
-    detail: "Programs, schedules, requirements, and direct contact paths are visible in the first few sections.",
+    title: "Cleaner decision path",
+    detail: "Programs, schedules, registration, requirements, and contact each have a clearer role in the page flow.",
   },
 ];
 
@@ -244,31 +244,31 @@ const requirementItems = [
 
 const supportItems = [
   {
-    title: "Admissions walkthrough",
-    detail: "Move from first inquiry to documents, track selection, and enrollment packet with clear guidance.",
+    title: "Cohort selection support",
+    detail: "Help students compare weekday, weekend, and evening options before they commit to a start date.",
   },
   {
-    title: "Career-facing support",
-    detail: "Position the school around practical outcomes and healthcare partner conversations instead of vague marketing.",
+    title: "Registration follow-through",
+    detail: "Capture enrollment details once, then move cleanly into payment and admissions follow-up.",
   },
   {
-    title: "Transparent updates",
-    detail: "Keep launch messaging honest so prospective students understand what is planned now and what comes next.",
+    title: "Document readiness",
+    detail: "Keep required ID, health forms, and screening steps visible so students know what to prepare early.",
   },
 ];
 
 const standardsItems = [
   {
-    title: "Admissions clarity",
-    detail: "Program length, track format, requirements, and next steps are shown before asking for a commitment.",
+    title: "Less repetition",
+    detail: "The interface should move from overview to enrollment without repeating the same message in every section.",
   },
   {
-    title: "Operational honesty",
-    detail: "Projected dates stay labeled as projected until approvals, scheduling, and placements are fully confirmed.",
+    title: "Operational clarity",
+    detail: "Program length, cohort timing, tuition, requirements, and next steps should be visible before checkout starts.",
   },
   {
     title: "Direct communication",
-    detail: "Students can reach a named coordinator rather than being pushed into a generic contact queue.",
+    detail: "When students need help, they should still have a clear path to a named admissions contact.",
   },
 ];
 
@@ -594,10 +594,10 @@ function App() {
         <div className="container utility-inner">
           <div className="utility-copy">
             <span>First Step Healthcare Academy</span>
-            <span>Program coordinator support available</span>
+            <span>Enrollment and payment now live</span>
           </div>
           <div className="utility-links">
-            <a href="#contact">Contact Huy Hoang</a>
+            <span className="utility-pill">Live seat tracking</span>
             <a href="#schedule">See class dates</a>
           </div>
         </div>
@@ -609,7 +609,7 @@ function App() {
             <img className="brand-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
             <span className="brand-text">
               <strong>First Step Healthcare Academy</strong>
-              <span>Healthcare training with direct coordinator support</span>
+              <span>CNA, medication aide, and CPR enrollment</span>
             </span>
           </a>
 
@@ -632,13 +632,13 @@ function App() {
                 {item.label}
               </a>
             ))}
-            <a href="#contact" className="btn btn-primary menu-cta" onClick={handleNavClick}>
-              Talk to Admissions
+            <a href="#register" className="btn btn-primary menu-cta" onClick={handleNavClick}>
+              Register & Pay
             </a>
           </div>
 
-          <a href="#contact" className="btn btn-primary nav-cta">
-            Talk to Admissions
+          <a href="#register" className="btn btn-primary nav-cta">
+            Register & Pay
           </a>
         </div>
       </nav>
@@ -1021,7 +1021,7 @@ function App() {
             </article>
 
             <article className="registration-form-panel reveal delay-1">
-              <h3>Register Student</h3>
+              <h3>Start Enrollment</h3>
               {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}
 
               <form className="enrollment-form" onSubmit={handleEnrollmentSubmit}>
@@ -1213,7 +1213,7 @@ function App() {
                   className="btn btn-primary"
                   disabled={enrollmentPending || cohorts.length === 0}
                 >
-                  {enrollmentPending ? "Preparing checkout..." : "Register Student"}
+                  {enrollmentPending ? "Preparing checkout..." : "Start Enrollment"}
                 </button>
               </form>
 
@@ -1285,7 +1285,7 @@ function App() {
             <div className="info-stack reveal delay-1">
               <article className="info-card">
                 <p className="card-label">Launch note</p>
-                <h3>Transparent positioning</h3>
+                <h3>Founding cohort note</h3>
                 <p>
                   Dates and pricing are shown as founding-cohort planning until final operations,
                   approvals, and enrollment workflows are fully locked.
@@ -1432,17 +1432,18 @@ function App() {
             </article>
 
             <article className="profile-card reveal delay-1">
-              <p className="card-label">Coordinator Profile</p>
-              <h3>Huy Hoang</h3>
-              <p className="profile-role">Program Coordinator</p>
+              <p className="card-label">Enrollment Office</p>
+              <h3>What students can expect after registering</h3>
+              <p className="profile-role">Admissions follow-through</p>
               <p>
-                Front-facing admissions support is anchored to a named coordinator so students know
-                who is handling questions, updates, and follow-up.
+                Once a student submits registration, admissions can confirm seat status, document
+                readiness, payment completion, and next-step timing without sending them back
+                through a generic intake loop.
               </p>
               <ul className="profile-points">
-                <li>Phone: (949) 407-9581</li>
-                <li>Email: huyh@firststepha.org</li>
-                <li>Brand: First Step Healthcare Academy</li>
+                <li>Seat confirmation and cohort review</li>
+                <li>Document checklist follow-up</li>
+                <li>Payment and onboarding support</li>
               </ul>
             </article>
           </div>

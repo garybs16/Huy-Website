@@ -34,12 +34,12 @@
 }
 
 .utility-copy span + span,
-.utility-links a + a {
+.utility-links > * + * {
   position: relative;
 }
 
 .utility-copy span + span::before,
-.utility-links a + a::before {
+.utility-links > * + *::before {
   content: "";
   position: absolute;
   left: -0.54rem;
@@ -54,6 +54,20 @@
 .utility-links a {
   color: #ffe5ab;
   font-weight: 800;
+}
+
+.utility-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.9rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6d7b7;
+  font-size: 0.77rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .navbar {
@@ -146,6 +160,11 @@
   color: #17283a;
   font-size: 0.92rem;
   font-weight: 800;
+}
+
+.nav-cta,
+.menu-cta {
+  white-space: nowrap;
 }
 
 .menu-cta {
