@@ -89,8 +89,8 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
       const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
       const session = await stripeClient.checkout.sessions.create({
         mode: "payment",
-        success_url: `${appBaseUrl}/?checkout=success&enrollment=${enrollment.id}`,
-        cancel_url: `${appBaseUrl}/?checkout=cancelled&enrollment=${enrollment.id}`,
+        success_url: `${appBaseUrl}/register?checkout=success&enrollment=${enrollment.id}`,
+        cancel_url: `${appBaseUrl}/register?checkout=cancelled&enrollment=${enrollment.id}`,
         customer_email: enrollment.email,
         expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
         line_items: [

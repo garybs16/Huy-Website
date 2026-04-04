@@ -30,6 +30,12 @@ async function run() {
     const spaRouteRes = await fetch(`http://localhost:${port}/schedule`);
     assert(spaRouteRes.ok, "SPA fallback route did not resolve in production mode");
 
+    const registerRouteRes = await fetch(`http://localhost:${port}/register`);
+    assert(registerRouteRes.ok, "Register route did not resolve in production mode");
+
+    const programsRouteRes = await fetch(`http://localhost:${port}/programs`);
+    assert(programsRouteRes.ok, "Programs route did not resolve in production mode");
+
     const programsRes = await fetch(`http://localhost:${port}/api/programs`);
     assert(programsRes.ok, "Production API failed to serve programs");
     const programsBody = await programsRes.json();
