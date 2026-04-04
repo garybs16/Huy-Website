@@ -22,8 +22,8 @@ async function parseError(response) {
   return `Request failed with status ${response.status}`;
 }
 
-async function request(path, { method = "GET", payload } = {}) {
-  const headers = {};
+async function request(path, { method = "GET", payload, headers: extraHeaders } = {}) {
+  const headers = { ...(extraHeaders ?? {}) };
 
   if (payload !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -66,4 +66,24 @@ export function createEnrollment(payload) {
 
 export function getEnrollmentStatus(enrollmentId) {
   return request(`/api/enrollments/${enrollmentId}/status`);
+}
+
+function adminHeaders(apiKey) {
+  return { "x-api-key": apiKey };
+}
+
+export function getAdminOverview(apiKey) {
+  return request("/api/admin/overview", { headers: adminHeaders(apiKey) });
+}
+
+export function getAdminEnrollments(apiKey) {
+  return request("/api/enrollments", { headers: adminHeaders(apiKey) });
+}
+
+export function getAdminInquiries(apiKey) {
+  return request("/api/inquiries", { headers: adminHeaders(apiKey) });
+}
+
+export function getAdminWaitlist(apiKey) {
+  return request("/api/waitlist", { headers: adminHeaders(apiKey) });
 }

@@ -13,6 +13,7 @@ async function run() {
   process.env.NODE_ENV = "production";
   process.env.DATA_DIR = tempDataDir;
   process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
+  process.env.API_ADMIN_KEY = "production-admin-key";
 
   const { startServer } = await import("../server/index.js");
   const port = 4030;
@@ -87,6 +88,11 @@ async function run() {
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
     );
     assert(enrollmentStatusRes.ok, "Production enrollment status endpoint failed");
+
+    const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
+      headers: { "x-api-key": "production-admin-key" },
+    });
+    assert(adminOverviewRes.ok, "Production admin overview endpoint failed");
 
     console.log("Production smoke check passed.");
   } finally {

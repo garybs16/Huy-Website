@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { createEnrollment, getCohorts, getEnrollmentStatus, getPrograms, joinWaitlist, submitInquiry } from "./lib/api";
+import {
+  createEnrollment,
+  getAdminEnrollments,
+  getAdminInquiries,
+  getAdminOverview,
+  getAdminWaitlist,
+  getCohorts,
+  getEnrollmentStatus,
+  getPrograms,
+  joinWaitlist,
+  submitInquiry,
+} from "./lib/api";
 import heroTraining from "./assets/hero-training.svg";
 import admissionsSupport from "./assets/admissions-support.svg";
 import firstStepLogo from "./assets/first-step-logo.svg";
@@ -368,6 +379,20 @@ function formatDateLabel(value) {
   }).format(new Date(`${value}T12:00:00Z`));
 }
 
+function formatDateTimeLabel(value) {
+  if (!value) {
+    return "Not available";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 function App() {
   const [programs, setPrograms] = useState(defaultPrograms);
   const [cohorts, setCohorts] = useState(defaultCohorts);
@@ -383,6 +408,13 @@ function App() {
   const [inquiryStatus, setInquiryStatus] = useState({ type: "", text: "" });
   const [waitlistStatus, setWaitlistStatus] = useState({ type: "", text: "" });
   const [enrollmentStatus, setEnrollmentStatus] = useState({ type: "", text: "" });
+  const [adminKey, setAdminKey] = useState("");
+  const [adminPending, setAdminPending] = useState(false);
+  const [adminError, setAdminError] = useState("");
+  const [adminOverview, setAdminOverview] = useState(null);
+  const [adminEnrollments, setAdminEnrollments] = useState([]);
+  const [adminInquiries, setAdminInquiries] = useState([]);
+  const [adminWaitlist, setAdminWaitlist] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -626,6 +658,36 @@ function App() {
       });
     } finally {
       setEnrollmentPending(false);
+    }
+  };
+
+  const handleAdminLoad = async (event) => {
+    event.preventDefault();
+
+    if (!adminKey.trim()) {
+      setAdminError("Enter the admin API key to load the operations dashboard.");
+      return;
+    }
+
+    setAdminPending(true);
+    setAdminError("");
+
+    try {
+      const [overview, enrollmentsData, inquiriesData, waitlistData] = await Promise.all([
+        getAdminOverview(adminKey.trim()),
+        getAdminEnrollments(adminKey.trim()),
+        getAdminInquiries(adminKey.trim()),
+        getAdminWaitlist(adminKey.trim()),
+      ]);
+
+      setAdminOverview(overview);
+      setAdminEnrollments(enrollmentsData.items ?? []);
+      setAdminInquiries(inquiriesData.items ?? []);
+      setAdminWaitlist(waitlistData.items ?? []);
+    } catch (error) {
+      setAdminError(error.message || "Could not load the admin dashboard.");
+    } finally {
+      setAdminPending(false);
     }
   };
 
@@ -1492,6 +1554,144 @@ function App() {
                 <li>Payment and onboarding support</li>
               </ul>
             </article>
+          </div>
+        </section>
+
+        <section className="admin section" id="admin">
+          <div className="container admin-shell">
+            <div className="admin-header reveal">
+              <div>
+                <p className="section-tag">Admin Dashboard</p>
+                <h2>Run admissions, enrollment, and lead follow-up from one place.</h2>
+                <p>
+                  This operations panel uses the protected admin APIs. Enter the API key to load
+                  live metrics and recent records.
+                </p>
+              </div>
+
+              <form className="admin-access-form" onSubmit={handleAdminLoad}>
+                <label>
+                  <span>Admin API key</span>
+                  <input
+                    type="password"
+                    value={adminKey}
+                    onChange={(event) => setAdminKey(event.target.value)}
+                    autoComplete="off"
+                    placeholder="Enter x-api-key value"
+                  />
+                </label>
+                <button type="submit" className="btn btn-primary" disabled={adminPending}>
+                  {adminPending ? "Loading dashboard..." : "Load Dashboard"}
+                </button>
+              </form>
+            </div>
+
+            {adminError ? <p className="form-status is-error">{adminError}</p> : null}
+
+            {adminOverview ? (
+              <>
+                <div className="admin-metrics reveal delay-1">
+                  <article className="admin-metric-card">
+                    <span>Active cohorts</span>
+                    <strong>{adminOverview.metrics.activeCohorts}</strong>
+                  </article>
+                  <article className="admin-metric-card">
+                    <span>Total enrollments</span>
+                    <strong>{adminOverview.metrics.enrollments}</strong>
+                  </article>
+                  <article className="admin-metric-card">
+                    <span>Paid enrollments</span>
+                    <strong>{adminOverview.metrics.paidEnrollments}</strong>
+                  </article>
+                  <article className="admin-metric-card">
+                    <span>Pending payments</span>
+                    <strong>{adminOverview.metrics.pendingPayments}</strong>
+                  </article>
+                  <article className="admin-metric-card">
+                    <span>Inquiries</span>
+                    <strong>{adminOverview.metrics.inquiries}</strong>
+                  </article>
+                  <article className="admin-metric-card">
+                    <span>Waitlist</span>
+                    <strong>{adminOverview.metrics.waitlist}</strong>
+                  </article>
+                </div>
+
+                <div className="admin-grid">
+                  <article className="admin-panel reveal">
+                    <h3>Recent enrollments</h3>
+                    <div className="admin-list">
+                      {adminEnrollments.slice(0, 6).map((item) => (
+                        <div key={item.id} className="admin-list-item">
+                          <div>
+                            <strong>{item.studentFullName}</strong>
+                            <p>{item.email}</p>
+                          </div>
+                          <div>
+                            <p>{item.cohortTitle}</p>
+                            <span>{item.paymentStatus}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+
+                  <article className="admin-panel reveal delay-1">
+                    <h3>Recent inquiries</h3>
+                    <div className="admin-list">
+                      {adminInquiries.slice(0, 6).map((item) => (
+                        <div key={item.id} className="admin-list-item">
+                          <div>
+                            <strong>{item.fullName}</strong>
+                            <p>{item.email}</p>
+                          </div>
+                          <div>
+                            <p>{item.program}</p>
+                            <span>{formatDateTimeLabel(item.createdAt)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+
+                  <article className="admin-panel reveal">
+                    <h3>Waitlist submissions</h3>
+                    <div className="admin-list">
+                      {adminWaitlist.slice(0, 6).map((item) => (
+                        <div key={item.id} className="admin-list-item">
+                          <div>
+                            <strong>{item.fullName}</strong>
+                            <p>{item.email}</p>
+                          </div>
+                          <div>
+                            <p>{item.phone || "No phone"}</p>
+                            <span>{formatDateTimeLabel(item.createdAt)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+
+                  <article className="admin-panel reveal delay-1">
+                    <h3>Cohort capacity</h3>
+                    <div className="admin-list">
+                      {adminOverview.cohorts.slice(0, 6).map((item) => (
+                        <div key={item.id} className="admin-list-item">
+                          <div>
+                            <strong>{item.title}</strong>
+                            <p>{item.programTitle}</p>
+                          </div>
+                          <div>
+                            <p>{item.remainingSeats} seats left</p>
+                            <span>{formatDateLabel(item.startDate)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                </div>
+              </>
+            ) : null}
           </div>
         </section>
       </main>

@@ -3,9 +3,10 @@
 This project now includes:
 
 - A React/Vite frontend
-- A Node/Express backend API for inquiries and waitlist submissions
-- SQLite-backed cohort and enrollment storage
+- A Node/Express backend API for admissions, registration, and operations
+- SQLite-backed storage for cohorts, enrollments, inquiries, and waitlist
 - Stripe Checkout support for online tuition payment
+- An admin dashboard section in the frontend backed by protected APIs
 
 ## Local setup
 
@@ -33,9 +34,9 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 
 - `PORT`: API port (default `4000`)
 - `CORS_ORIGINS`: allowed origins, comma-separated
-- `API_ADMIN_KEY`: required for admin listing endpoints
-- `DATA_DIR`: directory for JSON data storage
-- `DATABASE_URL`: SQLite database file for cohorts and enrollments
+- `API_ADMIN_KEY`: required for admin dashboard and protected admin endpoints
+- `DATA_DIR`: mounted directory for persistent app storage
+- `DATABASE_URL`: SQLite database file for cohorts, enrollments, inquiries, and waitlist
 - `STATIC_DIR`: built frontend directory to serve in production (default `dist`)
 - `SERVE_STATIC_APP`: serve the built frontend from Express (`true` in production by default)
 - `TRUST_PROXY`: trust upstream proxy headers (`true` in production by default)
@@ -66,6 +67,8 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `POST /api/waitlist`: submit waitlist request
 - `GET /api/cohorts`: live cohort availability with remaining seats
 - `POST /api/enrollments`: create enrollment and return Stripe Checkout URL when configured
+- `GET /api/enrollments/:id/status`: enrollment payment/status verification after checkout
+- `GET /api/admin/overview`: admin metrics and cohort capacity summary
 - `GET /api/inquiries`: admin-only inquiry list (requires `x-api-key`)
 - `GET /api/waitlist`: admin-only waitlist list (requires `x-api-key`)
 - `GET /api/enrollments`: admin-only enrollment list (requires `x-api-key`)
@@ -73,20 +76,22 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 
 ## Data persistence
 
-Inquiries and waitlist submissions are stored in:
-
-- `server/data/inquiries.json`
-- `server/data/waitlist.json`
-
-Enrollment and cohort data are stored in:
+Admissions data is stored in a single SQLite database:
 
 - `server/data/enrollment.db`
 
+This database now includes:
+
+- cohorts
+- enrollments
+- inquiries
+- waitlist submissions
+
 Important:
 
-- Inquiry and waitlist data still use JSON files, so durable production storage still requires persistent disk or a later database migration for those tables too.
-- If a JSON file becomes corrupted, the server now quarantines it and returns a temporary `503` instead of silently wiping records.
-- Class registration now uses SQLite so cohort inventory and payment state are not tied to in-memory state.
+- Durable production operation still requires persistent disk.
+- Payment confirmation depends on Stripe webhook delivery.
+- The admin dashboard depends on `API_ADMIN_KEY`.
 
 ## Deployment note
 
@@ -121,6 +126,7 @@ This repo now includes `render.yaml` for a single-service deploy.
 - Create a Render `Web Service`, not a `Static Site`
 - Connect the repo and keep the root directory blank
 - Render can detect the build/start commands from `render.yaml`
-- Add persistent storage so both `server/data/*.json` and `server/data/enrollment.db` survive redeploys
-- Configure `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and optionally `PUBLIC_APP_URL`
+- The Blueprint is configured for a persistent disk mounted at `/var/data`
+- Configure `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL`
 - Point the Stripe webhook at `/api/payments/stripe/webhook`
+- Use the frontend `#admin` section with your `API_ADMIN_KEY` to load operations data after deploy

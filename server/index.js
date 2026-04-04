@@ -8,8 +8,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config.js";
 import { EnrollmentDatabase } from "./lib/enrollmentDb.js";
-import { JsonStore, StoreIntegrityError } from "./lib/jsonStore.js";
 import { createStripeClient } from "./lib/stripe.js";
+import { createAdminRouter } from "./routes/admin.js";
 import { createCohortsRouter } from "./routes/cohorts.js";
 import { createEnrollmentsRouter } from "./routes/enrollments.js";
 import { createHealthRouter } from "./routes/health.js";
@@ -57,8 +57,6 @@ export function createApp() {
     legacyHeaders: false,
     message: { error: "Too many submissions. Please try again in a few minutes." },
   });
-  const inquiryStore = new JsonStore(path.join(config.dataDir, "inquiries.json"));
-  const waitlistStore = new JsonStore(path.join(config.dataDir, "waitlist.json"));
   const enrollmentDb = new EnrollmentDatabase(config.databasePath);
   const stripeClient = createStripeClient(config.stripeSecretKey);
   const paymentsEnabled = Boolean(stripeClient && config.stripeWebhookSecret);
@@ -92,6 +90,7 @@ export function createApp() {
   app.use("/api/health", createHealthRouter());
   app.use("/api/programs", createProgramsRouter());
   app.use("/api/cohorts", createCohortsRouter({ enrollmentDb }));
+  app.use("/api/admin", createAdminRouter({ adminKey: config.adminKey, enrollmentDb }));
   app.use(
     "/api/enrollments",
     createEnrollmentsRouter({
@@ -104,7 +103,10 @@ export function createApp() {
   app.use(
     "/api/inquiries",
     createInquiriesRouter({
-      store: inquiryStore,
+      store: {
+        insert: (record) => enrollmentDb.insertInquiry(record),
+        list: (options) => enrollmentDb.listInquiries(options),
+      },
       submissionLimiter,
       adminKey: config.adminKey,
     })
@@ -112,7 +114,10 @@ export function createApp() {
   app.use(
     "/api/waitlist",
     createWaitlistRouter({
-      store: waitlistStore,
+      store: {
+        insert: (record) => enrollmentDb.insertWaitlist(record),
+        list: (options) => enrollmentDb.listWaitlist(options),
+      },
       submissionLimiter,
       adminKey: config.adminKey,
     })
@@ -137,13 +142,6 @@ export function createApp() {
   app.use((error, _req, res, _next) => {
     if (error.message === "CORS origin not allowed") {
       return res.status(403).json({ error: error.message });
-    }
-
-    if (error instanceof StoreIntegrityError) {
-      console.error(`Store integrity error: ${error.message}`, error.details);
-      return res.status(503).json({
-        error: "Submission storage is temporarily unavailable. Please retry shortly.",
-      });
     }
 
     console.error(error);

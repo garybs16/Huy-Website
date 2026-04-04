@@ -78,9 +78,32 @@ export class EnrollmentDatabase {
         FOREIGN KEY (cohort_id) REFERENCES cohorts(id)
       );
 
+      CREATE TABLE IF NOT EXISTS inquiries (
+        id TEXT PRIMARY KEY,
+        full_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        program TEXT NOT NULL,
+        message TEXT NOT NULL,
+        source TEXT,
+        created_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS waitlist (
+        id TEXT PRIMARY KEY,
+        full_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        notes TEXT,
+        source TEXT,
+        created_at TEXT NOT NULL
+      );
+
       CREATE INDEX IF NOT EXISTS idx_enrollments_cohort_id ON enrollments(cohort_id);
       CREATE INDEX IF NOT EXISTS idx_enrollments_email ON enrollments(email);
       CREATE INDEX IF NOT EXISTS idx_enrollments_payment_status ON enrollments(payment_status);
+      CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at);
+      CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at);
     `);
   }
 
@@ -443,6 +466,173 @@ export class EnrollmentDatabase {
       `)
       .all({ pageSize, offset });
     const total = this.db.prepare(`SELECT COUNT(*) AS count FROM enrollments`).get().count;
+
+    return {
+      items,
+      page,
+      pageSize,
+      total,
+      totalPages: total === 0 ? 0 : Math.ceil(total / pageSize),
+    };
+  }
+
+  insertInquiry(record) {
+    this.db
+      .prepare(`
+        INSERT INTO inquiries (
+          id,
+          full_name,
+          email,
+          phone,
+          program,
+          message,
+          source,
+          created_at
+        ) VALUES (
+          @id,
+          @fullName,
+          @email,
+          @phone,
+          @program,
+          @message,
+          @source,
+          @createdAt
+        )
+      `)
+      .run({
+        id: record.id,
+        fullName: record.fullName,
+        email: record.email,
+        phone: record.phone ?? null,
+        program: record.program,
+        message: record.message,
+        source: record.source ?? null,
+        createdAt: record.createdAt,
+      });
+
+    return record;
+  }
+
+  listInquiries({ page = 1, pageSize = 20 } = {}) {
+    return this.paginateCollection({
+      tableName: "inquiries",
+      page,
+      pageSize,
+      selectSql: `
+        SELECT
+          id,
+          full_name AS fullName,
+          email,
+          phone,
+          program,
+          message,
+          source,
+          created_at AS createdAt
+        FROM inquiries
+      `,
+    });
+  }
+
+  insertWaitlist(record) {
+    this.db
+      .prepare(`
+        INSERT INTO waitlist (
+          id,
+          full_name,
+          email,
+          phone,
+          notes,
+          source,
+          created_at
+        ) VALUES (
+          @id,
+          @fullName,
+          @email,
+          @phone,
+          @notes,
+          @source,
+          @createdAt
+        )
+      `)
+      .run({
+        id: record.id,
+        fullName: record.fullName,
+        email: record.email,
+        phone: record.phone ?? null,
+        notes: record.notes ?? null,
+        source: record.source ?? null,
+        createdAt: record.createdAt,
+      });
+
+    return record;
+  }
+
+  listWaitlist({ page = 1, pageSize = 20 } = {}) {
+    return this.paginateCollection({
+      tableName: "waitlist",
+      page,
+      pageSize,
+      selectSql: `
+        SELECT
+          id,
+          full_name AS fullName,
+          email,
+          phone,
+          notes,
+          source,
+          created_at AS createdAt
+        FROM waitlist
+      `,
+    });
+  }
+
+  getAdminOverview() {
+    const metrics = this.db
+      .prepare(`
+        SELECT
+          (SELECT COUNT(*) FROM cohorts WHERE is_active = 1) AS activeCohorts,
+          (SELECT COUNT(*) FROM enrollments) AS enrollments,
+          (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'paid') AS paidEnrollments,
+          (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'checkout_pending') AS pendingPayments,
+          (SELECT COUNT(*) FROM inquiries) AS inquiries,
+          (SELECT COUNT(*) FROM waitlist) AS waitlist
+      `)
+      .get();
+
+    const recentEnrollments = this.db
+      .prepare(`
+        SELECT
+          e.id,
+          e.student_full_name AS studentFullName,
+          e.email,
+          e.status,
+          e.payment_status AS paymentStatus,
+          e.created_at AS createdAt,
+          c.title AS cohortTitle
+        FROM enrollments e
+        JOIN cohorts c ON c.id = e.cohort_id
+        ORDER BY e.created_at DESC
+        LIMIT 5
+      `)
+      .all();
+
+    return {
+      metrics,
+      recentEnrollments,
+      cohorts: this.listActiveCohorts(),
+    };
+  }
+
+  paginateCollection({ tableName, page, pageSize, selectSql }) {
+    const offset = (page - 1) * pageSize;
+    const items = this.db
+      .prepare(`
+        ${selectSql}
+        ORDER BY created_at DESC
+        LIMIT @pageSize OFFSET @offset
+      `)
+      .all({ pageSize, offset });
+    const total = this.db.prepare(`SELECT COUNT(*) AS count FROM ${tableName}`).get().count;
 
     return {
       items,

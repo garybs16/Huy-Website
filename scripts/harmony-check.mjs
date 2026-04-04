@@ -12,6 +12,7 @@ async function run() {
   const tempDataDir = await mkdtemp(path.join(os.tmpdir(), "pcahi-harmony-"));
   process.env.DATA_DIR = tempDataDir;
   process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
+  process.env.API_ADMIN_KEY = "harmony-admin-key";
   const { startServer } = await import("../server/index.js");
   const port = 4020;
   const { server } = startServer(port);
@@ -86,6 +87,13 @@ async function run() {
       typeof enrollmentStatusBody.paymentStatus === "string",
       "Enrollment status must include paymentStatus"
     );
+
+    const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
+      headers: { "x-api-key": "harmony-admin-key" },
+    });
+    assert(adminOverviewRes.ok, "Admin overview endpoint failed");
+    const adminOverviewBody = await adminOverviewRes.json();
+    assert(typeof adminOverviewBody.metrics?.enrollments === "number", "Admin overview metrics are invalid");
 
     console.log("Harmony check passed.");
   } finally {
