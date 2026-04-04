@@ -636,10 +636,6 @@ function App() {
               Register & Pay
             </a>
           </div>
-
-          <a href="#register" className="btn btn-primary nav-cta">
-            Register & Pay
-          </a>
         </div>
       </nav>
 

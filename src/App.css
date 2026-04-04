@@ -162,13 +162,13 @@
   font-weight: 800;
 }
 
-.nav-cta,
 .menu-cta {
   white-space: nowrap;
 }
 
 .menu-cta {
-  display: none;
+  display: inline-flex;
+  margin-left: 0.2rem;
 }
 
 .btn {
@@ -1447,11 +1447,24 @@
 }
 
 @media (max-width: 1120px) {
+  .utility-bar {
+    display: none;
+  }
+
+  .navbar {
+    padding: 0.65rem 0;
+  }
+
+  .nav-inner {
+    min-height: 72px;
+  }
+
   .menu {
     position: absolute;
     top: calc(100% + 0.75rem);
-    left: 0;
     right: 0;
+    left: auto;
+    width: min(24rem, calc(100vw - 2rem));
     display: none;
     flex-direction: column;
     align-items: stretch;
@@ -1477,7 +1490,9 @@
 
   .menu-cta {
     display: inline-flex;
+    width: 100%;
     margin-top: 0.35rem;
+    margin-left: 0;
   }
 
   .hero-grid,
@@ -1505,7 +1520,7 @@
   }
 
   .brand {
-    align-items: flex-start;
+    align-items: center;
   }
 
   .cta-band-inner {
@@ -1520,30 +1535,26 @@
 }
 
 @media (max-width: 760px) {
+  .container {
+    width: min(1180px, calc(100% - 1.25rem));
+  }
+
   .section {
     padding: 4.5rem 0;
   }
 
-  .utility-inner,
-  .utility-copy,
-  .utility-links {
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .nav-inner,
-  .utility-inner {
+  .nav-inner {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
   }
 
   .hero {
-    margin-top: -8.9rem;
-    padding-top: 10rem;
+    margin-top: -4.6rem;
+    padding-top: 6.6rem;
   }
 
   .hero-grid {
-    padding: 4.7rem 0 4rem;
+    padding: 4.1rem 0 4rem;
   }
 
   .quick-start {
@@ -1555,7 +1566,19 @@
   }
 
   .brand-logo {
-    width: min(8.6rem, 62vw);
+    width: min(8rem, 54vw);
+  }
+
+  .brand-text {
+    max-width: 12rem;
+  }
+
+  .brand-text strong {
+    font-size: 0.9rem;
+  }
+
+  .brand-text span {
+    display: none;
   }
 
   .hero-brand-chip {
@@ -1590,15 +1613,24 @@
     align-items: center;
     justify-content: space-between;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .brand {
     max-width: calc(100% - 4rem);
   }
 
-  .nav-cta {
-    display: none;
+  .menu {
+    width: min(22rem, calc(100vw - 1.25rem));
+  }
+
+  .cta-row {
+    flex-direction: column;
+  }
+
+  .cta-row .btn,
+  .cta-band-inner .btn {
+    width: 100%;
   }
 
   .register-card,
