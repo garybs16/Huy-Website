@@ -167,7 +167,7 @@
 }
 
 .menu-cta {
-  display: inline-flex;
+  display: none;
   margin-left: 0.2rem;
 }
 
