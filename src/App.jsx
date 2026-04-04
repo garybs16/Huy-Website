@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { createEnrollment, getCohorts, getPrograms, joinWaitlist, submitInquiry } from "./lib/api";
+import { createEnrollment, getCohorts, getEnrollmentStatus, getPrograms, joinWaitlist, submitInquiry } from "./lib/api";
 import heroTraining from "./assets/hero-training.svg";
 import admissionsSupport from "./assets/admissions-support.svg";
 import firstStepLogo from "./assets/first-step-logo.svg";
@@ -429,22 +429,68 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const checkoutStatus = params.get("checkout");
     const enrollmentId = params.get("enrollment");
+    let active = true;
 
-    if (checkoutStatus === "success") {
-      setEnrollmentStatus({
-        type: "success",
-        text: enrollmentId
-          ? `Payment received. Enrollment ${enrollmentId} has been recorded and admissions will follow up with next steps.`
-          : "Payment received. Your enrollment has been recorded and admissions will follow up with next steps.",
-      });
+    async function syncCheckoutStatus() {
+      if (!checkoutStatus || !enrollmentId) {
+        if (checkoutStatus === "cancelled" && active) {
+          setEnrollmentStatus({
+            type: "error",
+            text: "Checkout was cancelled before payment completed. Your seat is not confirmed until payment succeeds.",
+          });
+        }
+
+        return;
+      }
+
+      try {
+        const enrollment = await getEnrollmentStatus(enrollmentId);
+
+        if (!active) {
+          return;
+        }
+
+        if (enrollment.paymentStatus === "paid") {
+          setEnrollmentStatus({
+            type: "success",
+            text: `Payment received. Enrollment ${enrollment.enrollmentId} is confirmed and admissions will follow up with next steps.`,
+          });
+          return;
+        }
+
+        if (enrollment.paymentStatus === "checkout_pending") {
+          setEnrollmentStatus({
+            type: "error",
+            text: "Payment return was detected, but the backend has not confirmed the payment yet. Refresh in a moment or contact admissions if this does not update.",
+          });
+          return;
+        }
+
+        if (checkoutStatus === "cancelled" || enrollment.paymentStatus === "checkout_expired") {
+          setEnrollmentStatus({
+            type: "error",
+            text: "Checkout was cancelled or expired before payment completed. Your seat is not confirmed yet.",
+          });
+          return;
+        }
+
+        setEnrollmentStatus({
+          type: "error",
+          text: "Enrollment exists, but payment is not marked complete yet. Please contact admissions before assuming the seat is confirmed.",
+        });
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+
+        setEnrollmentStatus({
+          type: "error",
+          text: error.message || "Could not verify payment status after checkout.",
+        });
+      }
     }
 
-    if (checkoutStatus === "cancelled") {
-      setEnrollmentStatus({
-        type: "error",
-        text: "Checkout was cancelled before payment completed. Your seat is not confirmed until payment succeeds.",
-      });
-    }
+    syncCheckoutStatus();
 
     if (checkoutStatus) {
       const nextUrl = new URL(window.location.href);
@@ -452,6 +498,10 @@ function App() {
       nextUrl.searchParams.delete("enrollment");
       window.history.replaceState({}, document.title, `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
     }
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleInquiryInput = (event) => {

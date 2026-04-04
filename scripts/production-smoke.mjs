@@ -81,6 +81,12 @@ async function run() {
       }),
     });
     assert(enrollmentRes.status === 201, "Production enrollment submission failed");
+    const enrollmentBody = await enrollmentRes.json();
+
+    const enrollmentStatusRes = await fetch(
+      `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
+    );
+    assert(enrollmentStatusRes.ok, "Production enrollment status endpoint failed");
 
     console.log("Production smoke check passed.");
   } finally {

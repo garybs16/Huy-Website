@@ -63,3 +63,7 @@ export function joinWaitlist(payload) {
 export function createEnrollment(payload) {
   return request("/api/enrollments", { method: "POST", payload });
 }
+
+export function getEnrollmentStatus(enrollmentId) {
+  return request(`/api/enrollments/${enrollmentId}/status`);
+}

@@ -22,6 +22,22 @@ function resolveAppBaseUrl(req, configuredBaseUrl) {
 export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, publicAppUrl }) {
   const router = Router();
 
+  router.get("/:id/status", (req, res) => {
+    const enrollment = enrollmentDb.getEnrollmentById(req.params.id);
+
+    if (!enrollment) {
+      return res.status(404).json({ error: "Enrollment not found." });
+    }
+
+    return res.json({
+      enrollmentId: enrollment.id,
+      status: enrollment.status,
+      paymentStatus: enrollment.paymentStatus,
+      paidAt: enrollment.paidAt,
+      seatHoldExpiresAt: enrollment.seatHoldExpiresAt,
+    });
+  });
+
   router.post("/", async (req, res, next) => {
     try {
       const payload = enrollmentSchema.parse(req.body);

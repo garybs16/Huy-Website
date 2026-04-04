@@ -76,6 +76,17 @@ async function run() {
     const enrollmentBody = await enrollmentRes.json();
     assert(typeof enrollmentBody.enrollmentId === "string", "Enrollment response must contain enrollmentId");
 
+    const enrollmentStatusRes = await fetch(
+      `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
+    );
+    assert(enrollmentStatusRes.ok, "Enrollment status endpoint failed");
+    const enrollmentStatusBody = await enrollmentStatusRes.json();
+    assert(enrollmentStatusBody.enrollmentId === enrollmentBody.enrollmentId, "Enrollment status returned wrong id");
+    assert(
+      typeof enrollmentStatusBody.paymentStatus === "string",
+      "Enrollment status must include paymentStatus"
+    );
+
     console.log("Harmony check passed.");
   } finally {
     await new Promise((resolve) => server.close(resolve));
