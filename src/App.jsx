@@ -13,7 +13,7 @@ import {
   joinWaitlist,
   submitInquiry,
 } from "./lib/api";
-import firstStepLogo from "./assets/first-step-logo.svg";
+import firstStepLogo from "./assets/logo.jpg";
 import { AdminPage } from "./pages/AdminPage";
 import { AdmissionsPage } from "./pages/AdmissionsPage";
 import { ContactPage } from "./pages/ContactPage";
@@ -148,7 +148,7 @@ function AppShell({ children }) {
 
         <div className="container nav-frame">
           <Link className="brand-mark" to="/">
-            <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
+            <img className="header-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
           </Link>
 
           <nav className="site-nav" aria-label="Primary">
