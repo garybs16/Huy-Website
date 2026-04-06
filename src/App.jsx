@@ -134,6 +134,13 @@ function AppEffects({ setEnrollmentStatus }) {
 }
 
 function AppShell({ children }) {
+  const location = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
+
+  useEffect(() => {
+    setNavOpen(false);
+  }, [location.pathname]);
+
   return (
     <div className="site-shell">
       <header className="site-header">
@@ -151,7 +158,24 @@ function AppShell({ children }) {
             <img className="header-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
           </Link>
 
-          <nav className="site-nav" aria-label="Primary">
+          <button
+            type="button"
+            className={`nav-toggle ${navOpen ? "is-open" : ""}`}
+            aria-expanded={navOpen}
+            aria-controls="primary-navigation"
+            aria-label={navOpen ? "Close navigation menu" : "Open navigation menu"}
+            onClick={() => setNavOpen((current) => !current)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+
+          <nav
+            id="primary-navigation"
+            className={`site-nav ${navOpen ? "is-open" : ""}`}
+            aria-label="Primary"
+          >
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -164,9 +188,11 @@ function AppShell({ children }) {
             ))}
           </nav>
 
-          <Link to="/register" className="btn btn-primary nav-button">
-            Register Now
-          </Link>
+          <div className={`nav-actions ${navOpen ? "is-open" : ""}`}>
+            <Link to="/register" className="btn btn-primary nav-button">
+              Register Now
+            </Link>
+          </div>
         </div>
       </header>
 
