@@ -1,19 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Urbanist:wght@600;700;800&display=swap");
 
 :root {
-  --bg: #f4f8ff;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-soft: #eef4ff;
-  --ink: #10264d;
-  --muted: #5f7398;
-  --brand: #2f5bff;
-  --brand-strong: #163ccf;
-  --brand-deep: #0d225d;
-  --brand-soft: #dfe8ff;
-  --brand-soft-strong: #c8d8ff;
-  --brand-ice: #edf3ff;
-  --line: rgba(18, 52, 122, 0.12);
-  --shadow: rgba(16, 43, 96, 0.14);
+  --surface-soft: rgba(65, 105, 225, 0.08);
+  --ink: #4169e1;
+  --muted: rgba(65, 105, 225, 0.78);
+  --brand: #4169e1;
+  --line: rgba(65, 105, 225, 0.16);
+  --shadow: rgba(65, 105, 225, 0.16);
   --font-body: "Manrope", "Segoe UI", sans-serif;
   --font-display: "Urbanist", "Segoe UI", sans-serif;
 }
@@ -38,8 +33,8 @@ body {
   font-family: var(--font-body);
   line-height: 1.55;
   background-image:
-    radial-gradient(circle at top left, rgba(47, 91, 255, 0.14), transparent 24%),
-    radial-gradient(circle at right 10%, rgba(109, 168, 255, 0.12), transparent 20%);
+    radial-gradient(circle at top left, rgba(65, 105, 225, 0.16), transparent 24%),
+    radial-gradient(circle at right 10%, rgba(65, 105, 225, 0.1), transparent 20%);
 }
 
 h1,
@@ -68,6 +63,6 @@ img {
 }
 
 ::selection {
-  background: rgba(47, 91, 255, 0.22);
+  background: rgba(65, 105, 225, 0.22);
   color: #ffffff;
 }
