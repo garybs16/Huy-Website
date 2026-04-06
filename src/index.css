@@ -1,14 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Urbanist:wght@600;700;800&display=swap");
 
 :root {
-  --bg: #ffffff;
+  --bg: #f6f8ff;
   --surface: #ffffff;
   --surface-soft: rgba(65, 105, 225, 0.08);
-  --ink: #4169e1;
-  --muted: rgba(65, 105, 225, 0.78);
+  --ink: #18357f;
+  --muted: rgba(24, 53, 127, 0.72);
   --brand: #4169e1;
+  --brand-strong: #2e57d7;
+  --brand-soft: rgba(65, 105, 225, 0.1);
+  --brand-soft-strong: rgba(65, 105, 225, 0.18);
   --line: rgba(65, 105, 225, 0.16);
-  --shadow: rgba(65, 105, 225, 0.16);
+  --shadow: rgba(35, 63, 153, 0.16);
   --font-body: "Manrope", "Segoe UI", sans-serif;
   --font-display: "Urbanist", "Segoe UI", sans-serif;
 }
@@ -33,8 +36,8 @@ body {
   font-family: var(--font-body);
   line-height: 1.55;
   background-image:
-    radial-gradient(circle at top left, rgba(65, 105, 225, 0.16), transparent 24%),
-    radial-gradient(circle at right 10%, rgba(65, 105, 225, 0.1), transparent 20%);
+    radial-gradient(circle at top left, rgba(65, 105, 225, 0.14), transparent 24%),
+    radial-gradient(circle at right 10%, rgba(65, 105, 225, 0.08), transparent 22%);
 }
 
 h1,

@@ -48,11 +48,11 @@
   align-items: center;
   gap: 1.5rem;
   margin-top: 0.75rem;
-  padding: 1rem 1.15rem;
+  padding: 1rem 1.25rem;
   border: 1px solid var(--line);
-  border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 40px var(--shadow);
+  border-radius: 1.7rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 22px 54px var(--shadow);
 }
 
 .brand-mark {
@@ -64,6 +64,7 @@
   width: 182px;
   height: 118px;
   overflow: hidden;
+  flex: 0 0 auto;
 }
 
 .header-logo {
@@ -104,10 +105,20 @@
   color: var(--brand);
   font-size: 0.92rem;
   font-weight: 800;
+  line-height: 1;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.nav-link:hover {
+  background: var(--brand-soft);
+  transform: translateY(-1px);
 }
 
 .nav-link.is-active {
-  background: rgba(65, 105, 225, 0.12);
+  background: var(--brand-soft-strong);
   color: var(--brand);
 }
 
@@ -121,7 +132,7 @@
   background:
     radial-gradient(circle at 8% 18%, rgba(255, 255, 255, 0.28), transparent 24%),
     radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.18), transparent 28%),
-    linear-gradient(125deg, var(--brand) 0%, var(--brand) 100%);
+    linear-gradient(135deg, var(--brand-strong) 0%, var(--brand) 54%, #5c7ef0 100%);
   color: #ffffff;
 }
 
@@ -131,7 +142,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.2rem;
-  align-items: start;
+  align-items: center;
 }
 
 .hero-copy h1,
@@ -142,6 +153,10 @@
   margin: 0;
   font-size: clamp(2.4rem, 5vw, 4.5rem);
   line-height: 0.95;
+}
+
+.hero-copy h1 {
+  max-width: 11ch;
 }
 
 .hero-text,
@@ -194,7 +209,8 @@
     transform 0.18s ease,
     box-shadow 0.18s ease,
     background-color 0.18s ease,
-    border-color 0.18s ease;
+    border-color 0.18s ease,
+    color 0.18s ease;
 }
 
 .btn:hover {
@@ -203,7 +219,7 @@
 }
 
 .btn-primary {
-  background: var(--brand);
+  background: linear-gradient(135deg, var(--brand-strong) 0%, var(--brand) 100%);
   color: #fff;
 }
 
@@ -240,7 +256,10 @@
 
 .metric-card {
   padding: 1rem;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
 }
 
 .metric-card strong {
@@ -274,6 +293,7 @@
   border-radius: 1.8rem;
   background: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 24px 54px rgba(24, 53, 127, 0.18);
 }
 
 .hero-visual-card img {
@@ -287,8 +307,9 @@
   margin-top: 1rem;
   padding: 1rem 1.1rem;
   border-radius: 1.2rem;
-  background: #ffffff;
-  color: var(--brand);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  box-shadow: 0 18px 36px rgba(24, 53, 127, 0.16);
 }
 
 .quick-grid,
@@ -314,6 +335,33 @@
   background: #ffffff;
 }
 
+.quick-card,
+.program-card,
+.info-card,
+.schedule-card,
+.support-card,
+.form-card,
+.register-summary,
+.admin-row {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.quick-card:hover,
+.program-card:hover,
+.info-card:hover,
+.schedule-card:hover,
+.support-card:hover,
+.form-card:hover,
+.register-summary:hover,
+.admin-row:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 52px rgba(35, 63, 153, 0.16);
+  border-color: rgba(65, 105, 225, 0.24);
+}
+
 .dark-card,
 .register-intro {
   padding: 1.35rem;
@@ -333,6 +381,34 @@
 .detail-list {
   margin: 0.8rem 0 0;
   padding-left: 1.1rem;
+}
+
+.quick-card strong,
+.program-card h3,
+.info-card h3,
+.schedule-card h3,
+.register-summary h3,
+.form-card h2,
+.hero-floating-panel strong {
+  color: var(--ink);
+}
+
+.quick-card p,
+.program-card p,
+.info-card p,
+.schedule-card p,
+.form-card p,
+.register-summary p,
+.admin-row p {
+  color: var(--muted);
+}
+
+.quick-card span {
+  display: inline-flex;
+  margin-top: 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--brand);
 }
 
 .program-topline {
@@ -357,6 +433,10 @@
 .support-card {
   padding: 1.2rem;
   background: var(--brand);
+  color: #ffffff;
+}
+
+.support-card h3 {
   color: #ffffff;
 }
 
@@ -624,6 +704,7 @@
     display: grid;
     width: 100%;
     justify-content: stretch;
+    gap: 0.6rem;
   }
 
   .nav-link,
