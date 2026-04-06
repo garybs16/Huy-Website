@@ -1,24 +1,82 @@
-<svg width="620" height="220" viewBox="0 0 620 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="620" height="220" rx="24" fill="#FFFFFF"/>
-  <path d="M405 162C436 136 450 101 448 66C482 86 505 120 520 169C488 161 459 159 405 162Z" fill="#F0A11F"/>
-  <path d="M348 152C372 136 387 114 390 84L430 108C425 132 406 155 378 173C366 169 358 162 348 152Z" fill="#173E74"/>
-  <path d="M309 98L332 76H365L351 98H373L341 136L348 112H322L309 98Z" fill="#C72828"/>
-  <path d="M425 66C437 51 448 43 459 40L452 54L466 55L447 66H425Z" fill="#F0A11F"/>
-  <path d="M376 70C389 55 405 48 420 51C432 54 438 64 439 78C440 95 432 112 415 127L399 117C411 106 418 93 417 81C416 74 412 70 405 69C400 68 394 70 388 74L376 70Z" fill="#173E74"/>
-  <circle cx="402" cy="53" r="12" fill="#173E74"/>
-  <path d="M397 66H410V91H397V66Z" fill="#173E74"/>
-  <path d="M387 88C398 83 407 83 419 88L430 113L418 118L408 100V128H395V102L388 119L375 113L387 88Z" fill="#173E74"/>
-  <path d="M50 132H82V144H62V158H76V170H62V196H50V132Z" fill="#173E74"/>
-  <path d="M88 132H120V144H100V156H118V168H100V184H122V196H88V132Z" fill="#173E74"/>
-  <path d="M126 132H173V144H156V196H143V144H126V132Z" fill="#173E74"/>
-  <path d="M178 132H228V144H210V196H197V144H178V132Z" fill="#173E74"/>
-  <path d="M232 132H264V144H244V156H262V168H244V184H266V196H232V132Z" fill="#173E74"/>
-  <path d="M272 132H285L301 162L317 132H330V196H318V156L303 183H299L284 156V196H272V132Z" fill="#173E74"/>
-  <path d="M50 52H179V68H68V89H166V105H68V136H50V52Z" fill="#173E74"/>
-  <path d="M190 52H208V85H242V52H260V136H242V101H208V136H190V52Z" fill="#173E74"/>
-  <path d="M271 52H289V136H271V52Z" fill="#173E74"/>
-  <path d="M28 154H334V159H28V154Z" fill="#C78F3B"/>
-  <path d="M28 164H334V167H28V164Z" fill="#C78F3B"/>
-  <text x="27" y="112" fill="#173E74" font-family="Georgia, 'Times New Roman', serif" font-size="63" font-weight="700" letter-spacing="1">FIRST STEP</text>
-  <text x="58" y="148" fill="#B33A2E" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="1.2">HEALTHCARE ACADEMY</text>
+<svg width="560" height="560" viewBox="0 0 560 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldArc" x1="347" y1="86" x2="494" y2="395" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6B21F"/>
+      <stop offset="1" stop-color="#D98B00"/>
+    </linearGradient>
+    <linearGradient id="goldDip" x1="176" y1="339" x2="459" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D98B00"/>
+      <stop offset="1" stop-color="#F6B21F"/>
+    </linearGradient>
+    <linearGradient id="crossRed" x1="123" y1="167" x2="226" y2="296" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C5171F"/>
+      <stop offset="1" stop-color="#9F1119"/>
+    </linearGradient>
+    <path id="stepBase" d="M0 0H72V28H34V58H0V0Z"/>
+  </defs>
+
+  <polygon
+    points="383,40 392,70 422,70 397,88 406,117 383,99 360,117 369,88 344,70 374,70"
+    fill="#F6B21F"
+  />
+
+  <path
+    d="M346 88C430 155 448 278 395 406C430 352 455 286 461 219C467 153 439 101 379 73L346 88Z"
+    fill="url(#goldArc)"
+  />
+  <path
+    d="M168 344C236 377 325 394 406 390C355 423 283 438 202 431C171 428 145 420 119 408L168 344Z"
+    fill="url(#goldDip)"
+  />
+  <path
+    d="M123 193C123 185 130 178 138 178H168V148C168 140 175 133 183 133H210C218 133 225 140 225 148V178H255C263 178 270 185 270 193V220C270 228 263 235 255 235H225V265C225 273 218 280 210 280H183C175 280 168 273 168 265V235H138C130 235 123 228 123 220V193Z"
+    fill="url(#crossRed)"
+  />
+  <path
+    d="M160 194C176 181 195 176 214 179C191 185 174 202 170 223C162 219 155 208 160 194Z"
+    fill="#FFFFFF"
+  />
+  <path
+    d="M197 188C211 196 221 210 224 226C216 223 209 222 202 222C200 208 194 197 183 188H197Z"
+    fill="#FFFFFF"
+  />
+  <polygon
+    points="198,176 203,189 217,189 206,197 210,210 198,202 186,210 190,197 179,189 193,189"
+    fill="#FFFFFF"
+  />
+
+  <g transform="translate(214 207)">
+    <use href="#stepBase" fill="#123F89" transform="translate(68 110)"/>
+    <use href="#stepBase" fill="#123F89" transform="translate(102 138) scale(0.95)"/>
+    <use href="#stepBase" fill="#123F89" transform="translate(138 165) scale(0.9)"/>
+
+    <circle cx="111" cy="43" r="24" fill="#184A96"/>
+    <path d="M77 46L114 14L156 18L130 47L77 46Z" fill="#184A96"/>
+    <path d="M123 18L140 7L160 30L146 37L123 18Z" fill="#184A96"/>
+    <path d="M157 32L161 48L172 55L162 57L156 69L153 55L143 49L153 44L157 32Z" fill="#184A96"/>
+    <path
+      d="M94 71C97 60 107 53 118 53C133 53 144 66 144 80V127L173 86C180 76 194 72 206 77C218 82 224 95 220 107L213 130L195 124L200 102L181 134C176 142 167 148 157 148H146V202C146 213 141 222 132 229L111 246L95 236L108 208V145L102 204L68 256L49 249L78 187L83 132L88 92C89 84 91 77 94 71Z"
+      fill="#184A96"
+    />
+    <path d="M133 128L141 93L155 95L147 128H133Z" fill="#FFFFFF"/>
+    <path d="M91 139C76 138 64 147 61 162C59 176 68 188 81 190H91V180H83C76 179 72 174 73 166C74 158 80 153 89 153H96L91 139Z" fill="#FFFFFF"/>
+    <path d="M170 140C183 139 193 147 196 159C199 173 191 185 179 190H169V180H176C182 177 185 171 183 164C181 156 175 151 168 152L162 152L170 140Z" fill="#FFFFFF"/>
+    <path d="M173 82L212 97L206 111L167 95L173 82Z" fill="#184A96"/>
+    <path d="M206 77L227 86L218 108L198 99L206 77Z" fill="#F6B21F"/>
+    <path d="M225 80L236 88L228 101L217 93L225 80Z" fill="#C5171F"/>
+  </g>
+
+  <path d="M168 390C237 404 321 403 394 377C347 419 278 441 196 443C168 444 143 442 114 435L168 390Z" fill="#123F89"/>
+
+  <text x="76" y="474" fill="#184A96" font-family="Georgia, 'Times New Roman', serif" font-size="86" font-weight="700" letter-spacing="1">
+    FIRST STEP
+  </text>
+  <text x="99" y="512" fill="#B22A2A" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" letter-spacing="1.6">
+    HEALTHCARE ACADEMY
+  </text>
+  <line x1="82" y1="503" x2="96" y2="503" stroke="#D98B00" stroke-width="3"/>
+  <line x1="457" y1="503" x2="478" y2="503" stroke="#D98B00" stroke-width="3"/>
+  <text x="122" y="548" fill="#D98B00" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-style="italic" font-weight="700">
+    Start Now. Change Your Future.
+  </text>
 </svg>

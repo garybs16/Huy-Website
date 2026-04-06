@@ -149,10 +149,6 @@ function AppShell({ children }) {
         <div className="container nav-frame">
           <Link className="brand-mark" to="/">
             <img src={firstStepLogo} alt="First Step Healthcare Academy logo" />
-            <div>
-              <strong>First Step Healthcare Academy</strong>
-              <span>Healthcare training with a cleaner enrollment path</span>
-            </div>
           </Link>
 
           <nav className="site-nav" aria-label="Primary">
