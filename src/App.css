@@ -64,12 +64,12 @@
 
 .brand-mark img,
 .footer-logo {
-  width: min(8.5rem, 100%);
-  border-radius: 0.7rem;
-  background: #fff;
-  padding: 0.18rem 0.24rem;
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 20px rgba(65, 105, 225, 0.08);
+  width: min(12rem, 100%);
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
 }
 
 .brand-mark div {
@@ -270,6 +270,13 @@
   border-radius: 1.8rem;
   background: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.hero-visual-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }
 
 .hero-floating-panel {
@@ -573,7 +580,7 @@
   }
 
   .brand-mark img {
-    width: min(7rem, 42vw);
+    width: min(10rem, 62vw);
   }
 
   .brand-mark span {

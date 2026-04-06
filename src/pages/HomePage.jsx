@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import heroTraining from "../assets/hero-training.svg";
+import heroTraining from "../assets/hero-training-photo.jpg";
 import { announcementCards, proofPoints, quickLinks } from "../siteData";
 
 export function HomePage({ cohorts, programs }) {
@@ -49,7 +49,10 @@ export function HomePage({ cohorts, programs }) {
 
           <div className="hero-visual">
             <div className="hero-visual-card">
-              <img src={heroTraining} alt="Illustration of a healthcare training workflow" />
+              <img
+                src={heroTraining}
+                alt="Healthcare students and an instructor during hands-on clinical training"
+              />
             </div>
             <div className="hero-floating-panel">
               <p>Admissions support available by phone and email</p>
