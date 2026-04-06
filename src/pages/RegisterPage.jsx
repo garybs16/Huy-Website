@@ -1,3 +1,5 @@
+import { PageIntro } from "../components/PageIntro";
+
 function formatDateLabel(value) {
   if (!value) {
     return "";
@@ -24,10 +26,16 @@ export function RegisterPage({
 }) {
   return (
     <section className="section">
+      <PageIntro
+        kicker="Registration"
+        title="Reserve your seat with a focused enrollment and payment flow."
+        description="Choose your program, select an available cohort, and submit your student record once before continuing into payment."
+      />
+
       <div className="container register-layout">
         <article className="register-intro">
-          <p className="section-kicker">Registration</p>
-          <h1>Reserve your seat with a focused enrollment and payment flow.</h1>
+          <p className="section-kicker">Registration guide</p>
+          <h2>Everything you need before checkout is in one place.</h2>
           <p>
             Choose your program, select an available cohort, and submit your student record once
             before continuing into payment.

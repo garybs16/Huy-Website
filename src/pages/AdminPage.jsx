@@ -1,3 +1,5 @@
+import { PageIntro } from "../components/PageIntro";
+
 function formatDateLabel(value) {
   if (!value) {
     return "Not available";
@@ -25,14 +27,11 @@ export function AdminPage({
 }) {
   return (
     <section className="section section-soft">
-      <div className="container page-header">
-        <p className="section-kicker">Admin</p>
-        <h1>Operations dashboard for enrollments, inquiries, and cohort activity.</h1>
-        <p>
-          This page uses the protected admin APIs to load live enrollment metrics, lead intake, and
-          cohort capacity without exposing that workflow in the public navigation.
-        </p>
-      </div>
+      <PageIntro
+        kicker="Admin"
+        title="Operations dashboard for enrollments, inquiries, and cohort activity."
+        description="This page uses the protected admin APIs to load live enrollment metrics, lead intake, and cohort capacity without exposing that workflow in the public navigation."
+      />
 
       <div className="container admin-shell">
         <form className="form-card admin-access" onSubmit={onAdminLoad}>

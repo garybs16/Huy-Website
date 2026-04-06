@@ -1,3 +1,5 @@
+import { PageIntro } from "../components/PageIntro";
+
 export function ContactPage({
   programs,
   inquiryForm,
@@ -13,10 +15,16 @@ export function ContactPage({
 }) {
   return (
     <section className="section">
+      <PageIntro
+        kicker="Contact"
+        title="Talk to admissions directly when you need help choosing the next step."
+        description="Reach out for program guidance, cohort timing, registration support, and admissions questions."
+      />
+
       <div className="container split-panel">
         <article className="info-card dark-card">
-          <p className="section-kicker">Contact</p>
-          <h1>Talk to admissions directly when you need help choosing the next step.</h1>
+          <p className="section-kicker">Admissions desk</p>
+          <h2>Talk to a real person when timing or program choice needs clarity.</h2>
           <ul className="detail-list">
             <li>Coordinator: Huy Hoang</li>
             <li>Phone: (949) 407-9581</li>

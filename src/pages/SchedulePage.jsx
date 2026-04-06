@@ -1,3 +1,5 @@
+import { PageIntro } from "../components/PageIntro";
+
 function formatDateLabel(value) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -9,14 +11,11 @@ function formatDateLabel(value) {
 export function SchedulePage({ cohorts, cohortLoadError }) {
   return (
     <section className="section section-soft">
-      <div className="container page-header">
-        <p className="section-kicker">Schedule</p>
-        <h1>See upcoming class dates, meeting times, and current seat availability.</h1>
-        <p>
-          Review live cohorts in one place so it is easy to compare weekday, weekend, and evening
-          options before you start registration.
-        </p>
-      </div>
+      <PageIntro
+        kicker="Schedule"
+        title="See upcoming class dates, meeting times, and current seat availability."
+        description="Review live cohorts in one place so it is easy to compare weekday, weekend, and evening options before you start registration."
+      />
 
       <div className="container">
         {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}

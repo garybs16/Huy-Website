@@ -1,4 +1,5 @@
 import admissionsSupport from "../assets/admissions-support.svg";
+import { PageIntro } from "../components/PageIntro";
 import { supportItems } from "../siteData";
 
 const programMeta = {
@@ -10,14 +11,11 @@ const programMeta = {
 export function ProgramsPage({ programs, programLoadError }) {
   return (
     <section className="section">
-      <div className="container page-header">
-        <p className="section-kicker">Programs</p>
-        <h1>Choose the training path that fits your goals and schedule.</h1>
-        <p>
-          Review the essentials for each offering, including the learning focus, expected
-          duration, and the type of schedule students can expect.
-        </p>
-      </div>
+      <PageIntro
+        kicker="Programs"
+        title="Choose the training path that fits your goals and schedule."
+        description="Review the essentials for each offering, including the learning focus, expected duration, and the type of schedule students can expect."
+      />
 
       <div className="container">
         {programLoadError ? <p className="section-note">{programLoadError}</p> : null}

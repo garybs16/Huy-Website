@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import {
   createEnrollment,
@@ -13,7 +13,8 @@ import {
   joinWaitlist,
   submitInquiry,
 } from "./lib/api";
-import firstStepLogo from "./assets/logo.jpg";
+import { SiteFooter } from "./components/SiteFooter";
+import { SiteHeader } from "./components/SiteHeader";
 import { AdminPage } from "./pages/AdminPage";
 import { AdmissionsPage } from "./pages/AdmissionsPage";
 import { ContactPage } from "./pages/ContactPage";
@@ -134,105 +135,13 @@ function AppEffects({ setEnrollmentStatus }) {
 }
 
 function AppShell({ children }) {
-  const location = useLocation();
-  const [navOpen, setNavOpen] = useState(false);
-
-  useEffect(() => {
-    setNavOpen(false);
-  }, [location.pathname]);
-
   return (
     <div className="site-shell">
-      <header className="site-header">
-        <div className="top-strip">
-          <div className="container top-strip-inner">
-            <span>New cohort registration and online payment support are now available.</span>
-            <Link to="/register" className="top-strip-link">
-              Start enrollment
-            </Link>
-          </div>
-        </div>
-
-        <div className="container nav-frame">
-          <Link className="brand-mark" to="/">
-            <img className="header-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
-          </Link>
-
-          <button
-            type="button"
-            className={`nav-toggle ${navOpen ? "is-open" : ""}`}
-            aria-expanded={navOpen}
-            aria-controls="primary-navigation"
-            aria-label={navOpen ? "Close navigation menu" : "Open navigation menu"}
-            onClick={() => setNavOpen((current) => !current)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-
-          <nav
-            id="primary-navigation"
-            className={`site-nav ${navOpen ? "is-open" : ""}`}
-            aria-label="Primary"
-          >
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === "/"}
-                className={({ isActive }) => `nav-link ${isActive ? "is-active" : ""}`}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className={`nav-actions ${navOpen ? "is-open" : ""}`}>
-            <Link to="/register" className="btn btn-primary nav-button">
-              Register Now
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader navItems={navItems} />
 
       <main>{children}</main>
 
-      <footer className="site-footer">
-        <div className="container footer-grid">
-          <div>
-            <img className="footer-logo" src={firstStepLogo} alt="First Step Healthcare Academy logo" />
-            <p>
-              First Step Healthcare Academy with a more focused program, cohort, registration, and
-              admissions experience.
-            </p>
-          </div>
-          <div>
-            <h4>Navigate</h4>
-            <ul>
-              {navItems.map((item) => (
-                <li key={item.to}>
-                  <Link to={item.to}>{item.label}</Link>
-                </li>
-              ))}
-              <li>
-                <Link to="/register">Register</Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4>Contact</h4>
-            <ul>
-              <li>Huy Hoang</li>
-              <li>(949) 407-9581</li>
-              <li>huyh@firststepha.org</li>
-            </ul>
-          </div>
-        </div>
-        <div className="footer-bar">
-          <p>Copyright 2026 First Step Healthcare Academy. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter navItems={navItems} />
     </div>
   );
 }

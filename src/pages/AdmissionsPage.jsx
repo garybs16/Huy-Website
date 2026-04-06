@@ -1,3 +1,4 @@
+import { PageIntro } from "../components/PageIntro";
 import { faqItems, requirementItems } from "../siteData";
 
 const journeySteps = [
@@ -10,14 +11,11 @@ const journeySteps = [
 export function AdmissionsPage() {
   return (
     <section className="section section-soft">
-      <div className="container page-header">
-        <p className="section-kicker">Admissions</p>
-        <h1>Know what to prepare before your class start date.</h1>
-        <p>
-          This page outlines the normal admissions path, required documents, and the steps that
-          usually affect how quickly a student can be cleared to start.
-        </p>
-      </div>
+      <PageIntro
+        kicker="Admissions"
+        title="Know what to prepare before your class start date."
+        description="This page outlines the normal admissions path, required documents, and the steps that usually affect how quickly a student can be cleared to start."
+      />
 
       <div className="container split-panel">
         <article className="info-card dark-card">
