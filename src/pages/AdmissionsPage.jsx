@@ -15,6 +15,8 @@ export function AdmissionsPage() {
         kicker="Admissions"
         title="Know what to prepare before your class start date."
         description="This page outlines the normal admissions path, required documents, and the steps that usually affect how quickly a student can be cleared to start."
+        accent="Requirements made clearer"
+        note="Students see the path, documents, and timing in one place."
       />
 
       <div className="container split-panel">

@@ -15,6 +15,8 @@ export function ProgramsPage({ programs, programLoadError }) {
         kicker="Programs"
         title="Choose the training path that fits your goals and schedule."
         description="Review the essentials for each offering, including the learning focus, expected duration, and the type of schedule students can expect."
+        accent="Three practical training routes"
+        note="Built for faster comparison and clearer next steps."
       />
 
       <div className="container">

@@ -30,6 +30,8 @@ export function RegisterPage({
         kicker="Registration"
         title="Reserve your seat with a focused enrollment and payment flow."
         description="Choose your program, select an available cohort, and submit your student record once before continuing into payment."
+        accent="Single-flow enrollment experience"
+        note="Program, cohort, student record, and payment are tied together."
       />
 
       <div className="container register-layout">

@@ -19,6 +19,8 @@ export function ContactPage({
         kicker="Contact"
         title="Talk to admissions directly when you need help choosing the next step."
         description="Reach out for program guidance, cohort timing, registration support, and admissions questions."
+        accent="Real support, not a dead-end form"
+        note="Direct contact details and inquiry flows stay visible throughout."
       />
 
       <div className="container split-panel">

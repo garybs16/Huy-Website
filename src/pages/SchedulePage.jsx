@@ -15,6 +15,8 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
         kicker="Schedule"
         title="See upcoming class dates, meeting times, and current seat availability."
         description="Review live cohorts in one place so it is easy to compare weekday, weekend, and evening options before you start registration."
+        accent="Seat-aware class calendar"
+        note="Designed to reduce back-and-forth before enrollment."
       />
 
       <div className="container">
