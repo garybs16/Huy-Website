@@ -1,19 +1,18 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Urbanist:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Source+Sans+3:wght@400;600;700&display=swap");
 
 :root {
-  --bg: #f6f8ff;
+  --bg: #f5f8fb;
   --surface: #ffffff;
-  --surface-soft: rgba(65, 105, 225, 0.08);
-  --ink: #18357f;
-  --muted: rgba(24, 53, 127, 0.72);
-  --brand: #4169e1;
-  --brand-strong: #2e57d7;
-  --brand-soft: rgba(65, 105, 225, 0.1);
-  --brand-soft-strong: rgba(65, 105, 225, 0.18);
-  --line: rgba(65, 105, 225, 0.16);
-  --shadow: rgba(35, 63, 153, 0.16);
-  --font-body: "Manrope", "Segoe UI", sans-serif;
-  --font-display: "Urbanist", "Segoe UI", sans-serif;
+  --surface-soft: #eef4fa;
+  --ink: #334155;
+  --ink-strong: #1e293b;
+  --muted: rgba(51, 65, 85, 0.82);
+  --brand: #046bd2;
+  --brand-strong: #045cb4;
+  --line: rgba(148, 163, 184, 0.2);
+  --line-strong: rgba(4, 107, 210, 0.2);
+  --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+  --font-display: "Lato", "Segoe UI", sans-serif;
 }
 
 *,
@@ -34,10 +33,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
-  line-height: 1.55;
-  background-image:
-    radial-gradient(circle at top left, rgba(65, 105, 225, 0.14), transparent 24%),
-    radial-gradient(circle at right 10%, rgba(65, 105, 225, 0.08), transparent 22%);
+  line-height: 1.6;
 }
 
 h1,
@@ -48,6 +44,7 @@ h5,
 h6 {
   margin-top: 0;
   font-family: var(--font-display);
+  font-weight: 900;
   letter-spacing: -0.03em;
 }
 
@@ -61,11 +58,18 @@ p {
 }
 
 img {
-  max-width: 100%;
   display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 ::selection {
-  background: rgba(65, 105, 225, 0.22);
+  background: rgba(4, 107, 210, 0.18);
   color: #ffffff;
 }

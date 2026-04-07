@@ -13,10 +13,10 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
     <section className="section section-soft">
       <PageIntro
         kicker="Schedule"
-        title="See upcoming class dates, meeting times, and current seat availability."
-        description="Review live cohorts in one place so it is easy to compare weekday, weekend, and evening options before you start registration."
-        accent="Seat-aware class calendar"
-        note="Designed to reduce back-and-forth before enrollment."
+        title="See upcoming class dates, meeting times, pricing, and seat visibility in one place."
+        description="This page is arranged to feel closer to the reference site: schedule-first, easier to scan, and built around real cohort timing instead of generic filler."
+        accent="Schedule-first presentation"
+        note="Students can compare tracks before they ever reach the registration form."
       />
 
       <div className="container">
@@ -35,9 +35,30 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
                 <li>Tuition: {cohort.tuitionLabel}</li>
                 <li>Remaining seats: {cohort.remainingSeats}</li>
               </ul>
+              <p className="card-note">Registration stays tied to the selected cohort and pricing.</p>
             </article>
           ))}
         </div>
+      </div>
+
+      <div className="container card-grid two-up">
+        <article className="info-card">
+          <p className="section-kicker">Why this layout</p>
+          <h3>Schedules now lead the page instead of hiding behind general marketing copy.</h3>
+          <p>
+            That matches how students usually browse schools like this: they want dates, meeting
+            patterns, and seat context before anything else.
+          </p>
+        </article>
+
+        <article className="info-card">
+          <p className="section-kicker">Next step</p>
+          <h3>Once a student sees the right track, they can move straight into registration.</h3>
+          <p>
+            The public schedule and the registration form now speak the same language, which makes
+            the experience feel much more intentional.
+          </p>
+        </article>
       </div>
     </section>
   );

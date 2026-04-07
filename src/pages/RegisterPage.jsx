@@ -1,4 +1,5 @@
 import { PageIntro } from "../components/PageIntro";
+import { registrationChecklist } from "../siteData";
 
 function formatDateLabel(value) {
   if (!value) {
@@ -28,19 +29,19 @@ export function RegisterPage({
     <section className="section">
       <PageIntro
         kicker="Registration"
-        title="Reserve your seat with a focused enrollment and payment flow."
-        description="Choose your program, select an available cohort, and submit your student record once before continuing into payment."
-        accent="Single-flow enrollment experience"
-        note="Program, cohort, student record, and payment are tied together."
+        title="Reserve a seat with a registration flow that now fits the rest of the redesigned site."
+        description="Choose a program, select a cohort, and submit one structured student record before moving into payment or admissions follow-up."
+        accent="Registration matches the public site"
+        note="Program, cohort, student record, and payment handoff now feel like one system."
       />
 
       <div className="container register-layout">
         <article className="register-intro">
           <p className="section-kicker">Registration guide</p>
-          <h2>Everything you need before checkout is in one place.</h2>
+          <h2>Everything a student needs before checkout is grouped in one place.</h2>
           <p>
-            Choose your program, select an available cohort, and submit your student record once
-            before continuing into payment.
+            This page now feels closer to the reference site by keeping the selection, intake, and
+            next-step context visible while the student fills out the form.
           </p>
 
           {selectedCohort ? (
@@ -59,13 +60,12 @@ export function RegisterPage({
             </div>
           ) : (
             <div className="register-summary">
-              <p className="section-kicker">Registration flow</p>
-              <h3>What to expect</h3>
+              <p className="section-kicker">What to prepare</p>
+              <h3>Registration checklist</h3>
               <ul className="detail-list">
-                <li>Select program and cohort</li>
-                <li>Enter student and emergency contact details</li>
-                <li>Continue into secure payment when available</li>
-                <li>Receive admissions follow-up after submission</li>
+                {registrationChecklist.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
               </ul>
             </div>
           )}

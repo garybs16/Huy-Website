@@ -141,7 +141,7 @@ function AppShell({ children }) {
 
       <main>{children}</main>
 
-      <SiteFooter navItems={navItems} />
+      <SiteFooter />
     </div>
   );
 }

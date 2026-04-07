@@ -1,4 +1,5 @@
 import { PageIntro } from "../components/PageIntro";
+import { contactDetails, faqItems } from "../siteData";
 
 export function ContactPage({
   programs,
@@ -17,10 +18,10 @@ export function ContactPage({
     <section className="section">
       <PageIntro
         kicker="Contact"
-        title="Talk to admissions directly when you need help choosing the next step."
-        description="Reach out for program guidance, cohort timing, registration support, and admissions questions."
-        accent="Real support, not a dead-end form"
-        note="Direct contact details and inquiry flows stay visible throughout."
+        title="Talk to admissions directly when timing, program choice, or documents need clarification."
+        description="The contact page is now structured more like the reference site: direct contact info first, then inquiry and follow-up forms."
+        accent="Admissions-first contact page"
+        note="Direct phone, email, office details, and forms all stay visible together."
       />
 
       <div className="container split-panel">
@@ -28,10 +29,11 @@ export function ContactPage({
           <p className="section-kicker">Admissions desk</p>
           <h2>Talk to a real person when timing or program choice needs clarity.</h2>
           <ul className="detail-list">
-            <li>Coordinator: Huy Hoang</li>
-            <li>Phone: (949) 407-9581</li>
-            <li>Email: huyh@firststepha.org</li>
-            <li>Brand: First Step Healthcare Academy</li>
+            <li>Coordinator: {contactDetails.coordinator}</li>
+            <li>Phone: {contactDetails.phone}</li>
+            <li>Email: {contactDetails.email}</li>
+            <li>Address: {contactDetails.address}</li>
+            <li>Office hours: {contactDetails.officeHours}</li>
           </ul>
         </article>
 
@@ -82,10 +84,10 @@ export function ContactPage({
       <div className="container split-panel">
         <article className="info-card">
           <p className="section-kicker">Waitlist</p>
-          <h3>Request founding cohort updates</h3>
+          <h3>Request cohort updates and admissions follow-up</h3>
           <p>
-            If you are not ready to register yet, join the interest list to hear about new class
-            dates, added sections, and admissions updates.
+            If a student is not ready to register yet, this form keeps them in the pipeline for
+            new class dates, added sections, and admissions updates.
           </p>
         </article>
 
@@ -127,6 +129,15 @@ export function ContactPage({
             </p>
           ) : null}
         </article>
+      </div>
+
+      <div className="container card-grid three-up">
+        {faqItems.map((item) => (
+          <article key={item.question} className="info-card">
+            <h3>{item.question}</h3>
+            <p>{item.answer}</p>
+          </article>
+        ))}
       </div>
     </section>
   );

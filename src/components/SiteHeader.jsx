@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import academyLogo from "../assets/logo.jpg";
+import academyLogo from "../assets/first-step-logo.svg";
+import { contactDetails } from "../siteData";
 
 export function SiteHeader({ navItems }) {
   const location = useLocation();
@@ -14,21 +15,22 @@ export function SiteHeader({ navItems }) {
     <header className="site-header">
       <div className="top-strip">
         <div className="container top-strip-inner">
-          <span>New cohort registration and online payment support are now available.</span>
-          <Link to="/register" className="top-strip-link">
-            Start enrollment
+          <div className="top-strip-meta">
+            <a href={contactDetails.phoneHref}>{contactDetails.phone}</a>
+            <a href={contactDetails.emailHref}>{contactDetails.email}</a>
+          </div>
+          <Link to="/contact" className="top-strip-link">
+            Student Support
           </Link>
         </div>
       </div>
 
       <div className="container nav-frame">
         <Link className="brand-lockup" to="/">
-          <span className="brand-icon" aria-hidden="true">
-            <img className="brand-icon-image" src={academyLogo} alt="" />
-          </span>
+          <img className="brand-icon-image" src={academyLogo} alt="First Step Healthcare Academy" />
           <span className="brand-copy">
-            <strong>First Step</strong>
-            <span>Healthcare Academy</span>
+            <strong>{contactDetails.brand}</strong>
+            <span>Healthcare Career Training</span>
           </span>
         </Link>
 
