@@ -290,10 +290,11 @@
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 0.82rem 1.35rem;
+  padding: 0.85rem 1.5rem;
   border: 1px solid transparent;
-  border-radius: 0.7rem;
+  border-radius: 4px;
   font-weight: 700;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -305,18 +306,33 @@
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(4, 107, 210, 0.22);
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-strong) 100%);
+  background: var(--brand);
+  border-color: var(--brand);
   color: #ffffff;
+  box-shadow: 0 12px 28px rgba(4, 107, 210, 0.28);
+}
+
+.btn-primary:hover {
+  background: var(--brand-strong);
+  border-color: var(--brand-strong);
+  box-shadow: 0 16px 34px rgba(4, 92, 180, 0.34);
 }
 
 .btn-ghost {
   background: #ffffff;
-  border-color: var(--line-strong);
+  border-width: 2px;
+  border-color: var(--brand);
   color: var(--brand);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.btn-ghost:hover {
+  border-color: var(--brand-strong);
+  color: var(--brand-strong);
+  box-shadow: 0 10px 24px rgba(4, 107, 210, 0.14);
 }
 
 .metric-strip,
