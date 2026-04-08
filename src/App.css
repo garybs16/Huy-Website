@@ -70,34 +70,14 @@
 .brand-lockup {
   display: flex;
   align-items: center;
-  gap: 1rem;
   min-width: 0;
 }
 
 .brand-icon-image {
-  width: 178px;
-  max-width: 42vw;
+  width: 156px;
+  max-width: 32vw;
   height: auto;
   flex: 0 0 auto;
-}
-
-.brand-copy {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.brand-copy strong {
-  color: var(--ink-strong);
-  font-size: 1rem;
-  line-height: 1.15;
-}
-
-.brand-copy span {
-  color: var(--muted);
-  font-size: 0.76rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .site-nav {
@@ -768,7 +748,7 @@
 }
 
 .footer-logo {
-  width: min(14rem, 100%);
+  width: min(11rem, 100%);
 }
 
 .footer-address {
@@ -838,10 +818,6 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 1rem;
     padding: 0.9rem 0;
-  }
-
-  .brand-copy {
-    display: none;
   }
 
   .nav-toggle {
@@ -958,7 +934,8 @@
   }
 
   .brand-icon-image {
-    width: 150px;
+    width: 132px;
+    max-width: 48vw;
   }
 
   .hero-copy h1,

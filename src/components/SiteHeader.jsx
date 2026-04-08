@@ -27,11 +27,7 @@ export function SiteHeader({ navItems }) {
 
       <div className="container nav-frame">
         <Link className="brand-lockup" to="/">
-          <img className="brand-icon-image" src={academyLogo} alt="First Step Healthcare Academy" />
-          <span className="brand-copy">
-            <strong>{contactDetails.brand}</strong>
-            <span>Healthcare Career Training</span>
-          </span>
+          <img className="brand-icon-image" src={academyLogo} alt={contactDetails.brand} />
         </Link>
 
         <button
