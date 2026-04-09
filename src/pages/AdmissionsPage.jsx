@@ -1,3 +1,5 @@
+import heroTrainingPhoto from "../assets/hero-training-photo-v2.jpg";
+import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
 import {
   admissionsSteps,
@@ -18,6 +20,21 @@ export function AdmissionsPage() {
         accent="Checklist-driven admissions page"
         note="Requirements, location notes, and tuition context are grouped for faster review."
       />
+
+      <div className="container card-grid two-up photo-showcase">
+        <div className="media-panel">
+          <img
+            src={heroTrainingPhoto}
+            alt="Healthcare instructor demonstrating bedside skills with students observing during lab training"
+          />
+        </div>
+        <div className="media-panel">
+          <img
+            src={programsSupportPhoto}
+            alt="Students practicing patient care techniques in a clinical simulation room"
+          />
+        </div>
+      </div>
 
       <div className="container split-panel">
         <article className="info-card dark-card">

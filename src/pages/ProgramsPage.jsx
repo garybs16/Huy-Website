@@ -1,4 +1,5 @@
-import admissionsSupport from "../assets/admissions-support.svg";
+import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
+import admissionsSupport from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
 import { admissionsSteps, programMeta, supportItems } from "../siteData";
 
@@ -44,8 +45,19 @@ export function ProgramsPage({ programs, programLoadError }) {
       </div>
 
       <div className="container split-panel">
-        <div className="media-panel">
-          <img src={admissionsSupport} alt="Illustration of an admissions and student planning workflow" />
+        <div className="stack-panel">
+          <div className="media-panel">
+            <img
+              src={admissionsSupport}
+              alt="Healthcare students receiving hands-on instruction during a clinical skills lab"
+            />
+          </div>
+          <div className="media-panel">
+            <img
+              src={admissionsLabPhoto}
+              alt="Instructor leading healthcare students through a classroom simulation exercise"
+            />
+          </div>
         </div>
 
         <div className="stack-panel">

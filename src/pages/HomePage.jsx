@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import heroTraining from "../assets/hero-training-photo.jpg";
+import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import {
   admissionsSteps,
   miscFeeItems,
@@ -68,7 +68,7 @@ export function HomePage({ cohorts, programs }) {
             <div className="hero-visual-card">
               <img
                 src={heroTraining}
-                alt="Healthcare students and an instructor during hands-on clinical training"
+                alt="Healthcare instructor guiding students through hands-on bedside skills training"
               />
               <div className="hero-photo-badge">
                 <span>Admissions-guided enrollment</span>
