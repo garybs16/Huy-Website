@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import academyLogo from "../assets/first-step-logo.svg";
+import academyLogo from "../assets/new-logo.jpg";
 import { contactDetails } from "../siteData";
 
 export function SiteHeader({ navItems }) {

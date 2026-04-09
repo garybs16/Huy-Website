@@ -63,8 +63,8 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1.5rem;
-  min-height: 88px;
+  gap: 1.25rem;
+  min-height: 116px;
 }
 
 .brand-lockup {
@@ -74,9 +74,11 @@
 }
 
 .brand-icon-image {
-  width: 156px;
-  max-width: 32vw;
-  height: auto;
+  display: block;
+  width: auto;
+  height: 94px;
+  max-width: min(22vw, 96px);
+  object-fit: contain;
   flex: 0 0 auto;
 }
 
@@ -748,7 +750,11 @@
 }
 
 .footer-logo {
-  width: min(11rem, 100%);
+  display: block;
+  width: auto;
+  height: 158px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .footer-address {
@@ -934,8 +940,8 @@
   }
 
   .brand-icon-image {
-    width: 132px;
-    max-width: 48vw;
+    height: 74px;
+    max-width: min(34vw, 78px);
   }
 
   .hero-copy h1,

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import academyLogo from "../assets/first-step-logo.svg";
+import academyLogo from "../assets/new-logo.jpg";
 import { contactDetails, footerGroups } from "../siteData";
 
 export function SiteFooter() {
