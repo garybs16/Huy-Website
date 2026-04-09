@@ -8,10 +8,10 @@ export function ProgramsPage({ programs, programLoadError }) {
     <section className="section">
       <PageIntro
         kicker="Programs"
-        title="Choose the training path that fits your timeline, credential goals, and start plan."
-        description="The page now mirrors the reference site more closely with direct program summaries, visible format details, and stronger structure for admissions-driven browsing."
-        accent="Built for cleaner comparison"
-        note="Cards, supporting detail, and next steps are grouped more intentionally."
+        title="Choose the healthcare training path that fits your timeline and credential goals."
+        description="Compare current program options, review format details, and move into the next admissions step without digging through extra pages."
+        accent="Program comparison made clear"
+        note="Format, duration, and admissions context stay visible together."
       />
 
       <div className="container">
@@ -72,17 +72,17 @@ export function ProgramsPage({ programs, programLoadError }) {
 
       <div className="container card-grid two-up">
         <article className="info-card">
-          <p className="section-kicker">What changed</p>
-          <h3>The program section now reads more like a school site than a startup landing page.</h3>
+          <p className="section-kicker">Program planning</p>
+          <h3>Students can compare schedules, formats, and next steps without extra clicks.</h3>
           <p>
-            That shift is intentional. It puts training details, schedule expectations, and
-            admissions context ahead of decorative marketing language.
+            Each card is structured to answer the first questions most applicants ask: what the
+            training covers, how long it takes, and how it fits into enrollment.
           </p>
         </article>
 
         <article className="info-card">
           <p className="section-kicker">Admissions flow</p>
-          <h3>Students can move from program discovery into next steps without extra friction.</h3>
+          <h3>Once a student finds the right track, the next step stays simple.</h3>
           <ol className="detail-list ordered-list">
             {admissionsSteps.slice(0, 3).map((step) => (
               <li key={step}>{step}</li>

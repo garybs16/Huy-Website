@@ -7,12 +7,21 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
+          <p className="footer-kicker">Start with clarity</p>
           <img className="footer-logo" src={academyLogo} alt="First Step Healthcare Academy logo" />
           <p>
-            A healthcare training website rebuilt around clear schedules, direct admissions support,
-            and a faster path into registration.
+            Career training with visible schedules, flexible cohort options, and direct admissions
+            support from first inquiry to registration.
           </p>
           <p className="footer-address">{contactDetails.address}</p>
+          <div className="footer-action-row">
+            <a className="footer-contact-link" href={contactDetails.phoneHref}>
+              Call Admissions
+            </a>
+            <a className="footer-contact-link footer-contact-link-secondary" href={contactDetails.emailHref}>
+              Email School
+            </a>
+          </div>
         </div>
         {footerGroups.map((group) => (
           <div key={group.title}>

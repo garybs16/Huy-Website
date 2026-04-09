@@ -30,7 +30,7 @@ export function AdminPage({
       <PageIntro
         kicker="Admin"
         title="Operations dashboard for enrollments, inquiries, and cohort activity."
-        description="This page uses the protected admin APIs to load live enrollment metrics, lead intake, and cohort capacity without exposing that workflow in the public navigation."
+        description="Load live enrollment metrics, inquiry intake, waitlist activity, and cohort capacity through the protected admin APIs."
         accent="Protected operations snapshot"
         note="Live metrics, intake visibility, and cohort capacity in one view."
       />

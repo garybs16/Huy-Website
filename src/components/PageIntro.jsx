@@ -8,6 +8,7 @@ export function PageIntro({ kicker, title, description, accent, note }) {
           <p>{description}</p>
         </div>
         <aside className="page-intro-aside">
+          <span className="page-intro-note-label">At a glance</span>
           <strong>{accent}</strong>
           {note ? <p>{note}</p> : null}
         </aside>

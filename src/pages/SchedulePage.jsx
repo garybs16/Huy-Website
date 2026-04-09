@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
 
 function formatDateLabel(value) {
@@ -8,15 +9,27 @@ function formatDateLabel(value) {
   }).format(new Date(`${value}T12:00:00Z`));
 }
 
+function getSeatTone(remainingSeats) {
+  if (remainingSeats <= 4) {
+    return "is-limited";
+  }
+
+  if (remainingSeats <= 10) {
+    return "is-filling";
+  }
+
+  return "is-open";
+}
+
 export function SchedulePage({ cohorts, cohortLoadError }) {
   return (
     <section className="section section-soft">
       <PageIntro
         kicker="Schedule"
-        title="See upcoming class dates, meeting times, pricing, and seat visibility in one place."
-        description="This page is arranged to feel closer to the reference site: schedule-first, easier to scan, and built around real cohort timing instead of generic filler."
-        accent="Schedule-first presentation"
-        note="Students can compare tracks before they ever reach the registration form."
+        title="See upcoming class dates, meeting times, pricing, and open seats in one place."
+        description="Compare current cohorts by program, schedule, and tuition so students can identify the right track before they register."
+        accent="Real class visibility"
+        note="Dates, meeting patterns, and seat availability stay visible together."
       />
 
       <div className="container">
@@ -25,8 +38,14 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
         <div className="card-grid three-up">
           {cohorts.map((cohort) => (
             <article key={cohort.id} className="schedule-card">
-              <p className="section-kicker">{cohort.programTitle}</p>
+              <div className="schedule-card-top">
+                <p className="section-kicker">{cohort.scheduleLabel}</p>
+                <span className={`seat-pill ${getSeatTone(cohort.remainingSeats)}`}>
+                  {cohort.remainingSeats} seats left
+                </span>
+              </div>
               <h3>{cohort.title}</h3>
+              <p className="schedule-program">{cohort.programTitle}</p>
               <ul className="detail-list">
                 <li>
                   Dates: {formatDateLabel(cohort.startDate)} to {formatDateLabel(cohort.endDate)}
@@ -36,6 +55,9 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
                 <li>Remaining seats: {cohort.remainingSeats}</li>
               </ul>
               <p className="card-note">Registration stays tied to the selected cohort and pricing.</p>
+              <Link to="/register" className="text-link">
+                Register for this track
+              </Link>
             </article>
           ))}
         </div>
@@ -43,11 +65,11 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
 
       <div className="container card-grid two-up">
         <article className="info-card">
-          <p className="section-kicker">Why this layout</p>
-          <h3>Schedules now lead the page instead of hiding behind general marketing copy.</h3>
+          <p className="section-kicker">Why this matters</p>
+          <h3>Students can compare timing, tuition, and seat availability before they commit.</h3>
           <p>
-            That matches how students usually browse schools like this: they want dates, meeting
-            patterns, and seat context before anything else.
+            That matches how most applicants actually browse: they want dates, meeting patterns,
+            and seat context before anything else.
           </p>
         </article>
 
@@ -55,8 +77,8 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
           <p className="section-kicker">Next step</p>
           <h3>Once a student sees the right track, they can move straight into registration.</h3>
           <p>
-            The public schedule and the registration form now speak the same language, which makes
-            the experience feel much more intentional.
+            The published schedule and the registration form speak the same language, which keeps
+            the experience clear from first review to seat reservation.
           </p>
         </article>
       </div>

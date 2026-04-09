@@ -21,10 +21,15 @@ function formatDateLabel(value) {
 export function HomePage({ cohorts, programs }) {
   const openSeats = cohorts.reduce((total, cohort) => total + Math.max(cohort.remainingSeats ?? 0, 0), 0);
   const primaryCohorts = cohorts.filter((cohort) => cohort.programId === "cna").slice(0, 3);
+  const heroTrustItems = [
+    "Orange County campus",
+    "Live class visibility",
+    "Direct admissions guidance",
+  ];
   const heroHighlights = [
-    { value: String(programs.length), label: "published training paths" },
-    { value: String(cohorts.length), label: "active class options" },
-    { value: String(openSeats), label: "visible seats across cohorts" },
+    { value: String(programs.length), label: "training paths" },
+    { value: String(cohorts.length), label: "current class options" },
+    { value: String(openSeats), label: "open seats published" },
   ];
 
   return (
@@ -32,12 +37,18 @@ export function HomePage({ cohorts, programs }) {
       <section className="hero-panel">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Get your next healthcare credential</p>
-            <h1>Healthcare career training with a cleaner, admissions-first presentation.</h1>
+            <p className="eyebrow">Healthcare career training in Orange, California</p>
+            <div className="hero-trust-list" aria-label="School highlights">
+              {heroTrustItems.map((item) => (
+                <span key={item} className="hero-trust-item">
+                  {item}
+                </span>
+              ))}
+            </div>
+            <h1>Train with a school that makes class options, admissions support, and next steps easy to understand.</h1>
             <p className="hero-text">
-              This redesign pushes the site toward the reference look and structure: visible cohort
-              options, cleaner tuition sections, stronger calls to action, and a more direct path
-              from interest to enrollment.
+              Explore CNA, Medication Aide, and CPR/BLS training with published schedules, direct
+              support, and a clear path from first interest to confirmed enrollment.
             </p>
 
             <div className="button-row">
@@ -50,8 +61,8 @@ export function HomePage({ cohorts, programs }) {
             </div>
 
             <p className="hero-inline-note">
-              Weekday, weekend, evening, and short-format options stay visible without forcing
-              students to dig through the site.
+              Weekday, weekend, evening, and short-format options stay visible so students can plan
+              around work, family, and start-date goals.
             </p>
 
             <div className="metric-strip">
@@ -71,13 +82,13 @@ export function HomePage({ cohorts, programs }) {
                 alt="Healthcare instructor guiding students through hands-on bedside skills training"
               />
               <div className="hero-photo-badge">
-                <span>Admissions-guided enrollment</span>
-                <strong>Clearer path from homepage to checkout</strong>
+                <span>Hands-on instruction</span>
+                <strong>Real training, visible schedules, and a faster path to enrollment</strong>
               </div>
             </div>
 
             <div className="hero-floating-panel hero-schedule-panel">
-              <p className="section-kicker">Featured class tracks</p>
+              <p className="section-kicker">Featured upcoming starts</p>
               {primaryCohorts.map((cohort) => (
                 <article key={cohort.id} className="schedule-snapshot">
                   <div>
@@ -96,12 +107,12 @@ export function HomePage({ cohorts, programs }) {
         <div className="container">
           <div className="announcement-banner">
             <div>
-              <p className="section-kicker">In brief</p>
-              <h2>First Step Healthcare Academy now presents programs, schedules, and registration like a real admissions site.</h2>
+              <p className="section-kicker">Why students choose First Step</p>
+              <h2>Programs, schedules, and admissions details stay visible from the first visit.</h2>
             </div>
             <p>
-              Students can compare options faster, see live class timing sooner, and move into
-              enrollment without bouncing between disconnected pages.
+              Students can compare options faster, reach the right contact sooner, and move into
+              registration without bouncing between disconnected pages.
             </p>
           </div>
         </div>
@@ -121,11 +132,11 @@ export function HomePage({ cohorts, programs }) {
         <div className="container section-heading">
           <div>
             <p className="section-kicker">Programs</p>
-            <h2>See the list of current training paths in a layout that feels closer to the reference site.</h2>
+            <h2>Explore current training paths with the key details already surfaced.</h2>
           </div>
           <p>
-            Each program card keeps the delivery model, timing, and core admissions context visible
-            without requiring extra clicks.
+            Students can compare delivery format, timeline, and admissions context before they ever
+            contact the school.
           </p>
         </div>
 
@@ -160,7 +171,7 @@ export function HomePage({ cohorts, programs }) {
         <div className="container split-panel">
           <article className="info-card accent-card">
             <p className="section-kicker">Student support</p>
-            <h2>Admissions help stays visible instead of getting buried under filler blocks.</h2>
+            <h2>Get direct guidance on schedules, documents, and readiness before you enroll.</h2>
             <div className="stack-panel">
               {supportItems.map((item) => (
                 <div key={item.title} className="support-line">
@@ -173,7 +184,7 @@ export function HomePage({ cohorts, programs }) {
 
           <article className="info-card">
             <p className="section-kicker">Enrollment path</p>
-            <h2>Students can follow a direct step-by-step process.</h2>
+            <h2>A simple step-by-step path keeps the next move obvious.</h2>
             <ol className="detail-list ordered-list">
               {admissionsSteps.map((step) => (
                 <li key={step}>{step}</li>
@@ -187,7 +198,7 @@ export function HomePage({ cohorts, programs }) {
         <div className="container split-panel">
           <article className="info-card">
             <p className="section-kicker">Tuition snapshot</p>
-            <h2>Pricing sits in its own clear section, closer to the reference layout.</h2>
+            <h2>Published tuition and fee context stay easy to review.</h2>
             <div className="stack-panel">
               {tuitionItems.map((item) => (
                 <div key={item.title} className="tuition-line">
@@ -208,7 +219,7 @@ export function HomePage({ cohorts, programs }) {
 
           <article className="info-card">
             <p className="section-kicker">Requirements</p>
-            <h2>Key enrollment requirements stay easy to scan before registration.</h2>
+            <h2>Know the core admissions requirements before you register.</h2>
             <ul className="detail-list compact-list">
               {requirementItems.slice(0, 5).map((item) => (
                 <li key={item}>{item}</li>

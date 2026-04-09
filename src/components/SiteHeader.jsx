@@ -28,6 +28,10 @@ export function SiteHeader({ navItems }) {
       <div className="container nav-frame">
         <Link className="brand-lockup" to="/">
           <img className="brand-icon-image" src={academyLogo} alt={contactDetails.brand} />
+          <div className="brand-copy">
+            <strong className="brand-title">{contactDetails.brand}</strong>
+            <span className="brand-subtitle">Orange, California | Direct admissions support</span>
+          </div>
         </Link>
 
         <button

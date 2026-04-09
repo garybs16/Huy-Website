@@ -25,14 +25,20 @@ export function RegisterPage({
   onInput,
   onSubmit,
 }) {
+  const registrationSteps = [
+    "Choose the program that matches your goal.",
+    "Select the cohort with the best timing and available seats.",
+    "Submit one student record before checkout or admissions follow-up.",
+  ];
+
   return (
     <section className="section">
       <PageIntro
         kicker="Registration"
-        title="Reserve a seat with a registration flow that now fits the rest of the redesigned site."
-        description="Choose a program, select a cohort, and submit one structured student record before moving into payment or admissions follow-up."
-        accent="Registration matches the public site"
-        note="Program, cohort, student record, and payment handoff now feel like one system."
+        title="Reserve a seat with a registration flow that stays clear from cohort selection to checkout."
+        description="Choose a program, confirm the right cohort, and submit one organized student record before payment or admissions follow-up."
+        accent="Ready-to-enroll workflow"
+        note="Program choice, cohort details, and student intake stay connected."
       />
 
       <div className="container register-layout">
@@ -40,9 +46,17 @@ export function RegisterPage({
           <p className="section-kicker">Registration guide</p>
           <h2>Everything a student needs before checkout is grouped in one place.</h2>
           <p>
-            This page now feels closer to the reference site by keeping the selection, intake, and
-            next-step context visible while the student fills out the form.
+            Review the basics, choose the right class option, and keep the important next-step
+            details visible while the form is being completed.
           </p>
+          <div className="register-checkpoints">
+            {registrationSteps.map((item, index) => (
+              <div key={item} className="checkpoint-item">
+                <span className="checkpoint-number">{index + 1}</span>
+                <p>{item}</p>
+              </div>
+            ))}
+          </div>
 
           {selectedCohort ? (
             <div className="register-summary">
@@ -73,6 +87,7 @@ export function RegisterPage({
 
         <article className="form-card register-form-card">
           <h2>Start Enrollment</h2>
+          <p className="form-helper">Choose a program and cohort, then submit student details for the next step.</p>
           {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}
 
           <form className="form-stack" onSubmit={onSubmit}>
