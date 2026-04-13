@@ -1,6 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { createPasswordHash } from "../server/lib/adminSecurity.js";
 
 function assert(condition, message) {
   if (!condition) {
@@ -13,6 +14,9 @@ async function run() {
   process.env.DATA_DIR = tempDataDir;
   process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
   process.env.API_ADMIN_KEY = "harmony-admin-key";
+  process.env.ADMIN_USERNAME = "harmony-admin";
+  process.env.ADMIN_PASSWORD_HASH = createPasswordHash("HarmonyPassword123!");
+  process.env.ADMIN_SESSION_SECRET = "harmony-session-secret";
   const { startServer } = await import("../server/index.js");
   const port = 4020;
   const { server } = startServer(port);
@@ -109,11 +113,30 @@ async function run() {
     const adminOverviewBody = await adminOverviewRes.json();
     assert(typeof adminOverviewBody.metrics?.enrollments === "number", "Admin overview metrics are invalid");
 
+    const adminLoginRes = await fetch(`http://localhost:${port}/api/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: "harmony-admin",
+        password: "HarmonyPassword123!",
+      }),
+    });
+    assert(adminLoginRes.ok, "Admin session login failed");
+    const adminCookie = adminLoginRes.headers.get("set-cookie")?.split(";")[0];
+    assert(adminCookie, "Admin session login did not return a cookie");
+
+    const adminSessionRes = await fetch(`http://localhost:${port}/api/admin/session`, {
+      headers: { Cookie: adminCookie },
+    });
+    assert(adminSessionRes.ok, "Admin session endpoint failed");
+    const adminSessionBody = await adminSessionRes.json();
+    assert(adminSessionBody.authenticated === true, "Admin session should be authenticated after login");
+
     const adminProgramCreateRes = await fetch(`http://localhost:${port}/api/admin/programs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "harmony-admin-key",
+        Cookie: adminCookie,
       },
       body: JSON.stringify({
         id: "harmony-program",
@@ -162,7 +185,7 @@ async function run() {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "harmony-admin-key",
+        Cookie: adminCookie,
       },
       body: JSON.stringify({
         id: "harmony-program",
@@ -178,15 +201,21 @@ async function run() {
 
     const adminCohortDeleteRes = await fetch(`http://localhost:${port}/api/admin/cohorts/harmony-cohort`, {
       method: "DELETE",
-      headers: { "x-api-key": "harmony-admin-key" },
+      headers: { Cookie: adminCookie },
     });
     assert(adminCohortDeleteRes.status === 204, "Admin cohort deletion failed");
 
     const adminProgramDeleteRes = await fetch(`http://localhost:${port}/api/admin/programs/harmony-program`, {
       method: "DELETE",
-      headers: { "x-api-key": "harmony-admin-key" },
+      headers: { Cookie: adminCookie },
     });
     assert(adminProgramDeleteRes.status === 204, "Admin program deletion failed");
+
+    const adminLogoutRes = await fetch(`http://localhost:${port}/api/admin/logout`, {
+      method: "POST",
+      headers: { Cookie: adminCookie },
+    });
+    assert(adminLogoutRes.status === 204, "Admin logout failed");
 
     console.log("Harmony check passed.");
   } finally {

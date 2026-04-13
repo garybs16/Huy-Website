@@ -157,6 +157,25 @@ export class EnrollmentDatabase {
         created_at TEXT NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS admin_sessions (
+        id TEXT PRIMARY KEY,
+        username TEXT NOT NULL,
+        ip_address TEXT,
+        user_agent TEXT,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        last_seen_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS admin_audit_log (
+        id TEXT PRIMARY KEY,
+        actor TEXT NOT NULL,
+        action TEXT NOT NULL,
+        detail TEXT,
+        ip_address TEXT,
+        created_at TEXT NOT NULL
+      );
+
       CREATE INDEX IF NOT EXISTS idx_enrollments_cohort_id ON enrollments(cohort_id);
       CREATE INDEX IF NOT EXISTS idx_enrollments_email ON enrollments(email);
       CREATE INDEX IF NOT EXISTS idx_enrollments_payment_status ON enrollments(payment_status);
@@ -165,6 +184,8 @@ export class EnrollmentDatabase {
         WHERE stripe_checkout_session_id IS NOT NULL;
       CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at);
       CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at);
+      CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires_at ON admin_sessions(expires_at);
+      CREATE INDEX IF NOT EXISTS idx_admin_audit_log_created_at ON admin_audit_log(created_at);
     `);
 
     addColumnIfMissing(this.db, "cohorts", "allow_payment_plan", "INTEGER NOT NULL DEFAULT 0");
@@ -363,6 +384,131 @@ export class EnrollmentDatabase {
       });
 
     return result.changes;
+  }
+
+  deleteExpiredAdminSessions() {
+    return this.db
+      .prepare(`DELETE FROM admin_sessions WHERE expires_at <= @now`)
+      .run({ now: nowIso() }).changes;
+  }
+
+  createAdminSession({ id, username, ipAddress, userAgent, expiresAt }) {
+    this.deleteExpiredAdminSessions();
+    const timestamp = nowIso();
+
+    this.db
+      .prepare(`
+        INSERT INTO admin_sessions (
+          id,
+          username,
+          ip_address,
+          user_agent,
+          expires_at,
+          created_at,
+          last_seen_at
+        ) VALUES (
+          @id,
+          @username,
+          @ipAddress,
+          @userAgent,
+          @expiresAt,
+          @createdAt,
+          @lastSeenAt
+        )
+      `)
+      .run({
+        id,
+        username,
+        ipAddress: ipAddress ?? null,
+        userAgent: userAgent ?? null,
+        expiresAt,
+        createdAt: timestamp,
+        lastSeenAt: timestamp,
+      });
+
+    return this.getAdminSessionById(id);
+  }
+
+  getAdminSessionById(id) {
+    this.deleteExpiredAdminSessions();
+
+    return this.db
+      .prepare(`
+        SELECT
+          id,
+          username,
+          ip_address AS ipAddress,
+          user_agent AS userAgent,
+          expires_at AS expiresAt,
+          created_at AS createdAt,
+          last_seen_at AS lastSeenAt
+        FROM admin_sessions
+        WHERE id = ?
+      `)
+      .get(id);
+  }
+
+  touchAdminSession(id) {
+    this.db
+      .prepare(`
+        UPDATE admin_sessions
+        SET last_seen_at = @lastSeenAt
+        WHERE id = @id
+      `)
+      .run({
+        id,
+        lastSeenAt: nowIso(),
+      });
+  }
+
+  deleteAdminSession(id) {
+    this.db.prepare(`DELETE FROM admin_sessions WHERE id = ?`).run(id);
+  }
+
+  insertAdminAuditEvent({ id, actor, action, detail, ipAddress, createdAt }) {
+    this.db
+      .prepare(`
+        INSERT INTO admin_audit_log (
+          id,
+          actor,
+          action,
+          detail,
+          ip_address,
+          created_at
+        ) VALUES (
+          @id,
+          @actor,
+          @action,
+          @detail,
+          @ipAddress,
+          @createdAt
+        )
+      `)
+      .run({
+        id,
+        actor,
+        action,
+        detail: detail ?? null,
+        ipAddress: ipAddress ?? null,
+        createdAt,
+      });
+  }
+
+  listRecentAdminAuditEvents(limit = 8) {
+    return this.db
+      .prepare(`
+        SELECT
+          id,
+          actor,
+          action,
+          detail,
+          ip_address AS ipAddress,
+          created_at AS createdAt
+        FROM admin_audit_log
+        ORDER BY created_at DESC
+        LIMIT @limit
+      `)
+      .all({ limit });
   }
 
   listActiveCohorts() {
@@ -1106,6 +1252,7 @@ export class EnrollmentDatabase {
 
   getAdminOverview() {
     this.releaseExpiredSeatHolds();
+    this.deleteExpiredAdminSessions();
     const now = nowIso();
     const metrics = this.db
       .prepare(`
@@ -1114,6 +1261,7 @@ export class EnrollmentDatabase {
           (SELECT COUNT(*) FROM enrollments) AS enrollments,
           (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'paid') AS paidEnrollments,
           (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'deposit_paid') AS activePaymentPlans,
+          (SELECT COUNT(*) FROM admin_sessions WHERE expires_at > @now) AS activeAdminSessions,
           (
             SELECT COUNT(*)
             FROM enrollments
@@ -1148,6 +1296,7 @@ export class EnrollmentDatabase {
       metrics,
       recentEnrollments,
       cohorts: this.listActiveCohorts(),
+      recentAdminActivity: this.listRecentAdminAuditEvents(),
     };
   }
 

@@ -63,9 +63,20 @@ export function createApp() {
     legacyHeaders: false,
     message: { error: "Too many submissions. Please try again in a few minutes." },
   });
+  const adminLoginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many admin login attempts. Please try again in a few minutes." },
+  });
   const enrollmentDb = new EnrollmentDatabase(config.databasePath);
   const stripeClient = createStripeClient(config.stripeSecretKey);
   const paymentsEnabled = Boolean(stripeClient && configReport.paymentsEnabled);
+  const adminAuth = {
+    adminKey: config.adminKey,
+    adminSessionSecret: config.adminSessionSecret,
+  };
   app.locals.enrollmentDb = enrollmentDb;
   app.locals.configReport = configReport;
 
@@ -97,12 +108,26 @@ export function createApp() {
   app.use("/api/health", createHealthRouter({ enrollmentDb, configReport }));
   app.use("/api/programs", createProgramsRouter({ enrollmentDb }));
   app.use("/api/cohorts", createCohortsRouter({ enrollmentDb }));
-  app.use("/api/admin", createAdminRouter({ adminKey: config.adminKey, enrollmentDb }));
+  app.use(
+    "/api/admin",
+    createAdminRouter({
+      adminKey: config.adminKey,
+      adminUsername: config.adminUsername,
+      adminPasswordHash: config.adminPasswordHash,
+      adminSessionSecret: config.adminSessionSecret,
+      adminSessionTtlHours: config.adminSessionTtlHours,
+      nodeEnv: config.nodeEnv,
+      adminAuthMode: configReport.adminAuthMode,
+      sessionAuthConfigured: configReport.sessionAuthConfigured,
+      enrollmentDb,
+      loginLimiter: adminLoginLimiter,
+    })
+  );
   app.use(
     "/api/enrollments",
     createEnrollmentsRouter({
       enrollmentDb,
-      adminKey: config.adminKey,
+      adminAuth,
       stripeClient: paymentsEnabled ? stripeClient : null,
       publicAppUrl: config.publicAppUrl,
     })
@@ -115,7 +140,7 @@ export function createApp() {
         list: (options) => enrollmentDb.listInquiries(options),
       },
       submissionLimiter,
-      adminKey: config.adminKey,
+      adminAuth,
       enrollmentDb,
     })
   );
@@ -127,7 +152,8 @@ export function createApp() {
         list: (options) => enrollmentDb.listWaitlist(options),
       },
       submissionLimiter,
-      adminKey: config.adminKey,
+      adminAuth,
+      enrollmentDb,
     })
   );
 

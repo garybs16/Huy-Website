@@ -104,6 +104,11 @@ export const paginationSchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
 
+export const adminLoginSchema = z.object({
+  username: requiredString("username", 2, 120),
+  password: requiredString("password", 8, 200),
+});
+
 const slugString = z.preprocess(
   trimString,
   z

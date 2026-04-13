@@ -31,6 +31,7 @@ async function request(path, { method = "GET", payload, headers: extraHeaders } 
 
   const response = await fetch(buildUrl(path), {
     method,
+    credentials: "same-origin",
     headers,
     body: payload !== undefined ? JSON.stringify(payload) : undefined,
   });
@@ -73,7 +74,19 @@ export function getEnrollmentStatus(enrollmentId) {
 }
 
 function adminHeaders(apiKey) {
-  return { "x-api-key": apiKey };
+  return apiKey ? { "x-api-key": apiKey } : {};
+}
+
+export function getAdminSession() {
+  return request("/api/admin/session");
+}
+
+export function loginAdmin(payload) {
+  return request("/api/admin/login", { method: "POST", payload });
+}
+
+export function logoutAdmin() {
+  return request("/api/admin/logout", { method: "POST" });
 }
 
 export function getAdminOverview(apiKey) {

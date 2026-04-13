@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
-import { requireAdminKey } from "../middleware/requireAdminKey.js";
+import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { inquirySchema, paginationSchema } from "../validation/schemas.js";
 
-export function createInquiriesRouter({ store, submissionLimiter, adminKey, enrollmentDb }) {
+export function createInquiriesRouter({ store, submissionLimiter, adminAuth, enrollmentDb }) {
   const router = Router();
 
   router.post("/", submissionLimiter, async (req, res, next) => {
@@ -32,7 +32,7 @@ export function createInquiriesRouter({ store, submissionLimiter, adminKey, enro
     }
   });
 
-  router.get("/", requireAdminKey(adminKey), async (req, res, next) => {
+  router.get("/", requireAdminAccess({ ...adminAuth, enrollmentDb }), async (req, res, next) => {
     try {
       const { page, pageSize } = paginationSchema.parse(req.query);
       const data = await store.list({ page, pageSize });

@@ -1,12 +1,164 @@
+import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
-import { requireAdminKey } from "../middleware/requireAdminKey.js";
-import { adminCohortSchema, adminProgramSchema } from "../validation/schemas.js";
+import {
+  clearAdminSessionCookie,
+  createAdminSessionCookie,
+  getAdminSessionIdFromRequest,
+  verifyPassword,
+} from "../lib/adminSecurity.js";
+import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
+import { adminCohortSchema, adminLoginSchema, adminProgramSchema } from "../validation/schemas.js";
 
-export function createAdminRouter({ adminKey, enrollmentDb }) {
+function buildSessionPayload({ req, session, sessionAuthConfigured, apiKeySupported, adminAuthMode }) {
+  return {
+    authenticated: Boolean(session),
+    username: session?.username ?? null,
+    expiresAt: session?.expiresAt ?? null,
+    sessionAuthConfigured,
+    apiKeySupported,
+    adminAuthMode,
+    authMethod: req.adminAuth?.method ?? (session ? "session" : null),
+  };
+}
+
+function getIpAddress(req) {
+  return req.ip || req.socket?.remoteAddress || null;
+}
+
+export function createAdminRouter({
+  adminKey,
+  adminUsername,
+  adminPasswordHash,
+  adminSessionSecret,
+  adminSessionTtlHours,
+  nodeEnv,
+  adminAuthMode,
+  sessionAuthConfigured,
+  enrollmentDb,
+  loginLimiter,
+}) {
   const router = Router();
 
-  router.use(requireAdminKey(adminKey));
+  router.get("/session", (req, res) => {
+    const sessionId = getAdminSessionIdFromRequest(req, adminSessionSecret);
+    const session = sessionId ? enrollmentDb.getAdminSessionById(sessionId) : null;
+
+    if (session?.id) {
+      enrollmentDb.touchAdminSession(session.id);
+    }
+
+    if (sessionId && !session) {
+      res.setHeader("Set-Cookie", clearAdminSessionCookie({ secure: nodeEnv === "production" }));
+    }
+
+    res.json(
+      buildSessionPayload({
+        req,
+        session,
+        sessionAuthConfigured,
+        apiKeySupported: Boolean(adminKey),
+        adminAuthMode,
+      })
+    );
+  });
+
+  router.post("/login", loginLimiter, (req, res, next) => {
+    try {
+      if (!sessionAuthConfigured) {
+        return res.status(503).json({
+          error: "Session-based admin login is not configured on this server.",
+        });
+      }
+
+      const payload = adminLoginSchema.parse(req.body);
+      const credentialsValid =
+        payload.username === adminUsername && verifyPassword(payload.password, adminPasswordHash);
+
+      if (!credentialsValid) {
+        enrollmentDb.insertAdminAuditEvent({
+          id: randomUUID(),
+          actor: payload.username,
+          action: "admin.login.failed",
+          detail: "Invalid username or password.",
+          ipAddress: getIpAddress(req),
+          createdAt: new Date().toISOString(),
+        });
+
+        return res.status(401).json({ error: "Invalid username or password." });
+      }
+
+      const expiresAt = new Date(Date.now() + adminSessionTtlHours * 60 * 60 * 1000).toISOString();
+      const session = enrollmentDb.createAdminSession({
+        id: randomUUID(),
+        username: adminUsername,
+        ipAddress: getIpAddress(req),
+        userAgent: req.get("user-agent"),
+        expiresAt,
+      });
+
+      enrollmentDb.insertAdminAuditEvent({
+        id: randomUUID(),
+        actor: adminUsername,
+        action: "admin.login.succeeded",
+        detail: "Session created successfully.",
+        ipAddress: getIpAddress(req),
+        createdAt: new Date().toISOString(),
+      });
+
+      res.setHeader(
+        "Set-Cookie",
+        createAdminSessionCookie(session.id, {
+          sessionSecret: adminSessionSecret,
+          secure: nodeEnv === "production",
+          maxAgeSeconds: adminSessionTtlHours * 60 * 60,
+        })
+      );
+
+      return res.json(
+        buildSessionPayload({
+          req: { adminAuth: { method: "session" } },
+          session,
+          sessionAuthConfigured,
+          apiKeySupported: Boolean(adminKey),
+          adminAuthMode,
+        })
+      );
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  router.post("/logout", (req, res) => {
+    const sessionId = getAdminSessionIdFromRequest(req, adminSessionSecret);
+    const session = sessionId ? enrollmentDb.getAdminSessionById(sessionId) : null;
+
+    if (sessionId) {
+      enrollmentDb.deleteAdminSession(sessionId);
+    }
+
+    if (session) {
+      enrollmentDb.insertAdminAuditEvent({
+        id: randomUUID(),
+        actor: session.username,
+        action: "admin.logout",
+        detail: "Session closed by user.",
+        ipAddress: getIpAddress(req),
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    res.setHeader("Set-Cookie", clearAdminSessionCookie({ secure: nodeEnv === "production" }));
+    res.status(204).end();
+  });
+
+  router.use(
+    requireAdminAccess({
+      adminKey,
+      adminSessionSecret,
+      enrollmentDb,
+    })
+  );
 
   router.get("/overview", (_req, res) => {
     res.json(enrollmentDb.getAdminOverview());

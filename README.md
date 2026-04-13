@@ -9,6 +9,7 @@ This project now includes:
 - Cohort-level payment-plan support with deposit-now / balance-later tracking
 - An admin dashboard section in the frontend backed by protected APIs
 - Admin CRUD for programs and cohorts backed by SQLite
+- Session-based admin login with signed cookies, audit logging, and API-key fallback
 
 ## Local setup
 
@@ -36,7 +37,11 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 
 - `PORT`: API port (default `4000`)
 - `CORS_ORIGINS`: allowed origins, comma-separated
-- `API_ADMIN_KEY`: required for admin dashboard and protected admin endpoints
+- `API_ADMIN_KEY`: optional fallback admin credential for scripts, smoke tests, or emergency access
+- `ADMIN_USERNAME`: admin login username for browser session auth
+- `ADMIN_PASSWORD_HASH`: PBKDF2 password hash for admin login
+- `ADMIN_SESSION_SECRET`: HMAC secret used to sign admin session cookies
+- `ADMIN_SESSION_TTL_HOURS`: admin session lifetime in hours (default `12`)
 - `DATA_DIR`: mounted directory for persistent app storage
 - `DATABASE_URL`: SQLite database file for cohorts, enrollments, inquiries, and waitlist
 - `STATIC_DIR`: built frontend directory to serve in production (default `dist`)
@@ -55,6 +60,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `npm run dev:server`: run API only (nodemon)
 - `npm run dev:client`: run frontend only (Vite)
 - `npm run start`: run API server in production mode
+- `npm run admin:hash -- "YourPasswordHere"`: generate a secure admin password hash for `.env`
 - `npm run check:harmony`: smoke test API contract compatibility
 - `npm run check:production`: smoke test the built frontend + Express API together in production mode
 - `npm run verify`: run build, API smoke test, and production smoke test
@@ -71,6 +77,9 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `POST /api/enrollments`: create enrollment with `paymentOption: "full" | "deposit"` and return Stripe Checkout URL when configured
 - `GET /api/enrollments/:id/status`: enrollment payment/status verification after checkout
 - `GET /api/admin/overview`: admin metrics and cohort capacity summary
+- `GET /api/admin/session`: return current admin session state
+- `POST /api/admin/login`: start admin browser session
+- `POST /api/admin/logout`: clear admin browser session
 - `GET /api/admin/programs`: admin-only program list
 - `POST /api/admin/programs`: admin-only program create
 - `PATCH /api/admin/programs/:id`: admin-only program update
@@ -106,16 +115,30 @@ Important:
 
 - Durable production operation still requires persistent disk.
 - Payment confirmation depends on Stripe webhook delivery.
-- The admin dashboard depends on `API_ADMIN_KEY`.
+- The admin dashboard can use signed browser sessions or `API_ADMIN_KEY` fallback access.
 - Expired Stripe seat holds are now released automatically by the backend even if the webhook expiry event is delayed.
 - Seeded programs and cohorts are inserted only when missing, so admin edits persist across restarts.
 
 ## Production readiness
 
-- `API_ADMIN_KEY` is required in production startup.
+- Production startup requires at least one protected admin access path.
 - Stripe Checkout only starts when `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL` are all configured together.
 - If Stripe is not configured, enrollments still work in manual payment mode and admissions can follow up directly.
 - `GET /api/health` now reports database readiness plus whether payments are configured or manual.
+- In production, configure either full session auth (`ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `ADMIN_SESSION_SECRET`) or `API_ADMIN_KEY`. Hybrid mode supports both.
+
+## Admin auth
+
+- Preferred setup: browser login with `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, and `ADMIN_SESSION_SECRET`
+- Generate `ADMIN_PASSWORD_HASH` with:
+
+```bash
+npm run admin:hash -- "YourStrongAdminPassword"
+```
+
+- The frontend admin page uses signed `HttpOnly` cookies when session auth is configured.
+- `API_ADMIN_KEY` remains available as a fallback for smoke tests, scripts, or emergency access.
+- Same-origin deployment is the cleanest setup for browser session auth.
 
 ## Payment flow
 
@@ -160,4 +183,4 @@ This repo now includes `render.yaml` for a single-service deploy.
 - The Blueprint is configured for a persistent disk mounted at `/var/data`
 - Configure `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL`
 - Point the Stripe webhook at `/api/payments/stripe/webhook`
-- Use the frontend `#admin` section with your `API_ADMIN_KEY` to load operations data after deploy
+- Use the frontend `/admin` page to sign in with session auth after deploy, or keep `API_ADMIN_KEY` for fallback script access

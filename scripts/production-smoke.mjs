@@ -1,6 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { createPasswordHash } from "../server/lib/adminSecurity.js";
 
 function assert(condition, message) {
   if (!condition) {
@@ -14,6 +15,9 @@ async function run() {
   process.env.DATA_DIR = tempDataDir;
   process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
   process.env.API_ADMIN_KEY = "production-admin-key";
+  process.env.ADMIN_USERNAME = "production-admin";
+  process.env.ADMIN_PASSWORD_HASH = createPasswordHash("ProductionPassword123!");
+  process.env.ADMIN_SESSION_SECRET = "production-session-secret";
   process.env.SERVE_STATIC_APP = "true";
 
   const { startServer } = await import("../server/index.js");
@@ -114,11 +118,23 @@ async function run() {
     });
     assert(adminOverviewRes.ok, "Production admin overview endpoint failed");
 
+    const adminLoginRes = await fetch(`http://localhost:${port}/api/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: "production-admin",
+        password: "ProductionPassword123!",
+      }),
+    });
+    assert(adminLoginRes.ok, "Production admin login failed");
+    const adminCookie = adminLoginRes.headers.get("set-cookie")?.split(";")[0];
+    assert(adminCookie, "Production admin login did not return a cookie");
+
     const adminProgramCreateRes = await fetch(`http://localhost:${port}/api/admin/programs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "production-admin-key",
+        Cookie: adminCookie,
       },
       body: JSON.stringify({
         id: "production-program",
@@ -136,7 +152,7 @@ async function run() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "production-admin-key",
+        Cookie: adminCookie,
       },
       body: JSON.stringify({
         id: "production-cohort",
@@ -165,15 +181,21 @@ async function run() {
 
     const adminCohortDeleteRes = await fetch(`http://localhost:${port}/api/admin/cohorts/production-cohort`, {
       method: "DELETE",
-      headers: { "x-api-key": "production-admin-key" },
+      headers: { Cookie: adminCookie },
     });
     assert(adminCohortDeleteRes.status === 204, "Production admin cohort deletion failed");
 
     const adminProgramDeleteRes = await fetch(`http://localhost:${port}/api/admin/programs/production-program`, {
       method: "DELETE",
-      headers: { "x-api-key": "production-admin-key" },
+      headers: { Cookie: adminCookie },
     });
     assert(adminProgramDeleteRes.status === 204, "Production admin program deletion failed");
+
+    const adminLogoutRes = await fetch(`http://localhost:${port}/api/admin/logout`, {
+      method: "POST",
+      headers: { Cookie: adminCookie },
+    });
+    assert(adminLogoutRes.status === 204, "Production admin logout failed");
 
     console.log("Production smoke check passed.");
   } finally {

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
-import { requireAdminKey } from "../middleware/requireAdminKey.js";
+import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { enrollmentSchema, paginationSchema } from "../validation/schemas.js";
 
 function formatMoney(cents) {
@@ -49,7 +49,7 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
   };
 }
 
-export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, publicAppUrl }) {
+export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient, publicAppUrl }) {
   const router = Router();
 
   router.get("/:id/status", (req, res) => {
@@ -217,7 +217,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
     }
   });
 
-  router.get("/", requireAdminKey(adminKey), (req, res, next) => {
+  router.get("/", requireAdminAccess({ ...adminAuth, enrollmentDb }), (req, res, next) => {
     try {
       const { page, pageSize } = paginationSchema.parse(req.query);
       res.json(enrollmentDb.listEnrollments({ page, pageSize }));

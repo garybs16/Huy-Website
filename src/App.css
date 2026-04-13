@@ -1029,11 +1029,42 @@
   gap: 1rem;
 }
 
+.admin-access-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
 .admin-access {
   display: grid;
-  grid-template-columns: 1fr auto;
   gap: 0.9rem;
-  align-items: end;
+  align-content: start;
+}
+
+.admin-access-top,
+.admin-session-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.admin-auth-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(4, 107, 210, 0.08);
+  color: var(--brand);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-session-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 .admin-list {
@@ -1280,7 +1311,7 @@
   .page-intro,
   .announcement-banner,
   .section-heading,
-  .admin-access {
+  .admin-access-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1483,8 +1514,11 @@
   }
 
   .hero-trust-list,
-  .footer-action-row {
+  .footer-action-row,
+  .admin-access-top,
+  .admin-session-actions {
     flex-direction: column;
+    align-items: stretch;
   }
 }
 

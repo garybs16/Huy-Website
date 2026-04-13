@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import {
@@ -12,25 +12,37 @@ import {
   getAdminInquiries,
   getAdminOverview,
   getAdminPrograms,
+  getAdminSession,
   getAdminWaitlist,
   getCohorts,
   getEnrollmentStatus,
   getPrograms,
   joinWaitlist,
+  loginAdmin,
+  logoutAdmin,
   submitInquiry,
   updateAdminCohort,
   updateAdminProgram,
 } from "./lib/api";
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
-import { AdminPage } from "./pages/AdminPage";
-import { AdmissionsPage } from "./pages/AdmissionsPage";
-import { ContactPage } from "./pages/ContactPage";
-import { HomePage } from "./pages/HomePage";
-import { ProgramsPage } from "./pages/ProgramsPage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { SchedulePage } from "./pages/SchedulePage";
 import { defaultCohorts, defaultPrograms, navItems } from "./siteData";
+
+const AdminPage = lazy(() => import("./pages/AdminPage").then((module) => ({ default: module.AdminPage })));
+const AdmissionsPage = lazy(() =>
+  import("./pages/AdmissionsPage").then((module) => ({ default: module.AdmissionsPage }))
+);
+const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
+const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ default: module.HomePage })));
+const ProgramsPage = lazy(() =>
+  import("./pages/ProgramsPage").then((module) => ({ default: module.ProgramsPage }))
+);
+const RegisterPage = lazy(() =>
+  import("./pages/RegisterPage").then((module) => ({ default: module.RegisterPage }))
+);
+const SchedulePage = lazy(() =>
+  import("./pages/SchedulePage").then((module) => ({ default: module.SchedulePage }))
+);
 
 const initialInquiryState = {
   fullName: "",
@@ -46,6 +58,17 @@ const initialWaitlistState = {
   phone: "",
   trackPreference: "",
   notes: "",
+};
+
+const initialAdminSessionState = {
+  checked: false,
+  authenticated: false,
+  username: "",
+  expiresAt: "",
+  sessionAuthConfigured: false,
+  apiKeySupported: false,
+  adminAuthMode: "disabled",
+  authMethod: "",
 };
 
 const initialEnrollmentState = {
@@ -175,6 +198,9 @@ function App() {
   const [waitlistStatus, setWaitlistStatus] = useState({ type: "", text: "" });
   const [enrollmentStatus, setEnrollmentStatus] = useState({ type: "", text: "" });
   const [adminKey, setAdminKey] = useState("");
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminSession, setAdminSession] = useState(initialAdminSessionState);
   const [adminPending, setAdminPending] = useState(false);
   const [adminMutationPending, setAdminMutationPending] = useState(false);
   const [adminError, setAdminError] = useState("");
@@ -212,6 +238,30 @@ function App() {
     }
 
     loadCatalog();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAdminSession() {
+      try {
+        const session = await getAdminSession();
+
+        if (active) {
+          setAdminSession({ ...initialAdminSessionState, ...session, checked: true });
+        }
+      } catch {
+        if (active) {
+          setAdminSession((current) => ({ ...current, checked: true }));
+        }
+      }
+    }
+
+    loadAdminSession();
 
     return () => {
       active = false;
@@ -337,8 +387,12 @@ function App() {
   const handleAdminLoad = async (event) => {
     event.preventDefault();
 
-    if (!adminKey.trim()) {
-      setAdminError("Enter the admin API key to load the operations dashboard.");
+    if (!adminSession.authenticated && !adminKey.trim()) {
+      setAdminError(
+        adminSession.sessionAuthConfigured
+          ? "Sign in or provide the fallback admin API key before loading the dashboard."
+          : "Enter the admin API key to load the operations dashboard."
+      );
       return;
     }
 
@@ -347,7 +401,7 @@ function App() {
     setAdminNotice("");
 
     try {
-      const key = adminKey.trim();
+      const key = adminSession.authenticated ? undefined : adminKey.trim();
       const [overview, enrollmentsData, inquiriesData, waitlistData, programsData, cohortsData] = await Promise.all([
         getAdminOverview(key),
         getAdminEnrollments(key),
@@ -370,8 +424,75 @@ function App() {
     }
   };
 
+  const handleAdminLogin = async (event) => {
+    event.preventDefault();
+
+    if (!adminUsername.trim() || !adminPassword) {
+      setAdminError("Enter the admin username and password.");
+      return;
+    }
+
+    setAdminPending(true);
+    setAdminError("");
+    setAdminNotice("");
+
+    try {
+      const session = await loginAdmin({
+        username: adminUsername.trim(),
+        password: adminPassword,
+      });
+
+      setAdminSession({ ...initialAdminSessionState, ...session, checked: true });
+      setAdminPassword("");
+      setAdminNotice(`Signed in as ${session.username}.`);
+
+      const [overview, enrollmentsData, inquiriesData, waitlistData, programsData, cohortsData] = await Promise.all([
+        getAdminOverview(),
+        getAdminEnrollments(),
+        getAdminInquiries(),
+        getAdminWaitlist(),
+        getAdminPrograms(),
+        getAdminCohorts(),
+      ]);
+
+      setAdminOverview(overview);
+      setAdminEnrollments(enrollmentsData.items ?? []);
+      setAdminInquiries(inquiriesData.items ?? []);
+      setAdminWaitlist(waitlistData.items ?? []);
+      setAdminPrograms(programsData);
+      setAdminCohorts(cohortsData);
+    } catch (error) {
+      setAdminError(error.message || "Could not sign in to the admin dashboard.");
+    } finally {
+      setAdminPending(false);
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    setAdminPending(true);
+    setAdminError("");
+    setAdminNotice("");
+
+    try {
+      await logoutAdmin();
+      const session = await getAdminSession();
+      setAdminSession({ ...initialAdminSessionState, ...session, checked: true });
+      setAdminOverview(null);
+      setAdminEnrollments([]);
+      setAdminInquiries([]);
+      setAdminWaitlist([]);
+      setAdminPrograms([]);
+      setAdminCohorts([]);
+      setAdminNotice("Signed out.");
+    } catch (error) {
+      setAdminError(error.message || "Could not sign out cleanly.");
+    } finally {
+      setAdminPending(false);
+    }
+  };
+
   const refreshCatalog = async (apiKey) => {
-    const key = apiKey.trim();
+    const key = typeof apiKey === "string" ? apiKey.trim() : apiKey;
     const [programsData, cohortsData, overview] = await Promise.all([
       getAdminPrograms(key),
       getAdminCohorts(key),
@@ -388,10 +509,14 @@ function App() {
   };
 
   const runAdminMutation = async (action, successMessage) => {
-    const key = adminKey.trim();
+    const key = adminSession.authenticated ? undefined : adminKey.trim();
 
-    if (!key) {
-      setAdminError("Enter the admin API key before managing programs or cohorts.");
+    if (!adminSession.authenticated && !key) {
+      setAdminError(
+        adminSession.sessionAuthConfigured
+          ? "Sign in or provide the fallback admin API key before managing programs or cohorts."
+          : "Enter the admin API key before managing programs or cohorts."
+      );
       return;
     }
 
@@ -447,79 +572,88 @@ function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AppEffects setEnrollmentStatus={setEnrollmentStatus} />
       <AppShell>
-        <Routes>
-          <Route path="/" element={<HomePage cohorts={cohorts} programs={programs} />} />
-          <Route
-            path="/programs"
-            element={<ProgramsPage programs={programs} programLoadError={programLoadError} />}
-          />
-          <Route
-            path="/schedule"
-            element={<SchedulePage cohorts={cohorts} cohortLoadError={cohortLoadError} />}
-          />
-          <Route
-            path="/register"
-            element={
-              <RegisterPage
-                programs={programs}
-                cohorts={cohorts}
-                filteredCohorts={filteredCohorts}
-                selectedCohort={selectedCohort}
-                enrollmentForm={enrollmentForm}
-                enrollmentPending={enrollmentPending}
-                enrollmentStatus={enrollmentStatus}
-                cohortLoadError={cohortLoadError}
-                onInput={handleEnrollmentInput}
-                onSubmit={handleEnrollmentSubmit}
-              />
-            }
-          />
-          <Route path="/admissions" element={<AdmissionsPage />} />
-          <Route
-            path="/contact"
-            element={
-              <ContactPage
-                programs={programs}
-                inquiryForm={inquiryForm}
-                waitlistForm={waitlistForm}
-                inquiryPending={inquiryPending}
-                waitlistPending={waitlistPending}
-                inquiryStatus={inquiryStatus}
-                waitlistStatus={waitlistStatus}
-                onInquiryInput={handleInquiryInput}
-                onWaitlistInput={handleWaitlistInput}
-                onInquirySubmit={handleInquirySubmit}
-                onWaitlistSubmit={handleWaitlistSubmit}
-              />
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <AdminPage
-                adminKey={adminKey}
-                adminPending={adminPending}
-                adminMutationPending={adminMutationPending}
-                adminError={adminError}
-                adminNotice={adminNotice}
-                adminOverview={adminOverview}
-                adminEnrollments={adminEnrollments}
-                adminInquiries={adminInquiries}
-                adminWaitlist={adminWaitlist}
-                adminPrograms={adminPrograms}
-                adminCohorts={adminCohorts}
-                onAdminKeyChange={setAdminKey}
-                onAdminLoad={handleAdminLoad}
-                onCreateProgram={handleCreateProgram}
-                onUpdateProgram={handleUpdateProgram}
-                onDeleteProgram={handleDeleteProgram}
-                onCreateCohort={handleCreateCohort}
-                onUpdateCohort={handleUpdateCohort}
-                onDeleteCohort={handleDeleteCohort}
-              />
-            }
-          />
-        </Routes>
+        <Suspense fallback={<section className="section"><div className="container"><p className="section-note">Loading page content...</p></div></section>}>
+          <Routes>
+            <Route path="/" element={<HomePage cohorts={cohorts} programs={programs} />} />
+            <Route
+              path="/programs"
+              element={<ProgramsPage programs={programs} programLoadError={programLoadError} />}
+            />
+            <Route
+              path="/schedule"
+              element={<SchedulePage cohorts={cohorts} cohortLoadError={cohortLoadError} />}
+            />
+            <Route
+              path="/register"
+              element={
+                <RegisterPage
+                  programs={programs}
+                  cohorts={cohorts}
+                  filteredCohorts={filteredCohorts}
+                  selectedCohort={selectedCohort}
+                  enrollmentForm={enrollmentForm}
+                  enrollmentPending={enrollmentPending}
+                  enrollmentStatus={enrollmentStatus}
+                  cohortLoadError={cohortLoadError}
+                  onInput={handleEnrollmentInput}
+                  onSubmit={handleEnrollmentSubmit}
+                />
+              }
+            />
+            <Route path="/admissions" element={<AdmissionsPage />} />
+            <Route
+              path="/contact"
+              element={
+                <ContactPage
+                  programs={programs}
+                  inquiryForm={inquiryForm}
+                  waitlistForm={waitlistForm}
+                  inquiryPending={inquiryPending}
+                  waitlistPending={waitlistPending}
+                  inquiryStatus={inquiryStatus}
+                  waitlistStatus={waitlistStatus}
+                  onInquiryInput={handleInquiryInput}
+                  onWaitlistInput={handleWaitlistInput}
+                  onInquirySubmit={handleInquirySubmit}
+                  onWaitlistSubmit={handleWaitlistSubmit}
+                />
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminPage
+                  adminKey={adminKey}
+                  adminUsername={adminUsername}
+                  adminPassword={adminPassword}
+                  adminSession={adminSession}
+                  adminPending={adminPending}
+                  adminMutationPending={adminMutationPending}
+                  adminError={adminError}
+                  adminNotice={adminNotice}
+                  adminOverview={adminOverview}
+                  adminEnrollments={adminEnrollments}
+                  adminInquiries={adminInquiries}
+                  adminWaitlist={adminWaitlist}
+                  adminPrograms={adminPrograms}
+                  adminCohorts={adminCohorts}
+                  onAdminKeyChange={setAdminKey}
+                  onAdminUsernameChange={setAdminUsername}
+                  onAdminPasswordChange={setAdminPassword}
+                  onAdminLoad={handleAdminLoad}
+                  onAdminLogin={handleAdminLogin}
+                  onAdminLogout={handleAdminLogout}
+                  onCreateProgram={handleCreateProgram}
+                  onUpdateProgram={handleUpdateProgram}
+                  onDeleteProgram={handleDeleteProgram}
+                  onCreateCohort={handleCreateCohort}
+                  onUpdateCohort={handleUpdateCohort}
+                  onDeleteCohort={handleDeleteCohort}
+                />
+              }
+            />
+          </Routes>
+        </Suspense>
       </AppShell>
     </BrowserRouter>
   );

@@ -77,6 +77,9 @@ function toCohortForm(cohort) {
 
 export function AdminPage({
   adminKey,
+  adminUsername,
+  adminPassword,
+  adminSession,
   adminPending,
   adminMutationPending,
   adminError,
@@ -88,7 +91,11 @@ export function AdminPage({
   adminPrograms,
   adminCohorts,
   onAdminKeyChange,
+  onAdminUsernameChange,
+  onAdminPasswordChange,
   onAdminLoad,
+  onAdminLogin,
+  onAdminLogout,
   onCreateProgram,
   onUpdateProgram,
   onDeleteProgram,
@@ -140,6 +147,9 @@ export function AdminPage({
   }, [adminCohorts, adminPrograms, editingCohortId]);
 
   const adminBusy = adminPending || adminMutationPending;
+  const usingSessionLogin = adminSession.sessionAuthConfigured;
+  const usingApiKeyFallback = adminSession.apiKeySupported;
+  const isSignedIn = adminSession.authenticated;
 
   const handleProgramInput = (event) => {
     const { name, type, checked, value } = event.target;
@@ -209,26 +219,89 @@ export function AdminPage({
       <PageIntro
         kicker="Admin"
         title="Operations dashboard for enrollments, inquiries, and live catalog management."
-        description="Load live operations data, then create or update programs and cohorts directly from the protected admin interface."
+        description="Use signed admin sessions or the protected fallback key path, then manage operations and catalog data from one place."
         accent="Protected operations and catalog controls"
-        note="Metrics, intake visibility, and catalog maintenance live in the same dashboard."
+        note="Login, audit visibility, intake tracking, and catalog maintenance now live in the same dashboard."
       />
 
       <div className="container admin-shell">
-        <form className="form-card admin-access" onSubmit={onAdminLoad}>
-          <label>
-            <span>Admin API key</span>
-            <input
-              type="password"
-              value={adminKey}
-              onChange={(event) => onAdminKeyChange(event.target.value)}
-              placeholder="Enter x-api-key value"
-            />
-          </label>
-          <button type="submit" className="btn btn-primary" disabled={adminBusy}>
-            {adminPending ? "Loading..." : "Load Dashboard"}
-          </button>
-        </form>
+        <div className="admin-access-grid">
+          {usingSessionLogin ? (
+            <form className="form-card admin-access" onSubmit={onAdminLogin}>
+              <div className="admin-access-top">
+                <div>
+                  <p className="section-kicker">Admin login</p>
+                  <h3>{isSignedIn ? "Session active" : "Sign in securely"}</h3>
+                </div>
+                <span className="admin-auth-pill">{isSignedIn ? "Session" : "Credential login"}</span>
+              </div>
+              {isSignedIn ? (
+                <>
+                  <p className="form-helper">
+                    Signed in as <strong>{adminSession.username}</strong>.
+                  </p>
+                  <div className="admin-session-actions">
+                    <button type="button" className="btn btn-primary" onClick={onAdminLoad} disabled={adminBusy}>
+                      {adminPending ? "Refreshing..." : "Load Dashboard"}
+                    </button>
+                    <button type="button" className="btn btn-ghost" onClick={onAdminLogout} disabled={adminBusy}>
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <label>
+                    <span>Username</span>
+                    <input
+                      value={adminUsername}
+                      onChange={(event) => onAdminUsernameChange(event.target.value)}
+                      placeholder="admin"
+                      autoComplete="username"
+                    />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <input
+                      type="password"
+                      value={adminPassword}
+                      onChange={(event) => onAdminPasswordChange(event.target.value)}
+                      placeholder="Enter admin password"
+                      autoComplete="current-password"
+                    />
+                  </label>
+                  <button type="submit" className="btn btn-primary" disabled={adminBusy}>
+                    {adminPending ? "Signing in..." : "Sign In"}
+                  </button>
+                </>
+              )}
+            </form>
+          ) : null}
+
+          {usingApiKeyFallback ? (
+            <form className="form-card admin-access" onSubmit={onAdminLoad}>
+              <div className="admin-access-top">
+                <div>
+                  <p className="section-kicker">Fallback access</p>
+                  <h3>Protected API key path</h3>
+                </div>
+                <span className="admin-auth-pill">Legacy</span>
+              </div>
+              <label>
+                <span>Admin API key</span>
+                <input
+                  type="password"
+                  value={adminKey}
+                  onChange={(event) => onAdminKeyChange(event.target.value)}
+                  placeholder="Enter x-api-key value"
+                />
+              </label>
+              <button type="submit" className="btn btn-primary" disabled={adminBusy}>
+                {adminPending ? "Loading..." : "Load Dashboard"}
+              </button>
+            </form>
+          ) : null}
+        </div>
 
         {adminError ? <p className="form-status is-error">{adminError}</p> : null}
         {adminNotice ? <p className="form-status is-success">{adminNotice}</p> : null}
@@ -251,6 +324,10 @@ export function AdminPage({
               <article className="metric-card alt">
                 <strong>{adminOverview.metrics.activePaymentPlans}</strong>
                 <span>Active payment plans</span>
+              </article>
+              <article className="metric-card alt">
+                <strong>{adminOverview.metrics.activeAdminSessions}</strong>
+                <span>Active admin sessions</span>
               </article>
               <article className="metric-card alt">
                 <strong>{adminOverview.metrics.pendingPayments}</strong>
@@ -614,6 +691,24 @@ export function AdminPage({
                       <div>
                         <p>{item.remainingSeats} seats left</p>
                         <span>{item.tuitionLabel}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="info-card">
+                <h3>Recent admin activity</h3>
+                <div className="admin-list">
+                  {(adminOverview.recentAdminActivity ?? []).slice(0, 6).map((item) => (
+                    <div key={item.id} className="admin-row">
+                      <div>
+                        <strong>{item.actor}</strong>
+                        <p>{item.action}</p>
+                      </div>
+                      <div>
+                        <p>{item.detail || "No extra detail"}</p>
+                        <span>{formatDateLabel(item.createdAt)}</span>
                       </div>
                     </div>
                   ))}

@@ -10,6 +10,7 @@
     "start": "node server/index.js",
     "check:harmony": "node scripts/harmony-check.mjs",
     "check:production": "node scripts/production-smoke.mjs",
+    "admin:hash": "node scripts/hash-admin-password.mjs",
     "verify": "npm run build && npm run check:harmony && npm run check:production",
     "build": "vite build",
     "preview": "vite preview"
