@@ -87,38 +87,52 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
       }
 
       const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
-      const session = await stripeClient.checkout.sessions.create({
-        mode: "payment",
-        success_url: `${appBaseUrl}/register?checkout=success&enrollment=${enrollment.id}`,
-        cancel_url: `${appBaseUrl}/register?checkout=cancelled&enrollment=${enrollment.id}`,
-        customer_email: enrollment.email,
-        expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              unit_amount: cohort.tuitionCents,
-              product_data: {
-                name: `${program.title} - ${cohort.title}`,
-                description: `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
+      let session;
+
+      try {
+        session = await stripeClient.checkout.sessions.create({
+          mode: "payment",
+          success_url: `${appBaseUrl}/register?checkout=success&enrollment=${enrollment.id}`,
+          cancel_url: `${appBaseUrl}/register?checkout=cancelled&enrollment=${enrollment.id}`,
+          customer_email: enrollment.email,
+          expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: cohort.tuitionCents,
+                product_data: {
+                  name: `${program.title} - ${cohort.title}`,
+                  description: `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
+                },
               },
+              quantity: 1,
             },
-            quantity: 1,
-          },
-        ],
-        metadata: {
-          enrollmentId: enrollment.id,
-          cohortId: cohort.id,
-          programId: cohort.programId,
-        },
-        payment_intent_data: {
+          ],
           metadata: {
             enrollmentId: enrollment.id,
             cohortId: cohort.id,
             programId: cohort.programId,
           },
-        },
-      });
+          payment_intent_data: {
+            metadata: {
+              enrollmentId: enrollment.id,
+              cohortId: cohort.id,
+              programId: cohort.programId,
+            },
+          },
+        });
+      } catch {
+        enrollmentDb.markPaymentSetupFailed(
+          enrollment.id,
+          "Stripe checkout session creation failed before payment could start."
+        );
+
+        return res.status(502).json({
+          error:
+            "Payment checkout could not be created right now. Your registration was not reserved for payment. Please try again or contact admissions.",
+        });
+      }
 
       const pendingEnrollment = enrollmentDb.markCheckoutPending({
         enrollmentId: enrollment.id,

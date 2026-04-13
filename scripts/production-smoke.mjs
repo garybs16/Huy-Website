@@ -20,6 +20,11 @@ async function run() {
   const { server } = startServer(port);
 
   try {
+    const healthRes = await fetch(`http://localhost:${port}/api/health`);
+    assert(healthRes.ok, "Production health endpoint failed");
+    const healthBody = await healthRes.json();
+    assert(healthBody.services?.database === "ok", "Production health endpoint did not confirm database readiness");
+
     const homeRes = await fetch(`http://localhost:${port}/`);
     assert(homeRes.ok, "Production server did not serve the frontend root");
     assert(

@@ -22,6 +22,14 @@ function parseOrigins(value) {
     .filter(Boolean);
 }
 
+function parseBoolean(value, fallback = false) {
+  if (value === undefined) {
+    return fallback;
+  }
+
+  return value === "true";
+}
+
 const dataDir = path.resolve(process.cwd(), process.env.DATA_DIR ?? "server/data");
 const staticDir = path.resolve(process.cwd(), process.env.STATIC_DIR ?? "dist");
 const databasePath = path.resolve(process.cwd(), process.env.DATABASE_URL ?? "server/data/enrollment.db");
@@ -39,10 +47,38 @@ export const config = {
   publicAppUrl: (process.env.PUBLIC_APP_URL ?? "").trim().replace(/\/+$/, ""),
   stripeSecretKey: (process.env.STRIPE_SECRET_KEY ?? "").trim(),
   stripeWebhookSecret: (process.env.STRIPE_WEBHOOK_SECRET ?? "").trim(),
-  serveStaticApp:
-    process.env.SERVE_STATIC_APP === "true" ||
-    (process.env.NODE_ENV === "production" && process.env.SERVE_STATIC_APP !== "false"),
-  trustProxy:
-    process.env.TRUST_PROXY === "true" ||
-    (process.env.NODE_ENV === "production" && process.env.TRUST_PROXY !== "false"),
+  serveStaticApp: parseBoolean(
+    process.env.SERVE_STATIC_APP,
+    (process.env.NODE_ENV ?? "development") === "production"
+  ),
+  trustProxy: parseBoolean(process.env.TRUST_PROXY, (process.env.NODE_ENV ?? "development") === "production"),
 };
+
+export function getRuntimeConfigReport(currentConfig = config) {
+  const issues = [];
+  const warnings = [];
+  const stripeConfigured = Boolean(currentConfig.stripeSecretKey);
+
+  if (currentConfig.nodeEnv === "production" && !currentConfig.adminKey) {
+    issues.push("API_ADMIN_KEY is required in production so the admin endpoints stay protected and usable.");
+  }
+
+  if (stripeConfigured && !currentConfig.publicAppUrl) {
+    issues.push("PUBLIC_APP_URL is required when Stripe Checkout is enabled.");
+  }
+
+  if (stripeConfigured && !currentConfig.stripeWebhookSecret) {
+    issues.push("STRIPE_WEBHOOK_SECRET is required when Stripe Checkout is enabled.");
+  }
+
+  if (!stripeConfigured) {
+    warnings.push("Stripe is not configured. Enrollments will be created in manual payment mode.");
+  }
+
+  return {
+    issues,
+    warnings,
+    stripeConfigured,
+    paymentsEnabled: stripeConfigured && Boolean(currentConfig.stripeWebhookSecret && currentConfig.publicAppUrl),
+  };
+}

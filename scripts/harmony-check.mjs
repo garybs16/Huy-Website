@@ -18,6 +18,12 @@ async function run() {
   const { server } = startServer(port);
 
   try {
+    const healthRes = await fetch(`http://localhost:${port}/api/health`);
+    assert(healthRes.ok, "Health endpoint failed");
+    const healthBody = await healthRes.json();
+    assert(healthBody.status === "ok", "Health endpoint did not report ok status");
+    assert(healthBody.services?.database === "ok", "Health endpoint did not confirm database readiness");
+
     const programsRes = await fetch(`http://localhost:${port}/api/programs`);
     assert(programsRes.ok, "Failed to load programs from API");
     const programsBody = await programsRes.json();

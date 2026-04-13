@@ -102,6 +102,9 @@ export class EnrollmentDatabase {
       CREATE INDEX IF NOT EXISTS idx_enrollments_cohort_id ON enrollments(cohort_id);
       CREATE INDEX IF NOT EXISTS idx_enrollments_email ON enrollments(email);
       CREATE INDEX IF NOT EXISTS idx_enrollments_payment_status ON enrollments(payment_status);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_enrollments_checkout_session_id
+        ON enrollments(stripe_checkout_session_id)
+        WHERE stripe_checkout_session_id IS NOT NULL;
       CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at);
       CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at);
     `);
@@ -188,7 +191,36 @@ export class EnrollmentDatabase {
       .get(id);
   }
 
+  ping() {
+    this.db.prepare("SELECT 1 AS ok").get();
+    return true;
+  }
+
+  releaseExpiredSeatHolds() {
+    const now = nowIso();
+
+    const result = this.db
+      .prepare(`
+        UPDATE enrollments
+        SET
+          status = 'payment_expired',
+          payment_status = 'checkout_expired',
+          seat_hold_expires_at = NULL,
+          updated_at = @updatedAt
+        WHERE payment_status = 'checkout_pending'
+          AND seat_hold_expires_at IS NOT NULL
+          AND seat_hold_expires_at <= @now
+      `)
+      .run({
+        now,
+        updatedAt: now,
+      });
+
+    return result.changes;
+  }
+
   listActiveCohorts() {
+    this.releaseExpiredSeatHolds();
     const now = nowIso();
     const rows = this.db
       .prepare(`
@@ -234,6 +266,7 @@ export class EnrollmentDatabase {
   }
 
   createEnrollment(input) {
+    this.releaseExpiredSeatHolds();
     const cohort = this.getCohortById(input.cohortId);
 
     if (!cohort || !cohort.isActive) {
@@ -319,6 +352,7 @@ export class EnrollmentDatabase {
   }
 
   getEnrollmentById(id) {
+    this.releaseExpiredSeatHolds();
     return this.db
       .prepare(`
         SELECT
@@ -348,6 +382,30 @@ export class EnrollmentDatabase {
         WHERE id = ?
       `)
       .get(id);
+  }
+
+  markPaymentSetupFailed(enrollmentId, reason) {
+    this.db
+      .prepare(`
+        UPDATE enrollments
+        SET
+          status = 'payment_setup_failed',
+          payment_status = 'payment_failed',
+          notes = CASE
+            WHEN @reason IS NULL OR @reason = '' THEN notes
+            WHEN notes IS NULL OR notes = '' THEN @reason
+            ELSE notes || ' | ' || @reason
+          END,
+          updated_at = @updatedAt
+        WHERE id = @enrollmentId
+      `)
+      .run({
+        enrollmentId,
+        reason: reason ?? null,
+        updatedAt: nowIso(),
+      });
+
+    return this.getEnrollmentById(enrollmentId);
   }
 
   markCheckoutPending({ enrollmentId, sessionId, expiresAt }) {
@@ -442,6 +500,7 @@ export class EnrollmentDatabase {
   }
 
   listEnrollments({ page = 1, pageSize = 20 } = {}) {
+    this.releaseExpiredSeatHolds();
     const offset = (page - 1) * pageSize;
     const items = this.db
       .prepare(`
@@ -587,17 +646,24 @@ export class EnrollmentDatabase {
   }
 
   getAdminOverview() {
+    this.releaseExpiredSeatHolds();
+    const now = nowIso();
     const metrics = this.db
       .prepare(`
         SELECT
           (SELECT COUNT(*) FROM cohorts WHERE is_active = 1) AS activeCohorts,
           (SELECT COUNT(*) FROM enrollments) AS enrollments,
           (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'paid') AS paidEnrollments,
-          (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'checkout_pending') AS pendingPayments,
+          (
+            SELECT COUNT(*)
+            FROM enrollments
+            WHERE payment_status = 'checkout_pending'
+              AND seat_hold_expires_at > @now
+          ) AS pendingPayments,
           (SELECT COUNT(*) FROM inquiries) AS inquiries,
           (SELECT COUNT(*) FROM waitlist) AS waitlist
       `)
-      .get();
+      .get({ now });
 
     const recentEnrollments = this.db
       .prepare(`

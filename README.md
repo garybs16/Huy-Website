@@ -92,6 +92,14 @@ Important:
 - Durable production operation still requires persistent disk.
 - Payment confirmation depends on Stripe webhook delivery.
 - The admin dashboard depends on `API_ADMIN_KEY`.
+- Expired Stripe seat holds are now released automatically by the backend even if the webhook expiry event is delayed.
+
+## Production readiness
+
+- `API_ADMIN_KEY` is required in production startup.
+- Stripe Checkout only starts when `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL` are all configured together.
+- If Stripe is not configured, enrollments still work in manual payment mode and admissions can follow up directly.
+- `GET /api/health` now reports database readiness plus whether payments are configured or manual.
 
 ## Deployment note
 

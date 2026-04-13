@@ -6,7 +6,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
-import { config } from "./config.js";
+import { config, getRuntimeConfigReport } from "./config.js";
 import { EnrollmentDatabase } from "./lib/enrollmentDb.js";
 import { createStripeClient } from "./lib/stripe.js";
 import { createAdminRouter } from "./routes/admin.js";
@@ -38,6 +38,12 @@ function isAllowedOrigin(origin, req) {
 }
 
 export function createApp() {
+  const configReport = getRuntimeConfigReport(config);
+
+  if (configReport.issues.length > 0) {
+    throw new Error(`Invalid runtime configuration: ${configReport.issues.join(" ")}`);
+  }
+
   const app = express();
 
   if (config.trustProxy) {
@@ -59,8 +65,9 @@ export function createApp() {
   });
   const enrollmentDb = new EnrollmentDatabase(config.databasePath);
   const stripeClient = createStripeClient(config.stripeSecretKey);
-  const paymentsEnabled = Boolean(stripeClient && config.stripeWebhookSecret);
+  const paymentsEnabled = Boolean(stripeClient && configReport.paymentsEnabled);
   app.locals.enrollmentDb = enrollmentDb;
+  app.locals.configReport = configReport;
 
   app.disable("x-powered-by");
   app.use(helmet());
@@ -87,7 +94,7 @@ export function createApp() {
   app.use(express.json({ limit: "50kb" }));
   app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
   app.use("/api", generalLimiter);
-  app.use("/api/health", createHealthRouter());
+  app.use("/api/health", createHealthRouter({ enrollmentDb, configReport }));
   app.use("/api/programs", createProgramsRouter());
   app.use("/api/cohorts", createCohortsRouter({ enrollmentDb }));
   app.use("/api/admin", createAdminRouter({ adminKey: config.adminKey, enrollmentDb }));
@@ -156,6 +163,10 @@ export function startServer(port = config.port) {
   const server = app.listen(port, () => {
     const mode = config.serveStaticApp ? "API + frontend" : "API";
     console.log(`${mode} listening on http://localhost:${port}`);
+
+    for (const warning of app.locals.configReport?.warnings ?? []) {
+      console.warn(`Configuration warning: ${warning}`);
+    }
   });
 
   server.on("close", () => {
