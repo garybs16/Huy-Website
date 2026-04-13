@@ -2,16 +2,24 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import {
+  createAdminCohort,
+  createAdminProgram,
   createEnrollment,
+  deleteAdminCohort,
+  deleteAdminProgram,
+  getAdminCohorts,
   getAdminEnrollments,
   getAdminInquiries,
   getAdminOverview,
+  getAdminPrograms,
   getAdminWaitlist,
   getCohorts,
   getEnrollmentStatus,
   getPrograms,
   joinWaitlist,
   submitInquiry,
+  updateAdminCohort,
+  updateAdminProgram,
 } from "./lib/api";
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
@@ -162,11 +170,15 @@ function App() {
   const [enrollmentStatus, setEnrollmentStatus] = useState({ type: "", text: "" });
   const [adminKey, setAdminKey] = useState("");
   const [adminPending, setAdminPending] = useState(false);
+  const [adminMutationPending, setAdminMutationPending] = useState(false);
   const [adminError, setAdminError] = useState("");
+  const [adminNotice, setAdminNotice] = useState("");
   const [adminOverview, setAdminOverview] = useState(null);
   const [adminEnrollments, setAdminEnrollments] = useState([]);
   const [adminInquiries, setAdminInquiries] = useState([]);
   const [adminWaitlist, setAdminWaitlist] = useState([]);
+  const [adminPrograms, setAdminPrograms] = useState([]);
+  const [adminCohorts, setAdminCohorts] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -319,26 +331,91 @@ function App() {
 
     setAdminPending(true);
     setAdminError("");
+    setAdminNotice("");
 
     try {
       const key = adminKey.trim();
-      const [overview, enrollmentsData, inquiriesData, waitlistData] = await Promise.all([
+      const [overview, enrollmentsData, inquiriesData, waitlistData, programsData, cohortsData] = await Promise.all([
         getAdminOverview(key),
         getAdminEnrollments(key),
         getAdminInquiries(key),
         getAdminWaitlist(key),
+        getAdminPrograms(key),
+        getAdminCohorts(key),
       ]);
 
       setAdminOverview(overview);
       setAdminEnrollments(enrollmentsData.items ?? []);
       setAdminInquiries(inquiriesData.items ?? []);
       setAdminWaitlist(waitlistData.items ?? []);
+      setAdminPrograms(programsData);
+      setAdminCohorts(cohortsData);
     } catch (error) {
       setAdminError(error.message || "Could not load the admin dashboard.");
     } finally {
       setAdminPending(false);
     }
   };
+
+  const refreshCatalog = async (apiKey) => {
+    const key = apiKey.trim();
+    const [programsData, cohortsData, overview] = await Promise.all([
+      getAdminPrograms(key),
+      getAdminCohorts(key),
+      getAdminOverview(key),
+    ]);
+    const publicPrograms = await getPrograms();
+    const publicCohorts = await getCohorts();
+
+    setAdminPrograms(programsData);
+    setAdminCohorts(cohortsData);
+    setAdminOverview(overview);
+    setPrograms(publicPrograms);
+    setCohorts(publicCohorts);
+  };
+
+  const runAdminMutation = async (action, successMessage) => {
+    const key = adminKey.trim();
+
+    if (!key) {
+      setAdminError("Enter the admin API key before managing programs or cohorts.");
+      return;
+    }
+
+    setAdminMutationPending(true);
+    setAdminError("");
+    setAdminNotice("");
+
+    try {
+      await action(key);
+      await refreshCatalog(key);
+      setAdminNotice(successMessage);
+      return true;
+    } catch (error) {
+      setAdminError(error.message || "Admin update failed.");
+      return false;
+    } finally {
+      setAdminMutationPending(false);
+    }
+  };
+
+  const handleCreateProgram = (payload) =>
+    runAdminMutation((key) => createAdminProgram(key, payload), "Program created.");
+
+  const handleUpdateProgram = (programId, payload) =>
+    runAdminMutation((key) => updateAdminProgram(key, programId, payload), "Program updated.");
+
+  const handleDeleteProgram = (programId) =>
+    runAdminMutation((key) => deleteAdminProgram(key, programId), "Program deleted.");
+
+  const handleCreateCohort = (payload) =>
+    runAdminMutation((key) => createAdminCohort(key, payload), "Cohort created.");
+
+  const handleUpdateCohort = (cohortId, payload) =>
+    runAdminMutation((key) => updateAdminCohort(key, cohortId, payload), "Cohort updated.");
+
+  const handleDeleteCohort = (cohortId) =>
+    runAdminMutation((key) => deleteAdminCohort(key, cohortId), "Cohort deleted.");
 
   const filteredCohorts = cohorts.filter(
     (cohort) => !enrollmentForm.programId || cohort.programId === enrollmentForm.programId
@@ -401,13 +478,23 @@ function App() {
               <AdminPage
                 adminKey={adminKey}
                 adminPending={adminPending}
+                adminMutationPending={adminMutationPending}
                 adminError={adminError}
+                adminNotice={adminNotice}
                 adminOverview={adminOverview}
                 adminEnrollments={adminEnrollments}
                 adminInquiries={adminInquiries}
                 adminWaitlist={adminWaitlist}
+                adminPrograms={adminPrograms}
+                adminCohorts={adminCohorts}
                 onAdminKeyChange={setAdminKey}
                 onAdminLoad={handleAdminLoad}
+                onCreateProgram={handleCreateProgram}
+                onUpdateProgram={handleUpdateProgram}
+                onDeleteProgram={handleDeleteProgram}
+                onCreateCohort={handleCreateCohort}
+                onUpdateCohort={handleUpdateCohort}
+                onDeleteCohort={handleDeleteCohort}
               />
             }
           />

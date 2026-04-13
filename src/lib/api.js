@@ -39,6 +39,10 @@ async function request(path, { method = "GET", payload, headers: extraHeaders } 
     throw new Error(await parseError(response));
   }
 
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 }
 
@@ -86,4 +90,52 @@ export function getAdminInquiries(apiKey) {
 
 export function getAdminWaitlist(apiKey) {
   return request("/api/waitlist", { headers: adminHeaders(apiKey) });
+}
+
+export async function getAdminPrograms(apiKey) {
+  const data = await request("/api/admin/programs", { headers: adminHeaders(apiKey) });
+  return Array.isArray(data?.items) ? data.items : [];
+}
+
+export async function getAdminCohorts(apiKey) {
+  const data = await request("/api/admin/cohorts", { headers: adminHeaders(apiKey) });
+  return Array.isArray(data?.items) ? data.items : [];
+}
+
+export function createAdminProgram(apiKey, payload) {
+  return request("/api/admin/programs", { method: "POST", payload, headers: adminHeaders(apiKey) });
+}
+
+export function updateAdminProgram(apiKey, programId, payload) {
+  return request(`/api/admin/programs/${programId}`, {
+    method: "PATCH",
+    payload,
+    headers: adminHeaders(apiKey),
+  });
+}
+
+export function deleteAdminProgram(apiKey, programId) {
+  return request(`/api/admin/programs/${programId}`, {
+    method: "DELETE",
+    headers: adminHeaders(apiKey),
+  });
+}
+
+export function createAdminCohort(apiKey, payload) {
+  return request("/api/admin/cohorts", { method: "POST", payload, headers: adminHeaders(apiKey) });
+}
+
+export function updateAdminCohort(apiKey, cohortId, payload) {
+  return request(`/api/admin/cohorts/${cohortId}`, {
+    method: "PATCH",
+    payload,
+    headers: adminHeaders(apiKey),
+  });
+}
+
+export function deleteAdminCohort(apiKey, cohortId) {
+  return request(`/api/admin/cohorts/${cohortId}`, {
+    method: "DELETE",
+    headers: adminHeaders(apiKey),
+  });
 }

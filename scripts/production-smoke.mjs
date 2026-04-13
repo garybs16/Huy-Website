@@ -105,6 +105,65 @@ async function run() {
     });
     assert(adminOverviewRes.ok, "Production admin overview endpoint failed");
 
+    const adminProgramCreateRes = await fetch(`http://localhost:${port}/api/admin/programs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "production-admin-key",
+      },
+      body: JSON.stringify({
+        id: "production-program",
+        title: "Production Program",
+        summary: "Program created during the production CRUD smoke test.",
+        duration: "4 weeks",
+        schedule: "Evening",
+        isActive: true,
+        sortOrder: 88,
+      }),
+    });
+    assert(adminProgramCreateRes.status === 201, "Production admin program creation failed");
+
+    const adminCohortCreateRes = await fetch(`http://localhost:${port}/api/admin/cohorts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "production-admin-key",
+      },
+      body: JSON.stringify({
+        id: "production-cohort",
+        programId: "production-program",
+        title: "Production Cohort",
+        startDate: "2026-07-01",
+        endDate: "2026-07-18",
+        scheduleLabel: "Evening",
+        meetingPattern: "Monday to Thursday | 5:30 PM to 8:30 PM",
+        tuitionCents: 175000,
+        capacity: 12,
+        isActive: true,
+        sortOrder: 89,
+      }),
+    });
+    assert(adminCohortCreateRes.status === 201, "Production admin cohort creation failed");
+
+    const publicProgramsAfterCreateRes = await fetch(`http://localhost:${port}/api/programs`);
+    const publicProgramsAfterCreate = await publicProgramsAfterCreateRes.json();
+    assert(
+      publicProgramsAfterCreate.items.some((item) => item.id === "production-program"),
+      "Production public programs did not reflect admin CRUD changes"
+    );
+
+    const adminCohortDeleteRes = await fetch(`http://localhost:${port}/api/admin/cohorts/production-cohort`, {
+      method: "DELETE",
+      headers: { "x-api-key": "production-admin-key" },
+    });
+    assert(adminCohortDeleteRes.status === 204, "Production admin cohort deletion failed");
+
+    const adminProgramDeleteRes = await fetch(`http://localhost:${port}/api/admin/programs/production-program`, {
+      method: "DELETE",
+      headers: { "x-api-key": "production-admin-key" },
+    });
+    assert(adminProgramDeleteRes.status === 204, "Production admin program deletion failed");
+
     console.log("Production smoke check passed.");
   } finally {
     await new Promise((resolve) => server.close(resolve));

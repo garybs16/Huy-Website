@@ -95,7 +95,7 @@ export function createApp() {
   app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
   app.use("/api", generalLimiter);
   app.use("/api/health", createHealthRouter({ enrollmentDb, configReport }));
-  app.use("/api/programs", createProgramsRouter());
+  app.use("/api/programs", createProgramsRouter({ enrollmentDb }));
   app.use("/api/cohorts", createCohortsRouter({ enrollmentDb }));
   app.use("/api/admin", createAdminRouter({ adminKey: config.adminKey, enrollmentDb }));
   app.use(
@@ -116,6 +116,7 @@ export function createApp() {
       },
       submissionLimiter,
       adminKey: config.adminKey,
+      enrollmentDb,
     })
   );
   app.use(

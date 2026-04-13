@@ -7,6 +7,7 @@ This project now includes:
 - SQLite-backed storage for cohorts, enrollments, inquiries, and waitlist
 - Stripe Checkout support for online tuition payment
 - An admin dashboard section in the frontend backed by protected APIs
+- Admin CRUD for programs and cohorts backed by SQLite
 
 ## Local setup
 
@@ -69,6 +70,14 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `POST /api/enrollments`: create enrollment and return Stripe Checkout URL when configured
 - `GET /api/enrollments/:id/status`: enrollment payment/status verification after checkout
 - `GET /api/admin/overview`: admin metrics and cohort capacity summary
+- `GET /api/admin/programs`: admin-only program list
+- `POST /api/admin/programs`: admin-only program create
+- `PATCH /api/admin/programs/:id`: admin-only program update
+- `DELETE /api/admin/programs/:id`: admin-only program delete
+- `GET /api/admin/cohorts`: admin-only cohort list
+- `POST /api/admin/cohorts`: admin-only cohort create
+- `PATCH /api/admin/cohorts/:id`: admin-only cohort update
+- `DELETE /api/admin/cohorts/:id`: admin-only cohort delete
 - `GET /api/inquiries`: admin-only inquiry list (requires `x-api-key`)
 - `GET /api/waitlist`: admin-only waitlist list (requires `x-api-key`)
 - `GET /api/enrollments`: admin-only enrollment list (requires `x-api-key`)
@@ -93,6 +102,7 @@ Important:
 - Payment confirmation depends on Stripe webhook delivery.
 - The admin dashboard depends on `API_ADMIN_KEY`.
 - Expired Stripe seat holds are now released automatically by the backend even if the webhook expiry event is delayed.
+- Seeded programs and cohorts are inserted only when missing, so admin edits persist across restarts.
 
 ## Production readiness
 

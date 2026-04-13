@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { acceptedProgramIds } from "../constants/programs.js";
 
 const phonePattern = /^[0-9+().\-\s]{7,25}$/;
 
@@ -42,12 +41,7 @@ export const inquirySchema = z.object({
   fullName: requiredString("fullName", 2, 100),
   email: emailString,
   phone: phoneString,
-  program: z.preprocess(
-    trimString,
-    z.enum(acceptedProgramIds, {
-      errorMap: () => ({ message: `program must be one of: ${acceptedProgramIds.join(", ")}` }),
-    })
-  ),
+  program: requiredString("program", 2, 100),
   message: requiredString("message", 10, 2000),
   source: sourceString,
 });
@@ -108,3 +102,48 @@ export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
+
+const slugString = z.preprocess(
+  trimString,
+  z
+    .string({ required_error: "id is required" })
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "id must be lowercase letters, numbers, and hyphens only")
+    .min(2, "id must be at least 2 characters")
+    .max(80, "id must be at most 80 characters")
+);
+
+const isoDateString = z.preprocess(
+  trimString,
+  z
+    .string({ required_error: "date is required" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must use YYYY-MM-DD format")
+);
+
+export const adminProgramSchema = z.object({
+  id: slugString,
+  title: requiredString("title", 2, 120),
+  summary: requiredString("summary", 10, 600),
+  duration: requiredString("duration", 2, 80),
+  schedule: requiredString("schedule", 2, 120),
+  isActive: z.boolean().default(true),
+  sortOrder: z.coerce.number().int().min(0).max(10000).default(0),
+});
+
+export const adminCohortSchema = z
+  .object({
+    id: slugString,
+    programId: slugString,
+    title: requiredString("title", 2, 120),
+    startDate: isoDateString,
+    endDate: isoDateString,
+    scheduleLabel: requiredString("scheduleLabel", 2, 80),
+    meetingPattern: requiredString("meetingPattern", 2, 160),
+    tuitionCents: z.coerce.number().int().min(0).max(10_000_000),
+    capacity: z.coerce.number().int().min(1).max(1000),
+    isActive: z.boolean().default(true),
+    sortOrder: z.coerce.number().int().min(0).max(10000).default(0),
+  })
+  .refine((value) => value.endDate >= value.startDate, {
+    message: "endDate must be on or after startDate",
+    path: ["endDate"],
+  });

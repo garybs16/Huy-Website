@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
-import { programs } from "../constants/programs.js";
 import { requireAdminKey } from "../middleware/requireAdminKey.js";
 import { enrollmentSchema, paginationSchema } from "../validation/schemas.js";
 
@@ -47,10 +46,10 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
         return res.status(404).json({ error: "Selected cohort was not found." });
       }
 
-      const program = programs.find((item) => item.id === cohort.programId);
+      const program = enrollmentDb.getProgramById(cohort.programId);
 
       if (!program) {
-        return res.status(400).json({ error: "Selected cohort is attached to an unknown program." });
+        return res.status(400).json({ error: "Selected cohort is attached to an unavailable program." });
       }
 
       const enrollment = enrollmentDb.createEnrollment({

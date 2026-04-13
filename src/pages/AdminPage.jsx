@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { PageIntro } from "../components/PageIntro";
 
 function formatDateLabel(value) {
@@ -14,25 +15,197 @@ function formatDateLabel(value) {
   }).format(new Date(value));
 }
 
+function createEmptyProgramForm() {
+  return {
+    id: "",
+    title: "",
+    summary: "",
+    duration: "",
+    schedule: "",
+    sortOrder: "0",
+    isActive: true,
+  };
+}
+
+function createEmptyCohortForm() {
+  return {
+    id: "",
+    programId: "",
+    title: "",
+    startDate: "",
+    endDate: "",
+    scheduleLabel: "",
+    meetingPattern: "",
+    tuitionCents: "",
+    capacity: "",
+    sortOrder: "0",
+    isActive: true,
+  };
+}
+
+function toProgramForm(program) {
+  return {
+    id: program.id,
+    title: program.title,
+    summary: program.summary,
+    duration: program.duration,
+    schedule: program.schedule,
+    sortOrder: String(program.sortOrder ?? 0),
+    isActive: Boolean(program.isActive),
+  };
+}
+
+function toCohortForm(cohort) {
+  return {
+    id: cohort.id,
+    programId: cohort.programId,
+    title: cohort.title,
+    startDate: cohort.startDate,
+    endDate: cohort.endDate,
+    scheduleLabel: cohort.scheduleLabel,
+    meetingPattern: cohort.meetingPattern,
+    tuitionCents: String(cohort.tuitionCents ?? ""),
+    capacity: String(cohort.capacity ?? ""),
+    sortOrder: String(cohort.sortOrder ?? 0),
+    isActive: Boolean(cohort.isActive),
+  };
+}
+
 export function AdminPage({
   adminKey,
   adminPending,
+  adminMutationPending,
   adminError,
+  adminNotice,
   adminOverview,
   adminEnrollments,
   adminInquiries,
   adminWaitlist,
+  adminPrograms,
+  adminCohorts,
   onAdminKeyChange,
   onAdminLoad,
+  onCreateProgram,
+  onUpdateProgram,
+  onDeleteProgram,
+  onCreateCohort,
+  onUpdateCohort,
+  onDeleteCohort,
 }) {
+  const [programForm, setProgramForm] = useState(createEmptyProgramForm);
+  const [cohortForm, setCohortForm] = useState(createEmptyCohortForm);
+  const [editingProgramId, setEditingProgramId] = useState("");
+  const [editingCohortId, setEditingCohortId] = useState("");
+
+  useEffect(() => {
+    if (!editingProgramId) {
+      setProgramForm(createEmptyProgramForm());
+      return;
+    }
+
+    const currentProgram = adminPrograms.find((item) => item.id === editingProgramId);
+
+    if (currentProgram) {
+      setProgramForm(toProgramForm(currentProgram));
+    } else {
+      setEditingProgramId("");
+      setProgramForm(createEmptyProgramForm());
+    }
+  }, [adminPrograms, editingProgramId]);
+
+  useEffect(() => {
+    if (!editingCohortId) {
+      setCohortForm((current) => ({
+        ...createEmptyCohortForm(),
+        programId: adminPrograms[0]?.id ?? "",
+      }));
+      return;
+    }
+
+    const currentCohort = adminCohorts.find((item) => item.id === editingCohortId);
+
+    if (currentCohort) {
+      setCohortForm(toCohortForm(currentCohort));
+    } else {
+      setEditingCohortId("");
+      setCohortForm((current) => ({
+        ...createEmptyCohortForm(),
+        programId: adminPrograms[0]?.id ?? current.programId ?? "",
+      }));
+    }
+  }, [adminCohorts, adminPrograms, editingCohortId]);
+
+  const adminBusy = adminPending || adminMutationPending;
+
+  const handleProgramInput = (event) => {
+    const { name, type, checked, value } = event.target;
+    setProgramForm((current) => ({ ...current, [name]: type === "checkbox" ? checked : value }));
+  };
+
+  const handleCohortInput = (event) => {
+    const { name, type, checked, value } = event.target;
+    setCohortForm((current) => ({ ...current, [name]: type === "checkbox" ? checked : value }));
+  };
+
+  const resetProgramForm = () => {
+    setEditingProgramId("");
+    setProgramForm(createEmptyProgramForm());
+  };
+
+  const resetCohortForm = () => {
+    setEditingCohortId("");
+    setCohortForm({
+      ...createEmptyCohortForm(),
+      programId: adminPrograms[0]?.id ?? "",
+    });
+  };
+
+  const handleProgramSubmit = async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      ...programForm,
+      sortOrder: Number(programForm.sortOrder || 0),
+      isActive: Boolean(programForm.isActive),
+    };
+
+    const ok = editingProgramId
+      ? await onUpdateProgram(editingProgramId, payload)
+      : await onCreateProgram(payload);
+
+    if (ok) {
+      resetProgramForm();
+    }
+  };
+
+  const handleCohortSubmit = async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      ...cohortForm,
+      tuitionCents: Number(cohortForm.tuitionCents || 0),
+      capacity: Number(cohortForm.capacity || 0),
+      sortOrder: Number(cohortForm.sortOrder || 0),
+      isActive: Boolean(cohortForm.isActive),
+    };
+
+    const ok = editingCohortId
+      ? await onUpdateCohort(editingCohortId, payload)
+      : await onCreateCohort(payload);
+
+    if (ok) {
+      resetCohortForm();
+    }
+  };
+
   return (
     <section className="section section-soft">
       <PageIntro
         kicker="Admin"
-        title="Operations dashboard for enrollments, inquiries, and cohort activity."
-        description="Load live enrollment metrics, inquiry intake, waitlist activity, and cohort capacity through the protected admin APIs."
-        accent="Protected operations snapshot"
-        note="Live metrics, intake visibility, and cohort capacity in one view."
+        title="Operations dashboard for enrollments, inquiries, and live catalog management."
+        description="Load live operations data, then create or update programs and cohorts directly from the protected admin interface."
+        accent="Protected operations and catalog controls"
+        note="Metrics, intake visibility, and catalog maintenance live in the same dashboard."
       />
 
       <div className="container admin-shell">
@@ -46,12 +219,13 @@ export function AdminPage({
               placeholder="Enter x-api-key value"
             />
           </label>
-          <button type="submit" className="btn btn-primary" disabled={adminPending}>
+          <button type="submit" className="btn btn-primary" disabled={adminBusy}>
             {adminPending ? "Loading..." : "Load Dashboard"}
           </button>
         </form>
 
         {adminError ? <p className="form-status is-error">{adminError}</p> : null}
+        {adminNotice ? <p className="form-status is-success">{adminNotice}</p> : null}
 
         {adminOverview ? (
           <>
@@ -79,6 +253,256 @@ export function AdminPage({
               <article className="metric-card alt">
                 <strong>{adminOverview.metrics.waitlist}</strong>
                 <span>Waitlist</span>
+              </article>
+            </div>
+
+            <div className="card-grid two-up">
+              <article className="form-card admin-editor">
+                <div className="admin-card-top">
+                  <div>
+                    <p className="section-kicker">Catalog</p>
+                    <h3>{editingProgramId ? "Edit program" : "Create program"}</h3>
+                  </div>
+                  {editingProgramId ? (
+                    <button type="button" className="btn btn-ghost admin-inline-button" onClick={resetProgramForm}>
+                      New Program
+                    </button>
+                  ) : null}
+                </div>
+                <form className="form-stack" onSubmit={handleProgramSubmit}>
+                  <div className="form-grid two-up">
+                    <label>
+                      <span>Program id</span>
+                      <input
+                        name="id"
+                        value={programForm.id}
+                        onChange={handleProgramInput}
+                        placeholder="cna-evening-plus"
+                        disabled={Boolean(editingProgramId)}
+                        required
+                      />
+                    </label>
+                    <label>
+                      <span>Sort order</span>
+                      <input
+                        name="sortOrder"
+                        type="number"
+                        min="0"
+                        value={programForm.sortOrder}
+                        onChange={handleProgramInput}
+                        required
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    <span>Title</span>
+                    <input name="title" value={programForm.title} onChange={handleProgramInput} required />
+                  </label>
+                  <label>
+                    <span>Summary</span>
+                    <textarea name="summary" rows="4" value={programForm.summary} onChange={handleProgramInput} required />
+                  </label>
+                  <div className="form-grid two-up">
+                    <label>
+                      <span>Duration</span>
+                      <input name="duration" value={programForm.duration} onChange={handleProgramInput} required />
+                    </label>
+                    <label>
+                      <span>Schedule</span>
+                      <input name="schedule" value={programForm.schedule} onChange={handleProgramInput} required />
+                    </label>
+                  </div>
+                  <label className="admin-toggle">
+                    <input name="isActive" type="checkbox" checked={programForm.isActive} onChange={handleProgramInput} />
+                    <span>Program is active on the public site</span>
+                  </label>
+                  <button type="submit" className="btn btn-primary" disabled={adminBusy}>
+                    {adminMutationPending ? "Saving..." : editingProgramId ? "Save Program" : "Create Program"}
+                  </button>
+                </form>
+              </article>
+
+              <article className="info-card admin-manager">
+                <div className="admin-card-top">
+                  <div>
+                    <p className="section-kicker">Current programs</p>
+                    <h3>Manage public training options</h3>
+                  </div>
+                </div>
+                <div className="admin-list">
+                  {adminPrograms.map((item) => (
+                    <div key={item.id} className="admin-record">
+                      <div>
+                        <strong>{item.title}</strong>
+                        <p>{item.id}</p>
+                        <p>{item.duration} | {item.schedule}</p>
+                      </div>
+                      <div className="admin-record-actions">
+                        <span>{item.isActive ? "Active" : "Inactive"}</span>
+                        <button
+                          type="button"
+                          className="btn btn-ghost admin-inline-button"
+                          onClick={() => setEditingProgramId(item.id)}
+                          disabled={adminBusy}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost admin-inline-button admin-danger-button"
+                          onClick={() => {
+                            if (window.confirm(`Delete program "${item.title}"?`)) {
+                              onDeleteProgram(item.id);
+                            }
+                          }}
+                          disabled={adminBusy}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            </div>
+
+            <div className="card-grid two-up">
+              <article className="form-card admin-editor">
+                <div className="admin-card-top">
+                  <div>
+                    <p className="section-kicker">Cohorts</p>
+                    <h3>{editingCohortId ? "Edit cohort" : "Create cohort"}</h3>
+                  </div>
+                  {editingCohortId ? (
+                    <button type="button" className="btn btn-ghost admin-inline-button" onClick={resetCohortForm}>
+                      New Cohort
+                    </button>
+                  ) : null}
+                </div>
+                <form className="form-stack" onSubmit={handleCohortSubmit}>
+                  <div className="form-grid two-up">
+                    <label>
+                      <span>Cohort id</span>
+                      <input
+                        name="id"
+                        value={cohortForm.id}
+                        onChange={handleCohortInput}
+                        placeholder="cna-weekday-jun-2026"
+                        disabled={Boolean(editingCohortId)}
+                        required
+                      />
+                    </label>
+                    <label>
+                      <span>Program</span>
+                      <select name="programId" value={cohortForm.programId} onChange={handleCohortInput} required>
+                        <option value="" disabled>
+                          Select a program
+                        </option>
+                        {adminPrograms.map((program) => (
+                          <option key={program.id} value={program.id}>
+                            {program.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <label>
+                    <span>Title</span>
+                    <input name="title" value={cohortForm.title} onChange={handleCohortInput} required />
+                  </label>
+                  <div className="form-grid two-up">
+                    <label>
+                      <span>Start date</span>
+                      <input name="startDate" type="date" value={cohortForm.startDate} onChange={handleCohortInput} required />
+                    </label>
+                    <label>
+                      <span>End date</span>
+                      <input name="endDate" type="date" value={cohortForm.endDate} onChange={handleCohortInput} required />
+                    </label>
+                  </div>
+                  <div className="form-grid two-up">
+                    <label>
+                      <span>Schedule label</span>
+                      <input name="scheduleLabel" value={cohortForm.scheduleLabel} onChange={handleCohortInput} required />
+                    </label>
+                    <label>
+                      <span>Meeting pattern</span>
+                      <input name="meetingPattern" value={cohortForm.meetingPattern} onChange={handleCohortInput} required />
+                    </label>
+                  </div>
+                  <div className="form-grid three-up">
+                    <label>
+                      <span>Tuition cents</span>
+                      <input
+                        name="tuitionCents"
+                        type="number"
+                        min="0"
+                        value={cohortForm.tuitionCents}
+                        onChange={handleCohortInput}
+                        required
+                      />
+                    </label>
+                    <label>
+                      <span>Capacity</span>
+                      <input name="capacity" type="number" min="1" value={cohortForm.capacity} onChange={handleCohortInput} required />
+                    </label>
+                    <label>
+                      <span>Sort order</span>
+                      <input name="sortOrder" type="number" min="0" value={cohortForm.sortOrder} onChange={handleCohortInput} required />
+                    </label>
+                  </div>
+                  <label className="admin-toggle">
+                    <input name="isActive" type="checkbox" checked={cohortForm.isActive} onChange={handleCohortInput} />
+                    <span>Cohort is visible on the public site</span>
+                  </label>
+                  <button type="submit" className="btn btn-primary" disabled={adminBusy}>
+                    {adminMutationPending ? "Saving..." : editingCohortId ? "Save Cohort" : "Create Cohort"}
+                  </button>
+                </form>
+              </article>
+
+              <article className="info-card admin-manager">
+                <div className="admin-card-top">
+                  <div>
+                    <p className="section-kicker">Current cohorts</p>
+                    <h3>Manage live class availability</h3>
+                  </div>
+                </div>
+                <div className="admin-list">
+                  {adminCohorts.map((item) => (
+                    <div key={item.id} className="admin-record">
+                      <div>
+                        <strong>{item.title}</strong>
+                        <p>{item.programTitle}</p>
+                        <p>{item.startDate} to {item.endDate}</p>
+                        <p>{item.remainingSeats} seats left | {item.tuitionLabel}</p>
+                      </div>
+                      <div className="admin-record-actions">
+                        <span>{item.isActive ? "Active" : "Inactive"}</span>
+                        <button
+                          type="button"
+                          className="btn btn-ghost admin-inline-button"
+                          onClick={() => setEditingCohortId(item.id)}
+                          disabled={adminBusy}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost admin-inline-button admin-danger-button"
+                          onClick={() => {
+                            if (window.confirm(`Delete cohort "${item.title}"?`)) {
+                              onDeleteCohort(item.id);
+                            }
+                          }}
+                          disabled={adminBusy}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </article>
             </div>
 
@@ -138,7 +562,7 @@ export function AdminPage({
               </article>
 
               <article className="info-card">
-                <h3>Cohort capacity</h3>
+                <h3>Cohort capacity snapshot</h3>
                 <div className="admin-list">
                   {adminOverview.cohorts.slice(0, 6).map((item) => (
                     <div key={item.id} className="admin-row">

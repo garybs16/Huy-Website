@@ -4,12 +4,17 @@ import { ZodError } from "zod";
 import { requireAdminKey } from "../middleware/requireAdminKey.js";
 import { inquirySchema, paginationSchema } from "../validation/schemas.js";
 
-export function createInquiriesRouter({ store, submissionLimiter, adminKey }) {
+export function createInquiriesRouter({ store, submissionLimiter, adminKey, enrollmentDb }) {
   const router = Router();
 
   router.post("/", submissionLimiter, async (req, res, next) => {
     try {
       const payload = inquirySchema.parse(req.body);
+
+      if (!enrollmentDb.getProgramById(payload.program)) {
+        return res.status(400).json({ error: "Selected program was not found." });
+      }
+
       const record = {
         id: randomUUID(),
         ...payload,

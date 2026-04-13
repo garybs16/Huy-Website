@@ -1,12 +1,11 @@
 import { Router } from "express";
-import { programs } from "../constants/programs.js";
 
-export function createProgramsRouter() {
+export function createProgramsRouter({ enrollmentDb }) {
   const router = Router();
 
   router.get("/", (_req, res) => {
-    res.set("Cache-Control", "public, max-age=300");
-    res.json({ items: programs });
+    res.set("Cache-Control", "no-store");
+    res.json({ items: enrollmentDb.listPrograms() });
   });
 
   return router;

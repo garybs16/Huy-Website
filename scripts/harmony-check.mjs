@@ -101,6 +101,83 @@ async function run() {
     const adminOverviewBody = await adminOverviewRes.json();
     assert(typeof adminOverviewBody.metrics?.enrollments === "number", "Admin overview metrics are invalid");
 
+    const adminProgramCreateRes = await fetch(`http://localhost:${port}/api/admin/programs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "harmony-admin-key",
+      },
+      body: JSON.stringify({
+        id: "harmony-program",
+        title: "Harmony Program",
+        summary: "Program created during the admin CRUD smoke test.",
+        duration: "5 weeks",
+        schedule: "Weekend",
+        isActive: true,
+        sortOrder: 90,
+      }),
+    });
+    assert(adminProgramCreateRes.status === 201, "Admin program creation failed");
+
+    const adminCohortCreateRes = await fetch(`http://localhost:${port}/api/admin/cohorts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "harmony-admin-key",
+      },
+      body: JSON.stringify({
+        id: "harmony-cohort",
+        programId: "harmony-program",
+        title: "Harmony Cohort",
+        startDate: "2026-06-01",
+        endDate: "2026-06-20",
+        scheduleLabel: "Weekend",
+        meetingPattern: "Saturday and Sunday | 9:00 AM to 2:00 PM",
+        tuitionCents: 150000,
+        capacity: 10,
+        isActive: true,
+        sortOrder: 95,
+      }),
+    });
+    assert(adminCohortCreateRes.status === 201, "Admin cohort creation failed");
+
+    const publicProgramsAfterCreateRes = await fetch(`http://localhost:${port}/api/programs`);
+    const publicProgramsAfterCreate = await publicProgramsAfterCreateRes.json();
+    assert(
+      publicProgramsAfterCreate.items.some((item) => item.id === "harmony-program"),
+      "Public programs did not reflect the created admin program"
+    );
+
+    const adminProgramUpdateRes = await fetch(`http://localhost:${port}/api/admin/programs/harmony-program`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "harmony-admin-key",
+      },
+      body: JSON.stringify({
+        id: "harmony-program",
+        title: "Harmony Program Updated",
+        summary: "Updated during the admin CRUD smoke test.",
+        duration: "6 weeks",
+        schedule: "Weekend and evening",
+        isActive: true,
+        sortOrder: 91,
+      }),
+    });
+    assert(adminProgramUpdateRes.ok, "Admin program update failed");
+
+    const adminCohortDeleteRes = await fetch(`http://localhost:${port}/api/admin/cohorts/harmony-cohort`, {
+      method: "DELETE",
+      headers: { "x-api-key": "harmony-admin-key" },
+    });
+    assert(adminCohortDeleteRes.status === 204, "Admin cohort deletion failed");
+
+    const adminProgramDeleteRes = await fetch(`http://localhost:${port}/api/admin/programs/harmony-program`, {
+      method: "DELETE",
+      headers: { "x-api-key": "harmony-admin-key" },
+    });
+    assert(adminProgramDeleteRes.status === 204, "Admin program deletion failed");
+
     console.log("Harmony check passed.");
   } finally {
     await new Promise((resolve) => server.close(resolve));

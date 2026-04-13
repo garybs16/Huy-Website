@@ -31,11 +31,24 @@ export class EnrollmentDatabase {
     this.db.pragma("journal_mode = WAL");
     this.db.pragma("foreign_keys = ON");
     this.migrate();
+    this.seedPrograms();
     this.seedCohorts();
   }
 
   migrate() {
     this.db.exec(`
+      CREATE TABLE IF NOT EXISTS programs (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        duration TEXT NOT NULL,
+        schedule TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS cohorts (
         id TEXT PRIMARY KEY,
         program_id TEXT NOT NULL,
@@ -110,6 +123,48 @@ export class EnrollmentDatabase {
     `);
   }
 
+  seedPrograms() {
+    const insert = this.db.prepare(`
+      INSERT INTO programs (
+        id,
+        title,
+        summary,
+        duration,
+        schedule,
+        is_active,
+        sort_order,
+        created_at,
+        updated_at
+      ) VALUES (
+        @id,
+        @title,
+        @summary,
+        @duration,
+        @schedule,
+        @isActive,
+        @sortOrder,
+        @createdAt,
+        @updatedAt
+      )
+      ON CONFLICT(id) DO NOTHING
+    `);
+    const timestamp = nowIso();
+
+    const transaction = this.db.transaction(() => {
+      for (const [index, program] of programs.entries()) {
+        insert.run({
+          ...program,
+          isActive: 1,
+          sortOrder: (index + 1) * 10,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+      }
+    });
+
+    transaction();
+  }
+
   seedCohorts() {
     const insert = this.db.prepare(`
       INSERT INTO cohorts (
@@ -141,18 +196,7 @@ export class EnrollmentDatabase {
         @createdAt,
         @updatedAt
       )
-      ON CONFLICT(id) DO UPDATE SET
-        program_id = excluded.program_id,
-        title = excluded.title,
-        start_date = excluded.start_date,
-        end_date = excluded.end_date,
-        schedule_label = excluded.schedule_label,
-        meeting_pattern = excluded.meeting_pattern,
-        tuition_cents = excluded.tuition_cents,
-        capacity = excluded.capacity,
-        is_active = excluded.is_active,
-        sort_order = excluded.sort_order,
-        updated_at = excluded.updated_at
+      ON CONFLICT(id) DO NOTHING
     `);
     const timestamp = nowIso();
 
@@ -184,11 +228,34 @@ export class EnrollmentDatabase {
           c.tuition_cents AS tuitionCents,
           c.capacity,
           c.is_active AS isActive,
-          c.sort_order AS sortOrder
+          c.sort_order AS sortOrder,
+          p.title AS programTitle,
+          p.is_active AS programIsActive
         FROM cohorts c
+        LEFT JOIN programs p ON p.id = c.program_id
         WHERE c.id = ?
       `)
       .get(id);
+  }
+
+  getProgramById(id, { includeInactive = false } = {}) {
+    return this.db
+      .prepare(`
+        SELECT
+          id,
+          title,
+          summary,
+          duration,
+          schedule,
+          is_active AS isActive,
+          sort_order AS sortOrder,
+          created_at AS createdAt,
+          updated_at AS updatedAt
+        FROM programs
+        WHERE id = @id
+          ${includeInactive ? "" : "AND is_active = 1"}
+      `)
+      .get({ id });
   }
 
   ping() {
@@ -235,6 +302,8 @@ export class EnrollmentDatabase {
           c.tuition_cents AS tuitionCents,
           c.capacity,
           c.sort_order AS sortOrder,
+          p.title AS programTitle,
+          p.summary AS programSummary,
           COUNT(
             CASE
               WHEN e.payment_status = 'paid' THEN 1
@@ -243,26 +312,295 @@ export class EnrollmentDatabase {
             END
           ) AS reservedSeats
         FROM cohorts c
+        JOIN programs p ON p.id = c.program_id
         LEFT JOIN enrollments e ON e.cohort_id = c.id
         WHERE c.is_active = 1
+          AND p.is_active = 1
         GROUP BY c.id
         ORDER BY c.sort_order ASC, c.start_date ASC
       `)
       .all({ now });
 
     return rows.map((row) => {
-      const program = programs.find((item) => item.id === row.programId);
       const reservedSeats = Number(row.reservedSeats ?? 0);
 
       return {
         ...row,
-        programTitle: program?.title ?? row.programId,
-        summary: program?.summary ?? "",
+        programTitle: row.programTitle ?? row.programId,
+        summary: row.programSummary ?? "",
         tuitionLabel: formatMoney(row.tuitionCents),
         reservedSeats,
         remainingSeats: Math.max(row.capacity - reservedSeats, 0),
       };
     });
+  }
+
+  listPrograms({ includeInactive = false } = {}) {
+    return this.db
+      .prepare(`
+        SELECT
+          id,
+          title,
+          summary,
+          duration,
+          schedule,
+          is_active AS isActive,
+          sort_order AS sortOrder,
+          created_at AS createdAt,
+          updated_at AS updatedAt
+        FROM programs
+        ${includeInactive ? "" : "WHERE is_active = 1"}
+        ORDER BY sort_order ASC, title ASC
+      `)
+      .all();
+  }
+
+  createProgram(input) {
+    const existing = this.getProgramById(input.id, { includeInactive: true });
+
+    if (existing) {
+      throw new Error("A program with that id already exists.");
+    }
+
+    const timestamp = nowIso();
+
+    this.db
+      .prepare(`
+        INSERT INTO programs (
+          id,
+          title,
+          summary,
+          duration,
+          schedule,
+          is_active,
+          sort_order,
+          created_at,
+          updated_at
+        ) VALUES (
+          @id,
+          @title,
+          @summary,
+          @duration,
+          @schedule,
+          @isActive,
+          @sortOrder,
+          @createdAt,
+          @updatedAt
+        )
+      `)
+      .run({
+        ...input,
+        isActive: normalizeBoolean(input.isActive),
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+
+    return this.getProgramById(input.id, { includeInactive: true });
+  }
+
+  updateProgram(id, input) {
+    const existing = this.getProgramById(id, { includeInactive: true });
+
+    if (!existing) {
+      throw new Error("Program not found.");
+    }
+
+    this.db
+      .prepare(`
+        UPDATE programs
+        SET
+          title = @title,
+          summary = @summary,
+          duration = @duration,
+          schedule = @schedule,
+          is_active = @isActive,
+          sort_order = @sortOrder,
+          updated_at = @updatedAt
+        WHERE id = @id
+      `)
+      .run({
+        ...input,
+        id,
+        isActive: normalizeBoolean(input.isActive),
+        updatedAt: nowIso(),
+      });
+
+    return this.getProgramById(id, { includeInactive: true });
+  }
+
+  deleteProgram(id) {
+    const existing = this.getProgramById(id, { includeInactive: true });
+
+    if (!existing) {
+      throw new Error("Program not found.");
+    }
+
+    const cohortCount = this.db.prepare(`SELECT COUNT(*) AS count FROM cohorts WHERE program_id = ?`).get(id).count;
+    const enrollmentCount = this.db
+      .prepare(`SELECT COUNT(*) AS count FROM enrollments WHERE program_id = ?`)
+      .get(id).count;
+
+    if (cohortCount > 0 || enrollmentCount > 0) {
+      throw new Error("Remove dependent cohorts before deleting this program.");
+    }
+
+    this.db.prepare(`DELETE FROM programs WHERE id = ?`).run(id);
+  }
+
+  listCohortsForAdmin() {
+    this.releaseExpiredSeatHolds();
+    const now = nowIso();
+
+    return this.db
+      .prepare(`
+        SELECT
+          c.id,
+          c.program_id AS programId,
+          p.title AS programTitle,
+          c.title,
+          c.start_date AS startDate,
+          c.end_date AS endDate,
+          c.schedule_label AS scheduleLabel,
+          c.meeting_pattern AS meetingPattern,
+          c.tuition_cents AS tuitionCents,
+          c.capacity,
+          c.is_active AS isActive,
+          c.sort_order AS sortOrder,
+          COUNT(
+            CASE
+              WHEN e.payment_status = 'paid' THEN 1
+              WHEN e.payment_status = 'manual_pending' THEN 1
+              WHEN e.payment_status = 'checkout_pending' AND e.seat_hold_expires_at > @now THEN 1
+            END
+          ) AS reservedSeats
+        FROM cohorts c
+        LEFT JOIN programs p ON p.id = c.program_id
+        LEFT JOIN enrollments e ON e.cohort_id = c.id
+        GROUP BY c.id
+        ORDER BY c.sort_order ASC, c.start_date ASC
+      `)
+      .all({ now })
+      .map((row) => ({
+        ...row,
+        reservedSeats: Number(row.reservedSeats ?? 0),
+        remainingSeats: Math.max(row.capacity - Number(row.reservedSeats ?? 0), 0),
+        tuitionLabel: formatMoney(row.tuitionCents),
+      }));
+  }
+
+  createCohort(input) {
+    const existing = this.getCohortById(input.id);
+
+    if (existing) {
+      throw new Error("A cohort with that id already exists.");
+    }
+
+    const program = this.getProgramById(input.programId, { includeInactive: true });
+
+    if (!program) {
+      throw new Error("Selected program was not found.");
+    }
+
+    const timestamp = nowIso();
+
+    this.db
+      .prepare(`
+        INSERT INTO cohorts (
+          id,
+          program_id,
+          title,
+          start_date,
+          end_date,
+          schedule_label,
+          meeting_pattern,
+          tuition_cents,
+          capacity,
+          is_active,
+          sort_order,
+          created_at,
+          updated_at
+        ) VALUES (
+          @id,
+          @programId,
+          @title,
+          @startDate,
+          @endDate,
+          @scheduleLabel,
+          @meetingPattern,
+          @tuitionCents,
+          @capacity,
+          @isActive,
+          @sortOrder,
+          @createdAt,
+          @updatedAt
+        )
+      `)
+      .run({
+        ...input,
+        isActive: normalizeBoolean(input.isActive),
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+
+    return this.getCohortById(input.id);
+  }
+
+  updateCohort(id, input) {
+    const existing = this.getCohortById(id);
+
+    if (!existing) {
+      throw new Error("Cohort not found.");
+    }
+
+    const program = this.getProgramById(input.programId, { includeInactive: true });
+
+    if (!program) {
+      throw new Error("Selected program was not found.");
+    }
+
+    this.db
+      .prepare(`
+        UPDATE cohorts
+        SET
+          program_id = @programId,
+          title = @title,
+          start_date = @startDate,
+          end_date = @endDate,
+          schedule_label = @scheduleLabel,
+          meeting_pattern = @meetingPattern,
+          tuition_cents = @tuitionCents,
+          capacity = @capacity,
+          is_active = @isActive,
+          sort_order = @sortOrder,
+          updated_at = @updatedAt
+        WHERE id = @id
+      `)
+      .run({
+        ...input,
+        id,
+        isActive: normalizeBoolean(input.isActive),
+        updatedAt: nowIso(),
+      });
+
+    return this.getCohortById(id);
+  }
+
+  deleteCohort(id) {
+    const existing = this.getCohortById(id);
+
+    if (!existing) {
+      throw new Error("Cohort not found.");
+    }
+
+    const enrollmentCount = this.db
+      .prepare(`SELECT COUNT(*) AS count FROM enrollments WHERE cohort_id = ?`)
+      .get(id).count;
+
+    if (enrollmentCount > 0) {
+      throw new Error("Existing enrollments are attached to this cohort.");
+    }
+
+    this.db.prepare(`DELETE FROM cohorts WHERE id = ?`).run(id);
   }
 
   createEnrollment(input) {
