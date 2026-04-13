@@ -23,6 +23,46 @@ function formatMoney(cents) {
   }).format(cents / 100);
 }
 
+function hasColumn(db, tableName, columnName) {
+  return db
+    .prepare(`PRAGMA table_info(${tableName})`)
+    .all()
+    .some((column) => column.name === columnName);
+}
+
+function addColumnIfMissing(db, tableName, columnName, definition) {
+  if (!hasColumn(db, tableName, columnName)) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition}`);
+  }
+}
+
+function mapCohortRecord(row) {
+  if (!row) {
+    return null;
+  }
+
+  const tuitionCents = Number(row.tuitionCents ?? 0);
+  const capacity = Number(row.capacity ?? 0);
+  const isActive = Boolean(row.isActive);
+  const allowPaymentPlan = Boolean(row.allowPaymentPlan);
+  const paymentPlanDepositCents = allowPaymentPlan ? Number(row.paymentPlanDepositCents ?? 0) : null;
+  const paymentPlanRemainingCents =
+    allowPaymentPlan && paymentPlanDepositCents !== null ? Math.max(tuitionCents - paymentPlanDepositCents, 0) : null;
+
+  return {
+    ...row,
+    tuitionCents,
+    capacity,
+    isActive,
+    allowPaymentPlan,
+    paymentPlanDepositCents,
+    paymentPlanDepositLabel: paymentPlanDepositCents !== null ? formatMoney(paymentPlanDepositCents) : null,
+    paymentPlanRemainingCents,
+    paymentPlanRemainingLabel: paymentPlanRemainingCents !== null ? formatMoney(paymentPlanRemainingCents) : null,
+    tuitionLabel: formatMoney(tuitionCents),
+  };
+}
+
 export class EnrollmentDatabase {
   constructor(filePath) {
     this.filePath = filePath;
@@ -58,6 +98,8 @@ export class EnrollmentDatabase {
         schedule_label TEXT NOT NULL,
         meeting_pattern TEXT NOT NULL,
         tuition_cents INTEGER NOT NULL,
+        allow_payment_plan INTEGER NOT NULL DEFAULT 0,
+        payment_plan_deposit_cents INTEGER,
         capacity INTEGER NOT NULL,
         is_active INTEGER NOT NULL DEFAULT 1,
         sort_order INTEGER NOT NULL DEFAULT 0,
@@ -82,7 +124,10 @@ export class EnrollmentDatabase {
         notes TEXT,
         status TEXT NOT NULL,
         payment_status TEXT NOT NULL,
+        payment_option TEXT NOT NULL DEFAULT 'full',
         payment_amount_cents INTEGER NOT NULL,
+        tuition_total_cents INTEGER NOT NULL DEFAULT 0,
+        balance_due_cents INTEGER NOT NULL DEFAULT 0,
         stripe_checkout_session_id TEXT,
         seat_hold_expires_at TEXT,
         paid_at TEXT,
@@ -120,6 +165,30 @@ export class EnrollmentDatabase {
         WHERE stripe_checkout_session_id IS NOT NULL;
       CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at);
       CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at);
+    `);
+
+    addColumnIfMissing(this.db, "cohorts", "allow_payment_plan", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing(this.db, "cohorts", "payment_plan_deposit_cents", "INTEGER");
+    addColumnIfMissing(this.db, "enrollments", "payment_option", "TEXT NOT NULL DEFAULT 'full'");
+    addColumnIfMissing(this.db, "enrollments", "tuition_total_cents", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing(this.db, "enrollments", "balance_due_cents", "INTEGER NOT NULL DEFAULT 0");
+
+    this.db.exec(`
+      UPDATE cohorts
+      SET allow_payment_plan = 0
+      WHERE allow_payment_plan IS NULL;
+
+      UPDATE enrollments
+      SET payment_option = 'full'
+      WHERE payment_option IS NULL OR payment_option = '';
+
+      UPDATE enrollments
+      SET tuition_total_cents = payment_amount_cents
+      WHERE tuition_total_cents IS NULL OR tuition_total_cents = 0;
+
+      UPDATE enrollments
+      SET balance_due_cents = 0
+      WHERE balance_due_cents IS NULL;
     `);
   }
 
@@ -176,6 +245,8 @@ export class EnrollmentDatabase {
         schedule_label,
         meeting_pattern,
         tuition_cents,
+        allow_payment_plan,
+        payment_plan_deposit_cents,
         capacity,
         is_active,
         sort_order,
@@ -190,6 +261,8 @@ export class EnrollmentDatabase {
         @scheduleLabel,
         @meetingPattern,
         @tuitionCents,
+        @allowPaymentPlan,
+        @paymentPlanDepositCents,
         @capacity,
         @isActive,
         @sortOrder,
@@ -204,6 +277,8 @@ export class EnrollmentDatabase {
       for (const cohort of cohortSeeds) {
         insert.run({
           ...cohort,
+          allowPaymentPlan: normalizeBoolean(cohort.allowPaymentPlan),
+          paymentPlanDepositCents: cohort.paymentPlanDepositCents ?? null,
           isActive: normalizeBoolean(cohort.isActive),
           createdAt: timestamp,
           updatedAt: timestamp,
@@ -215,7 +290,7 @@ export class EnrollmentDatabase {
   }
 
   getCohortById(id) {
-    return this.db
+    const row = this.db
       .prepare(`
         SELECT
           c.id,
@@ -226,6 +301,8 @@ export class EnrollmentDatabase {
           c.schedule_label AS scheduleLabel,
           c.meeting_pattern AS meetingPattern,
           c.tuition_cents AS tuitionCents,
+          c.allow_payment_plan AS allowPaymentPlan,
+          c.payment_plan_deposit_cents AS paymentPlanDepositCents,
           c.capacity,
           c.is_active AS isActive,
           c.sort_order AS sortOrder,
@@ -236,6 +313,8 @@ export class EnrollmentDatabase {
         WHERE c.id = ?
       `)
       .get(id);
+
+    return mapCohortRecord(row);
   }
 
   getProgramById(id, { includeInactive = false } = {}) {
@@ -300,6 +379,8 @@ export class EnrollmentDatabase {
           c.schedule_label AS scheduleLabel,
           c.meeting_pattern AS meetingPattern,
           c.tuition_cents AS tuitionCents,
+          c.allow_payment_plan AS allowPaymentPlan,
+          c.payment_plan_deposit_cents AS paymentPlanDepositCents,
           c.capacity,
           c.sort_order AS sortOrder,
           p.title AS programTitle,
@@ -307,6 +388,7 @@ export class EnrollmentDatabase {
           COUNT(
             CASE
               WHEN e.payment_status = 'paid' THEN 1
+              WHEN e.payment_status = 'deposit_paid' THEN 1
               WHEN e.payment_status = 'manual_pending' THEN 1
               WHEN e.payment_status = 'checkout_pending' AND e.seat_hold_expires_at > @now THEN 1
             END
@@ -323,14 +405,14 @@ export class EnrollmentDatabase {
 
     return rows.map((row) => {
       const reservedSeats = Number(row.reservedSeats ?? 0);
+      const cohort = mapCohortRecord(row);
 
       return {
-        ...row,
+        ...cohort,
         programTitle: row.programTitle ?? row.programId,
         summary: row.programSummary ?? "",
-        tuitionLabel: formatMoney(row.tuitionCents),
         reservedSeats,
-        remainingSeats: Math.max(row.capacity - reservedSeats, 0),
+        remainingSeats: Math.max(cohort.capacity - reservedSeats, 0),
       };
     });
   }
@@ -463,12 +545,15 @@ export class EnrollmentDatabase {
           c.schedule_label AS scheduleLabel,
           c.meeting_pattern AS meetingPattern,
           c.tuition_cents AS tuitionCents,
+          c.allow_payment_plan AS allowPaymentPlan,
+          c.payment_plan_deposit_cents AS paymentPlanDepositCents,
           c.capacity,
           c.is_active AS isActive,
           c.sort_order AS sortOrder,
           COUNT(
             CASE
               WHEN e.payment_status = 'paid' THEN 1
+              WHEN e.payment_status = 'deposit_paid' THEN 1
               WHEN e.payment_status = 'manual_pending' THEN 1
               WHEN e.payment_status = 'checkout_pending' AND e.seat_hold_expires_at > @now THEN 1
             END
@@ -481,10 +566,9 @@ export class EnrollmentDatabase {
       `)
       .all({ now })
       .map((row) => ({
-        ...row,
+        ...mapCohortRecord(row),
         reservedSeats: Number(row.reservedSeats ?? 0),
-        remainingSeats: Math.max(row.capacity - Number(row.reservedSeats ?? 0), 0),
-        tuitionLabel: formatMoney(row.tuitionCents),
+        remainingSeats: Math.max(Number(row.capacity ?? 0) - Number(row.reservedSeats ?? 0), 0),
       }));
   }
 
@@ -514,6 +598,8 @@ export class EnrollmentDatabase {
           schedule_label,
           meeting_pattern,
           tuition_cents,
+          allow_payment_plan,
+          payment_plan_deposit_cents,
           capacity,
           is_active,
           sort_order,
@@ -528,6 +614,8 @@ export class EnrollmentDatabase {
           @scheduleLabel,
           @meetingPattern,
           @tuitionCents,
+          @allowPaymentPlan,
+          @paymentPlanDepositCents,
           @capacity,
           @isActive,
           @sortOrder,
@@ -537,6 +625,8 @@ export class EnrollmentDatabase {
       `)
       .run({
         ...input,
+        allowPaymentPlan: normalizeBoolean(input.allowPaymentPlan),
+        paymentPlanDepositCents: input.paymentPlanDepositCents ?? null,
         isActive: normalizeBoolean(input.isActive),
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -569,6 +659,8 @@ export class EnrollmentDatabase {
           schedule_label = @scheduleLabel,
           meeting_pattern = @meetingPattern,
           tuition_cents = @tuitionCents,
+          allow_payment_plan = @allowPaymentPlan,
+          payment_plan_deposit_cents = @paymentPlanDepositCents,
           capacity = @capacity,
           is_active = @isActive,
           sort_order = @sortOrder,
@@ -578,6 +670,8 @@ export class EnrollmentDatabase {
       .run({
         ...input,
         id,
+        allowPaymentPlan: normalizeBoolean(input.allowPaymentPlan),
+        paymentPlanDepositCents: input.paymentPlanDepositCents ?? null,
         isActive: normalizeBoolean(input.isActive),
         updatedAt: nowIso(),
       });
@@ -618,6 +712,7 @@ export class EnrollmentDatabase {
         WHERE cohort_id = @cohortId
           AND (
             payment_status = 'paid'
+            OR payment_status = 'deposit_paid'
             OR payment_status = 'manual_pending'
             OR (payment_status = 'checkout_pending' AND seat_hold_expires_at > @now)
           )
@@ -649,7 +744,10 @@ export class EnrollmentDatabase {
           notes,
           status,
           payment_status,
+          payment_option,
           payment_amount_cents,
+          tuition_total_cents,
+          balance_due_cents,
           stripe_checkout_session_id,
           seat_hold_expires_at,
           paid_at,
@@ -672,7 +770,10 @@ export class EnrollmentDatabase {
           @notes,
           @status,
           @paymentStatus,
+          @paymentOption,
           @paymentAmountCents,
+          @tuitionTotalCents,
+          @balanceDueCents,
           NULL,
           NULL,
           NULL,
@@ -710,7 +811,10 @@ export class EnrollmentDatabase {
           notes,
           status,
           payment_status AS paymentStatus,
+          payment_option AS paymentOption,
           payment_amount_cents AS paymentAmountCents,
+          tuition_total_cents AS tuitionTotalCents,
+          balance_due_cents AS balanceDueCents,
           stripe_checkout_session_id AS stripeCheckoutSessionId,
           seat_hold_expires_at AS seatHoldExpiresAt,
           paid_at AS paidAt,
@@ -773,7 +877,10 @@ export class EnrollmentDatabase {
       .prepare(`
         UPDATE enrollments
         SET
-          status = 'submitted',
+          status = CASE
+            WHEN payment_option = 'deposit' AND balance_due_cents > 0 THEN 'payment_plan_pending'
+            ELSE 'submitted'
+          END,
           payment_status = 'manual_pending',
           updated_at = @updatedAt
         WHERE id = @enrollmentId
@@ -803,8 +910,14 @@ export class EnrollmentDatabase {
       .prepare(`
         UPDATE enrollments
         SET
-          status = 'registered',
-          payment_status = 'paid',
+          status = CASE
+            WHEN payment_option = 'deposit' AND balance_due_cents > 0 THEN 'payment_plan_active'
+            ELSE 'registered'
+          END,
+          payment_status = CASE
+            WHEN payment_option = 'deposit' AND balance_due_cents > 0 THEN 'deposit_paid'
+            ELSE 'paid'
+          END,
           seat_hold_expires_at = NULL,
           paid_at = @paidAt,
           updated_at = @updatedAt
@@ -851,7 +964,10 @@ export class EnrollmentDatabase {
           e.cohort_id AS cohortId,
           e.status,
           e.payment_status AS paymentStatus,
+          e.payment_option AS paymentOption,
           e.payment_amount_cents AS paymentAmountCents,
+          e.tuition_total_cents AS tuitionTotalCents,
+          e.balance_due_cents AS balanceDueCents,
           e.created_at AS createdAt,
           c.title AS cohortTitle,
           c.start_date AS startDate,
@@ -865,7 +981,12 @@ export class EnrollmentDatabase {
     const total = this.db.prepare(`SELECT COUNT(*) AS count FROM enrollments`).get().count;
 
     return {
-      items,
+      items: items.map((item) => ({
+        ...item,
+        paymentAmountLabel: formatMoney(item.paymentAmountCents),
+        tuitionTotalLabel: formatMoney(item.tuitionTotalCents),
+        balanceDueLabel: formatMoney(item.balanceDueCents),
+      })),
       page,
       pageSize,
       total,
@@ -992,6 +1113,7 @@ export class EnrollmentDatabase {
           (SELECT COUNT(*) FROM cohorts WHERE is_active = 1) AS activeCohorts,
           (SELECT COUNT(*) FROM enrollments) AS enrollments,
           (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'paid') AS paidEnrollments,
+          (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'deposit_paid') AS activePaymentPlans,
           (
             SELECT COUNT(*)
             FROM enrollments
@@ -1011,6 +1133,8 @@ export class EnrollmentDatabase {
           e.email,
           e.status,
           e.payment_status AS paymentStatus,
+          e.payment_option AS paymentOption,
+          e.balance_due_cents AS balanceDueCents,
           e.created_at AS createdAt,
           c.title AS cohortTitle
         FROM enrollments e

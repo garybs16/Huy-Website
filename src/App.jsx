@@ -61,6 +61,7 @@ const initialEnrollmentState = {
   emergencyContactPhone: "",
   programId: "",
   cohortId: "",
+  paymentOption: "full",
   notes: "",
 };
 
@@ -104,6 +105,11 @@ function AppEffects({ setEnrollmentStatus }) {
           setEnrollmentStatus({
             type: "success",
             text: `Payment received. Enrollment ${enrollment.enrollmentId} is confirmed and admissions will follow up with next steps.`,
+          });
+        } else if (enrollment.paymentStatus === "deposit_paid") {
+          setEnrollmentStatus({
+            type: "success",
+            text: `Deposit received. Enrollment ${enrollment.enrollmentId} now holds the seat, and the remaining balance will be coordinated by admissions before class start.`,
           });
         } else if (checkoutStatus === "cancelled" || enrollment.paymentStatus === "checkout_expired") {
           setEnrollmentStatus({
@@ -227,7 +233,13 @@ function App() {
 
     setEnrollmentForm((current) => {
       if (name === "programId") {
-        return { ...current, programId: value, cohortId: "" };
+        return { ...current, programId: value, cohortId: "", paymentOption: "full" };
+      }
+
+      if (name === "cohortId") {
+        const cohort = cohorts.find((item) => item.id === value);
+        const paymentOption = cohort?.allowPaymentPlan ? current.paymentOption : "full";
+        return { ...current, cohortId: value, paymentOption };
       }
 
       return { ...current, [name]: value };
@@ -301,6 +313,7 @@ function App() {
         emergencyContactName: enrollmentForm.emergencyContactName,
         emergencyContactPhone: enrollmentForm.emergencyContactPhone,
         cohortId: enrollmentForm.cohortId,
+        paymentOption: enrollmentForm.paymentOption,
         notes: enrollmentForm.notes,
       });
 
@@ -421,6 +434,14 @@ function App() {
     (cohort) => !enrollmentForm.programId || cohort.programId === enrollmentForm.programId
   );
   const selectedCohort = cohorts.find((cohort) => cohort.id === enrollmentForm.cohortId) ?? null;
+
+  useEffect(() => {
+    if (selectedCohort?.allowPaymentPlan || enrollmentForm.paymentOption === "full") {
+      return;
+    }
+
+    setEnrollmentForm((current) => ({ ...current, paymentOption: "full" }));
+  }, [selectedCohort, enrollmentForm.paymentOption]);
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>

@@ -718,6 +718,103 @@
   margin-top: 0.45rem;
 }
 
+.payment-choice-block {
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem;
+  border: 1px solid rgba(4, 107, 210, 0.12);
+  border-radius: 1.1rem;
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0.98) 0%, rgba(239, 245, 251, 0.92) 100%);
+}
+
+.payment-choice-copy h3,
+.payment-breakdown strong,
+.payment-choice-card strong {
+  color: var(--ink-strong);
+}
+
+.payment-choice-copy p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.payment-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.payment-choice-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.payment-choice-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(4, 107, 210, 0.22);
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.07);
+}
+
+.payment-choice-card input {
+  margin: 0;
+}
+
+.payment-choice-card span {
+  color: var(--brand);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.payment-choice-card small {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.payment-choice-card.is-selected {
+  border-color: rgba(4, 107, 210, 0.38);
+  box-shadow: 0 18px 32px rgba(4, 107, 210, 0.11);
+}
+
+.payment-choice-card.is-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.payment-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.payment-breakdown div {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.payment-breakdown span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .ordered-list {
   padding-left: 1.35rem;
 }
@@ -982,6 +1079,7 @@
   display: grid;
   justify-items: end;
   gap: 0.55rem;
+  flex-shrink: 0;
 }
 
 .admin-inline-button {
@@ -1372,6 +1470,11 @@
   .tuition-line,
   .admin-row {
     flex-direction: column;
+  }
+
+  .payment-choice-grid,
+  .payment-breakdown {
+    grid-template-columns: 1fr;
   }
 
   .schedule-snapshot p,

@@ -37,6 +37,8 @@ function createEmptyCohortForm() {
     scheduleLabel: "",
     meetingPattern: "",
     tuitionCents: "",
+    allowPaymentPlan: false,
+    paymentPlanDepositCents: "",
     capacity: "",
     sortOrder: "0",
     isActive: true,
@@ -65,6 +67,8 @@ function toCohortForm(cohort) {
     scheduleLabel: cohort.scheduleLabel,
     meetingPattern: cohort.meetingPattern,
     tuitionCents: String(cohort.tuitionCents ?? ""),
+    allowPaymentPlan: Boolean(cohort.allowPaymentPlan),
+    paymentPlanDepositCents: cohort.paymentPlanDepositCents ? String(cohort.paymentPlanDepositCents) : "",
     capacity: String(cohort.capacity ?? ""),
     sortOrder: String(cohort.sortOrder ?? 0),
     isActive: Boolean(cohort.isActive),
@@ -184,8 +188,10 @@ export function AdminPage({
     const payload = {
       ...cohortForm,
       tuitionCents: Number(cohortForm.tuitionCents || 0),
+      paymentPlanDepositCents: cohortForm.allowPaymentPlan ? Number(cohortForm.paymentPlanDepositCents || 0) : null,
       capacity: Number(cohortForm.capacity || 0),
       sortOrder: Number(cohortForm.sortOrder || 0),
+      allowPaymentPlan: Boolean(cohortForm.allowPaymentPlan),
       isActive: Boolean(cohortForm.isActive),
     };
 
@@ -240,7 +246,11 @@ export function AdminPage({
               </article>
               <article className="metric-card alt">
                 <strong>{adminOverview.metrics.paidEnrollments}</strong>
-                <span>Paid enrollments</span>
+                <span>Paid in full</span>
+              </article>
+              <article className="metric-card alt">
+                <strong>{adminOverview.metrics.activePaymentPlans}</strong>
+                <span>Active payment plans</span>
               </article>
               <article className="metric-card alt">
                 <strong>{adminOverview.metrics.pendingPayments}</strong>
@@ -452,6 +462,28 @@ export function AdminPage({
                     </label>
                   </div>
                   <label className="admin-toggle">
+                    <input
+                      name="allowPaymentPlan"
+                      type="checkbox"
+                      checked={cohortForm.allowPaymentPlan}
+                      onChange={handleCohortInput}
+                    />
+                    <span>Offer a deposit-based payment plan for this cohort</span>
+                  </label>
+                  <label>
+                    <span>Deposit cents</span>
+                    <input
+                      name="paymentPlanDepositCents"
+                      type="number"
+                      min="0"
+                      value={cohortForm.paymentPlanDepositCents}
+                      onChange={handleCohortInput}
+                      disabled={!cohortForm.allowPaymentPlan}
+                      required={cohortForm.allowPaymentPlan}
+                      placeholder={cohortForm.allowPaymentPlan ? "65000" : "Enable payment plan first"}
+                    />
+                  </label>
+                  <label className="admin-toggle">
                     <input name="isActive" type="checkbox" checked={cohortForm.isActive} onChange={handleCohortInput} />
                     <span>Cohort is visible on the public site</span>
                   </label>
@@ -476,6 +508,11 @@ export function AdminPage({
                         <p>{item.programTitle}</p>
                         <p>{item.startDate} to {item.endDate}</p>
                         <p>{item.remainingSeats} seats left | {item.tuitionLabel}</p>
+                        <p>
+                          {item.allowPaymentPlan
+                            ? `Plan enabled | ${item.paymentPlanDepositLabel} deposit`
+                            : "Full payment only"}
+                        </p>
                       </div>
                       <div className="admin-record-actions">
                         <span>{item.isActive ? "Active" : "Inactive"}</span>
@@ -518,7 +555,11 @@ export function AdminPage({
                       </div>
                       <div>
                         <p>{item.cohortTitle}</p>
-                        <span>{item.paymentStatus}</span>
+                        <p>{item.paymentOption === "deposit" ? "Deposit plan" : "Paid in full"}</p>
+                        <span>
+                          {item.paymentStatus}
+                          {item.paymentOption === "deposit" && item.balanceDueLabel ? ` | ${item.balanceDueLabel} left` : ""}
+                        </span>
                       </div>
                     </div>
                   ))}

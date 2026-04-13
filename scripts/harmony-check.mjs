@@ -35,9 +35,10 @@ async function run() {
     const cohortsBody = await cohortsRes.json();
     assert(Array.isArray(cohortsBody.items), "Cohorts payload must contain items array");
     assert(cohortsBody.items.length > 0, "Cohorts array cannot be empty");
+    const depositCohort = cohortsBody.items.find((item) => item.allowPaymentPlan);
+    assert(depositCohort, "At least one cohort must offer a payment plan");
 
     const firstProgramId = programsBody.items[0].id;
-    const firstCohortId = cohortsBody.items[0].id;
 
     const inquiryRes = await fetch(`http://localhost:${port}/api/inquiries`, {
       method: "POST",
@@ -75,13 +76,18 @@ async function run() {
         postalCode: "92614",
         emergencyContactName: "Casey Harmony",
         emergencyContactPhone: "949-555-0101",
-        cohortId: firstCohortId,
+        cohortId: depositCohort.id,
+        paymentOption: "deposit",
         notes: `Interested in ${firstProgramId}`,
       }),
     });
     assert(enrollmentRes.status === 201, "Enrollment submission failed contract check");
     const enrollmentBody = await enrollmentRes.json();
     assert(typeof enrollmentBody.enrollmentId === "string", "Enrollment response must contain enrollmentId");
+    assert(enrollmentBody.paymentStatus === "manual_pending", "Deposit enrollment should fall back to manual pending without Stripe");
+    assert(enrollmentBody.paymentOption === "deposit", "Deposit enrollment should preserve payment option");
+    assert(enrollmentBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Deposit amount mismatch");
+    assert(enrollmentBody.balanceDueCents > 0, "Deposit enrollment must retain a remaining balance");
 
     const enrollmentStatusRes = await fetch(
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
@@ -93,6 +99,8 @@ async function run() {
       typeof enrollmentStatusBody.paymentStatus === "string",
       "Enrollment status must include paymentStatus"
     );
+    assert(enrollmentStatusBody.paymentOption === "deposit", "Enrollment status must include deposit payment option");
+    assert(enrollmentStatusBody.balanceDueCents > 0, "Enrollment status must include remaining balance");
 
     const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
       headers: { "x-api-key": "harmony-admin-key" },
@@ -134,6 +142,8 @@ async function run() {
         scheduleLabel: "Weekend",
         meetingPattern: "Saturday and Sunday | 9:00 AM to 2:00 PM",
         tuitionCents: 150000,
+        allowPaymentPlan: true,
+        paymentPlanDepositCents: 50000,
         capacity: 10,
         isActive: true,
         sortOrder: 95,

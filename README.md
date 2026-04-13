@@ -6,6 +6,7 @@ This project now includes:
 - A Node/Express backend API for admissions, registration, and operations
 - SQLite-backed storage for cohorts, enrollments, inquiries, and waitlist
 - Stripe Checkout support for online tuition payment
+- Cohort-level payment-plan support with deposit-now / balance-later tracking
 - An admin dashboard section in the frontend backed by protected APIs
 - Admin CRUD for programs and cohorts backed by SQLite
 
@@ -67,7 +68,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `POST /api/inquiries`: submit contact inquiry
 - `POST /api/waitlist`: submit waitlist request
 - `GET /api/cohorts`: live cohort availability with remaining seats
-- `POST /api/enrollments`: create enrollment and return Stripe Checkout URL when configured
+- `POST /api/enrollments`: create enrollment with `paymentOption: "full" | "deposit"` and return Stripe Checkout URL when configured
 - `GET /api/enrollments/:id/status`: enrollment payment/status verification after checkout
 - `GET /api/admin/overview`: admin metrics and cohort capacity summary
 - `GET /api/admin/programs`: admin-only program list
@@ -96,6 +97,11 @@ This database now includes:
 - inquiries
 - waitlist submissions
 
+Payment-plan data is also persisted:
+
+- cohorts can enable `allow_payment_plan` and store `payment_plan_deposit_cents`
+- enrollments store `payment_option`, `payment_amount_cents`, `tuition_total_cents`, and `balance_due_cents`
+
 Important:
 
 - Durable production operation still requires persistent disk.
@@ -110,6 +116,13 @@ Important:
 - Stripe Checkout only starts when `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL` are all configured together.
 - If Stripe is not configured, enrollments still work in manual payment mode and admissions can follow up directly.
 - `GET /api/health` now reports database readiness plus whether payments are configured or manual.
+
+## Payment flow
+
+- Each cohort can be configured for full payment only, or full payment plus a deposit plan.
+- A deposit plan charges only the configured deposit amount through Stripe Checkout.
+- The remaining balance stays attached to the enrollment record and is surfaced in admin for follow-up.
+- The current implementation is a school-friendly MVP payment plan, not automatic recurring billing.
 
 ## Deployment note
 

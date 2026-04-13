@@ -14,6 +14,7 @@ async function run() {
   process.env.DATA_DIR = tempDataDir;
   process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
   process.env.API_ADMIN_KEY = "production-admin-key";
+  process.env.SERVE_STATIC_APP = "true";
 
   const { startServer } = await import("../server/index.js");
   const port = 4030;
@@ -50,6 +51,8 @@ async function run() {
     assert(cohortsRes.ok, "Production API failed to serve cohorts");
     const cohortsBody = await cohortsRes.json();
     assert(Array.isArray(cohortsBody.items) && cohortsBody.items.length > 0, "Cohorts payload is invalid");
+    const depositCohort = cohortsBody.items.find((item) => item.allowPaymentPlan);
+    assert(depositCohort, "Production cohorts must expose at least one payment-plan option");
 
     const inquiryRes = await fetch(`http://localhost:${port}/api/inquiries`, {
       method: "POST",
@@ -88,17 +91,23 @@ async function run() {
         postalCode: "92626",
         emergencyContactName: "Jordan Enrollment",
         emergencyContactPhone: "949-555-0111",
-        cohortId: cohortsBody.items[0].id,
+        cohortId: depositCohort.id,
+        paymentOption: "deposit",
         notes: "Production smoke registration.",
       }),
     });
     assert(enrollmentRes.status === 201, "Production enrollment submission failed");
     const enrollmentBody = await enrollmentRes.json();
+    assert(enrollmentBody.paymentOption === "deposit", "Production enrollment should keep deposit payment option");
+    assert(enrollmentBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Production deposit amount mismatch");
+    assert(enrollmentBody.balanceDueCents > 0, "Production enrollment must keep a remaining balance");
 
     const enrollmentStatusRes = await fetch(
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
     );
     assert(enrollmentStatusRes.ok, "Production enrollment status endpoint failed");
+    const enrollmentStatusBody = await enrollmentStatusRes.json();
+    assert(enrollmentStatusBody.paymentOption === "deposit", "Production enrollment status must include payment option");
 
     const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
       headers: { "x-api-key": "production-admin-key" },
@@ -138,6 +147,8 @@ async function run() {
         scheduleLabel: "Evening",
         meetingPattern: "Monday to Thursday | 5:30 PM to 8:30 PM",
         tuitionCents: 175000,
+        allowPaymentPlan: true,
+        paymentPlanDepositCents: 60000,
         capacity: 12,
         isActive: true,
         sortOrder: 89,

@@ -13,6 +13,13 @@ function formatDateLabel(value) {
   }).format(new Date(`${value}T12:00:00Z`));
 }
 
+function formatMoney(cents) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format((cents ?? 0) / 100);
+}
+
 export function RegisterPage({
   programs,
   cohorts,
@@ -28,8 +35,16 @@ export function RegisterPage({
   const registrationSteps = [
     "Choose the program that matches your goal.",
     "Select the cohort with the best timing and available seats.",
-    "Submit one student record before checkout or admissions follow-up.",
+    "Choose full tuition or a published deposit plan before checkout or admissions follow-up.",
   ];
+  const dueTodayCents =
+    selectedCohort && enrollmentForm.paymentOption === "deposit" && selectedCohort.allowPaymentPlan
+      ? selectedCohort.paymentPlanDepositCents ?? 0
+      : selectedCohort?.tuitionCents ?? 0;
+  const remainingBalanceCents =
+    selectedCohort && enrollmentForm.paymentOption === "deposit" && selectedCohort.allowPaymentPlan
+      ? selectedCohort.paymentPlanRemainingCents ?? 0
+      : 0;
 
   return (
     <section className="section">
@@ -70,6 +85,12 @@ export function RegisterPage({
                 <li>Schedule: {selectedCohort.meetingPattern}</li>
                 <li>Tuition: {selectedCohort.tuitionLabel}</li>
                 <li>Remaining seats: {selectedCohort.remainingSeats}</li>
+                {selectedCohort.allowPaymentPlan ? (
+                  <li>
+                    Payment plan: {selectedCohort.paymentPlanDepositLabel} deposit, then{" "}
+                    {selectedCohort.paymentPlanRemainingLabel} remaining
+                  </li>
+                ) : null}
               </ul>
             </div>
           ) : (
@@ -191,6 +212,75 @@ export function RegisterPage({
               </label>
             </div>
 
+            {selectedCohort ? (
+              <section className="payment-choice-block">
+                <div className="payment-choice-copy">
+                  <span className="section-kicker">Payment setup</span>
+                  <h3>Choose how this seat should be reserved.</h3>
+                  <p>
+                    The amount due today changes immediately. If you choose a deposit, admissions will collect the
+                    remaining balance before class start.
+                  </p>
+                </div>
+
+                <div className="payment-choice-grid">
+                  <label className={`payment-choice-card ${enrollmentForm.paymentOption === "full" ? "is-selected" : ""}`}>
+                    <input
+                      type="radio"
+                      name="paymentOption"
+                      value="full"
+                      checked={enrollmentForm.paymentOption === "full"}
+                      onChange={onInput}
+                    />
+                    <span>Pay in full</span>
+                    <strong>{selectedCohort.tuitionLabel}</strong>
+                    <small>Complete tuition now and confirm the seat after payment clears.</small>
+                  </label>
+
+                  <label
+                    className={`payment-choice-card ${
+                      enrollmentForm.paymentOption === "deposit" ? "is-selected" : ""
+                    } ${selectedCohort.allowPaymentPlan ? "" : "is-disabled"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentOption"
+                      value="deposit"
+                      checked={enrollmentForm.paymentOption === "deposit"}
+                      onChange={onInput}
+                      disabled={!selectedCohort.allowPaymentPlan}
+                    />
+                    <span>Pay deposit</span>
+                    <strong>
+                      {selectedCohort.allowPaymentPlan
+                        ? selectedCohort.paymentPlanDepositLabel
+                        : "Not available"}
+                    </strong>
+                    <small>
+                      {selectedCohort.allowPaymentPlan
+                        ? `${selectedCohort.paymentPlanRemainingLabel} stays due later through admissions.`
+                        : "This cohort requires full tuition at checkout."}
+                    </small>
+                  </label>
+                </div>
+
+                <div className="payment-breakdown">
+                  <div>
+                    <span>Due today</span>
+                    <strong>{formatMoney(dueTodayCents)}</strong>
+                  </div>
+                  <div>
+                    <span>Remaining balance</span>
+                    <strong>{formatMoney(remainingBalanceCents)}</strong>
+                  </div>
+                  <div>
+                    <span>Payment path</span>
+                    <strong>{selectedCohort.allowPaymentPlan && enrollmentForm.paymentOption === "deposit" ? "Deposit plan" : "Paid in full"}</strong>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
             <label>
               <span>Admissions notes</span>
               <textarea
@@ -203,7 +293,11 @@ export function RegisterPage({
             </label>
 
             <button type="submit" className="btn btn-primary" disabled={enrollmentPending || cohorts.length === 0}>
-              {enrollmentPending ? "Preparing checkout..." : "Start Enrollment"}
+              {enrollmentPending
+                ? "Preparing checkout..."
+                : enrollmentForm.paymentOption === "deposit"
+                  ? "Start Deposit Checkout"
+                  : "Start Enrollment"}
             </button>
           </form>
 

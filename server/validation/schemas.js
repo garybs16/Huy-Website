@@ -95,6 +95,7 @@ export const enrollmentSchema = z.object({
       .refine((value) => phonePattern.test(value), "Emergency contact phone format is invalid")
   ),
   cohortId: requiredString("cohortId", 2, 100),
+  paymentOption: z.enum(["full", "deposit"]).default("full"),
   notes: optionalString(600),
 });
 
@@ -139,6 +140,8 @@ export const adminCohortSchema = z
     scheduleLabel: requiredString("scheduleLabel", 2, 80),
     meetingPattern: requiredString("meetingPattern", 2, 160),
     tuitionCents: z.coerce.number().int().min(0).max(10_000_000),
+    allowPaymentPlan: z.boolean().default(false),
+    paymentPlanDepositCents: z.union([z.coerce.number().int().min(0).max(10_000_000), z.null()]).default(null),
     capacity: z.coerce.number().int().min(1).max(1000),
     isActive: z.boolean().default(true),
     sortOrder: z.coerce.number().int().min(0).max(10000).default(0),
@@ -146,4 +149,28 @@ export const adminCohortSchema = z
   .refine((value) => value.endDate >= value.startDate, {
     message: "endDate must be on or after startDate",
     path: ["endDate"],
+  })
+  .superRefine((value, context) => {
+    if (!value.allowPaymentPlan) {
+      return;
+    }
+
+    if (value.paymentPlanDepositCents === null || value.paymentPlanDepositCents <= 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["paymentPlanDepositCents"],
+        message: "paymentPlanDepositCents must be set when payment plans are enabled",
+      });
+    }
+
+    if (
+      value.paymentPlanDepositCents !== null &&
+      value.paymentPlanDepositCents >= value.tuitionCents
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["paymentPlanDepositCents"],
+        message: "paymentPlanDepositCents must be less than tuitionCents",
+      });
+    }
   });

@@ -4,6 +4,13 @@ import { ZodError } from "zod";
 import { requireAdminKey } from "../middleware/requireAdminKey.js";
 import { enrollmentSchema, paginationSchema } from "../validation/schemas.js";
 
+function formatMoney(cents) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(cents / 100);
+}
+
 function resolveAppBaseUrl(req, configuredBaseUrl) {
   if (configuredBaseUrl) {
     return configuredBaseUrl;
@@ -16,6 +23,30 @@ function resolveAppBaseUrl(req, configuredBaseUrl) {
   }
 
   return `${req.protocol}://${req.get("host")}`;
+}
+
+function resolveEnrollmentPricing(cohort, paymentOption) {
+  if (paymentOption === "deposit") {
+    if (!cohort.allowPaymentPlan || !cohort.paymentPlanDepositCents) {
+      throw new Error("This cohort does not offer a payment plan.");
+    }
+
+    return {
+      paymentOption: "deposit",
+      paymentAmountCents: cohort.paymentPlanDepositCents,
+      tuitionTotalCents: cohort.tuitionCents,
+      balanceDueCents: Math.max(cohort.tuitionCents - cohort.paymentPlanDepositCents, 0),
+      checkoutLabel: "Enrollment deposit",
+    };
+  }
+
+  return {
+    paymentOption: "full",
+    paymentAmountCents: cohort.tuitionCents,
+    tuitionTotalCents: cohort.tuitionCents,
+    balanceDueCents: 0,
+    checkoutLabel: "Tuition payment",
+  };
 }
 
 export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, publicAppUrl }) {
@@ -32,6 +63,10 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
       enrollmentId: enrollment.id,
       status: enrollment.status,
       paymentStatus: enrollment.paymentStatus,
+      paymentOption: enrollment.paymentOption,
+      paymentAmountCents: enrollment.paymentAmountCents,
+      tuitionTotalCents: enrollment.tuitionTotalCents,
+      balanceDueCents: enrollment.balanceDueCents,
       paidAt: enrollment.paidAt,
       seatHoldExpiresAt: enrollment.seatHoldExpiresAt,
     });
@@ -52,6 +87,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
         return res.status(400).json({ error: "Selected cohort is attached to an unavailable program." });
       }
 
+      const pricing = resolveEnrollmentPricing(cohort, payload.paymentOption);
       const enrollment = enrollmentDb.createEnrollment({
         id: randomUUID(),
         studentFullName: payload.studentFullName,
@@ -69,19 +105,31 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
         notes: payload.notes,
         status: stripeClient ? "payment_setup" : "submitted",
         paymentStatus: stripeClient ? "unpaid" : "manual_pending",
-        paymentAmountCents: cohort.tuitionCents,
+        paymentOption: pricing.paymentOption,
+        paymentAmountCents: pricing.paymentAmountCents,
+        tuitionTotalCents: pricing.tuitionTotalCents,
+        balanceDueCents: pricing.balanceDueCents,
       });
 
       if (!stripeClient) {
         const manualEnrollment = enrollmentDb.markManualPending(enrollment.id);
+        const amountDueNowLabel = formatMoney(manualEnrollment.paymentAmountCents);
+        const balanceDueLabel = formatMoney(manualEnrollment.balanceDueCents);
 
         return res.status(201).json({
           enrollmentId: manualEnrollment.id,
           paymentRequired: false,
           status: manualEnrollment.status,
           paymentStatus: manualEnrollment.paymentStatus,
+          paymentOption: manualEnrollment.paymentOption,
+          amountDueNowCents: manualEnrollment.paymentAmountCents,
+          amountDueNowLabel,
+          balanceDueCents: manualEnrollment.balanceDueCents,
+          balanceDueLabel,
           message:
-            "Registration submitted. Online payment is not configured yet, so admissions will contact you to collect tuition.",
+            manualEnrollment.paymentOption === "deposit"
+              ? `Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the ${amountDueNowLabel} deposit and confirm the remaining ${balanceDueLabel} balance plan.`
+              : "Registration submitted. Online payment is not configured yet, so admissions will contact you to collect tuition.",
         });
       }
 
@@ -99,10 +147,13 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
             {
               price_data: {
                 currency: "usd",
-                unit_amount: cohort.tuitionCents,
+                unit_amount: pricing.paymentAmountCents,
                 product_data: {
-                  name: `${program.title} - ${cohort.title}`,
-                  description: `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
+                  name: `${program.title} - ${cohort.title} ${pricing.checkoutLabel}`,
+                  description:
+                    pricing.paymentOption === "deposit"
+                      ? `${cohort.meetingPattern} | Deposit now, ${formatMoney(pricing.balanceDueCents)} due before class start`
+                      : `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
                 },
               },
               quantity: 1,
@@ -112,12 +163,14 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
             enrollmentId: enrollment.id,
             cohortId: cohort.id,
             programId: cohort.programId,
+            paymentOption: pricing.paymentOption,
           },
           payment_intent_data: {
             metadata: {
               enrollmentId: enrollment.id,
               cohortId: cohort.id,
               programId: cohort.programId,
+              paymentOption: pricing.paymentOption,
             },
           },
         });
@@ -143,12 +196,21 @@ export function createEnrollmentsRouter({ enrollmentDb, adminKey, stripeClient, 
         enrollmentId: pendingEnrollment.id,
         paymentRequired: true,
         paymentStatus: pendingEnrollment.paymentStatus,
+        paymentOption: pendingEnrollment.paymentOption,
+        amountDueNowCents: pendingEnrollment.paymentAmountCents,
+        amountDueNowLabel: formatMoney(pendingEnrollment.paymentAmountCents),
+        balanceDueCents: pendingEnrollment.balanceDueCents,
+        balanceDueLabel: formatMoney(pendingEnrollment.balanceDueCents),
         checkoutUrl: session.url,
         checkoutExpiresAt: pendingEnrollment.seatHoldExpiresAt,
       });
     } catch (error) {
       if (error.message === "This cohort is full. Please choose another class date.") {
         return res.status(409).json({ error: error.message });
+      }
+
+      if (error.message === "This cohort does not offer a payment plan.") {
+        return res.status(400).json({ error: error.message });
       }
 
       return next(error);
