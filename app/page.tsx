@@ -10,14 +10,18 @@ const heroVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
 const productVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4";
+const goldenFieldVideo =
+  "https://videos.pexels.com/video-files/29894402/12827622_2560_1440_30fps.mp4";
+const mountainLakeVideo =
+  "https://videos.pexels.com/video-files/30600756/13089083_2560_1440_30fps.mp4";
 const sectionMotionVideos = {
-  problem: heroVideo,
-  solution: productVideo,
+  problem: mountainLakeVideo,
+  solution: goldenFieldVideo,
   product: productVideo,
-  market: heroVideo,
+  market: goldenFieldVideo,
   competition: productVideo,
-  traction: heroVideo,
-  ask: productVideo
+  traction: goldenFieldVideo,
+  ask: mountainLakeVideo
 };
 const deckImages = {
   problem: "/prisma-media/problem-orbit.svg",
@@ -128,23 +132,43 @@ const comparisonLabels = ["Speed", "3D Fidelity", "Editability"];
 
 const pricingTiers = [
   {
-    title: "Creator",
-    price: "$29",
+    title: "Free",
+    price: "$0",
     suffix: "/mo",
-    text: "Standard resolution, basic export"
+    text: "Entry plan for fast adoption.",
+    credits: "800 credits / month",
+    detail: "Best for trial and habit formation.",
+    margin: "User growth"
   },
   {
     title: "Pro",
-    price: "$99",
+    price: "$20",
     suffix: "/mo",
-    text: "4K, Unreal export, team sharing"
-  },
-  {
-    title: "Studio",
-    price: "Custom",
-    suffix: "",
-    text: "SSO, API access, trained models"
+    text: "Low-cost paid plan built for volume.",
+    credits: "15,000 credits / month",
+    detail: "25% margin. Included credits are designed to drive refill usage.",
+    margin: "25% margin"
   }
+];
+
+const tractionHighlights = [
+  ["800", "Free credits / month"],
+  ["15k", "Pro credits / month"],
+  ["$20", "Pro monthly price"],
+  ["$192", "Yearly plan upfront"]
+];
+
+const onDemandBillingPoints = [
+  "2 cents per 10 credits",
+  "100% margin",
+  "Weekly billing"
+];
+
+const revenueLoop = [
+  { label: "Free to Paid", value: 35 },
+  { label: "Cheap Pro Entry", value: 62 },
+  { label: "Credit Exhaustion", value: 82 },
+  { label: "Weekly Refill Billing", value: 100 }
 ];
 
 const fundAllocation = ["50% R&D", "25% Compute", "15% GTM", "10% Ops"];
@@ -169,7 +193,7 @@ const askBars = [
 ];
 
 function SectionTag({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] uppercase tracking-[0.35em] text-primary sm:text-xs">{children}</p>;
+  return <p className="text-[10px] uppercase tracking-[0.32em] text-primary sm:text-xs">{children}</p>;
 }
 
 function SectionHeader({
@@ -187,12 +211,12 @@ function SectionHeader({
 }) {
   if (center) {
     return (
-      <div className="mb-8 border-b border-white/5 pb-8">
-        <div className="mx-auto max-w-5xl text-center px-4">
+      <div className="mb-10 border-b border-white/5 pb-10 sm:mb-12 sm:pb-12">
+        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
           <SectionTag>{label}</SectionTag>
           <p className="mt-4 text-5xl font-light tracking-[-0.06em] text-white/18">{index}</p>
           <div className="mx-auto mt-6 max-w-4xl">{children}</div>
-          <p className="mx-auto mt-6 max-w-[32rem] rounded-[1.35rem] border border-white/8 bg-black/35 px-5 py-4 text-center text-sm leading-relaxed text-gray-500 backdrop-blur-md">
+          <p className="mx-auto mt-7 max-w-[36rem] rounded-[1.5rem] border border-white/8 bg-black/45 px-6 py-4 text-center text-[13px] leading-relaxed text-gray-400 backdrop-blur-md sm:text-sm lg:max-w-[40rem]">
             {note}
           </p>
         </div>
@@ -201,14 +225,14 @@ function SectionHeader({
   }
 
   return (
-    <div className="mb-8 grid gap-5 border-b border-white/5 pb-8 sm:gap-6 lg:grid-cols-[120px_minmax(0,1fr)] lg:gap-8">
+    <div className="mb-10 grid gap-5 border-b border-white/5 pb-10 sm:mb-12 sm:gap-6 sm:pb-12 lg:grid-cols-[132px_minmax(0,1fr)] lg:gap-10">
       <div>
         <SectionTag>{label}</SectionTag>
         <p className="mt-4 text-5xl font-light tracking-[-0.06em] text-white/18">{index}</p>
       </div>
       <div className="min-w-0">
         {children}
-        <p className="mt-6 max-w-[30rem] rounded-[1.35rem] border border-white/8 bg-black/35 px-4 py-4 text-sm leading-relaxed text-gray-500 backdrop-blur-md lg:ml-auto">
+        <p className="mt-7 max-w-[32rem] rounded-[1.5rem] border border-white/8 bg-black/45 px-5 py-4 text-[13px] leading-relaxed text-gray-400 backdrop-blur-md sm:text-sm lg:ml-auto xl:max-w-[35rem]">
           {note}
         </p>
       </div>
@@ -218,7 +242,7 @@ function SectionHeader({
 
 function StatChip({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-full border border-white/10 bg-black/45 px-4 py-3 backdrop-blur-sm">
+    <div className="min-w-[96px] rounded-full border border-white/10 bg-black/45 px-4 py-3 text-center backdrop-blur-sm">
       <p className="text-base font-semibold tracking-[-0.03em]" style={{ color: primaryText }}>
         {value}
       </p>
@@ -293,9 +317,14 @@ function SectionShell({
   className?: string;
 }) {
   return (
-    <section id={id} className={`relative isolate px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24 ${className}`}>
+    <section
+      id={id}
+      className={`relative isolate px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24 min-[2200px]:px-10 min-[2200px]:py-28 min-[3200px]:px-14 min-[3200px]:py-32 ${className}`}
+    >
       <div className="cream-glow pointer-events-none absolute left-1/2 top-0 h-48 w-[28rem] -translate-x-1/2 opacity-30" />
-      <div className="mx-auto w-full max-w-7xl">{children}</div>
+      <div className="mx-auto w-full max-w-[1500px] 2xl:max-w-[1680px] min-[2200px]:max-w-[1920px] min-[2800px]:max-w-[2280px] min-[3400px]:max-w-[2880px]">
+        {children}
+      </div>
     </section>
   );
 }
@@ -318,13 +347,19 @@ function RevealCard({
   );
 }
 
-function ScrollRevealText({ text }: { text: string }) {
+function ScrollRevealText({
+  text,
+  className = ""
+}: {
+  text: string;
+  className?: string;
+}) {
   return (
     <motion.p
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="mx-auto mt-8 max-w-3xl text-balance text-center text-xs leading-relaxed text-[#DEDBC8] sm:text-sm md:text-base"
+      className={`mx-auto max-w-3xl px-4 text-balance text-center text-sm leading-relaxed text-[#DEDBC8] sm:text-[15px] md:text-[1.02rem] ${className}`}
     >
       {text}
     </motion.p>
@@ -346,35 +381,35 @@ function ProductFeatureCard({
 }) {
   return (
     <RevealCard delay={delay}>
-      <div className="flex h-full min-h-[280px] flex-col rounded-[1.75rem] bg-[#212121] p-5 shadow-cinematic sm:p-6">
+      <div className="flex h-full min-h-[300px] flex-col rounded-[1.75rem] border border-white/5 bg-[#212121] p-5 shadow-cinematic sm:p-6">
         <div className="relative overflow-hidden rounded-[1.3rem] border border-white/5 bg-black/30">
-          <div className="cream-glow absolute inset-0 opacity-50" />
+              <div className="cream-glow absolute inset-0 opacity-45" />
           <img
             src={image}
             alt={title}
-            className="relative h-28 w-full object-cover sm:h-32"
+            className="relative h-[7.5rem] w-full object-cover sm:h-36"
           />
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/35 to-transparent" />
         </div>
         <div className="mt-6 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs text-gray-500">{number}</p>
-            <h3 className="mt-1 text-xl" style={{ color: primaryText }}>
+            <h3 className="mt-1 text-xl sm:text-[1.35rem]" style={{ color: primaryText }}>
               {title}
             </h3>
           </div>
         </div>
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-3.5">
           {points.map((point) => (
             <div key={point} className="flex items-start gap-3">
               <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <p className="text-sm leading-relaxed text-gray-400">{point}</p>
+              <p className="text-[15px] leading-relaxed text-gray-300">{point}</p>
             </div>
           ))}
         </div>
         <a
           href="#team-ask"
-          className="mt-auto inline-flex items-center gap-2 pt-8 text-sm text-primary transition hover:gap-3"
+          className="mt-auto inline-flex items-center gap-2 pt-8 text-sm text-primary/90 transition hover:gap-3"
         >
           Learn more
           <ArrowRight className="h-4 w-4 -rotate-45" />
@@ -400,17 +435,19 @@ function InsightCard({
   return (
     <RevealCard delay={delay}>
       <div
-        className={`rounded-[1.6rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.32))] p-5 shadow-cinematic backdrop-blur-sm ${className}`}
+        className={`flex h-full min-h-[220px] flex-col justify-center rounded-[1.6rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(0,0,0,0.42))] p-6 text-center shadow-cinematic backdrop-blur-sm sm:p-7 ${className}`}
       >
         {value ? (
-          <p className="text-4xl font-light tracking-[-0.05em] sm:text-5xl" style={{ color: primaryText }}>
+          <p className="text-4xl font-light tracking-[-0.05em] sm:text-[3.4rem]" style={{ color: primaryText }}>
             {value}
           </p>
         ) : null}
-        <h3 className={`${value ? "mt-4" : ""} text-xl sm:text-2xl`} style={{ color: primaryText }}>
+        <h3 className={`${value ? "mt-4" : ""} text-[1.45rem] sm:text-[1.8rem]`} style={{ color: primaryText }}>
           {title}
         </h3>
-        <p className="mt-2 max-w-[32ch] text-sm leading-relaxed text-gray-400">{text}</p>
+        <p className="mx-auto mt-3 max-w-[30ch] text-center text-[15px] leading-relaxed text-gray-300">
+          {text}
+        </p>
       </div>
     </RevealCard>
   );
@@ -424,7 +461,9 @@ function EditorialImageCard({
   title,
   delay = 0,
   className = "",
-  imageClassName = ""
+  imageClassName = "",
+  contentClassName = "",
+  titleClassName = ""
 }: {
   src: string;
   videoSrc?: string;
@@ -434,6 +473,8 @@ function EditorialImageCard({
   delay?: number;
   className?: string;
   imageClassName?: string;
+  contentClassName?: string;
+  titleClassName?: string;
 }) {
   return (
     <RevealCard delay={delay}>
@@ -448,7 +489,7 @@ function EditorialImageCard({
             playsInline
             aria-hidden="true"
             preload="auto"
-            className={`absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-[1.03] ${imageClassName}`}
+          className={`absolute inset-0 h-full w-full object-cover opacity-82 transition-transform duration-700 group-hover:scale-[1.03] ${imageClassName}`}
             src={videoSrc}
           />
         ) : null}
@@ -456,16 +497,21 @@ function EditorialImageCard({
           src={src}
           alt={alt}
           className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03] ${
-            videoSrc ? "mix-blend-screen opacity-55" : ""
+            videoSrc ? "mix-blend-screen opacity-60" : ""
           } ${imageClassName}`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/34 to-black/12" />
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-          <div className="max-w-md rounded-[1.35rem] border border-white/8 bg-black/40 p-4 backdrop-blur-md">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-primary sm:text-xs">{eyebrow}</p>
-          <p className="mt-2 max-w-[18ch] text-xl leading-tight sm:text-2xl" style={{ color: primaryText }}>
-            {title}
-          </p>
+          <div
+            className={`max-w-md rounded-[1.45rem] border border-white/8 bg-black/52 p-4 backdrop-blur-md sm:p-5 ${contentClassName}`}
+          >
+            <p className="text-[10px] uppercase tracking-[0.28em] text-primary sm:text-xs">{eyebrow}</p>
+            <p
+              className={`mt-2 max-w-[20ch] text-xl leading-tight sm:text-[1.7rem] ${titleClassName}`}
+              style={{ color: primaryText }}
+            >
+              {title}
+            </p>
           </div>
         </div>
       </div>
@@ -479,7 +525,9 @@ function SectionBackdrop({
   className = "",
   imageClassName = "",
   videoClassName = "",
-  opacity = 0.18
+  opacity = 0.18,
+  showImage = true,
+  videoOpacity
 }: {
   src: string;
   videoSrc?: string;
@@ -487,6 +535,8 @@ function SectionBackdrop({
   imageClassName?: string;
   videoClassName?: string;
   opacity?: number;
+  showImage?: boolean;
+  videoOpacity?: number;
 }) {
   return (
     <div className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
@@ -498,25 +548,27 @@ function SectionBackdrop({
           playsInline
           preload="auto"
           className={`absolute inset-0 h-full w-full object-cover ${videoClassName}`}
-          style={{ opacity: Math.min(opacity + 0.04, 0.22) }}
+          style={{ opacity: videoOpacity ?? Math.min(opacity + 0.04, 0.22) }}
           initial={false}
           animate={{ scale: [1.05, 1.09, 1.05], x: [0, 8, 0], y: [0, -6, 0] }}
           transition={{ duration: 34, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
           src={videoSrc}
         />
       ) : null}
-      <motion.img
-        src={src}
-        alt=""
-        aria-hidden="true"
-        className={`h-full w-full object-cover ${imageClassName}`}
-        style={{ opacity }}
-        initial={false}
-        animate={{ scale: [1.02, 1.06, 1.02], x: [0, -12, 0], y: [0, 10, 0] }}
-        transition={{ duration: 24, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
-      />
+      {showImage ? (
+        <motion.img
+          src={src}
+          alt=""
+          aria-hidden="true"
+          className={`h-full w-full object-cover ${imageClassName}`}
+          style={{ opacity }}
+          initial={false}
+          animate={{ scale: [1.02, 1.06, 1.02], x: [0, -12, 0], y: [0, 10, 0] }}
+          transition={{ duration: 24, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+        />
+      ) : null}
       <div className="bg-noise absolute inset-0 opacity-[0.12]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/35 to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/12 via-black/42 to-black/82" />
       <div className="cream-glow absolute -left-16 top-8 h-56 w-56 opacity-35" />
       <div className="cream-glow absolute bottom-0 right-0 h-64 w-64 opacity-25" />
     </div>
@@ -556,8 +608,8 @@ export default function HomePage() {
 
   return (
     <main className="relative bg-black">
-      <section className="h-screen p-4 md:p-6">
-        <div className="relative h-full overflow-hidden rounded-2xl bg-black shadow-cinematic md:rounded-[2rem]">
+      <section className="h-screen p-4 md:p-6 2xl:p-8 min-[2200px]:p-10 min-[3200px]:p-12">
+        <div className="relative mx-auto h-full w-full max-w-[2200px] overflow-hidden rounded-2xl bg-black shadow-cinematic md:rounded-[2rem] min-[2200px]:max-w-[2880px] min-[3200px]:max-w-[3600px]">
           <video
             ref={heroVideoRef}
             autoPlay
@@ -565,7 +617,7 @@ export default function HomePage() {
             muted
             playsInline
             preload="auto"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover object-[44%_38%] md:object-[46%_36%] lg:object-[48%_34%] min-[2200px]:object-[49%_38%] min-[3200px]:object-[50%_40%]"
             src={heroVideo}
           />
           <div className="cream-glow absolute left-[12%] top-[14%] h-72 w-72 opacity-60" />
@@ -575,7 +627,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
           <div className="vignette-overlay absolute inset-0" />
 
-          <div className="relative z-10 flex h-full flex-col p-4 sm:p-6 md:p-8 lg:p-10">
+          <div className="relative z-10 flex h-full flex-col p-4 sm:p-6 md:p-8 lg:p-10 2xl:p-12 min-[2200px]:p-14 min-[3200px]:p-16">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="rounded-full border border-white/10 bg-black/45 px-4 py-3 backdrop-blur-sm">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-gray-500">Deck Format</p>
@@ -607,16 +659,16 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid flex-1 gap-8 pt-10 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_420px] lg:items-end">
-              <div className="flex flex-col justify-end lg:pb-8">
+            <div className="grid flex-1 gap-8 pt-10 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_420px] lg:items-end 2xl:grid-cols-[minmax(0,1fr)_460px] min-[2200px]:grid-cols-[minmax(0,1.05fr)_560px] min-[3200px]:grid-cols-[minmax(0,1.08fr)_660px] min-[2200px]:gap-12">
+              <div className="flex flex-col justify-end pb-4 lg:pb-10 2xl:pb-12 min-[2200px]:pb-20 min-[3200px]:pb-24">
                 <p className="text-[10px] uppercase tracking-[0.35em] text-primary sm:text-xs">
                   Unstable ML
                 </p>
-                <p className="mt-4 max-w-xl font-serif text-xl italic text-primary/80 sm:text-2xl md:text-3xl">
+                <p className="mt-4 max-w-xl font-serif text-[clamp(1.15rem,1.8vw,2.25rem)] italic text-primary/80 min-[2200px]:max-w-[18ch] min-[2200px]:text-[clamp(1.6rem,1.5vw,2.9rem)] min-[3200px]:text-[clamp(2rem,1.45vw,3.35rem)]">
                   Generate cinematic 3D scenes from text in seconds.
                 </p>
                 <div
-                  className="mt-6 font-medium leading-[0.86] tracking-[-0.08em] text-[18vw] sm:text-[14vw] md:text-[12vw] lg:text-[9.2vw] xl:text-[8.4vw]"
+                  className="mt-6 font-medium leading-[0.86] tracking-[-0.08em] text-[clamp(3.2rem,8vw,9rem)] min-[2200px]:mt-8 min-[2200px]:text-[clamp(5rem,7vw,12rem)] min-[3200px]:text-[clamp(6rem,6.7vw,14.5rem)]"
                   style={{ color: primaryText }}
                 >
                   <span className="block lg:inline">
@@ -626,39 +678,39 @@ export default function HomePage() {
                     ML
                   </span>
                 </div>
-                <div className="mt-5 flex flex-wrap items-center gap-4">
-                  <span className="h-px w-20 bg-primary/40" />
-                  <p className="text-xs uppercase tracking-[0.28em] text-primary/70 sm:text-sm">
+                <div className="mt-5 flex flex-wrap items-center gap-4 min-[2200px]:mt-6 min-[2200px]:gap-5">
+                  <span className="h-px w-20 bg-primary/40 min-[2200px]:w-28" />
+                  <p className="text-xs uppercase tracking-[0.28em] text-primary/70 sm:text-sm min-[2200px]:text-base min-[3200px]:text-lg">
                     Cinematic text-to-3D infrastructure
                   </p>
                 </div>
               </div>
 
-              <div className="self-end rounded-[2rem] border border-white/10 bg-black/42 p-5 shadow-cinematic backdrop-blur-md sm:p-6">
-                <p className="max-w-md text-sm leading-[1.45] text-primary/70 md:text-base">
+              <div className="self-end rounded-[2rem] border border-white/10 bg-black/42 p-5 shadow-cinematic backdrop-blur-md sm:p-6 min-[2200px]:rounded-[2.25rem] min-[2200px]:p-8 min-[3200px]:p-10">
+                <p className="max-w-md text-sm leading-[1.45] text-primary/70 md:text-base min-[2200px]:max-w-[36rem] min-[2200px]:text-lg min-[3200px]:text-[1.35rem]">
                   The page keeps the original pitch-deck sequence, but reframes it as a dark,
                   premium investor narrative with clearer structure and more cinematic visual weight.
                 </p>
-                <div className="mt-5 grid grid-cols-3 gap-3">
+                <div className="mt-5 grid grid-cols-3 gap-3 min-[2200px]:mt-6 min-[2200px]:gap-4">
                   {heroStats.map(([value, label]) => (
                     <StatChip key={label} value={value} label={label} />
                   ))}
                 </div>
-                <div className="mt-5">
+                <div className="mt-5 min-[2200px]:mt-6">
                   <a
                     href="#product"
-                    className="group inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-black transition-all duration-300 hover:gap-3 sm:text-base"
+                    className="group inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-black transition-all duration-300 hover:gap-3 sm:text-base min-[2200px]:px-7 min-[2200px]:py-3.5 min-[2200px]:text-lg min-[3200px]:text-xl"
                   >
                     View the workflow
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10">
-                      <ArrowRight className="h-4 w-4 text-primary" />
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10 min-[2200px]:h-12 min-[2200px]:w-12 min-[3200px]:h-14 min-[3200px]:w-14">
+                      <ArrowRight className="h-4 w-4 text-primary min-[2200px]:h-5 min-[2200px]:w-5 min-[3200px]:h-6 min-[3200px]:w-6" />
                     </span>
                   </a>
                 </div>
-                <p className="mt-5 text-xs text-gray-500 sm:text-sm">
+                <p className="mt-5 text-xs text-gray-500 sm:text-sm min-[2200px]:mt-6 min-[2200px]:text-base min-[3200px]:text-lg">
                   [Founder Name], CEO | [Founder Name], CTO
                 </p>
-                <div className="mt-5">
+                <div className="mt-5 min-[2200px]:mt-7">
                   <OrbitalVisual />
                 </div>
               </div>
@@ -672,11 +724,11 @@ export default function HomePage() {
           <SectionBackdrop
             src={deckImages.problem}
             videoSrc={sectionMotionVideos.problem}
-            imageClassName="object-right"
-            videoClassName="object-center blur-[0.2px]"
+            showImage={false}
+            videoClassName="object-[50%_42%]"
             opacity={0.16}
+            videoOpacity={0.48}
           />
-          <div className="absolute inset-0 deck-grid opacity-[0.06]" />
           <div className="relative z-10">
           <SectionHeader
             index="02"
@@ -700,8 +752,15 @@ export default function HomePage() {
               />
             </div>
           </SectionHeader>
-          <ScrollRevealText text="Crushing delays kill creative momentum, while high minimum production costs keep ambitious stories locked behind specialist teams and expensive pipelines." />
-          <div className="mt-10 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="mt-8 flex justify-center">
+            <div className="w-full max-w-3xl rounded-[1.35rem] border border-white/6 bg-black/20 px-4 py-4 backdrop-blur-sm sm:px-6">
+              <ScrollRevealText
+                text="Crushing delays kill creative momentum, while high minimum production costs keep ambitious stories locked behind specialist teams and expensive pipelines."
+                className="mt-0 max-w-[42rem]"
+              />
+            </div>
+          </div>
+          <div className="mt-10 grid gap-5 xl:gap-6 lg:grid-cols-[1.15fr_0.85fr]">
             <EditorialImageCard
               src={deckImages.problem}
               videoSrc={sectionMotionVideos.problem}
@@ -710,6 +769,8 @@ export default function HomePage() {
               title="Great ideas lose force when the workflow becomes the obstacle."
               className="min-h-[320px]"
               imageClassName="object-center"
+              contentClassName="mx-auto max-w-[28rem] text-center"
+              titleClassName="max-w-none"
             />
             <div className="grid gap-4">
               <InsightCard
@@ -731,7 +792,7 @@ export default function HomePage() {
       </SectionShell>
 
       <SectionShell id="solution">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_340px] xl:items-start">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px] xl:items-start xl:gap-5">
           <RevealCard delay={0}>
             <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#0a0a0a] p-6 shadow-cinematic sm:p-8 md:p-10">
               <SectionBackdrop
@@ -758,7 +819,7 @@ export default function HomePage() {
                   />
                 </div>
               </SectionHeader>
-              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start">
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px] xl:items-start">
                 <div className="rounded-[1.6rem] border border-white/8 bg-black/35 p-5 backdrop-blur-md sm:p-6">
                   <p className="max-w-[34rem] text-sm leading-relaxed text-primary/78 sm:text-base">
                     The product removes weeks of manual production overhead without removing directorial
@@ -800,7 +861,7 @@ export default function HomePage() {
               </div>
             </div>
           </RevealCard>
-          <div className="grid gap-4">
+          <div className="grid gap-4 xl:gap-5">
             <InsightCard
               delay={0.12}
               title="10-100x faster"
@@ -854,7 +915,7 @@ export default function HomePage() {
             </div>
           </SectionHeader>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr_1fr_1fr] lg:gap-4">
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr_1fr_1fr] lg:gap-5">
             <RevealCard delay={0}>
               <div className="relative h-full min-h-[280px] overflow-hidden rounded-[1.75rem] bg-[#212121] shadow-cinematic">
                 <video
@@ -880,7 +941,7 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 grid gap-4 md:grid-cols-3 lg:gap-5">
             {productSteps.map((step, index) => (
               <RevealCard key={step.number} delay={0.12 * index}>
                 <div className="rounded-[1.5rem] border border-white/5 bg-black/50 p-5">
@@ -908,15 +969,16 @@ export default function HomePage() {
       </SectionShell>
 
       <SectionShell id="market">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-7">
           <RevealCard delay={0}>
             <div className="relative overflow-hidden rounded-[2rem] bg-[#101010] p-6 shadow-cinematic sm:p-8">
               <SectionBackdrop
                 src={deckImages.market}
                 videoSrc={sectionMotionVideos.market}
-                imageClassName="object-right"
-                videoClassName="object-[52%_42%]"
+                showImage={false}
+                videoClassName="object-[50%_52%]"
                 opacity={0.12}
+                videoOpacity={0.46}
               />
               <div className="relative z-10">
               <SectionHeader
@@ -958,9 +1020,10 @@ export default function HomePage() {
               <SectionBackdrop
                 src={deckImages.market}
                 videoSrc={sectionMotionVideos.market}
-                imageClassName="object-left"
-                videoClassName="object-[35%_45%]"
+                showImage={false}
+                videoClassName="object-[50%_52%]"
                 opacity={0.11}
+                videoOpacity={0.4}
               />
               <div className="relative z-10">
               <SectionTag>Why Now</SectionTag>
@@ -1084,7 +1147,7 @@ export default function HomePage() {
       </SectionShell>
 
       <SectionShell id="traction">
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-7">
           <RevealCard delay={0}>
             <div className="relative overflow-hidden rounded-[2rem] bg-[#101010] p-6 shadow-cinematic sm:p-8">
               <SectionBackdrop
@@ -1098,25 +1161,20 @@ export default function HomePage() {
               <SectionHeader
                 index="07"
                 label="Traction"
-                note="Show that demand, retention, and monetization already exist. This section should feel compact and credible."
+                note="Simple model: cheap entry, broad adoption, then refill revenue from power users."
               >
                 <div className="text-3xl leading-[0.95] sm:text-4xl sm:leading-[0.9] md:text-5xl">
                   <WordsPullUpMultiStyle
                     justify="start"
                     segments={[
-                      { text: "Strong early signals.", className: "font-normal" },
-                      { text: "Scalable revenue engine.", className: "font-serif italic" }
+                      { text: "Low-friction entry.", className: "font-normal" },
+                      { text: "Expansion revenue by usage.", className: "font-serif italic" }
                     ]}
                   />
                 </div>
               </SectionHeader>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {[
-                  ["25k+", "Waitlisted creators"],
-                  ["42%", "MoM growth"],
-                  ["88%", "Week-4 retention"],
-                  ["12k+", "Renders / month"]
-                ].map(([value, label], index) => (
+                {tractionHighlights.map(([value, label], index) => (
                   <RevealCard key={label} delay={0.08 * index}>
                     <div className="rounded-[1.5rem] bg-black/60 p-5">
                       <p className="text-4xl" style={{ color: primaryText }}>
@@ -1128,7 +1186,7 @@ export default function HomePage() {
                 ))}
               </div>
               <div className="mt-6">
-                <DataBars title="Monthly Demand Signal" bars={growthBars} />
+                <DataBars title="Revenue Expansion Loop" bars={revenueLoop} />
               </div>
               </div>
             </div>
@@ -1149,23 +1207,36 @@ export default function HomePage() {
                   {pricingTiers.map((tier, index) => (
                     <RevealCard key={tier.title} delay={0.08 * index}>
                       <div className="rounded-[1.5rem] bg-[#151515] p-5">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div>
                             <p className="text-lg" style={{ color: primaryText }}>
                               {tier.title}
                             </p>
-                            <p className="mt-2 text-sm text-gray-400">{tier.text}</p>
+                            <p className="mt-2 text-sm text-primary/80">{tier.credits}</p>
+                            <p className="mt-1 text-sm leading-relaxed text-gray-400">{tier.text}</p>
                           </div>
                           <p className="text-right text-2xl" style={{ color: primaryText }}>
                             {tier.price}
                             <span className="ml-1 text-sm text-gray-500">{tier.suffix}</span>
                           </p>
                         </div>
+                        <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr] sm:items-start">
+                          <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-primary/85">
+                            {tier.margin}
+                          </span>
+                          <p className="text-sm leading-relaxed text-gray-400">{tier.detail}</p>
+                        </div>
                       </div>
                     </RevealCard>
                   ))}
                 </div>
-                <p className="mt-5 text-sm text-primary/75">$0.05 / render minute usage-based compute</p>
+                <div className="mt-5 rounded-[1.4rem] border border-white/6 bg-black/35 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-primary">Yearly Incentive</p>
+                  <p className="mt-3 text-3xl" style={{ color: primaryText }}>
+                    $192 upfront
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-400">$240 list price. 20% off. $16/mo effective.</p>
+                </div>
                 </div>
               </div>
             </RevealCard>
@@ -1179,23 +1250,32 @@ export default function HomePage() {
                   opacity={0.08}
                 />
                 <div className="relative z-10">
-                <SectionTag>Fund Allocation</SectionTag>
-                <div className="mt-6 space-y-4">
-                  {askBars.map((item) => (
-                    <div key={item.label}>
-                      <div className="mb-2 flex items-center justify-between text-sm">
-                        <span className="text-gray-400">{item.label}</span>
-                        <span className="text-primary/80">{item.value}%</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-white/5">
-                        <div
-                          className="h-2 rounded-full bg-gradient-to-r from-[#7f7868] via-[#b9b099] to-[#ede4cd]"
-                          style={{ width: `${item.value}%` }}
-                        />
-                      </div>
+                <SectionTag>On-Demand Billing</SectionTag>
+                <div className="mt-6 rounded-[1.5rem] border border-white/6 bg-black/35 p-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="text-4xl" style={{ color: primaryText }}>
+                        $0.02
+                      </p>
+                      <p className="mt-2 text-sm text-gray-400">per 10 credits</p>
+                    </div>
+                    <div>
+                      <p className="text-4xl" style={{ color: primaryText }}>
+                        100%
+                      </p>
+                      <p className="mt-2 text-sm text-gray-400">refill margin</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  {onDemandBillingPoints.map((point) => (
+                    <div key={point} className="flex items-center gap-3 rounded-[1.2rem] border border-white/5 bg-black/25 px-4 py-3">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <p className="text-sm leading-relaxed text-gray-400">{point}</p>
                     </div>
                   ))}
                 </div>
+                <p className="mt-5 text-sm leading-relaxed text-primary/75">Cheap Pro gets users in. Credit overages drive expansion revenue.</p>
                 </div>
               </div>
             </RevealCard>
@@ -1208,9 +1288,10 @@ export default function HomePage() {
           <SectionBackdrop
             src={deckImages.ask}
             videoSrc={sectionMotionVideos.ask}
-            imageClassName="object-center"
-            videoClassName="object-center"
+            showImage={false}
+            videoClassName="object-[52%_45%]"
             opacity={0.12}
+            videoOpacity={0.46}
           />
           <div className="relative z-10">
           <SectionHeader
@@ -1228,8 +1309,8 @@ export default function HomePage() {
               />
             </div>
           </SectionHeader>
-          <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-            <div>
+          <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:gap-7">
+            <div className="flex h-full flex-col gap-4">
               <div className="grid gap-4 md:grid-cols-2">
                 {[
                   {
@@ -1244,18 +1325,41 @@ export default function HomePage() {
                   }
                 ].map((person, index) => (
                   <RevealCard key={person.role} delay={0.1 * index}>
-                    <div className="rounded-[1.5rem] bg-black/55 p-5">
+                    <div className="rounded-[1.5rem] border border-white/5 bg-black/60 p-5">
                       <p className="text-2xl" style={{ color: primaryText }}>
                         {person.name}
                       </p>
                       <p className="mt-2 text-xs uppercase tracking-[0.25em] text-primary">
                         {person.role}
                       </p>
-                      <p className="mt-4 text-sm leading-relaxed text-gray-400">{person.text}</p>
+                      <p className="mt-4 text-[15px] leading-relaxed text-gray-300">{person.text}</p>
                     </div>
                   </RevealCard>
                 ))}
               </div>
+              <RevealCard delay={0.2}>
+                <div className="flex flex-1 flex-col rounded-[1.6rem] border border-white/5 bg-black/38 p-6 backdrop-blur-sm">
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-primary sm:text-xs">Why This Team</p>
+                  <p className="mt-4 max-w-2xl text-lg leading-relaxed text-primary/90 sm:text-[1.35rem]">
+                    A founding team built across creative tooling, 3D systems, and frontier model research,
+                    with the technical range to ship infrastructure and the product taste to make it usable.
+                  </p>
+                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                    {[
+                      "3D vision and tooling depth",
+                      "Model and inference expertise",
+                      "Production-native product judgment"
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="rounded-[1.25rem] border border-white/6 bg-black/45 px-4 py-4 text-sm leading-relaxed text-gray-300"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </RevealCard>
             </div>
             <RevealCard delay={0.2}>
               <div className="flex h-full flex-col rounded-[1.75rem] border border-white/5 bg-black/45 p-6">
