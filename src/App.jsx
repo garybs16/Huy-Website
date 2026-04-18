@@ -26,6 +26,7 @@ import {
 } from "./lib/api";
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
+import { SiteCtaBand } from "./components/SiteCtaBand";
 import { defaultCohorts, defaultPrograms, navItems } from "./siteData";
 
 const AdminPage = lazy(() => import("./pages/AdminPage").then((module) => ({ default: module.AdminPage })));
@@ -227,11 +228,16 @@ function RegisterRoute({
 }
 
 function AppShell({ children }) {
+  const location = useLocation();
+  const showCtaBand = location.pathname !== "/admin";
+
   return (
     <div className="site-shell">
       <SiteHeader navItems={navItems} />
 
       <main>{children}</main>
+
+      {showCtaBand ? <SiteCtaBand /> : null}
 
       <SiteFooter />
     </div>
