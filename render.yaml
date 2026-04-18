@@ -3,7 +3,8 @@ services:
     name: first-step-healthcare-academy
     runtime: node
     plan: starter
-    buildCommand: npm install && npm run build
+    healthCheckPath: /api/health
+    buildCommand: npm ci && npm run build
     startCommand: npm run start
     autoDeploy: true
     disk:
@@ -17,6 +18,14 @@ services:
         value: "true"
       - key: TRUST_PROXY
         value: "true"
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_SESSION_COOKIE_SAME_SITE
+        value: "lax"
       - key: DATA_DIR
         value: /var/data
       - key: DATABASE_URL

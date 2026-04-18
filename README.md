@@ -39,6 +39,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `CORS_ORIGINS`: allowed origins, comma-separated
 - `API_ADMIN_KEY`: optional fallback admin credential for scripts, smoke tests, or emergency access
 - `ADMIN_USERNAME`: admin login username for browser session auth
+- `ADMIN_PASSWORD`: optional plain admin password that will be hashed at runtime if `ADMIN_PASSWORD_HASH` is not set
 - `ADMIN_PASSWORD_HASH`: PBKDF2 password hash for admin login
 - `ADMIN_SESSION_SECRET`: HMAC secret used to sign admin session cookies
 - `ADMIN_SESSION_COOKIE_SAME_SITE`: cookie SameSite policy for admin sessions (`lax` by default, use `none` for separate frontend/API origins over HTTPS)
@@ -126,11 +127,12 @@ Important:
 - Stripe Checkout only starts when `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL` are all configured together.
 - If Stripe is not configured, enrollments still work in manual payment mode and admissions can follow up directly.
 - `GET /api/health` now reports database readiness plus whether payments are configured or manual.
-- In production, configure either full session auth (`ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `ADMIN_SESSION_SECRET`) or `API_ADMIN_KEY`. Hybrid mode supports both.
+- In production, configure either full session auth (`ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` or `ADMIN_PASSWORD`, plus `ADMIN_SESSION_SECRET`) or `API_ADMIN_KEY`. Hybrid mode supports both.
 
 ## Admin auth
 
 - Preferred setup: browser login with `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, and `ADMIN_SESSION_SECRET`
+- Faster deployment setup: `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_SESSION_SECRET`
 - Generate `ADMIN_PASSWORD_HASH` with:
 
 ```bash
@@ -142,6 +144,7 @@ npm run admin:hash -- "YourStrongAdminPassword"
 - Same-origin deployment is the most reliable setup for browser session auth.
 - If the frontend and API run on different origins, set `CORS_ORIGINS` to the frontend origin, build the frontend with `VITE_API_BASE_URL`, and set `ADMIN_SESSION_COOKIE_SAME_SITE=none` for HTTPS deployments.
 - Some browsers apply stricter third-party cookie rules, so `API_ADMIN_KEY` remains the safest fallback for separate-origin admin access.
+- If you use `ADMIN_PASSWORD`, the server hashes it at startup so browser login still uses the same verification path.
 
 ## Payment flow
 
@@ -186,6 +189,8 @@ This repo now includes `render.yaml` for a single-service deploy.
 - Connect the repo and keep the root directory blank
 - Render can detect the build/start commands from `render.yaml`
 - The Blueprint is configured for a persistent disk mounted at `/var/data`
+- The Blueprint now provisions `API_ADMIN_KEY`, `ADMIN_SESSION_SECRET`, and a default `ADMIN_USERNAME`
+- Set `ADMIN_PASSWORD` in Render to enable browser admin login immediately after deploy
 - Configure `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL`
 - Point the Stripe webhook at `/api/payments/stripe/webhook`
 - Use the frontend `/admin` page to sign in with session auth after deploy, or keep `API_ADMIN_KEY` for fallback script access

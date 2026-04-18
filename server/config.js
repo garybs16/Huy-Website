@@ -1,5 +1,6 @@
 import "dotenv/config";
 import path from "node:path";
+import { createPasswordHash } from "./lib/adminSecurity.js";
 
 function parsePort(value, fallback) {
   const parsed = Number(value);
@@ -53,13 +54,16 @@ function parsePositiveInteger(value, fallback) {
 const dataDir = path.resolve(process.cwd(), process.env.DATA_DIR ?? "server/data");
 const staticDir = path.resolve(process.cwd(), process.env.STATIC_DIR ?? "dist");
 const databasePath = path.resolve(process.cwd(), process.env.DATABASE_URL ?? "server/data/enrollment.db");
+const adminPassword = (process.env.ADMIN_PASSWORD ?? "").trim();
+const adminPasswordHash = (process.env.ADMIN_PASSWORD_HASH ?? "").trim() || (adminPassword ? createPasswordHash(adminPassword) : "");
 
 export const config = {
   port: parsePort(process.env.PORT, 4000),
   nodeEnv: process.env.NODE_ENV ?? "development",
   adminKey: process.env.API_ADMIN_KEY ?? "",
   adminUsername: (process.env.ADMIN_USERNAME ?? "").trim(),
-  adminPasswordHash: (process.env.ADMIN_PASSWORD_HASH ?? "").trim(),
+  adminPasswordHash,
+  adminPasswordProvided: Boolean(adminPassword),
   adminSessionSecret: (process.env.ADMIN_SESSION_SECRET ?? "").trim(),
   adminSessionCookieSameSite: parseSameSite(process.env.ADMIN_SESSION_COOKIE_SAME_SITE, "lax"),
   adminSessionTtlHours: parsePositiveInteger(process.env.ADMIN_SESSION_TTL_HOURS, 12),
@@ -88,7 +92,11 @@ export function getRuntimeConfigReport(currentConfig = config) {
   );
   const sessionPiecesConfigured = [
     currentConfig.adminUsername ? "ADMIN_USERNAME" : null,
-    currentConfig.adminPasswordHash ? "ADMIN_PASSWORD_HASH" : null,
+    currentConfig.adminPasswordHash
+      ? currentConfig.adminPasswordProvided
+        ? "ADMIN_PASSWORD"
+        : "ADMIN_PASSWORD_HASH"
+      : null,
     currentConfig.adminSessionSecret ? "ADMIN_SESSION_SECRET" : null,
   ].filter(Boolean);
   const sessionAuthPartial = sessionPiecesConfigured.length > 0 && !sessionAuthConfigured;
@@ -96,7 +104,7 @@ export function getRuntimeConfigReport(currentConfig = config) {
 
   if (sessionAuthPartial) {
     issues.push(
-      "ADMIN_USERNAME, ADMIN_PASSWORD_HASH, and ADMIN_SESSION_SECRET must all be configured together to enable session-based admin login."
+      "ADMIN_USERNAME, ADMIN_SESSION_SECRET, and either ADMIN_PASSWORD_HASH or ADMIN_PASSWORD must all be configured together to enable session-based admin login."
     );
   }
 
@@ -120,6 +128,10 @@ export function getRuntimeConfigReport(currentConfig = config) {
 
   if (!sessionAuthConfigured && currentConfig.adminKey) {
     warnings.push("Session-based admin login is not configured. The admin dashboard falls back to raw API key access.");
+  }
+
+  if (currentConfig.adminPasswordProvided) {
+    warnings.push("ADMIN_PASSWORD is set directly. Prefer ADMIN_PASSWORD_HASH when you want a pre-hashed credential at rest.");
   }
 
   if (sessionAuthConfigured && !currentConfig.adminKey) {
