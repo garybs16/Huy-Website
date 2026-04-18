@@ -21,6 +21,14 @@ function getSeatTone(remainingSeats) {
   return "is-open";
 }
 
+function buildRegisterUrl(cohort) {
+  const params = new URLSearchParams({
+    programId: cohort.programId,
+    cohortId: cohort.id,
+  });
+  return `/register?${params.toString()}`;
+}
+
 export function SchedulePage({ cohorts, cohortLoadError }) {
   return (
     <section className="section section-soft">
@@ -55,7 +63,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
                 <li>Remaining seats: {cohort.remainingSeats}</li>
               </ul>
               <p className="card-note">Registration stays tied to the selected cohort and pricing.</p>
-              <Link to="/register" className="text-link">
+              <Link to={buildRegisterUrl(cohort)} className="text-link">
                 Register for this track
               </Link>
             </article>

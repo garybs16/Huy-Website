@@ -30,6 +30,16 @@ function parseBoolean(value, fallback = false) {
   return value === "true";
 }
 
+function parseSameSite(value, fallback = "lax") {
+  const normalized = (value ?? fallback).trim().toLowerCase();
+
+  if (["lax", "strict", "none"].includes(normalized)) {
+    return normalized;
+  }
+
+  return fallback;
+}
+
 function parsePositiveInteger(value, fallback) {
   const parsed = Number(value);
 
@@ -51,6 +61,7 @@ export const config = {
   adminUsername: (process.env.ADMIN_USERNAME ?? "").trim(),
   adminPasswordHash: (process.env.ADMIN_PASSWORD_HASH ?? "").trim(),
   adminSessionSecret: (process.env.ADMIN_SESSION_SECRET ?? "").trim(),
+  adminSessionCookieSameSite: parseSameSite(process.env.ADMIN_SESSION_COOKIE_SAME_SITE, "lax"),
   adminSessionTtlHours: parsePositiveInteger(process.env.ADMIN_SESSION_TTL_HOURS, 12),
   corsOrigins: parseOrigins(
     process.env.CORS_ORIGINS ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:5173")

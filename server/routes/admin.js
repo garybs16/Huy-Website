@@ -26,11 +26,31 @@ function getIpAddress(req) {
   return req.ip || req.socket?.remoteAddress || null;
 }
 
+function getSessionCookieOptions(req, { nodeEnv, adminSessionCookieSameSite, adminSessionTtlHours }) {
+  return {
+    sameSite: adminSessionCookieSameSite,
+    secure: nodeEnv === "production",
+    maxAgeSeconds: adminSessionTtlHours * 60 * 60,
+  };
+}
+
+function writeAdminAuditEvent(enrollmentDb, req, action, detail) {
+  enrollmentDb.insertAdminAuditEvent({
+    id: randomUUID(),
+    actor: req.adminAuth?.actor ?? "unknown",
+    action,
+    detail,
+    ipAddress: getIpAddress(req),
+    createdAt: new Date().toISOString(),
+  });
+}
+
 export function createAdminRouter({
   adminKey,
   adminUsername,
   adminPasswordHash,
   adminSessionSecret,
+  adminSessionCookieSameSite,
   adminSessionTtlHours,
   nodeEnv,
   adminAuthMode,
@@ -49,7 +69,14 @@ export function createAdminRouter({
     }
 
     if (sessionId && !session) {
-      res.setHeader("Set-Cookie", clearAdminSessionCookie({ secure: nodeEnv === "production" }));
+      res.setHeader(
+        "Set-Cookie",
+        clearAdminSessionCookie(getSessionCookieOptions(req, {
+          nodeEnv,
+          adminSessionCookieSameSite,
+          adminSessionTtlHours,
+        }))
+      );
     }
 
     res.json(
@@ -110,8 +137,11 @@ export function createAdminRouter({
         "Set-Cookie",
         createAdminSessionCookie(session.id, {
           sessionSecret: adminSessionSecret,
-          secure: nodeEnv === "production",
-          maxAgeSeconds: adminSessionTtlHours * 60 * 60,
+          ...getSessionCookieOptions(req, {
+            nodeEnv,
+            adminSessionCookieSameSite,
+            adminSessionTtlHours,
+          }),
         })
       );
 
@@ -148,7 +178,14 @@ export function createAdminRouter({
       });
     }
 
-    res.setHeader("Set-Cookie", clearAdminSessionCookie({ secure: nodeEnv === "production" }));
+    res.setHeader(
+      "Set-Cookie",
+      clearAdminSessionCookie(getSessionCookieOptions(req, {
+        nodeEnv,
+        adminSessionCookieSameSite,
+        adminSessionTtlHours,
+      }))
+    );
     res.status(204).end();
   });
 
@@ -172,6 +209,7 @@ export function createAdminRouter({
     try {
       const payload = adminProgramSchema.parse(req.body);
       const item = enrollmentDb.createProgram(payload);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.program.created", `Program ${item.id} created.`);
       res.status(201).json(item);
     } catch (error) {
       next(error);
@@ -182,6 +220,7 @@ export function createAdminRouter({
     try {
       const payload = adminProgramSchema.parse({ ...req.body, id: req.params.id });
       const item = enrollmentDb.updateProgram(req.params.id, payload);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.program.updated", `Program ${item.id} updated.`);
       res.json(item);
     } catch (error) {
       next(error);
@@ -191,6 +230,7 @@ export function createAdminRouter({
   router.delete("/programs/:id", (req, res, next) => {
     try {
       enrollmentDb.deleteProgram(req.params.id);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.program.deleted", `Program ${req.params.id} deleted.`);
       res.status(204).end();
     } catch (error) {
       next(error);
@@ -205,6 +245,7 @@ export function createAdminRouter({
     try {
       const payload = adminCohortSchema.parse(req.body);
       const item = enrollmentDb.createCohort(payload);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.cohort.created", `Cohort ${item.id} created.`);
       res.status(201).json(item);
     } catch (error) {
       next(error);
@@ -215,6 +256,7 @@ export function createAdminRouter({
     try {
       const payload = adminCohortSchema.parse({ ...req.body, id: req.params.id });
       const item = enrollmentDb.updateCohort(req.params.id, payload);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.cohort.updated", `Cohort ${item.id} updated.`);
       res.json(item);
     } catch (error) {
       next(error);
@@ -224,6 +266,7 @@ export function createAdminRouter({
   router.delete("/cohorts/:id", (req, res, next) => {
     try {
       enrollmentDb.deleteCohort(req.params.id);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.cohort.deleted", `Cohort ${req.params.id} deleted.`);
       res.status(204).end();
     } catch (error) {
       next(error);

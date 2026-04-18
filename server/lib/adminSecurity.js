@@ -28,12 +28,26 @@ function signSessionId(sessionId, secret) {
   return createHmac("sha256", secret).update(sessionId).digest("base64url");
 }
 
-function buildCookieString(name, value, { maxAgeSeconds, secure }) {
+function formatSameSite(value) {
+  const normalized = (value ?? "Lax").toLowerCase();
+
+  if (normalized === "strict") {
+    return "Strict";
+  }
+
+  if (normalized === "none") {
+    return "None";
+  }
+
+  return "Lax";
+}
+
+function buildCookieString(name, value, { maxAgeSeconds, sameSite = "Lax", secure }) {
   const parts = [
     `${name}=${encodeURIComponent(value)}`,
     "Path=/",
     "HttpOnly",
-    "SameSite=Lax",
+    `SameSite=${formatSameSite(sameSite)}`,
     `Max-Age=${maxAgeSeconds}`,
   ];
 
@@ -117,19 +131,21 @@ export function getAdminSessionIdFromRequest(req, sessionSecret) {
   return sessionId;
 }
 
-export function createAdminSessionCookie(sessionId, { sessionSecret, secure, maxAgeSeconds }) {
+export function createAdminSessionCookie(sessionId, { sessionSecret, sameSite, secure, maxAgeSeconds }) {
   return buildCookieString(
     SESSION_COOKIE_NAME,
     `${sessionId}.${signSessionId(sessionId, sessionSecret)}`,
     {
+      sameSite,
       secure,
       maxAgeSeconds,
     }
   );
 }
 
-export function clearAdminSessionCookie({ secure }) {
+export function clearAdminSessionCookie({ sameSite, secure }) {
   return buildCookieString(SESSION_COOKIE_NAME, "", {
+    sameSite,
     secure,
     maxAgeSeconds: 0,
   });

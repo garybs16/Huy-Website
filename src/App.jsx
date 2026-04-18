@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import {
@@ -171,6 +171,61 @@ function AppEffects({ setEnrollmentStatus }) {
   return null;
 }
 
+function RegisterRoute({
+  cohorts,
+  programs,
+  filteredCohorts,
+  selectedCohort,
+  enrollmentForm,
+  enrollmentPending,
+  enrollmentStatus,
+  cohortLoadError,
+  onInput,
+  onSubmit,
+  onRouteSelection,
+}) {
+  const location = useLocation();
+  const routeSelectionRef = useRef(onRouteSelection);
+
+  useEffect(() => {
+    routeSelectionRef.current = onRouteSelection;
+  }, [onRouteSelection]);
+
+  useEffect(() => {
+    if (location.pathname !== "/register") {
+      return;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const programId = params.get("programId");
+    const cohortId = params.get("cohortId");
+
+    if (!programId && !cohortId) {
+      return;
+    }
+
+    routeSelectionRef.current({
+      programId,
+      cohortId,
+    });
+  }, [location.pathname, location.search]);
+
+  return (
+    <RegisterPage
+      programs={programs}
+      cohorts={cohorts}
+      filteredCohorts={filteredCohorts}
+      selectedCohort={selectedCohort}
+      enrollmentForm={enrollmentForm}
+      enrollmentPending={enrollmentPending}
+      enrollmentStatus={enrollmentStatus}
+      cohortLoadError={cohortLoadError}
+      onInput={onInput}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
 function AppShell({ children }) {
   return (
     <div className="site-shell">
@@ -293,6 +348,34 @@ function App() {
       }
 
       return { ...current, [name]: value };
+    });
+  };
+
+  const handleRegisterRouteSelection = ({ programId, cohortId }) => {
+    setEnrollmentForm((current) => {
+      const routeCohort = cohortId ? cohorts.find((item) => item.id === cohortId) : null;
+      const nextProgramId =
+        routeCohort?.programId ??
+        (programId && programs.some((item) => item.id === programId) ? programId : current.programId);
+      const nextCohortId =
+        routeCohort && (!programId || routeCohort.programId === programId) ? routeCohort.id : "";
+      const paymentOption =
+        routeCohort?.allowPaymentPlan && current.paymentOption === "deposit" ? "deposit" : "full";
+
+      if (
+        current.programId === nextProgramId &&
+        current.cohortId === nextCohortId &&
+        current.paymentOption === paymentOption
+      ) {
+        return current;
+      }
+
+      return {
+        ...current,
+        programId: nextProgramId,
+        cohortId: nextCohortId,
+        paymentOption,
+      };
     });
   };
 
@@ -586,7 +669,7 @@ function App() {
             <Route
               path="/register"
               element={
-                <RegisterPage
+                <RegisterRoute
                   programs={programs}
                   cohorts={cohorts}
                   filteredCohorts={filteredCohorts}
@@ -597,6 +680,7 @@ function App() {
                   cohortLoadError={cohortLoadError}
                   onInput={handleEnrollmentInput}
                   onSubmit={handleEnrollmentSubmit}
+                  onRouteSelection={handleRegisterRouteSelection}
                 />
               }
             />

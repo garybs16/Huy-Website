@@ -1,3 +1,5 @@
+import { cohortCatalogSeed, programCatalogSeed } from "../shared/catalogSeed";
+
 export const navItems = [
   { label: "Home", to: "/" },
   { label: "Programs", to: "/programs" },
@@ -17,130 +19,31 @@ export const contactDetails = {
   officeHours: "Monday to Friday | 8:00 AM to 5:00 PM",
 };
 
-export const defaultPrograms = [
-  {
-    id: "cna",
-    title: "Certified Nurse Assistant",
-    summary:
-      "Accelerated classroom, lab, and clinical preparation for students entering direct patient-care roles.",
-    duration: "4 to 10 weeks",
-    schedule: "Weekday, weekend, and evening cohorts",
-  },
-  {
-    id: "med-aide",
-    title: "Medication Aide Fundamentals",
-    summary:
-      "Short-format medication workflow training for caregivers and support staff expanding responsibilities.",
-    duration: "3 weeks",
-    schedule: "Evening cohort model",
-  },
-  {
-    id: "cpr",
-    title: "CPR / BLS Certification",
-    summary:
-      "Fast certification sessions for healthcare workers who need direct, compliance-ready renewal or first-time training.",
-    duration: "1 day",
-    schedule: "Open-session scheduling",
-  },
-];
+function formatMoney(cents) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(cents / 100);
+}
 
-export const defaultCohorts = [
-  {
-    id: "cna-weekday-apr-2026",
-    programId: "cna",
-    programTitle: "Certified Nurse Assistant",
-    title: "Weekday Cohort",
-    startDate: "2026-04-20",
-    endDate: "2026-05-18",
-    scheduleLabel: "Weekday",
-    meetingPattern: "Monday to Friday | 7:00 AM to 3:30 PM",
-    tuitionCents: 196000,
-    tuitionLabel: "$1,960.00",
-    allowPaymentPlan: true,
-    paymentPlanDepositCents: 65000,
-    paymentPlanDepositLabel: "$650.00",
-    paymentPlanRemainingCents: 131000,
-    paymentPlanRemainingLabel: "$1,310.00",
-    capacity: 15,
-    remainingSeats: 15,
-  },
-  {
-    id: "cna-weekend-apr-2026",
-    programId: "cna",
-    programTitle: "Certified Nurse Assistant",
-    title: "Weekend Cohort",
-    startDate: "2026-04-25",
-    endDate: "2026-06-28",
-    scheduleLabel: "Weekend",
-    meetingPattern: "Saturday and Sunday | 7:00 AM to 3:30 PM",
-    tuitionCents: 196000,
-    tuitionLabel: "$1,960.00",
-    allowPaymentPlan: true,
-    paymentPlanDepositCents: 65000,
-    paymentPlanDepositLabel: "$650.00",
-    paymentPlanRemainingCents: 131000,
-    paymentPlanRemainingLabel: "$1,310.00",
-    capacity: 15,
-    remainingSeats: 12,
-  },
-  {
-    id: "cna-evening-may-2026",
-    programId: "cna",
-    programTitle: "Certified Nurse Assistant",
-    title: "Evening Cohort",
-    startDate: "2026-05-25",
-    endDate: "2026-07-10",
-    scheduleLabel: "Evening",
-    meetingPattern: "Monday to Friday | 4:00 PM to 8:00 PM",
-    tuitionCents: 196000,
-    tuitionLabel: "$1,960.00",
-    allowPaymentPlan: true,
-    paymentPlanDepositCents: 65000,
-    paymentPlanDepositLabel: "$650.00",
-    paymentPlanRemainingCents: 131000,
-    paymentPlanRemainingLabel: "$1,310.00",
-    capacity: 15,
-    remainingSeats: 10,
-  },
-  {
-    id: "med-aide-evening-may-2026",
-    programId: "med-aide",
-    programTitle: "Medication Aide Fundamentals",
-    title: "Medication Aide Evening Cohort",
-    startDate: "2026-05-04",
-    endDate: "2026-05-22",
-    scheduleLabel: "Evening",
-    meetingPattern: "Monday to Thursday | 5:30 PM to 9:00 PM",
-    tuitionCents: 202000,
-    tuitionLabel: "$2,020.00",
-    allowPaymentPlan: true,
-    paymentPlanDepositCents: 70000,
-    paymentPlanDepositLabel: "$700.00",
-    paymentPlanRemainingCents: 132000,
-    paymentPlanRemainingLabel: "$1,320.00",
-    capacity: 12,
-    remainingSeats: 8,
-  },
-  {
-    id: "cpr-open-session",
-    programId: "cpr",
-    programTitle: "CPR / BLS Certification",
-    title: "Open Session",
-    startDate: "2026-04-15",
-    endDate: "2026-04-15",
-    scheduleLabel: "Open Session",
-    meetingPattern: "Single-day certification session",
-    tuitionCents: 12500,
-    tuitionLabel: "$125.00",
-    allowPaymentPlan: false,
-    paymentPlanDepositCents: null,
-    paymentPlanDepositLabel: null,
-    paymentPlanRemainingCents: null,
-    paymentPlanRemainingLabel: null,
-    capacity: 20,
-    remainingSeats: 20,
-  },
-];
+export const defaultPrograms = programCatalogSeed;
+
+export const defaultCohorts = cohortCatalogSeed.map((cohort) => {
+  const program = programCatalogSeed.find((item) => item.id === cohort.programId);
+  const paymentPlanDepositCents = cohort.allowPaymentPlan ? cohort.paymentPlanDepositCents ?? 0 : null;
+  const paymentPlanRemainingCents =
+    paymentPlanDepositCents !== null ? Math.max(cohort.tuitionCents - paymentPlanDepositCents, 0) : null;
+
+  return {
+    ...cohort,
+    programTitle: program?.title ?? cohort.programId,
+    tuitionLabel: formatMoney(cohort.tuitionCents),
+    paymentPlanDepositLabel: paymentPlanDepositCents !== null ? formatMoney(paymentPlanDepositCents) : null,
+    paymentPlanRemainingCents,
+    paymentPlanRemainingLabel: paymentPlanRemainingCents !== null ? formatMoney(paymentPlanRemainingCents) : null,
+    remainingSeats: cohort.capacity,
+  };
+});
 
 export const programMeta = {
   cna: {

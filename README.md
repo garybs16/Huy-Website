@@ -41,6 +41,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `ADMIN_USERNAME`: admin login username for browser session auth
 - `ADMIN_PASSWORD_HASH`: PBKDF2 password hash for admin login
 - `ADMIN_SESSION_SECRET`: HMAC secret used to sign admin session cookies
+- `ADMIN_SESSION_COOKIE_SAME_SITE`: cookie SameSite policy for admin sessions (`lax` by default, use `none` for separate frontend/API origins over HTTPS)
 - `ADMIN_SESSION_TTL_HOURS`: admin session lifetime in hours (default `12`)
 - `DATA_DIR`: mounted directory for persistent app storage
 - `DATABASE_URL`: SQLite database file for cohorts, enrollments, inquiries, and waitlist
@@ -138,7 +139,9 @@ npm run admin:hash -- "YourStrongAdminPassword"
 
 - The frontend admin page uses signed `HttpOnly` cookies when session auth is configured.
 - `API_ADMIN_KEY` remains available as a fallback for smoke tests, scripts, or emergency access.
-- Same-origin deployment is the cleanest setup for browser session auth.
+- Same-origin deployment is the most reliable setup for browser session auth.
+- If the frontend and API run on different origins, set `CORS_ORIGINS` to the frontend origin, build the frontend with `VITE_API_BASE_URL`, and set `ADMIN_SESSION_COOKIE_SAME_SITE=none` for HTTPS deployments.
+- Some browsers apply stricter third-party cookie rules, so `API_ADMIN_KEY` remains the safest fallback for separate-origin admin access.
 
 ## Payment flow
 
@@ -164,6 +167,8 @@ You now have two deployment modes:
 - GitHub Pages can host the frontend build only
 - The backend must be deployed separately (Render, Railway, Fly.io, VPS, etc.)
 - In that mode, set `VITE_API_BASE_URL` to the deployed API host before building the frontend
+- For browser session login across different origins, also set `CORS_ORIGINS` and `ADMIN_SESSION_COOKIE_SAME_SITE=none`
+- If cross-origin cookies are blocked in the admin browser, use `API_ADMIN_KEY` fallback access on `/admin`
 
 ## CI note
 

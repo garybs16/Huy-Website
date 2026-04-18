@@ -31,7 +31,7 @@ async function request(path, { method = "GET", payload, headers: extraHeaders } 
 
   const response = await fetch(buildUrl(path), {
     method,
-    credentials: "same-origin",
+    credentials: "include",
     headers,
     body: payload !== undefined ? JSON.stringify(payload) : undefined,
   });

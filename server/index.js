@@ -87,7 +87,7 @@ export function createApp() {
       const origin = req.header("Origin");
 
       if (isAllowedOrigin(origin, req)) {
-        callback(null, { origin: origin || true });
+        callback(null, origin ? { origin, credentials: true } : { origin: true });
         return;
       }
 
@@ -115,6 +115,7 @@ export function createApp() {
       adminUsername: config.adminUsername,
       adminPasswordHash: config.adminPasswordHash,
       adminSessionSecret: config.adminSessionSecret,
+      adminSessionCookieSameSite: config.adminSessionCookieSameSite,
       adminSessionTtlHours: config.adminSessionTtlHours,
       nodeEnv: config.nodeEnv,
       adminAuthMode: configReport.adminAuthMode,
