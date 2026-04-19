@@ -10,9 +10,9 @@ const heroVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
 const productVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4";
-const problemVideo = "https://www.pexels.com/download/video/31660894/";
+const problemVideo = "https://www.pexels.com/download/video/8475056/";
 const marketVideo =
-  "https://media.istockphoto.com/id/1457070706/video/beautiful-night-scene-with-the-full-moon-rising-over-river-with-a-lunar-path.mp4?s=mp4-640x640-is&k=20&c=aT_zPzJYe3lx3fwePKUjA6Wr9jWzhEfBm0THH0E9g6Y=";
+  "https://media.istockphoto.com/id/2215175664/video/astronaut-on-moon-in-front-of-planet-earth-wormhole-bending-laws-of-the-universe-augmented.mp4?s=mp4-640x640-is&k=20&c=PT3MofP0Ov4IGwzXNfIvPfRUWNSEssvEO4txyeIumqk=";
 const askVideo =
   "https://www.pexels.com/download/video/31129791/";
 const sectionMotionVideos = {
@@ -725,9 +725,9 @@ export default function HomePage() {
           <SectionBackdrop
             src={deckImages.problem}
             videoSrc={sectionMotionVideos.problem}
-            imageClassName="object-right"
-            videoClassName="object-center blur-[0.2px]"
-            opacity={0.16}
+            imageClassName="object-[78%_50%]"
+            videoClassName="object-[72%_50%] brightness-[0.7] saturate-[0.78]"
+            opacity={0.13}
           />
           <div className="relative z-10">
           <SectionHeader
@@ -768,7 +768,7 @@ export default function HomePage() {
               eyebrow="Production Friction"
               title="Great ideas lose force when the workflow becomes the obstacle."
               className="min-h-[320px]"
-              imageClassName="object-center"
+              imageClassName="object-[72%_50%]"
               contentClassName="mx-auto max-w-[28rem] text-center"
               titleClassName="max-w-none"
             />
@@ -975,9 +975,9 @@ export default function HomePage() {
               <SectionBackdrop
                 src={deckImages.market}
                 videoSrc={sectionMotionVideos.market}
-                imageClassName="object-right"
-                videoClassName="object-[52%_42%]"
-                opacity={0.12}
+                imageClassName="object-[58%_48%]"
+                videoClassName="object-[58%_44%] brightness-[0.6] saturate-[0.7]"
+                opacity={0.11}
               />
               <div className="relative z-10">
               <SectionHeader
@@ -1019,9 +1019,9 @@ export default function HomePage() {
               <SectionBackdrop
                 src={deckImages.market}
                 videoSrc={sectionMotionVideos.market}
-                imageClassName="object-left"
-                videoClassName="object-[35%_45%]"
-                opacity={0.11}
+                imageClassName="object-[42%_50%]"
+                videoClassName="object-[38%_45%] brightness-[0.56] saturate-[0.68]"
+                opacity={0.1}
               />
               <div className="relative z-10">
               <SectionTag>Why Now</SectionTag>
@@ -1044,6 +1044,7 @@ export default function HomePage() {
                   title="Demand is global, visual, and increasingly native to AI-first production."
                   delay={0.25}
                   className="min-h-[250px]"
+                  imageClassName="object-[54%_46%]"
                 />
               </div>
               </div>
