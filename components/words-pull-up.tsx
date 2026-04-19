@@ -63,9 +63,12 @@ export function WordsPullUp({
       {words.map((word, index) => {
         const isLast = index === words.length - 1;
         return (
-          <span key={`${word}-${index}`} className="overflow-hidden">
+          <span
+            key={`${word}-${index}`}
+            className="inline-block -my-[0.12em] overflow-hidden py-[0.12em] align-baseline"
+          >
             <motion.span
-              className={className}
+              className={`inline-block ${className ?? ""}`}
               initial={{ y: 12, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ ...transition, delay: index * 0.08 }}
@@ -98,9 +101,12 @@ export function WordsPullUpMultiStyle({
       } ${className ?? ""}`}
     >
       {words.map(({ word, className: wordClassName }, index) => (
-        <span key={`${word}-${index}`} className="overflow-hidden">
+        <span
+          key={`${word}-${index}`}
+          className="inline-block -my-[0.12em] overflow-hidden py-[0.12em] align-baseline"
+        >
           <motion.span
-            className={wordClassName}
+            className={`inline-block ${wordClassName}`}
             initial={{ y: 12, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ ...transition, delay: index * 0.08 }}
