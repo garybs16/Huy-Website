@@ -10,18 +10,19 @@ const heroVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
 const productVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4";
-const goldenFieldVideo =
-  "https://videos.pexels.com/video-files/29894402/12827622_2560_1440_30fps.mp4";
-const mountainLakeVideo =
-  "https://videos.pexels.com/video-files/30600756/13089083_2560_1440_30fps.mp4";
+const problemVideo = "https://www.pexels.com/download/video/31660894/";
+const marketVideo =
+  "https://media.istockphoto.com/id/1457070706/video/beautiful-night-scene-with-the-full-moon-rising-over-river-with-a-lunar-path.mp4?s=mp4-640x640-is&k=20&c=aT_zPzJYe3lx3fwePKUjA6Wr9jWzhEfBm0THH0E9g6Y=";
+const askVideo =
+  "https://www.pexels.com/download/video/31129791/";
 const sectionMotionVideos = {
-  problem: mountainLakeVideo,
-  solution: goldenFieldVideo,
+  problem: problemVideo,
+  solution: productVideo,
   product: productVideo,
-  market: goldenFieldVideo,
+  market: marketVideo,
   competition: productVideo,
-  traction: goldenFieldVideo,
-  ask: mountainLakeVideo
+  traction: heroVideo,
+  ask: askVideo
 };
 const deckImages = {
   problem: "/prisma-media/problem-orbit.svg",
@@ -724,10 +725,9 @@ export default function HomePage() {
           <SectionBackdrop
             src={deckImages.problem}
             videoSrc={sectionMotionVideos.problem}
-            showImage={false}
-            videoClassName="object-[50%_42%]"
+            imageClassName="object-right"
+            videoClassName="object-center blur-[0.2px]"
             opacity={0.16}
-            videoOpacity={0.48}
           />
           <div className="relative z-10">
           <SectionHeader
@@ -975,10 +975,9 @@ export default function HomePage() {
               <SectionBackdrop
                 src={deckImages.market}
                 videoSrc={sectionMotionVideos.market}
-                showImage={false}
-                videoClassName="object-[50%_52%]"
+                imageClassName="object-right"
+                videoClassName="object-[52%_42%]"
                 opacity={0.12}
-                videoOpacity={0.46}
               />
               <div className="relative z-10">
               <SectionHeader
@@ -1020,10 +1019,9 @@ export default function HomePage() {
               <SectionBackdrop
                 src={deckImages.market}
                 videoSrc={sectionMotionVideos.market}
-                showImage={false}
-                videoClassName="object-[50%_52%]"
+                imageClassName="object-left"
+                videoClassName="object-[35%_45%]"
                 opacity={0.11}
-                videoOpacity={0.4}
               />
               <div className="relative z-10">
               <SectionTag>Why Now</SectionTag>
@@ -1288,10 +1286,9 @@ export default function HomePage() {
           <SectionBackdrop
             src={deckImages.ask}
             videoSrc={sectionMotionVideos.ask}
-            showImage={false}
-            videoClassName="object-[52%_45%]"
+            imageClassName="object-center"
+            videoClassName="object-center"
             opacity={0.12}
-            videoOpacity={0.46}
           />
           <div className="relative z-10">
           <SectionHeader
