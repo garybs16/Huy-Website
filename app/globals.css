@@ -73,3 +73,20 @@ video {
   background:
     radial-gradient(circle at 50% 38%, transparent 0%, rgba(0, 0, 0, 0.18) 46%, rgba(0, 0, 0, 0.72) 100%);
 }
+
+.page-ambient {
+  background:
+    radial-gradient(circle at 18% 16%, rgba(222, 219, 200, 0.1), transparent 24%),
+    radial-gradient(circle at 82% 24%, rgba(222, 219, 200, 0.07), transparent 22%),
+    radial-gradient(circle at 50% 56%, rgba(94, 86, 68, 0.2), transparent 34%),
+    linear-gradient(180deg, #050505 0%, #090909 28%, #0d0b09 56%, #060606 100%);
+}
+
+.page-orbit {
+  background: radial-gradient(circle, rgba(222, 219, 200, 0.12) 0%, rgba(222, 219, 200, 0) 68%);
+  filter: blur(8px);
+}
+
+.page-column {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+}
