@@ -18,6 +18,7 @@ const deckImages = {
   market: "/prisma-media/market-globe.svg",
   ask: "/prisma-media/ask-ascent.svg",
   product: "/prisma-media/product-ribbon.svg",
+  competition: "/prisma-media/competition-matrix.svg",
   traction: "/prisma-media/traction-signal.svg"
 };
 
@@ -244,8 +245,32 @@ export default function HomePage() {
       </SlideFrame>
 
       <SlideFrame
-        id="market"
+        id="product"
         step="04"
+        eyebrow="Product"
+        title="One workflow from idea to editable scene."
+        description="The product is built to feel direct: input intent, generate scenes, then refine inside a production-friendly workflow."
+        points={[
+          "Prompt, sketch, or reference input starts the scene.",
+          "Outputs stay editable instead of collapsing into flat video."
+        ]}
+        mediaVideo={productVideo}
+        mediaImage={deckImages.product}
+        mediaAlt="A cinematic product slide for the workflow."
+        mediaPosition="object-[54%_48%]"
+        overlayImagePosition="object-center"
+        reverse
+      >
+        <div className="flex flex-wrap gap-3">
+          <StatPill value="01" label="Input" />
+          <StatPill value="02" label="Generate" />
+          <StatPill value="03" label="Refine" />
+        </div>
+      </SlideFrame>
+
+      <SlideFrame
+        id="market"
+        step="05"
         eyebrow="Market"
         title="The market is large and arriving now."
         description="Creator demand, lower compute costs, and model maturity are aligning at the same moment."
@@ -271,19 +296,71 @@ export default function HomePage() {
       </SlideFrame>
 
       <SlideFrame
-        id="traction-ask"
-        step="05"
-        eyebrow="Traction & Ask"
-        title="Early pull. Clear raise."
-        description="The model is simple: attract creators with a low-friction product, convert broadly, and expand revenue through usage."
+        id="competition"
+        step="06"
+        eyebrow="Competition"
+        title="Speed matters. Control matters more."
+        description="The category winner is not just fast. It is the company that keeps teams in editable 3D while moving at AI speed."
+        points={[
+          "Traditional tools have control but not speed.",
+          "Gen-video tools have speed but not editability."
+        ]}
+        mediaVideo={productVideo}
+        mediaImage={deckImages.competition}
+        mediaAlt="A competitive landscape slide for Unstable ML."
+        mediaPosition="object-center"
+        overlayImagePosition="object-center"
+      >
+        <div className="grid max-w-[34rem] gap-3 sm:grid-cols-3">
+          <StatPill value="Slow" label="Traditional" />
+          <StatPill value="Flat" label="Gen-video" />
+          <StatPill value="Editable" label="Unstable ML" />
+        </div>
+      </SlideFrame>
+
+      <SlideFrame
+        id="traction"
+        step="07"
+        eyebrow="Traction"
+        title="Early demand is already visible."
+        description="The revenue engine is simple: low-friction entry, broad paid conversion, then expansion through usage."
         stats={[
           ["25k+", "Waitlist"],
           ["42%", "MoM growth"],
-          ["$3M", "Seed ask"]
+          ["88%", "Retention"]
         ]}
         points={[
-          "Use of funds: product, compute, and go-to-market.",
-          "Target outcome: durable creative tooling with recurring revenue."
+          "Free gets creators in quickly.",
+          "Paid and usage expansion build the revenue curve."
+        ]}
+        mediaVideo={heroVideo}
+        mediaImage={deckImages.traction}
+        mediaAlt="A traction slide showing early demand."
+        mediaPosition="object-center"
+        overlayImagePosition="object-center"
+        reverse
+      >
+        <div className="grid max-w-[34rem] gap-3 sm:grid-cols-3">
+          <StatPill value="$20" label="Pro plan" />
+          <StatPill value="$192" label="Annual" />
+          <StatPill value="2c" label="Refill rate" />
+        </div>
+      </SlideFrame>
+
+      <SlideFrame
+        id="ask"
+        step="08"
+        eyebrow="Team & Ask"
+        title="Raise capital. Scale the product."
+        description="The ask is straightforward: fund product, compute, and go-to-market behind an early signal of demand."
+        stats={[
+          ["$3M", "Seed ask"],
+          ["50%", "R&D"],
+          ["25%", "Compute"]
+        ]}
+        points={[
+          "Founder, CEO: creative tooling and 3D systems.",
+          "Co-Founder, CTO: frontier models and inference depth."
         ]}
         mediaVideo={askVideo}
         mediaImage={deckImages.ask}
