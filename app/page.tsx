@@ -268,7 +268,10 @@ function SectionShell({
         </div>
       ) : null}
       <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-white/8" />
-      <div className="relative z-10 mx-auto max-w-6xl">{children}</div>
+      <div className="relative z-10 mx-auto max-w-6xl px-1">
+        <div className="section-frame pointer-events-none absolute inset-0 rounded-[2.6rem] opacity-60" />
+        <div className="relative rounded-[2.6rem] px-4 py-6 md:px-6 md:py-8">{children}</div>
+      </div>
     </section>
   );
 }
@@ -525,6 +528,7 @@ function HeroSection() {
       <div className="page-noise absolute inset-0 opacity-[0.07]" />
       <div className="absolute inset-y-0 left-[8%] hidden w-px bg-white/8 xl:block" />
       <div className="absolute inset-y-0 right-[8%] hidden w-px bg-white/8 xl:block" />
+      <div className="hero-spotlight absolute inset-0 opacity-80" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_40%)]" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black" />
       <div className="hero-vignette absolute inset-0" />
@@ -559,46 +563,84 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center text-center [-webkit-transform:translateY(-18%)] [transform:translateY(-18%)]">
-        <Reveal className="max-w-5xl" y={40}>
-          <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/18 px-4 py-2 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-            <p className="text-[10px] uppercase tracking-[0.34em] text-white/50">Seed Narrative 01 / 08</p>
-          </div>
-          <p className="mt-7 text-xs uppercase tracking-[0.34em] text-white/40">Unstable ML</p>
-          <h1 className="mt-6 text-5xl tracking-tight text-white md:text-6xl lg:text-[5.4rem] lg:leading-[0.98]">
-            Generate cinematic <Accent>3D scenes</Accent> from text in seconds.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl px-4 text-sm leading-relaxed text-white/70">
-            Cinematic text-to-3D infrastructure
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-            {heroPillars.map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-white/50 backdrop-blur-md"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <GlassButton href="#product">
-              View the workflow
-              <ArrowRight className="h-4 w-4" />
-            </GlassButton>
-            <GlassButton href="#traction">See traction</GlassButton>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            {heroStats.map(([value, label]) => (
-              <StatPill key={label} value={value} label={label} />
-            ))}
-          </div>
-          <p className="mt-6 text-sm text-white/50">[Founder Name], CEO | [Founder Name], CTO</p>
-        </Reveal>
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 items-center [-webkit-transform:translateY(-9%)] [transform:translateY(-9%)]">
+        <div className="grid w-full gap-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-end">
+          <Reveal className="max-w-[52rem] text-center lg:text-left" y={40}>
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/18 px-4 py-2 backdrop-blur-md lg:mx-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+              <p className="text-[10px] uppercase tracking-[0.34em] text-white/50">Seed Narrative 01 / 08</p>
+            </div>
+            <p className="mt-7 text-xs uppercase tracking-[0.34em] text-white/40">Unstable ML</p>
+            <h1 className="mt-6 text-5xl tracking-tight text-white md:text-6xl lg:text-[6.2rem] lg:leading-[0.94]">
+              Generate cinematic <Accent>3D scenes</Accent> from text in seconds.
+            </h1>
+            <div className="mt-6 flex items-center justify-center gap-4 lg:justify-start">
+              <span className="h-px w-12 bg-white/20" />
+              <p className="text-[11px] uppercase tracking-[0.28em] text-white/45">Cinematic text-to-3D infrastructure</p>
+            </div>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              {heroPillars.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-white/50 backdrop-blur-md"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <GlassButton href="#product">
+                View the workflow
+                <ArrowRight className="h-4 w-4" />
+              </GlassButton>
+              <GlassButton href="#traction">See traction</GlassButton>
+            </div>
+          </Reveal>
+
+          <Reveal className="lg:justify-self-end" delay={0.16} x={24}>
+            <div className="liquid-glass shadow-panel max-w-[26rem] rounded-[2rem] p-5 md:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/45">Investor Snapshot</p>
+                  <p className="mt-3 max-w-[18rem] text-lg leading-relaxed text-white/88">
+                    Premium creative tooling built around editable output and fast production loops.
+                  </p>
+                </div>
+                <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/45">
+                  Live
+                </span>
+              </div>
+              <div className="mt-6 grid grid-cols-3 gap-3">
+                {heroStats.map(([value, label]) => (
+                  <StatPill key={label} value={value} label={label} />
+                ))}
+              </div>
+              <div className="mt-6 overflow-hidden rounded-[1.5rem]">
+                <MediaPanel
+                  videoSrc={featuredVideo}
+                  className="aspect-[16/11] min-h-[14rem]"
+                  videoClassName="object-center brightness-[0.56]"
+                >
+                  <div className="flex h-full items-end p-4">
+                    <div className="liquid-glass max-w-[13rem] rounded-[1.2rem] p-4">
+                      <p className="text-[10px] uppercase tracking-[0.28em] text-white/45">Output State</p>
+                      <p className="mt-2 text-lg leading-tight text-white">Prompt-first. Production-ready. Director-controlled.</p>
+                    </div>
+                  </div>
+                </MediaPanel>
+              </div>
+              <div className="mt-5 flex items-center justify-between gap-4">
+                <p className="text-sm text-white/45">[Founder Name], CEO | [Founder Name], CTO</p>
+                <a href="#team-ask" className="text-sm text-white/78 transition hover:text-white">
+                  Meet the team
+                </a>
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </div>
 
-      <div className="relative z-10 mt-auto flex items-center justify-center gap-3">
+      <div className="relative z-10 mt-auto flex items-center justify-center gap-3 lg:justify-start lg:pl-[max(0px,calc((100vw-72rem)/2+1.5rem))]">
         {[
           { icon: Instagram, href: "#" },
           { icon: Twitter, href: "#" },
@@ -643,7 +685,7 @@ function ProblemSection() {
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {problemStats.map((item, index) => (
               <Reveal key={item.title} delay={0.18 + index * 0.12}>
-                <div className="liquid-glass rounded-[1.7rem] p-6">
+                <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
                   <p className="text-4xl tracking-tight text-white">{item.value}</p>
                   <p className="mt-4 text-lg text-white">{item.title}</p>
                   <p className="mt-3 text-sm leading-relaxed text-white/55">{item.text}</p>
@@ -662,7 +704,7 @@ function ProblemSection() {
             imageClassName="object-[70%_50%]"
           >
             <div className="flex h-full items-end p-6 md:p-8">
-              <div className="liquid-glass max-w-md rounded-[1.6rem] p-6">
+              <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Production Friction</p>
                 <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
                   Creative momentum dies when every shot still needs a specialist pipeline.
@@ -705,7 +747,7 @@ function SolutionSection() {
         >
           <div className="flex h-full flex-col justify-end p-6 md:p-10">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="liquid-glass max-w-md rounded-[1.6rem] p-6 md:p-8">
+              <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6 md:p-8">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Workflow Shift</p>
                 <p className="mt-3 text-base leading-relaxed text-white md:text-lg">
                   Replace weeks of production overhead with an AI-native workflow that stays editable and usable in
@@ -716,7 +758,7 @@ function SolutionSection() {
                 href="#product"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="liquid-glass inline-flex items-center justify-center rounded-full px-8 py-3 text-sm font-medium text-white"
+                className="liquid-glass shadow-panel inline-flex items-center justify-center rounded-full px-8 py-3 text-sm font-medium text-white"
               >
                 Explore more
               </motion.a>
@@ -727,14 +769,14 @@ function SolutionSection() {
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         <Reveal delay={0.24}>
-          <div className="liquid-glass rounded-[1.7rem] p-6">
+          <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
             <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Proof</p>
             <p className="mt-5 text-5xl tracking-tight text-white md:text-6xl">10-100x</p>
             <p className="mt-4 text-sm leading-relaxed text-white/55">Faster, lower cost, still editable.</p>
           </div>
         </Reveal>
         <Reveal delay={0.32}>
-          <div className="liquid-glass rounded-[1.7rem] p-6">
+          <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
             <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Outcome</p>
             <p className="mt-5 text-xl leading-relaxed text-white md:text-2xl">
               Prompt-first. Production-ready. Director-controlled.
@@ -767,7 +809,7 @@ function ProductSection() {
           <Reveal delay={0.16} className="mt-10">
             <MediaPanel videoSrc={productVideo} imageSrc={deckImages.product} className="aspect-[4/5] min-h-[30rem]">
               <div className="flex h-full items-end p-6 md:p-8">
-                <div className="liquid-glass max-w-md rounded-[1.6rem] p-6">
+                <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Creative Canvas</p>
                   <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
                     One workflow from prompt to editable scene.
@@ -788,7 +830,7 @@ function ProductSection() {
           <div className="grid gap-4 sm:grid-cols-3">
             {productSteps.map((step, index) => (
               <Reveal key={step.number} delay={0.22 + index * 0.1}>
-                <div className="liquid-glass rounded-[1.5rem] p-5">
+                <div className="liquid-glass shadow-panel rounded-[1.5rem] p-5">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">{step.number}</p>
                   <p className="mt-3 text-lg tracking-tight text-white">{step.title}</p>
                   <p className="mt-3 text-sm leading-relaxed text-white/55">{step.text}</p>
@@ -848,14 +890,14 @@ function MarketSection() {
                   ["$5B", "Obtainable"]
                 ].map(([value, label], index) => (
                   <Reveal key={label} delay={0.24 + index * 0.08}>
-                    <div className="liquid-glass rounded-[1.4rem] p-4">
+                    <div className="liquid-glass shadow-panel rounded-[1.4rem] p-4">
                       <p className="text-2xl tracking-tight text-white md:text-3xl">{value}</p>
                       <p className="mt-2 text-[10px] uppercase tracking-[0.24em] text-white/40">{label}</p>
                     </div>
                   </Reveal>
                 ))}
               </div>
-              <div className="liquid-glass max-w-sm rounded-[1.5rem] p-5 md:p-6">
+              <div className="liquid-glass shadow-panel max-w-sm rounded-[1.5rem] p-5 md:p-6">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Why Now</p>
                 <p className="mt-3 text-lg leading-relaxed text-white">
                   Demand is global, visual, and increasingly native to AI-first production.
@@ -895,7 +937,7 @@ function CompetitionSection() {
             imageClassName="object-center opacity-24"
           >
             <div className="flex h-full items-end p-6 md:p-8">
-              <div className="liquid-glass max-w-md rounded-[1.6rem] p-6">
+              <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Competitive Edge</p>
                 <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
                   Fast enough for iteration. Structured enough for production.
@@ -1018,7 +1060,7 @@ function TractionSection() {
               imageClassName="object-center opacity-24"
             >
               <div className="flex h-full items-end p-6 md:p-8">
-                <div className="liquid-glass max-w-lg rounded-[1.6rem] p-6">
+                <div className="liquid-glass shadow-panel max-w-lg rounded-[1.6rem] p-6">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Revenue Engine</p>
                   <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
                     Free entry creates habit. Paid plans and refills expand revenue over time.
@@ -1130,7 +1172,7 @@ function TeamAskSection() {
               imageClassName="object-top"
             >
               <div className="flex h-full items-end p-6 md:p-8">
-                <div className="liquid-glass max-w-sm rounded-[1.6rem] p-6">
+                <div className="liquid-glass shadow-panel max-w-sm rounded-[1.6rem] p-6">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Scale Up</p>
                   <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
                     Capital scales product velocity.
