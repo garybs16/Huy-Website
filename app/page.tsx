@@ -229,7 +229,7 @@ function SectionShell({
   backgroundClassName?: string;
 }) {
   return (
-    <section id={id} className={`relative flex min-h-[100svh] items-center px-5 py-16 md:px-7 md:py-24 ${className}`}>
+    <section id={id} className={`relative flex min-h-[94svh] items-center px-5 py-14 md:px-7 md:py-18 ${className}`}>
       {(backgroundVideoSrc || backgroundImageSrc) ? (
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {backgroundVideoSrc ? (
@@ -239,7 +239,7 @@ function SectionShell({
               muted
               playsInline
               preload="auto"
-              className={`absolute inset-0 h-full w-full scale-[1.05] object-cover opacity-[0.18] saturate-[0.54] ${backgroundClassName}`}
+              className={`absolute inset-0 h-full w-full scale-[1.05] object-cover opacity-[0.16] saturate-[0.46] ${backgroundClassName}`}
               src={backgroundVideoSrc}
             />
           ) : null}
@@ -248,17 +248,17 @@ function SectionShell({
               src={backgroundImageSrc}
               alt=""
               aria-hidden="true"
-              className={`absolute inset-0 h-full w-full scale-[1.04] object-cover opacity-[0.12] mix-blend-screen ${backgroundClassName}`}
+              className={`absolute inset-0 h-full w-full scale-[1.04] object-cover opacity-[0.1] mix-blend-screen ${backgroundClassName}`}
             />
           ) : null}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(164,136,255,0.14),_transparent_30%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/46 via-black/78 to-black/98" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(164,136,255,0.12),_transparent_28%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/54 via-black/82 to-black/98" />
         </div>
       ) : null}
       <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/8 md:inset-x-7" />
-      <div className="relative z-10 mx-auto w-full max-w-[1120px] px-1">
+      <div className="relative z-10 mx-auto w-full max-w-[1090px] px-1">
         <div className="section-frame pointer-events-none absolute inset-0 rounded-[2.4rem] opacity-70" />
-        <div className="relative rounded-[2.4rem] bg-[linear-gradient(180deg,rgba(4,4,7,0.34),rgba(1,1,2,0.16))] px-3 py-4 md:px-6 md:py-6">
+        <div className="relative rounded-[2.4rem] bg-[linear-gradient(180deg,rgba(4,4,7,0.46),rgba(1,1,2,0.24))] px-3 py-4 md:px-6 md:py-5">
           {children}
         </div>
       </div>
@@ -318,7 +318,7 @@ function MediaPanel({
   children?: React.ReactNode;
 }) {
   return (
-      <div className={`shadow-panel group relative overflow-hidden rounded-[2.15rem] border border-white/10 bg-white/[0.03] ${className}`}>
+    <div className={`shadow-panel group relative overflow-hidden rounded-[2.15rem] border border-white/12 bg-white/[0.04] ${className}`}>
       <video
         autoPlay
         loop
@@ -336,10 +336,10 @@ function MediaPanel({
           className={`absolute inset-0 h-full w-full object-cover opacity-28 mix-blend-screen ${imageClassName}`}
         />
       ) : null}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/94 via-black/40 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(191,175,255,0.1),_transparent_36%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_34%,rgba(0,0,0,0.42)_100%)]" />
-      <div className="absolute inset-x-6 top-0 h-px bg-white/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/48 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(191,175,255,0.08),_transparent_34%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_30%,rgba(0,0,0,0.5)_100%)]" />
+      <div className="absolute inset-x-6 top-0 h-px bg-white/24" />
       {children ? <div className="relative z-10 h-full">{children}</div> : null}
     </div>
   );
@@ -524,7 +524,7 @@ function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/42 via-black/56 to-black" />
       <div className="hero-vignette absolute inset-0" />
 
-      <div className="relative z-20 mx-auto w-full max-w-[1120px]">
+      <div className="relative z-20 mx-auto w-full max-w-[1090px]">
         <div className="liquid-glass shadow-panel flex items-center justify-between rounded-full px-4 py-2.5 md:px-6 md:py-3">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
@@ -554,15 +554,15 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1120px] flex-1 items-center [-webkit-transform:translateY(-3%)] [transform:translateY(-3%)]">
-        <div className="grid w-full gap-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-end">
-          <Reveal className="max-w-[46rem] text-center lg:text-left" y={40}>
+      <div className="relative z-10 mx-auto flex w-full max-w-[1090px] flex-1 items-center [-webkit-transform:translateY(-2%)] [transform:translateY(-2%)]">
+        <div className="grid w-full gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
+          <Reveal className="max-w-[43rem] text-center lg:text-left" y={40}>
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/18 px-4 py-2 backdrop-blur-md lg:mx-0">
               <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
               <p className="text-[10px] uppercase tracking-[0.34em] text-white/60">Seed Narrative 01 / 08</p>
             </div>
             <p className="mt-7 text-xs uppercase tracking-[0.34em] text-white/56">Unstable ML</p>
-            <h1 className="mt-4 text-[2.7rem] tracking-tight text-white md:text-[3.95rem] lg:text-[4.95rem] lg:leading-[0.95]">
+            <h1 className="mt-4 text-[2.5rem] tracking-tight text-white md:text-[3.55rem] lg:text-[4.45rem] lg:leading-[0.96]">
               Generate cinematic <Accent>3D scenes</Accent> from text in seconds.
             </h1>
             <div className="mt-5 flex items-center justify-center gap-4 lg:justify-start">
@@ -579,10 +579,10 @@ function HeroSection() {
           </Reveal>
 
           <Reveal className="lg:justify-self-end" delay={0.16} x={24}>
-            <div className="liquid-glass shadow-panel max-w-[21.5rem] rounded-[1.85rem] p-4 md:p-5">
+            <div className="liquid-glass shadow-panel max-w-[22rem] rounded-[1.85rem] p-4 md:p-5">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">Investor Snapshot</p>
-                <p className="mt-3 max-w-[14rem] text-sm leading-relaxed text-white/88 md:text-base">
+                <p className="mt-3 max-w-[15rem] text-sm leading-relaxed text-white/92 md:text-base">
                   Editable scenes. Faster production loops.
                 </p>
               </div>
@@ -595,7 +595,7 @@ function HeroSection() {
                 <MediaPanel
                   videoSrc={featuredVideo}
                   className="aspect-[16/11] min-h-[10.5rem]"
-                  videoClassName="object-center brightness-[0.56]"
+                  videoClassName="object-center brightness-[0.48]"
                 >
                   <div className="flex h-full items-end p-4">
                     <div className="liquid-glass max-w-[13rem] rounded-[1.2rem] p-4">
@@ -621,7 +621,7 @@ function HeroSection() {
             key={index}
             href={item.href}
             whileHover={{ y: -3 }}
-            className="liquid-glass rounded-full p-3 text-white/80 transition hover:bg-white/[0.04] hover:text-white md:p-4"
+            className="liquid-glass rounded-full p-3 text-white/90 transition hover:bg-white/[0.04] hover:text-white md:p-4"
           >
             <item.icon className="h-5 w-5" />
           </motion.a>
@@ -643,7 +643,7 @@ function ProblemSection() {
       <div className="mt-5 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
         <div>
           <Reveal delay={0.05}>
-            <h2 className="max-w-[14ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
+            <h2 className="max-w-[13ch] text-[2.1rem] leading-[1.05] tracking-tight text-white md:text-[2.75rem] lg:text-[3.5rem]">
               Video and 3D production is still slow, expensive, and <Accent>gated by expertise.</Accent>
             </h2>
           </Reveal>
@@ -668,8 +668,8 @@ function ProblemSection() {
         <Reveal delay={0.16} x={30}>
           <MediaPanel
             videoSrc={problemVideo}
-            className="aspect-[4/5] min-h-[21rem]"
-            videoClassName="object-[72%_48%] brightness-[0.5]"
+            className="aspect-[4/5] min-h-[20rem]"
+            videoClassName="object-[60%_50%] brightness-[0.38]"
           >
             <div className="flex h-full items-end p-6 md:p-8">
               <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
@@ -698,7 +698,7 @@ function SolutionSection() {
           <SectionLabel>Solution</SectionLabel>
         </Reveal>
         <Reveal delay={0.08}>
-          <h2 className="max-w-[17ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:max-w-[18ch] md:text-[3rem] lg:max-w-[19ch] lg:text-[4rem]">
+          <h2 className="max-w-[16ch] text-[2.05rem] leading-[1.04] tracking-tight text-white md:max-w-[17ch] md:text-[2.7rem] lg:max-w-[18ch] lg:text-[3.45rem]">
             <span className="lg:block">Text-to-3D that turns ideas into</span>{" "}
             <span className="lg:block lg:whitespace-nowrap">
               <Accent>shot-ready scenes</Accent> in minutes.
@@ -711,7 +711,7 @@ function SolutionSection() {
         <MediaPanel
           videoSrc={productVideo}
           className="aspect-[16/7] rounded-[1.55rem]"
-          videoClassName="object-cover brightness-[0.58]"
+          videoClassName="object-cover brightness-[0.44]"
         >
           <div className="flex h-full flex-col justify-end p-4 md:p-6">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -766,12 +766,12 @@ function ProductSection() {
       <div className="mt-5 grid gap-8 md:grid-cols-2 md:gap-7">
         <div>
           <Reveal delay={0.06}>
-            <h2 className="max-w-[14ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
+            <h2 className="max-w-[13ch] text-[2.1rem] leading-[1.05] tracking-tight text-white md:text-[2.75rem] lg:text-[3.45rem]">
               Studio-grade workflow from raw intent to shot-ready 3D. <Accent>Built for speed and control.</Accent>
             </h2>
           </Reveal>
           <Reveal delay={0.16} className="mt-6">
-            <MediaPanel videoSrc={productVideo} className="aspect-[4/5] min-h-[18.5rem]">
+            <MediaPanel videoSrc={productVideo} className="aspect-[4/5] min-h-[17.5rem]">
               <div className="flex h-full items-end p-4 md:p-5">
                 <div className="liquid-glass shadow-panel max-w-md rounded-[1.4rem] p-4">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/60">Creative Canvas</p>
@@ -821,7 +821,7 @@ function MarketSection() {
       <div className="mt-5 grid gap-8 md:grid-cols-[0.92fr_1.08fr] md:items-end">
         <div>
           <Reveal delay={0.08}>
-            <h2 className="max-w-[12ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
+            <h2 className="max-w-[12ch] text-[2.1rem] leading-[1.05] tracking-tight text-white md:text-[2.75rem] lg:text-[3.45rem]">
               A $150B+ opportunity <Accent>at the right inflection point.</Accent>
             </h2>
           </Reveal>
@@ -840,8 +840,8 @@ function MarketSection() {
         <Reveal delay={0.14} x={30}>
           <MediaPanel
             videoSrc={marketVideo}
-            className="aspect-[4/5] min-h-[22.5rem]"
-            videoClassName="object-[58%_44%] brightness-[0.48]"
+            className="aspect-[4/5] min-h-[21rem]"
+            videoClassName="object-[50%_45%] brightness-[0.38]"
           >
             <div className="flex h-full flex-col justify-between p-6 md:p-8">
               <div className="grid gap-4 sm:grid-cols-3">
@@ -881,7 +881,7 @@ function CompetitionSection() {
         <SectionLabel>Competition</SectionLabel>
       </Reveal>
       <Reveal delay={0.08} className="mt-6">
-        <h2 className="max-w-[14ch] text-[2.05rem] leading-[1.02] tracking-tight text-white md:max-w-none md:text-[2.65rem] lg:text-[3.15rem]">
+        <h2 className="max-w-[14ch] text-[1.95rem] leading-[1.03] tracking-tight text-white md:max-w-none md:text-[2.45rem] lg:text-[2.9rem]">
           <span className="block">The only platform</span>
           <span className="block lg:whitespace-nowrap">combining <Accent>AI speed</Accent> with true 3D control.</span>
         </h2>
@@ -890,8 +890,8 @@ function CompetitionSection() {
         <Reveal delay={0.16}>
           <MediaPanel
             videoSrc={philosophyVideo}
-            className="aspect-[16/10] min-h-[18rem]"
-            videoClassName="object-center brightness-[0.58]"
+            className="aspect-[16/10] min-h-[17rem]"
+            videoClassName="object-center brightness-[0.44]"
           >
             <div className="flex h-full items-end p-6 md:p-8">
               <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
@@ -988,7 +988,7 @@ function TractionSection() {
       <div className="mt-5 grid gap-8 lg:grid-cols-[0.88fr_1.12fr]">
         <div>
           <Reveal delay={0.08}>
-            <h2 className="max-w-[13ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
+            <h2 className="max-w-[13ch] text-[2.1rem] leading-[1.05] tracking-tight text-white md:text-[2.75rem] lg:text-[3.45rem]">
               Low-friction entry. <Accent>Expansion revenue by usage.</Accent>
             </h2>
           </Reveal>
@@ -1008,8 +1008,8 @@ function TractionSection() {
           <Reveal delay={0.16} className="md:col-span-2">
             <MediaPanel
               videoSrc={featuredVideo}
-              className="aspect-[16/8] min-h-[14rem]"
-              videoClassName="object-center brightness-[0.56]"
+              className="aspect-[16/8] min-h-[13rem]"
+              videoClassName="object-center brightness-[0.42]"
             >
               <div className="flex h-full items-end p-6 md:p-8">
                 <div className="liquid-glass shadow-panel max-w-lg rounded-[1.6rem] p-6">
@@ -1084,7 +1084,7 @@ function TeamAskSection() {
       <div className="mt-5 grid gap-8 lg:grid-cols-[0.88fr_1.12fr]">
         <div>
           <Reveal delay={0.08}>
-            <h2 className="max-w-[14ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
+            <h2 className="max-w-[14ch] text-[2.1rem] leading-[1.05] tracking-tight text-white md:text-[2.75rem] lg:text-[3.45rem]">
               The team to build it. <Accent>The capital to scale it.</Accent>
             </h2>
           </Reveal>
@@ -1116,8 +1116,8 @@ function TeamAskSection() {
           <Reveal delay={0.18}>
             <MediaPanel
               videoSrc={askVideo}
-              className="aspect-[4/5] min-h-[22rem]"
-              videoClassName="object-[50%_45%] brightness-[0.52] saturate-[0.78]"
+              className="aspect-[4/5] min-h-[20.5rem]"
+              videoClassName="object-[50%_45%] brightness-[0.4] saturate-[0.68]"
             >
               <div className="flex h-full items-end p-6 md:p-8">
                 <div className="liquid-glass shadow-panel max-w-sm rounded-[1.6rem] p-6">
