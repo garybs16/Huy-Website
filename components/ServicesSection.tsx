@@ -27,35 +27,57 @@ export default function ServicesSection() {
 
   return (
     <section
-      id="pricing"
-      className="bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.02)_0%,_transparent_60%)] px-6 py-28 md:py-40"
+      id="services"
+      className="bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.02)_0%,_transparent_60%)] px-6 py-24 md:py-32"
       ref={ref}
     >
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.7 }}
           className="mb-16 flex items-baseline justify-between"
         >
-          <h2 className="text-3xl tracking-tight text-white md:text-5xl">
-            What we do
-          </h2>
+          <div>
+            <p className="deck-kicker mb-5 text-xs">
+              05 / SERVICES
+            </p>
+            <h2 className="text-3xl tracking-tight text-white md:text-5xl">
+              What we do
+            </h2>
+          </div>
           <span className="hidden text-sm uppercase tracking-widest text-white/40 md:block">
-            Our services
+            Compact, premium, fast
           </span>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+        <div className="space-y-5">
           {services.map((service, idx) => (
             <motion.div
               key={service.title}
-              initial={{ opacity: 0, y: 50 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 34 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 34 }}
               transition={{ duration: 0.8, delay: idx * 0.15 }}
-              className="group liquid-glass relative flex flex-col overflow-hidden rounded-3xl"
+              className="grid gap-4 border-b border-white/10 pb-5 md:grid-cols-[0.16fr_0.34fr_1fr_180px] md:items-center"
             >
-              <div className="relative aspect-video w-full overflow-hidden">
+              <span className="text-[11px] uppercase tracking-[0.28em] text-white/32">
+                {service.tag}
+              </span>
+
+              <div className="flex items-center gap-3">
+                <h3 className="text-xl tracking-tight text-white md:text-[1.6rem]">
+                  {service.title}
+                </h3>
+                <div className="rounded-full border border-white/10 p-2 text-white/55">
+                  <ArrowUpRight className="h-4 w-4" />
+                </div>
+              </div>
+
+              <p className="max-w-md text-sm leading-relaxed text-white/42">
+                {service.desc}
+              </p>
+
+              <div className="deck-frame relative aspect-[16/10] overflow-hidden rounded-2xl">
                 <video
                   src={service.videoUrl}
                   muted
@@ -63,30 +85,42 @@ export default function ServicesSection() {
                   loop
                   playsInline
                   preload="auto"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="h-full w-full object-cover"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
-
-              <div className="relative z-10 flex flex-1 flex-col justify-end p-6 md:p-8">
-                <div className="mb-8 flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-widest text-white/40">
-                    {service.tag}
-                  </span>
-                  <div className="liquid-glass rounded-full p-2 text-white/60 transition-colors duration-300 group-hover:text-white">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </div>
-                </div>
-
-                <h3 className="mb-3 text-xl tracking-tight text-white md:text-2xl">
-                  {service.title}
-                </h3>
-                <p className="max-w-sm text-sm leading-relaxed text-white/50">
-                  {service.desc}
-                </p>
-              </div>
             </motion.div>
           ))}
+
+          <motion.div
+            initial={{ opacity: 0, y: 36 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
+            transition={{ duration: 0.85, delay: 0.35 }}
+            className="grid gap-6 pt-8 md:grid-cols-[0.42fr_1fr]"
+          >
+            <div className="flex flex-col justify-end">
+              <p className="mb-3 text-2xl tracking-tight text-white md:text-[1.9rem]">
+                Curiosity as a compass
+              </p>
+              <p className="max-w-xs text-sm leading-relaxed text-white/42">
+                Discovery stays close to execution, so ideas keep their energy
+                from first concept through final launch.
+              </p>
+            </div>
+
+            <div className="deck-frame relative overflow-hidden rounded-[1.9rem]">
+              <video
+                src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4"
+                muted
+                autoPlay
+                loop
+                playsInline
+                preload="auto"
+                className="aspect-[16/9] h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

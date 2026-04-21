@@ -3,6 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Globe, Instagram, Twitter } from "lucide-react";
 
+const navLinks = [
+  { label: "About", href: "#about" },
+  { label: "Services", href: "#services" },
+  { label: "Market", href: "#market" },
+  { label: "Traction", href: "#traction" },
+  { label: "Ask", href: "#ask" }
+];
+
 export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoOpacity, setVideoOpacity] = useState(0);
@@ -65,25 +73,30 @@ export default function HeroSection() {
         autoPlay
         playsInline
         preload="auto"
-        className="absolute inset-0 h-full w-full object-cover translate-y-[calc(17%+100px)] transition-opacity duration-500 ease-in-out"
+        className="absolute inset-0 h-full w-full object-cover object-[center_32%] contrast-110 saturate-110 transition-opacity duration-500 ease-in-out"
         style={{ opacity: videoOpacity }}
       />
 
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_42%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,_rgba(230,215,192,0.18),_transparent_26%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_26%,_rgba(151,176,209,0.16),_transparent_24%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/16 via-black/26 to-black/58" />
+
       <div className="z-20 mx-auto w-full max-w-5xl px-6 py-6">
-        <nav className="liquid-glass flex items-center justify-between rounded-full px-6 py-3">
+        <nav className="liquid-glass deck-frame flex items-center justify-between rounded-full px-6 py-3">
           <div className="flex items-center gap-2">
             <Globe className="h-6 w-6 text-white" />
             <span className="text-lg font-semibold text-white">Asme</span>
           </div>
 
           <div className="hidden items-center gap-8 md:flex">
-            {["Features", "Pricing", "About"].map((item) => (
+            {navLinks.map((item) => (
               <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
+                key={item.label}
+                href={item.href}
                 className="text-sm font-medium text-white/80 transition-colors hover:text-white"
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </div>
@@ -92,41 +105,82 @@ export default function HeroSection() {
             <button className="hidden text-sm font-medium text-white transition-colors hover:text-white/80 sm:block">
               Sign Up
             </button>
-            <button className="liquid-glass rounded-full px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-white/5">
+            <button className="rounded-full border border-white/10 bg-white/10 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15">
               Login
             </button>
           </div>
         </nav>
       </div>
 
-      <div className="z-10 flex flex-1 -translate-y-[20%] flex-col items-center justify-center px-6 text-center">
-        <h1
-          className="mb-8 whitespace-nowrap text-5xl tracking-tight text-white md:text-6xl lg:text-7xl"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
-        >
-          Built for the curious
-        </h1>
+      <div className="z-10 flex flex-1 items-center px-6 pb-20 pt-8">
+        <div className="mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-[1.1fr_0.44fr] lg:items-end">
+          <div className="-translate-y-[7%]">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/20 px-4 py-2 backdrop-blur-sm">
+              <span className="deck-kicker text-[11px]">01 / HERO</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--deck-warm))]" />
+            </div>
 
-        <div className="flex w-full max-w-md flex-col items-center gap-6">
-          <div className="liquid-glass flex w-full flex-row items-center rounded-full py-2 pl-6 pr-2">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 border-none bg-transparent text-sm text-white outline-none placeholder:text-white/40"
-            />
-            <button className="flex items-center justify-center rounded-full bg-white p-2 transition-colors hover:bg-white/90">
-              <ArrowRight className="h-5 w-5 text-black" />
-            </button>
+            <h1
+              className="mb-6 max-w-4xl text-5xl leading-[0.94] tracking-tight text-white md:text-6xl lg:text-[5.4rem]"
+              style={{ fontFamily: "'Instrument Serif', serif" }}
+            >
+              Built for the curious.
+              <br />
+              Refined for the decisive.
+            </h1>
+
+            <p className="max-w-lg text-sm leading-relaxed text-white/70 md:text-base">
+              A tighter, cinematic pitch-deck landing page for strategy,
+              creative systems, and investor-facing storytelling.
+            </p>
+
+            <div className="mt-8 flex w-full max-w-md flex-col gap-4">
+              <div className="liquid-glass deck-frame flex w-full flex-row items-center rounded-full py-2 pl-6 pr-2">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 border-none bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+                />
+                <button className="flex items-center justify-center rounded-full bg-white p-2 transition-colors hover:bg-white/90">
+                  <ArrowRight className="h-5 w-5 text-black" />
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                {[
+                  "Investor-ready",
+                  "Narrative-led",
+                  "High-speed execution"
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-full border border-white/10 bg-black/18 px-4 py-2 text-xs text-white/64 backdrop-blur-sm"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <p className="px-4 text-sm leading-relaxed text-white opacity-80">
-            Stay updated with the latest news and insights. Subscribe to our
-            newsletter today and never miss out on exciting updates.
-          </p>
+          <div className="hidden lg:grid lg:gap-4">
+            <div className="liquid-glass deck-frame deck-tint-warm rounded-[1.9rem] p-5">
+              <p className="deck-kicker text-[10px]">Deck Format</p>
+              <p className="mt-4 text-3xl tracking-tight text-white">8 sections</p>
+              <p className="mt-2 text-sm text-white/48">
+                Narrative, proof, market, traction, and ask.
+              </p>
+            </div>
 
-          <button className="liquid-glass mt-2 rounded-full px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5">
-            Manifesto
-          </button>
+            <div className="liquid-glass deck-frame deck-tint-cool rounded-[1.9rem] p-5">
+              <p className="deck-kicker text-[10px]">Positioning</p>
+              <p className="mt-4 text-lg leading-tight text-white">
+                Premium output
+                <br />
+                with startup speed.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

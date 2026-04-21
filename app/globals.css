@@ -4,14 +4,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --deck-warm: 230 215 192;
+    --deck-cool: 151 176 209;
+    --deck-panel: 255 255 255;
+  }
+}
+
 @layer components {
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(var(--deck-panel), 0.02);
     background-blend-mode: luminosity;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: none;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.12),
+      0 20px 80px rgba(0, 0, 0, 0.22);
     position: relative;
     overflow: hidden;
   }
@@ -38,6 +48,30 @@
     mask-composite: exclude;
     pointer-events: none;
   }
+
+  .deck-kicker {
+    color: rgba(255, 255, 255, 0.42);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+  }
+
+  .deck-tint-warm {
+    background:
+      radial-gradient(circle at top, rgba(var(--deck-warm), 0.16), transparent 46%),
+      rgba(255, 255, 255, 0.03);
+  }
+
+  .deck-tint-cool {
+    background:
+      radial-gradient(circle at top, rgba(var(--deck-cool), 0.16), transparent 46%),
+      rgba(255, 255, 255, 0.03);
+  }
+
+  .deck-frame {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 30px 100px rgba(0, 0, 0, 0.28);
+  }
 }
 
 html {
@@ -45,7 +79,10 @@ html {
 }
 
 body {
-  background-color: black;
+  background:
+    radial-gradient(circle at top, rgba(var(--deck-warm), 0.07), transparent 26%),
+    radial-gradient(circle at 85% 20%, rgba(var(--deck-cool), 0.08), transparent 24%),
+    #000;
   color: white;
   -webkit-font-smoothing: antialiased;
 }

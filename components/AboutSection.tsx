@@ -23,29 +23,39 @@ export default function AboutSection() {
     <section
       id="about"
       ref={ref}
-      className="relative bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] px-6 pb-10 pt-32 md:pb-14 md:pt-44"
+      className="relative bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] px-6 pb-12 pt-24 md:pb-16 md:pt-32"
     >
-      <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
-        <motion.p
+      <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[1fr_0.42fr] md:items-end">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
-          className="mb-16 text-sm uppercase tracking-widest text-white/40"
         >
-          ABOUT US
-        </motion.p>
+          <p className="deck-kicker mb-6 text-xs">
+            02 / ABOUT
+          </p>
 
-        <motion.h2
+          <h2 className="text-4xl leading-[1.02] tracking-tight text-white md:text-6xl lg:text-[4.4rem]">
+            Pioneering <AccentWord>ideas</AccentWord> for
+            <br />
+            minds that <AccentWord>create, build,</AccentWord>
+            <br />
+            and <AccentWord>inspire.</AccentWord>
+          </h2>
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-4xl leading-[1.1] tracking-tight text-white md:text-6xl lg:text-7xl"
+          className="max-w-xs md:justify-self-end"
         >
-          Pioneering <AccentWord>ideas</AccentWord> for{" "}
-          <br className="hidden md:block" />
-          minds that <AccentWord>create,</AccentWord> <AccentWord>build,</AccentWord>{" "}
-          and <AccentWord>inspire.</AccentWord>
-        </motion.h2>
+          <p className="text-sm leading-relaxed text-white/42">
+            We combine deck narrative, visual language, and launch-ready
+            execution into one compact creative system built for fast-moving
+            teams.
+          </p>
+        </motion.div>
       </div>
     </section>
   );
