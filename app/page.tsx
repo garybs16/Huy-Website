@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Globe, Instagram, Twitter } from "lucide-react";
+import { ArrowRight, Globe } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import AboutSection from "@/components/landing/AboutSection";
 import FeaturedVideoSection from "@/components/landing/FeaturedVideoSection";
@@ -13,14 +13,8 @@ const heroVideo =
 
 const navLinks = [
   { label: "Features", href: "#featured-video" },
-  { label: "Pricing", href: "#services" },
+  { label: "Services", href: "#services" },
   { label: "About", href: "#about" }
-];
-
-const socialLinks = [
-  { label: "Instagram", href: "https://instagram.com", icon: Instagram },
-  { label: "Twitter", href: "https://twitter.com", icon: Twitter },
-  { label: "Website", href: "#about", icon: Globe }
 ];
 
 function useHeroVideoLoop(videoRef: React.RefObject<HTMLVideoElement>) {
@@ -115,7 +109,7 @@ function HeroSection() {
   const videoOpacity = useHeroVideoLoop(videoRef);
 
   return (
-    <section className="relative flex min-h-screen flex-col overflow-hidden bg-black px-6 pb-8 pt-6">
+    <section className="relative flex min-h-[92vh] flex-col overflow-hidden bg-black px-6 pb-16 pt-6">
       <video
         ref={videoRef}
         muted
@@ -126,22 +120,22 @@ function HeroSection() {
         style={{ opacity: videoOpacity }}
         className="absolute inset-0 h-full w-full translate-y-[calc(17%+100px)] object-cover"
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.06),_transparent_42%)]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/45 to-black" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_42%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/28 via-black/52 to-black" />
 
       <div className="relative z-20 mx-auto w-full max-w-5xl">
-        <div className="liquid-glass flex items-center justify-between rounded-full px-6 py-3">
+        <div className="liquid-glass flex items-center justify-between rounded-full px-5 py-3">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
-              <Globe className="h-6 w-6 text-white" />
-              <span className="text-lg font-semibold text-white">Asme</span>
+              <Globe className="h-4 w-4 text-white" />
+              <span className="text-sm font-medium text-white">Asme</span>
             </div>
-            <nav className="hidden items-center gap-6 md:flex">
+            <nav className="hidden items-center gap-5 md:flex">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-white/80 transition hover:text-white"
+                  className="text-[11px] font-medium text-white/80 transition hover:text-white"
                 >
                   {link.label}
                 </a>
@@ -150,12 +144,12 @@ function HeroSection() {
           </div>
 
           <div className="flex items-center gap-4">
-            <a href="#services" className="text-sm font-medium text-white">
+            <a href="#contact" className="text-[11px] font-medium text-white">
               Sign Up
             </a>
             <a
-              href="#featured-video"
-              className="liquid-glass rounded-full px-6 py-2 text-sm font-medium text-white"
+              href="#contact"
+              className="liquid-glass rounded-full px-5 py-2 text-[11px] font-medium text-white"
             >
               Login
             </a>
@@ -163,15 +157,15 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-1 -translate-y-[20%] flex-col items-center justify-center text-center">
+      <div className="relative z-10 flex flex-1 -translate-y-[16%] flex-col items-center justify-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-5xl"
+          className="w-full max-w-4xl"
         >
           <h1
-            className="mb-8 text-5xl tracking-tight text-white whitespace-nowrap md:text-6xl lg:text-7xl"
+            className="mb-8 whitespace-nowrap text-5xl tracking-tight text-white md:text-6xl lg:text-[4.25rem]"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
             Built for the curious
@@ -182,50 +176,37 @@ function HeroSection() {
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-xl"
+          className="w-full max-w-md"
         >
           <div className="liquid-glass flex items-center rounded-full py-2 pl-6 pr-2">
             <input
               type="email"
               placeholder="Enter your email"
-              className="h-11 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+              className="h-9 flex-1 bg-transparent text-[11px] text-white outline-none placeholder:text-white/40"
             />
             <button
               type="button"
               aria-label="Submit email"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black"
             >
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
 
-          <p className="mt-5 px-4 text-sm leading-relaxed text-white">
+          <p className="mt-4 px-4 text-[10px] leading-relaxed text-white/72">
             Stay updated with the latest news and insights. Subscribe to our
             newsletter today and never miss out on exciting updates.
           </p>
 
-          <div className="mt-8">
+          <div className="mt-5">
             <a
               href="#philosophy"
-              className="liquid-glass inline-flex rounded-full px-8 py-3 text-sm font-medium text-white transition hover:bg-white/5"
+              className="inline-flex text-[10px] font-medium text-white/70 transition hover:text-white"
             >
               Manifesto
             </a>
           </div>
         </motion.div>
-      </div>
-
-      <div className="relative z-10 mx-auto mt-auto flex w-full max-w-5xl justify-center gap-3 md:justify-start">
-        {socialLinks.map(({ label, href, icon: Icon }) => (
-          <a
-            key={label}
-            href={href}
-            aria-label={label}
-            className="liquid-glass rounded-full p-4 text-white/80 transition hover:bg-white/5 hover:text-white"
-          >
-            <Icon className="h-5 w-5" />
-          </a>
-        ))}
       </div>
     </section>
   );
