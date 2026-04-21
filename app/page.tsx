@@ -510,7 +510,7 @@ function HeroSection() {
         preload="auto"
         src={heroVideo}
         style={{ opacity: videoOpacity }}
-        className="absolute inset-0 h-full w-full object-cover [transform:translateY(calc(17%+100px))]"
+        className="absolute inset-0 h-full w-full scale-[1.08] object-cover object-[50%_54%] md:object-[50%_52%] lg:object-[50%_50%]"
       />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_40%)]" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black" />
