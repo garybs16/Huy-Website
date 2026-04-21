@@ -43,6 +43,24 @@ const navItems = [
   { label: "Ask", href: "#team-ask" }
 ];
 
+const productSteps = [
+  {
+    number: "01",
+    title: "Prompt Interface",
+    text: "Text, sketch, or motion reference."
+  },
+  {
+    number: "02",
+    title: "AI Neural Core",
+    text: "Scene graph, lighting, and motion."
+  },
+  {
+    number: "03",
+    title: "Cinematic 3D",
+    text: "Editable output, ready for production."
+  }
+];
+
 const whyNow = [
   { title: "Foundation models", text: "production-ready" },
   { title: "GPU costs", text: "falling fast" },
@@ -127,6 +145,12 @@ const tractionHighlights = [
   ["15k", "Pro credits / month"],
   ["$20", "Pro monthly price"],
   ["$192", "Yearly plan upfront"]
+];
+
+const onDemandBillingPoints = [
+  "2 cents / 10 credits",
+  "100% refill margin",
+  "Weekly refill billing"
 ];
 
 const heroStats = [
@@ -243,10 +267,10 @@ function SectionShell({
   return (
       <section
         id={id}
-        className={`relative isolate px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-18 min-[2200px]:px-10 min-[2200px]:py-22 min-[3200px]:px-14 min-[3200px]:py-26 ${className}`}
+        className={`relative isolate px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24 min-[2200px]:px-10 min-[2200px]:py-28 min-[3200px]:px-14 min-[3200px]:py-32 ${className}`}
       >
-        <div className="cream-glow pointer-events-none absolute left-1/2 top-0 h-48 w-[28rem] -translate-x-1/2 opacity-30" />
-        <div className="mx-auto w-full max-w-[1380px] 2xl:max-w-[1500px] min-[2200px]:max-w-[1720px] min-[2800px]:max-w-[2040px] min-[3400px]:max-w-[2480px]">
+        <div className="cream-glow pointer-events-none absolute left-1/2 top-0 h-40 w-[24rem] -translate-x-1/2 opacity-18" />
+        <div className="mx-auto w-full max-w-[1180px] 2xl:max-w-[1260px] min-[2200px]:max-w-[1480px] min-[2800px]:max-w-[1740px] min-[3400px]:max-w-[2080px]">
           {children}
         </div>
       </section>
@@ -286,9 +310,9 @@ function ProductFeatureCard({
 }) {
   return (
     <RevealCard delay={delay}>
-      <div className="flex h-full min-h-[280px] flex-col rounded-[1.75rem] border border-white/5 bg-[#212121] p-5 shadow-cinematic sm:p-6">
-        <div className="relative overflow-hidden rounded-[1.3rem] border border-white/5 bg-black/30">
-              <div className="cream-glow absolute inset-0 opacity-45" />
+      <div className="flex h-full min-h-[260px] flex-col rounded-[1.6rem] border border-white/8 bg-white/[0.02] p-4 shadow-cinematic sm:p-5">
+        <div className="relative overflow-hidden rounded-[1.1rem] border border-white/6 bg-black/30">
+          <div className="cream-glow absolute inset-0 opacity-35" />
           <img
             src={image}
             alt={title}
@@ -296,15 +320,15 @@ function ProductFeatureCard({
           />
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/35 to-transparent" />
         </div>
-        <div className="mt-6 flex items-start justify-between gap-4">
+        <div className="mt-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs text-gray-500">{number}</p>
-            <h3 className="mt-1 text-xl sm:text-[1.35rem]" style={{ color: primaryText }}>
+            <h3 className="mt-1 text-lg sm:text-[1.2rem]" style={{ color: primaryText }}>
               {title}
             </h3>
           </div>
         </div>
-        <div className="mt-5 space-y-3">
+        <div className="mt-4 space-y-3">
           {points.map((point) => (
             <div key={point} className="flex items-start gap-3">
               <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -333,17 +357,17 @@ function InsightCard({
   return (
     <RevealCard delay={delay}>
       <div
-        className={`flex h-full min-h-[200px] flex-col justify-center rounded-[1.6rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(0,0,0,0.42))] p-5 text-center shadow-cinematic backdrop-blur-sm sm:p-6 ${className}`}
+        className={`flex h-full min-h-[180px] flex-col justify-between rounded-[1.45rem] border border-white/8 bg-white/[0.025] p-5 shadow-cinematic backdrop-blur-sm sm:p-6 ${className}`}
       >
         {value ? (
-          <p className="text-4xl font-light tracking-[-0.05em] sm:text-[3rem]" style={{ color: primaryText }}>
+          <p className="text-4xl font-light tracking-[-0.05em] sm:text-[2.8rem]" style={{ color: primaryText }}>
             {value}
           </p>
         ) : null}
-        <h3 className={`${value ? "mt-4" : ""} text-[1.35rem] sm:text-[1.65rem]`} style={{ color: primaryText }}>
+        <h3 className={`${value ? "mt-4" : ""} text-[1.2rem] sm:text-[1.4rem]`} style={{ color: primaryText }}>
           {title}
         </h3>
-        <p className="mx-auto mt-3 max-w-[28ch] text-center text-sm leading-relaxed text-gray-300">
+        <p className="mt-3 max-w-[28ch] text-sm leading-relaxed text-gray-300">
           {text}
         </p>
       </div>
@@ -377,7 +401,7 @@ function EditorialImageCard({
   return (
     <RevealCard delay={delay}>
       <div
-        className={`group relative overflow-hidden rounded-[1.75rem] border border-white/5 bg-[#111111] shadow-cinematic ${className}`}
+        className={`group relative overflow-hidden rounded-[1.7rem] border border-white/6 bg-[#111111] shadow-cinematic ${className}`}
       >
         {videoSrc ? (
           <video
@@ -398,14 +422,14 @@ function EditorialImageCard({
             videoSrc ? "mix-blend-screen opacity-60" : ""
           } ${imageClassName}`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/34 to-black/12" />
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/26 to-black/8" />
+        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
           <div
-            className={`max-w-md rounded-[1.45rem] border border-white/8 bg-black/52 p-4 backdrop-blur-md sm:p-5 ${contentClassName}`}
+            className={`max-w-md rounded-[1.2rem] border border-white/8 bg-black/45 p-4 backdrop-blur-md sm:p-5 ${contentClassName}`}
           >
             <p className="text-[10px] uppercase tracking-[0.28em] text-primary sm:text-xs">{eyebrow}</p>
             <p
-              className={`mt-2 max-w-[20ch] text-xl leading-tight sm:text-[1.7rem] ${titleClassName}`}
+              className={`mt-2 max-w-[20ch] text-lg leading-tight sm:text-[1.5rem] ${titleClassName}`}
               style={{ color: primaryText }}
             >
               {title}
@@ -628,49 +652,30 @@ export default function HomePage() {
       </section>
 
       <SectionShell id="problem">
-        <div className="relative overflow-hidden rounded-[2rem] bg-[#101010] px-5 py-10 text-center shadow-cinematic sm:px-8 sm:py-14 md:px-12">
-          <SectionBackdrop
-            src={deckImages.problem}
-            videoSrc={sectionMotionVideos.problem}
-            imageClassName="object-[78%_50%]"
-            videoClassName="object-[72%_50%] brightness-[0.7] saturate-[0.78]"
-            opacity={0.13}
-          />
-          <div className="relative z-10">
-          <SectionHeader
-            index="02"
-            label="Problem"
-            center
-          >
-            <div className="mx-auto max-w-4xl text-3xl leading-[0.95] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-[5.5rem]">
-              <WordsPullUpMultiStyle
-                justify="center"
-                segments={[
-                  {
-                    text: "Video and 3D production is still slow, expensive, and",
-                    className: "font-normal"
-                  },
-                  {
-                    text: "gated by expertise.",
-                    className: "font-serif italic"
-                  }
-                ]}
-              />
-            </div>
-          </SectionHeader>
-          <div className="mt-10 grid gap-5 xl:gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-            <EditorialImageCard
-              src={deckImages.problem}
-              videoSrc={sectionMotionVideos.problem}
-              alt="A creator overwhelmed by traditional 3D production tooling."
-              eyebrow="Production Friction"
-              title="Great ideas lose force when the workflow becomes the blocker."
-              className="min-h-[320px]"
-              imageClassName="object-[72%_50%]"
-              contentClassName="mx-auto max-w-[28rem] text-center"
-              titleClassName="max-w-none"
-            />
-            <div className="grid gap-4">
+        <div className="grid gap-10 lg:grid-cols-[0.84fr_1.16fr] lg:items-start">
+          <div>
+            <SectionHeader index="02" label="Problem">
+              <div className="max-w-[18ch] text-3xl leading-[0.97] sm:text-4xl sm:leading-[0.94] md:text-5xl lg:text-[4rem]">
+                <WordsPullUpMultiStyle
+                  justify="start"
+                  segments={[
+                    {
+                      text: "Video and 3D production is still slow, expensive, and",
+                      className: "font-normal"
+                    },
+                    {
+                      text: "gated by expertise.",
+                      className: "font-serif italic"
+                    }
+                  ]}
+                />
+              </div>
+            </SectionHeader>
+            <p className="max-w-[30rem] text-sm leading-relaxed text-primary/78 sm:text-[15px]">
+              Great ideas lose force when the workflow becomes the blocker. Creative teams still spend weeks on
+              manual build, lighting, motion, and review before they reach the shot.
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <InsightCard
                 delay={0}
                 value="3-6 weeks"
@@ -678,219 +683,211 @@ export default function HomePage() {
                 text="Manual build, light, motion, review."
               />
               <InsightCard
-                delay={0.15}
+                delay={0.12}
                 value="$15k+"
                 title="Minimum cost"
                 text="Too expensive for fast iteration."
               />
             </div>
           </div>
-          </div>
+
+          <EditorialImageCard
+            src={deckImages.problem}
+            videoSrc={sectionMotionVideos.problem}
+            alt="A creator overwhelmed by traditional 3D production tooling."
+            eyebrow="Production Friction"
+            title="Creative momentum dies when every shot still needs a specialist pipeline."
+            className="min-h-[460px] lg:min-h-[560px]"
+            imageClassName="object-[72%_50%]"
+            contentClassName="max-w-[22rem]"
+          />
         </div>
       </SectionShell>
 
       <SectionShell id="solution">
-        <RevealCard delay={0}>
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#0a0a0a] p-6 shadow-cinematic sm:p-8 md:p-10">
-            <SectionBackdrop
-              src={deckImages.solution}
-              videoSrc={sectionMotionVideos.solution}
-              imageClassName="object-center"
-              videoClassName="object-center"
-              opacity={0.14}
-            />
-            <div className="relative z-10">
-              <SectionHeader index="03" label="Solution">
-                <div className="max-w-4xl text-3xl leading-[0.95] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-[3.8rem]">
-                  <WordsPullUpMultiStyle
-                    justify="start"
-                    segments={[
-                      { text: "Text-to-3D that turns ideas into", className: "font-normal" },
-                      { text: "shot-ready scenes", className: "font-serif italic" },
-                      { text: "in minutes.", className: "font-normal" }
-                    ]}
-                  />
-                </div>
-              </SectionHeader>
-              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
-                <EditorialImageCard
-                  src={deckImages.solution}
-                  videoSrc={sectionMotionVideos.solution}
-                  alt="An abstract visual showing disorder transformed into a clean AI-assisted 3D workflow."
-                  eyebrow="Workflow Shift"
-                  title="Move from chaos to editable scene generation."
-                  className="min-h-[320px]"
-                  imageClassName="object-center"
+        <div className="grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
+          <EditorialImageCard
+            src={deckImages.solution}
+            videoSrc={sectionMotionVideos.solution}
+            alt="An abstract visual showing disorder transformed into a clean AI-assisted 3D workflow."
+            eyebrow="Workflow Shift"
+            title="Move from chaos to structured, editable scene generation."
+            className="min-h-[480px] lg:min-h-[600px]"
+            imageClassName="object-center"
+          />
+
+          <div>
+            <SectionHeader index="03" label="Solution">
+              <div className="max-w-[16ch] text-3xl leading-[0.97] sm:text-4xl sm:leading-[0.94] md:text-5xl lg:text-[4rem]">
+                <WordsPullUpMultiStyle
+                  justify="start"
+                  segments={[
+                    { text: "Text-to-3D that turns ideas into", className: "font-normal" },
+                    { text: "shot-ready scenes", className: "font-serif italic" },
+                    { text: "in minutes.", className: "font-normal" }
+                  ]}
                 />
-                <div className="grid gap-4">
-                  <div className="rounded-[1.6rem] border border-white/8 bg-black/35 p-5 backdrop-blur-md sm:p-6">
-                    <p className="max-w-[26rem] text-sm leading-relaxed text-primary/78 sm:text-[15px]">
-                      Replace weeks of production overhead with an editable AI-native workflow.
-                    </p>
-                  </div>
-                  <div className="rounded-[1.6rem] border border-white/8 bg-black/40 p-5 backdrop-blur-md">
-                    <p className="text-[10px] uppercase tracking-[0.28em] text-primary">Proof</p>
-                    <p className="mt-4 text-5xl font-light tracking-[-0.06em]" style={{ color: primaryText }}>
-                      10-100x
-                    </p>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-400">Faster, lower cost, still editable.</p>
-                  </div>
-                </div>
+              </div>
+            </SectionHeader>
+            <p className="max-w-[28rem] text-sm leading-relaxed text-primary/78 sm:text-[15px]">
+              Replace weeks of production overhead with an AI-native workflow that stays editable and usable in
+              production.
+            </p>
+            <div className="mt-7 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-[1.45rem] border border-white/8 bg-white/[0.025] p-5">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-primary">Proof</p>
+                <p className="mt-3 text-5xl font-light tracking-[-0.06em]" style={{ color: primaryText }}>
+                  10-100x
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-gray-400">Faster, lower cost, still editable.</p>
+              </div>
+              <div className="rounded-[1.45rem] border border-white/8 bg-white/[0.025] p-5">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-primary">Outcome</p>
+                <p className="mt-3 text-lg leading-relaxed text-primary/85">Prompt-first. Production-ready. Director-controlled.</p>
               </div>
             </div>
           </div>
-        </RevealCard>
+        </div>
       </SectionShell>
 
       <SectionShell id="product" className="relative overflow-hidden">
-        <div className="bg-noise absolute inset-0 opacity-[0.15]" />
-        <SectionBackdrop
-          src={deckImages.product}
-          videoSrc={sectionMotionVideos.product}
-          className="rounded-[2rem]"
-          imageClassName="object-center"
-          videoClassName="object-center"
-          opacity={0.1}
-        />
-        <div className="relative rounded-[2rem] border border-white/5 bg-black/25 p-5 shadow-cinematic backdrop-blur-[8px] sm:p-6 md:p-8">
-          <SectionHeader
-            index="04"
-            label="Product"
-            center
-          >
-            <div className="mx-auto max-w-4xl text-xl sm:text-2xl md:text-3xl lg:text-[2.6rem]">
-              <WordsPullUpMultiStyle
-                justify="center"
-                segments={[
-                  {
-                    text: "Studio-grade workflow from raw intent to shot-ready 3D.",
-                    className: "font-normal"
-                  },
-                  {
-                    text: "Built for speed and control.",
-                    className: "text-gray-500 font-normal"
-                  }
-                ]}
-              />
-            </div>
-          </SectionHeader>
+        <div className="bg-noise absolute inset-0 opacity-[0.08]" />
+        <div className="grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
+          <div>
+            <SectionHeader index="04" label="Product">
+              <div className="max-w-[18ch] text-3xl leading-[0.97] sm:text-4xl sm:leading-[0.94] md:text-5xl lg:text-[4rem]">
+                <WordsPullUpMultiStyle
+                  justify="start"
+                  segments={[
+                    {
+                      text: "Studio-grade workflow from raw intent to shot-ready 3D.",
+                      className: "font-normal"
+                    },
+                    {
+                      text: "Built for speed and control.",
+                      className: "font-serif italic"
+                    }
+                  ]}
+                />
+              </div>
+            </SectionHeader>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr_1fr_1fr] lg:gap-5">
             <RevealCard delay={0}>
-              <div className="relative h-full min-h-[280px] overflow-hidden rounded-[1.75rem] bg-[#212121] shadow-cinematic">
+              <div className="relative min-h-[420px] overflow-hidden rounded-[1.9rem] border border-white/6 bg-[#121212] shadow-cinematic lg:min-h-[540px]">
                 <video
                   autoPlay
                   loop
                   muted
                   playsInline
                   preload="auto"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover object-center"
                   src={productVideo}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <p className="max-w-[10ch] text-2xl leading-tight" style={{ color: primaryText }}>
-                    Your creative canvas.
-                  </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/16 to-black/6" />
+                <div className="absolute left-0 right-0 top-0 p-5 sm:p-6">
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-primary">Creative Canvas</p>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+                  <div className="max-w-[24rem] rounded-[1.2rem] border border-white/8 bg-black/42 p-4 backdrop-blur-md sm:p-5">
+                    <p className="text-2xl leading-tight sm:text-[2rem]" style={{ color: primaryText }}>
+                      One workflow from prompt to editable scene.
+                    </p>
+                    <p className="mt-3 text-sm leading-relaxed text-gray-300">
+                      Text, sketch, or motion reference in. Scene graph, lighting, motion, and engine-ready output out.
+                    </p>
+                  </div>
                 </div>
               </div>
             </RevealCard>
-
-            {featureCards.map((card, index) => (
-              <ProductFeatureCard key={card.title} {...card} delay={0.15 * (index + 1)} />
-            ))}
           </div>
 
+          <div className="space-y-6">
+            <div className="grid gap-4">
+              {featureCards.map((card, index) => (
+                <ProductFeatureCard key={card.title} {...card} delay={0.12 * (index + 1)} />
+              ))}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {productSteps.map((step) => (
+                <div key={step.number} className="rounded-[1.3rem] border border-white/8 bg-white/[0.02] p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-primary">{step.number}</p>
+                  <p className="mt-2 text-sm" style={{ color: primaryText }}>
+                    {step.title}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-gray-400">{step.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </SectionShell>
 
       <SectionShell id="market">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-7">
-          <RevealCard delay={0}>
-            <div className="relative overflow-hidden rounded-[2rem] bg-[#101010] p-6 shadow-cinematic sm:p-8">
-              <SectionBackdrop
-                src={deckImages.market}
-                videoSrc={sectionMotionVideos.market}
-                imageClassName="object-[58%_48%]"
-                videoClassName="object-[58%_44%] brightness-[0.6] saturate-[0.7]"
-                opacity={0.11}
-              />
-              <div className="relative z-10">
-              <SectionHeader
-                index="05"
-                label="Market"
-              >
-                <div className="text-3xl leading-[0.95] sm:text-4xl sm:leading-[0.9] md:text-[3.8rem]">
-                  <WordsPullUpMultiStyle
-                    justify="start"
-                    segments={[
-                      { text: "A $150B+ opportunity", className: "font-normal" },
-                      { text: "at the right inflection point.", className: "font-serif italic" }
-                    ]}
-                  />
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div>
+            <SectionHeader index="05" label="Market">
+              <div className="max-w-[16ch] text-3xl leading-[0.97] sm:text-4xl sm:leading-[0.94] md:text-5xl lg:text-[4rem]">
+                <WordsPullUpMultiStyle
+                  justify="start"
+                  segments={[
+                    { text: "A $150B+ opportunity", className: "font-normal" },
+                    { text: "at the right inflection point.", className: "font-serif italic" }
+                  ]}
+                />
+              </div>
+            </SectionHeader>
+            <div className="grid gap-4">
+              {whyNow.map((item) => (
+                <div key={item.title} className="border-t border-white/6 pt-4">
+                  <p className="text-lg" style={{ color: primaryText }}>
+                    {item.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-400">{item.text}</p>
                 </div>
-              </SectionHeader>
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                {[ 
+              ))}
+            </div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-[1.9rem] border border-white/6 bg-[#101010] shadow-cinematic">
+            <SectionBackdrop
+              src={deckImages.market}
+              videoSrc={sectionMotionVideos.market}
+              imageClassName="object-[58%_48%]"
+              videoClassName="object-[58%_44%] brightness-[0.58] saturate-[0.7]"
+              opacity={0.12}
+            />
+            <div className="relative z-10 flex min-h-[520px] flex-col justify-between p-6 sm:p-8">
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
                   ["$150B+", "Total Market"],
                   ["$45B", "Serviceable"],
                   ["$5B", "Obtainable"]
                 ].map(([value, label], index) => (
                   <RevealCard key={label} delay={0.1 * (index + 1)}>
-                    <div className="rounded-[1.25rem] border border-white/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.28))] p-5">
+                    <div className="rounded-[1.25rem] border border-white/8 bg-black/36 p-4 backdrop-blur-md">
                       <p className="text-3xl" style={{ color: primaryText }}>
                         {value}
                       </p>
-                      <p className="mt-2 text-xs uppercase tracking-[0.2em] text-gray-500">{label}</p>
+                      <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-gray-500">{label}</p>
                     </div>
                   </RevealCard>
                 ))}
               </div>
+              <div className="max-w-[22rem] rounded-[1.2rem] border border-white/8 bg-black/40 p-4 backdrop-blur-md sm:p-5">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-primary">Why Now</p>
+                <p className="mt-3 text-lg leading-relaxed text-primary/88">
+                  Demand is global, visual, and increasingly native to AI-first production.
+                </p>
               </div>
             </div>
-          </RevealCard>
-          <RevealCard delay={0.2}>
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#0a0a0a] p-6 sm:p-8">
-              <SectionBackdrop
-                src={deckImages.market}
-                videoSrc={sectionMotionVideos.market}
-                imageClassName="object-[42%_50%]"
-                videoClassName="object-[38%_45%] brightness-[0.56] saturate-[0.68]"
-                opacity={0.1}
-              />
-              <div className="relative z-10">
-              <SectionTag>Why Now</SectionTag>
-              <div className="mt-6 space-y-5">
-                {whyNow.map((item) => (
-                  <div key={item.title} className="border-b border-white/5 pb-4 last:border-b-0 last:pb-0">
-                    <p className="text-lg" style={{ color: primaryText }}>
-                      {item.title}
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-gray-400">{item.text}</p>
-                  </div>
-                ))}
-              </div>
-              </div>
-            </div>
-          </RevealCard>
+          </div>
         </div>
       </SectionShell>
 
       <SectionShell id="competition">
-        <div className="relative overflow-hidden rounded-[2rem] bg-[#101010] p-6 shadow-cinematic sm:p-8 md:p-10">
-          <SectionBackdrop
-            src={deckImages.competition}
-            videoSrc={sectionMotionVideos.competition}
-            imageClassName="object-center"
-            videoClassName="object-center"
-            opacity={0.12}
-          />
-          <div className="relative z-10">
-          <SectionHeader
-            index="06"
-            label="Competition"
-          >
-            <div className="max-w-5xl text-3xl leading-[0.95] sm:text-4xl sm:leading-[0.9] md:text-[3.8rem]">
+        <div>
+          <SectionHeader index="06" label="Competition">
+            <div className="max-w-[18ch] text-3xl leading-[0.97] sm:text-4xl sm:leading-[0.94] md:text-5xl lg:text-[4rem]">
               <WordsPullUpMultiStyle
                 justify="start"
                 segments={[
@@ -901,20 +898,20 @@ export default function HomePage() {
               />
             </div>
           </SectionHeader>
-          <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-white/5">
-            <div className="hidden grid-cols-[1.1fr_1fr_1fr_1fr] bg-black/80 px-6 py-3 text-xs uppercase tracking-[0.2em] text-gray-500 md:grid">
+          <div className="overflow-hidden rounded-[1.65rem] border border-white/6 bg-black/26 backdrop-blur-sm">
+            <div className="hidden grid-cols-[1.15fr_1fr_1fr_1fr] border-b border-white/6 px-6 py-4 text-[10px] uppercase tracking-[0.24em] text-gray-500 md:grid">
               <p>Category</p>
               <p>Speed</p>
               <p>3D Fidelity</p>
               <p>Editability</p>
             </div>
             {comparisonRows.map((row, index) => (
-              <RevealCard delay={0.12 * index} key={row.category}>
+              <RevealCard delay={0.1 * index} key={row.category}>
                 <div
-                  className={`grid grid-cols-1 gap-4 border-t border-white/5 px-4 py-5 md:grid-cols-[1.1fr_1fr_1fr_1fr] md:px-6 ${
+                  className={`grid grid-cols-1 gap-4 border-t border-white/6 px-5 py-5 md:grid-cols-[1.15fr_1fr_1fr_1fr] md:px-6 ${
                     row.category === "UnstableML"
-                      ? "bg-[linear-gradient(90deg,rgba(222,219,200,0.12),rgba(12,12,12,0.94)_44%)]"
-                      : "bg-[#0c0c0c]"
+                      ? "bg-[linear-gradient(90deg,rgba(222,219,200,0.1),rgba(0,0,0,0.0)_36%,rgba(255,255,255,0.01))]"
+                      : ""
                   }`}
                 >
                   <div>
@@ -927,18 +924,18 @@ export default function HomePage() {
                     const good = row.state[itemIndex] === "good";
                     return (
                       <div key={value} className="space-y-1.5">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 md:hidden">
+                        <p className="text-[10px] uppercase tracking-[0.22em] text-gray-500 md:hidden">
                           {comparisonLabels[itemIndex]}
                         </p>
                         <div className="flex items-start gap-3">
-                        <span
-                          className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full ${
-                            good ? "bg-primary text-black" : "border border-white/10 text-gray-500"
-                          }`}
-                        >
-                          {good ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                        </span>
-                        <p className="text-sm leading-relaxed text-gray-400">{value}</p>
+                          <span
+                            className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                              good ? "bg-primary text-black" : "border border-white/10 text-gray-500"
+                            }`}
+                          >
+                            {good ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                          </span>
+                          <p className="text-sm leading-relaxed text-gray-400">{value}</p>
                         </div>
                       </div>
                     );
@@ -947,73 +944,52 @@ export default function HomePage() {
               </RevealCard>
             ))}
           </div>
-          </div>
         </div>
       </SectionShell>
 
       <SectionShell id="traction">
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-7">
-          <RevealCard delay={0}>
-            <div className="relative overflow-hidden rounded-[2rem] bg-[#101010] p-6 shadow-cinematic sm:p-8">
-              <SectionBackdrop
-                src={deckImages.traction}
-                videoSrc={sectionMotionVideos.traction}
-                imageClassName="object-center"
-                videoClassName="object-center"
-                opacity={0.14}
-              />
-              <div className="relative z-10">
-              <SectionHeader
-                index="07"
-                label="Traction"
-              >
-                <div className="text-3xl leading-[0.95] sm:text-4xl sm:leading-[0.9] md:text-[3.8rem]">
-                  <WordsPullUpMultiStyle
-                    justify="start"
-                    segments={[
-                      { text: "Low-friction entry.", className: "font-normal" },
-                      { text: "Expansion revenue by usage.", className: "font-serif italic" }
-                    ]}
-                  />
-                </div>
-              </SectionHeader>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {tractionHighlights.map(([value, label], index) => (
-                  <RevealCard key={label} delay={0.08 * index}>
-                    <div className="rounded-[1.5rem] bg-black/60 p-5">
-                      <p className="text-4xl" style={{ color: primaryText }}>
-                        {value}
-                      </p>
-                      <p className="mt-2 text-sm text-gray-400">{label}</p>
-                    </div>
-                  </RevealCard>
-                ))}
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div>
+            <SectionHeader index="07" label="Traction">
+              <div className="max-w-[16ch] text-3xl leading-[0.97] sm:text-4xl sm:leading-[0.94] md:text-5xl lg:text-[4rem]">
+                <WordsPullUpMultiStyle
+                  justify="start"
+                  segments={[
+                    { text: "Low-friction entry.", className: "font-normal" },
+                    { text: "Expansion revenue by usage.", className: "font-serif italic" }
+                  ]}
+                />
               </div>
-              </div>
+            </SectionHeader>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {tractionHighlights.map(([value, label], index) => (
+                <RevealCard key={label} delay={0.08 * index}>
+                  <div className="rounded-[1.4rem] border border-white/8 bg-white/[0.025] p-5">
+                    <p className="text-4xl" style={{ color: primaryText }}>
+                      {value}
+                    </p>
+                    <p className="mt-2 text-sm text-gray-400">{label}</p>
+                  </div>
+                </RevealCard>
+              ))}
             </div>
-          </RevealCard>
-          <RevealCard delay={0.1}>
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#0a0a0a] p-6">
-              <SectionBackdrop
-                src={deckImages.traction}
-                videoSrc={sectionMotionVideos.traction}
-                imageClassName="object-right"
-                videoClassName="object-right"
-                opacity={0.1}
-              />
-              <div className="relative z-10">
-              <SectionTag>Pricing</SectionTag>
-              <div className="mt-6 grid gap-4">
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1fr_0.86fr]">
+            <div className="rounded-[1.7rem] border border-white/6 bg-black/26 p-5 backdrop-blur-sm sm:p-6">
+              <p className="text-[10px] uppercase tracking-[0.28em] text-primary">Pricing</p>
+              <div className="mt-5 grid gap-4">
                 {pricingTiers.map((tier, index) => (
                   <RevealCard key={tier.title} delay={0.08 * index}>
-                    <div className="rounded-[1.5rem] bg-[#151515] p-5">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="rounded-[1.35rem] border border-white/8 bg-white/[0.025] p-5">
+                      <div className="flex items-start justify-between gap-4">
                         <div>
                           <p className="text-lg" style={{ color: primaryText }}>
                             {tier.title}
                           </p>
                           <p className="mt-2 text-sm text-primary/80">{tier.credits}</p>
-                          <p className="mt-1 text-sm leading-relaxed text-gray-400">{tier.text}</p>
+                          <p className="mt-2 text-sm leading-relaxed text-gray-400">{tier.text}</p>
+                          <p className="mt-2 text-xs leading-relaxed text-gray-500">{tier.detail}</p>
                         </div>
                         <p className="text-right text-2xl" style={{ color: primaryText }}>
                           {tier.price}
@@ -1024,45 +1000,44 @@ export default function HomePage() {
                   </RevealCard>
                 ))}
               </div>
-              <div className="mt-5 rounded-[1.4rem] border border-white/6 bg-black/35 p-4">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-primary">Expansion</p>
-                <p className="mt-3 text-3xl" style={{ color: primaryText }}>
-                  $192 upfront
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-gray-400">Low entry price, then refill revenue from usage.</p>
-              </div>
-              </div>
             </div>
-          </RevealCard>
+            <div className="rounded-[1.7rem] border border-white/6 bg-black/26 p-5 backdrop-blur-sm sm:p-6">
+              <p className="text-[10px] uppercase tracking-[0.28em] text-primary">Expansion</p>
+              <p className="mt-4 text-5xl font-light tracking-[-0.06em]" style={{ color: primaryText }}>
+                $192
+              </p>
+              <p className="mt-2 text-sm text-gray-400">Yearly upfront</p>
+              <div className="mt-6 space-y-3">
+                {onDemandBillingPoints.map((point) => (
+                  <div key={point} className="flex items-start gap-3 text-sm leading-relaxed text-gray-300">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{point}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-6 text-sm leading-relaxed text-gray-400">
+                Low entry price, then refill revenue from usage.
+              </p>
+            </div>
+          </div>
         </div>
       </SectionShell>
 
       <SectionShell id="team-ask" className="pb-20">
-        <div className="relative overflow-hidden rounded-[2rem] bg-[#101010] p-6 shadow-cinematic sm:p-8 md:p-10">
-          <SectionBackdrop
-            src={deckImages.ask}
-            videoSrc={sectionMotionVideos.ask}
-            imageClassName="object-center"
-            videoClassName="object-center"
-            opacity={0.12}
-          />
-          <div className="relative z-10">
-          <SectionHeader
-            index="08"
-            label="Team & Ask"
-          >
-            <div className="max-w-3xl text-3xl leading-[0.95] sm:text-4xl sm:leading-[0.9] md:text-[3.8rem]">
-              <WordsPullUpMultiStyle
-                justify="start"
-                segments={[
-                  { text: "The team to build it.", className: "font-normal" },
-                  { text: "The capital to scale it.", className: "font-serif italic" }
-                ]}
-              />
-            </div>
-          </SectionHeader>
-          <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:gap-7">
-            <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+          <div>
+            <SectionHeader index="08" label="Team & Ask">
+              <div className="max-w-[16ch] text-3xl leading-[0.97] sm:text-4xl sm:leading-[0.94] md:text-5xl lg:text-[4rem]">
+                <WordsPullUpMultiStyle
+                  justify="start"
+                  segments={[
+                    { text: "The team to build it.", className: "font-normal" },
+                    { text: "The capital to scale it.", className: "font-serif italic" }
+                  ]}
+                />
+              </div>
+            </SectionHeader>
+            <div className="grid gap-4">
               {[
                 {
                   name: "[Founder Name]",
@@ -1076,52 +1051,50 @@ export default function HomePage() {
                 }
               ].map((person, index) => (
                 <RevealCard key={person.role} delay={0.1 * index}>
-                  <div className="rounded-[1.5rem] border border-white/5 bg-black/60 p-5">
+                  <div className="rounded-[1.45rem] border border-white/8 bg-white/[0.025] p-5">
                     <p className="text-2xl" style={{ color: primaryText }}>
                       {person.name}
                     </p>
                     <p className="mt-2 text-xs uppercase tracking-[0.25em] text-primary">
                       {person.role}
                     </p>
-                    <p className="mt-4 text-[15px] leading-relaxed text-gray-300">{person.text}</p>
+                    <p className="mt-4 text-sm leading-relaxed text-gray-300">{person.text}</p>
                   </div>
                 </RevealCard>
               ))}
             </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1fr_0.88fr]">
+            <EditorialImageCard
+              src={deckImages.ask}
+              videoSrc={sectionMotionVideos.ask}
+              alt="A glowing rocket visual representing growth and competitive acceleration."
+              eyebrow="Scale Up"
+              title="Capital scales product velocity."
+              className="min-h-[420px] lg:min-h-[520px]"
+              imageClassName="object-top"
+            />
             <RevealCard delay={0.2}>
-              <div className="flex h-full flex-col rounded-[1.75rem] border border-white/5 bg-black/45 p-6">
-                <div className="mb-6">
-                  <EditorialImageCard
-                    src={deckImages.ask}
-                    videoSrc={sectionMotionVideos.ask}
-                    alt="A glowing rocket visual representing growth and competitive acceleration."
-                    eyebrow="Scale Up"
-                    title="Capital scales product velocity."
-                    className="min-h-[220px]"
-                    imageClassName="object-top"
-                  />
-                </div>
-                <p className="text-xs uppercase tracking-[0.25em] text-primary">The Ask</p>
+              <div className="flex h-full flex-col rounded-[1.7rem] border border-white/6 bg-black/26 p-5 backdrop-blur-sm sm:p-6">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-primary">The Ask</p>
                 <p className="mt-4 text-6xl leading-none" style={{ color: primaryText }}>
                   $3M
                 </p>
                 <p className="mt-2 text-lg text-gray-400">Seed Round</p>
-                <div className="mt-8 rounded-[1.5rem] border border-white/5 bg-[#0c0c0c] p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-gray-500">Use of funds</p>
-                  <div className="mt-4 space-y-3">
-                    {askBars.map((item) => (
-                      <div key={item.label} className="grid grid-cols-[74px_1fr_44px] items-center gap-3 text-sm">
-                        <span className="text-gray-400">{item.label}</span>
-                        <div className="h-2 rounded-full bg-white/5">
-                          <div
-                            className="h-2 rounded-full bg-gradient-to-r from-[#7f7868] via-[#b9b099] to-[#ede4cd]"
-                            style={{ width: `${item.value}%` }}
-                          />
-                        </div>
-                        <span className="text-right text-primary/75">{item.value}%</span>
+                <div className="mt-8 space-y-3">
+                  {askBars.map((item) => (
+                    <div key={item.label} className="grid grid-cols-[70px_1fr_38px] items-center gap-3 text-sm">
+                      <span className="text-gray-400">{item.label}</span>
+                      <div className="h-2 rounded-full bg-white/5">
+                        <div
+                          className="h-2 rounded-full bg-gradient-to-r from-[#7f7868] via-[#b9b099] to-[#ede4cd]"
+                          style={{ width: `${item.value}%` }}
+                        />
                       </div>
-                    ))}
-                  </div>
+                      <span className="text-right text-primary/75">{item.value}%</span>
+                    </div>
+                  ))}
                 </div>
                 <div className="mt-auto pt-10">
                   <p className="text-sm text-gray-500">founders@unstableml.ai</p>
@@ -1138,7 +1111,6 @@ export default function HomePage() {
                 </div>
               </div>
             </RevealCard>
-          </div>
           </div>
         </div>
       </SectionShell>
