@@ -53,6 +53,7 @@ const heroStats = [
   ["42%", "MoM growth"],
   ["88%", "retention"]
 ];
+const heroPillars = ["Editable scenes", "Director control", "Production-ready"];
 
 const problemStats = [
   {
@@ -215,7 +216,13 @@ function Reveal({
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs uppercase tracking-[0.32em] text-white/40">{children}</p>;
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-1.5 w-1.5 rounded-full bg-white/55" />
+      <p className="text-xs uppercase tracking-[0.32em] text-white/40">{children}</p>
+      <span className="section-sheen h-px flex-1 opacity-50" />
+    </div>
+  );
 }
 
 function SectionShell({
@@ -260,6 +267,7 @@ function SectionShell({
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/72 to-black" />
         </div>
       ) : null}
+      <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-white/8" />
       <div className="relative z-10 mx-auto max-w-6xl">{children}</div>
     </section>
   );
@@ -285,7 +293,7 @@ function GlassButton({
   return (
     <a
       href={href}
-      className={`liquid-glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white transition duration-300 hover:bg-white/[0.04] ${className}`}
+      className={`liquid-glass shadow-panel inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white transition duration-300 hover:bg-white/[0.04] hover:shadow-[0_24px_60px_rgba(0,0,0,0.42)] ${className}`}
     >
       {children}
     </a>
@@ -294,7 +302,7 @@ function GlassButton({
 
 function StatPill({ value, label }: { value: string; label: string }) {
   return (
-    <div className="liquid-glass rounded-full px-5 py-3 text-center">
+    <div className="liquid-glass shadow-panel min-w-[112px] rounded-full px-5 py-3 text-center">
       <p className="text-base font-medium tracking-tight text-white">{value}</p>
       <p className="mt-1 text-[10px] uppercase tracking-[0.28em] text-white/40">{label}</p>
     </div>
@@ -317,7 +325,7 @@ function MediaPanel({
   children?: React.ReactNode;
 }) {
   return (
-    <div className={`group relative overflow-hidden rounded-[1.9rem] bg-white/[0.02] ${className}`}>
+    <div className={`shadow-panel group relative overflow-hidden rounded-[1.9rem] border border-white/8 bg-white/[0.02] ${className}`}>
       <video
         autoPlay
         loop
@@ -337,6 +345,7 @@ function MediaPanel({
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.09),_transparent_42%)]" />
+      <div className="absolute inset-x-6 top-0 h-px bg-white/12" />
       {children ? <div className="relative z-10 h-full">{children}</div> : null}
     </div>
   );
@@ -359,7 +368,7 @@ function FeatureCard({
 }) {
   return (
     <Reveal delay={delay}>
-      <div className="liquid-glass group overflow-hidden rounded-[1.7rem]">
+      <div className="liquid-glass shadow-panel group overflow-hidden rounded-[1.7rem]">
         <div className="relative aspect-[16/10] overflow-hidden">
           {video ? (
             <video
@@ -512,11 +521,16 @@ function HeroSection() {
         style={{ opacity: videoOpacity }}
         className="absolute inset-0 h-full w-full scale-[1.08] object-cover object-[50%_54%] md:object-[50%_52%] lg:object-[50%_50%]"
       />
+      <div className="page-grid absolute inset-0 opacity-[0.05]" />
+      <div className="page-noise absolute inset-0 opacity-[0.07]" />
+      <div className="absolute inset-y-0 left-[8%] hidden w-px bg-white/8 xl:block" />
+      <div className="absolute inset-y-0 right-[8%] hidden w-px bg-white/8 xl:block" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_40%)]" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black" />
+      <div className="hero-vignette absolute inset-0" />
 
-      <div className="relative z-20 mx-auto w-full max-w-5xl">
-        <div className="liquid-glass flex items-center justify-between rounded-full px-5 py-3 md:px-6">
+      <div className="relative z-20 mx-auto w-full max-w-6xl">
+        <div className="liquid-glass shadow-panel flex items-center justify-between rounded-full px-5 py-3 md:px-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <Globe className="h-6 w-6 text-white" />
@@ -545,15 +559,29 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center text-center [-webkit-transform:translateY(-20%)] [transform:translateY(-20%)]">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center text-center [-webkit-transform:translateY(-18%)] [transform:translateY(-18%)]">
         <Reveal className="max-w-5xl" y={40}>
-          <p className="text-xs uppercase tracking-[0.34em] text-white/40">Unstable ML</p>
-          <h1 className="mt-6 text-5xl tracking-tight text-white md:text-6xl lg:text-7xl">
+          <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/18 px-4 py-2 backdrop-blur-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+            <p className="text-[10px] uppercase tracking-[0.34em] text-white/50">Seed Narrative 01 / 08</p>
+          </div>
+          <p className="mt-7 text-xs uppercase tracking-[0.34em] text-white/40">Unstable ML</p>
+          <h1 className="mt-6 text-5xl tracking-tight text-white md:text-6xl lg:text-[5.4rem] lg:leading-[0.98]">
             Generate cinematic <Accent>3D scenes</Accent> from text in seconds.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl px-4 text-sm leading-relaxed text-white/70">
             Cinematic text-to-3D infrastructure
           </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            {heroPillars.map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-white/50 backdrop-blur-md"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <GlassButton href="#product">
               View the workflow
@@ -878,19 +906,19 @@ function CompetitionSection() {
         </Reveal>
         <Reveal delay={0.24}>
           <div className="grid gap-4">
-            <div className="liquid-glass rounded-[1.7rem] p-6">
+            <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
               <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Positioning</p>
               <p className="mt-4 text-xl leading-relaxed text-white">
                 UnstableML sits between legacy 3D software and flat gen-video tools.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="liquid-glass rounded-[1.6rem] p-5">
+              <div className="liquid-glass shadow-panel rounded-[1.6rem] p-5">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Speed</p>
                 <p className="mt-3 text-3xl tracking-tight text-white">mins</p>
                 <p className="mt-2 text-sm text-white/55">Fast enough for creative iteration.</p>
               </div>
-              <div className="liquid-glass rounded-[1.6rem] p-5">
+              <div className="liquid-glass shadow-panel rounded-[1.6rem] p-5">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Control</p>
                 <p className="mt-3 text-3xl tracking-tight text-white">true 3D</p>
                 <p className="mt-2 text-sm text-white/55">Editable, scene-aware, production ready.</p>
@@ -900,7 +928,7 @@ function CompetitionSection() {
         </Reveal>
       </div>
       <Reveal delay={0.16} className="mt-8">
-        <div className="liquid-glass overflow-hidden rounded-[2rem]">
+        <div className="liquid-glass shadow-panel overflow-hidden rounded-[2rem]">
           <div className="hidden grid-cols-[1.2fr_1fr_1fr_1fr] border-b border-white/10 px-6 py-5 text-[10px] uppercase tracking-[0.28em] text-white/40 md:grid">
             <p>Category</p>
             <p>Speed</p>
@@ -971,7 +999,7 @@ function TractionSection() {
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {tractionHighlights.map(([value, label], index) => (
               <Reveal key={label} delay={0.18 + index * 0.08}>
-                <div className="liquid-glass rounded-[1.7rem] p-6">
+                <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
                   <p className="text-4xl tracking-tight text-white md:text-5xl">{value}</p>
                   <p className="mt-3 text-sm leading-relaxed text-white/55">{label}</p>
                 </div>
@@ -1000,7 +1028,7 @@ function TractionSection() {
             </MediaPanel>
           </Reveal>
           <Reveal delay={0.18}>
-            <div className="liquid-glass rounded-[1.9rem] p-6 md:p-8">
+            <div className="liquid-glass shadow-panel rounded-[1.9rem] p-6 md:p-8">
               <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Pricing</p>
               <div className="mt-6 space-y-4">
                 {pricingTiers.map((tier) => (
@@ -1024,7 +1052,7 @@ function TractionSection() {
           </Reveal>
 
           <Reveal delay={0.28}>
-            <div className="liquid-glass flex h-full flex-col rounded-[1.9rem] p-6 md:p-8">
+            <div className="liquid-glass shadow-panel flex h-full flex-col rounded-[1.9rem] p-6 md:p-8">
               <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Expansion</p>
               <p className="mt-5 text-6xl tracking-tight text-white">$192</p>
               <p className="mt-2 text-sm text-white/55">Yearly upfront</p>
@@ -1082,7 +1110,7 @@ function TeamAskSection() {
               }
             ].map((person, index) => (
               <Reveal key={person.role} delay={0.18 + index * 0.12}>
-                <div className="liquid-glass rounded-[1.7rem] p-6">
+                <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
                   <p className="text-2xl tracking-tight text-white">{person.name}</p>
                   <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/40">{person.role}</p>
                   <p className="mt-4 text-sm leading-relaxed text-white/60">{person.text}</p>
@@ -1113,7 +1141,7 @@ function TeamAskSection() {
           </Reveal>
 
           <Reveal delay={0.28}>
-            <div className="liquid-glass flex h-full flex-col rounded-[1.9rem] p-6 md:p-8">
+            <div className="liquid-glass shadow-panel flex h-full flex-col rounded-[1.9rem] p-6 md:p-8">
               <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">The Ask</p>
               <p className="mt-5 text-6xl tracking-tight text-white">$3M</p>
               <p className="mt-2 text-lg text-white/55">Seed Round</p>
@@ -1146,7 +1174,14 @@ function TeamAskSection() {
 
 export default function HomePage() {
   return (
-    <main className="overflow-hidden bg-black text-white">
+    <main className="relative isolate overflow-hidden bg-black text-white">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="page-grid absolute inset-0 opacity-[0.03]" />
+        <div className="page-noise absolute inset-0 opacity-[0.04]" />
+        <div className="absolute left-[10%] top-0 h-full w-px bg-white/[0.05]" />
+        <div className="absolute right-[10%] top-0 h-full w-px bg-white/[0.05]" />
+        <div className="absolute left-1/2 top-[18%] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[140px]" />
+      </div>
       <HeroSection />
       <ProblemSection />
       <SolutionSection />
