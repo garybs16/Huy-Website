@@ -16,7 +16,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 26%),
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.035), transparent 24%),
     linear-gradient(180deg, #050505 0%, #030303 38%, #000 100%);
   color: #fff;
   font-family:
@@ -36,9 +36,9 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.06), transparent 24%),
-    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.04), transparent 22%),
-    radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.03), transparent 34%);
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.04), transparent 22%),
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.025), transparent 20%),
+    radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.02), transparent 30%);
   z-index: 0;
 }
 
@@ -49,7 +49,7 @@ body::after {
   pointer-events: none;
   background-image: radial-gradient(rgba(255, 255, 255, 0.06) 0.7px, transparent 0.7px);
   background-size: 28px 28px;
-  opacity: 0.08;
+  opacity: 0.05;
   mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 80%);
   z-index: 0;
 }
@@ -82,8 +82,8 @@ video {
 
 .shadow-panel {
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 24px 70px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
 .hero-vignette {
@@ -111,12 +111,12 @@ video {
 
 @layer components {
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(255, 255, 255, 0.025);
     background-blend-mode: luminosity;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: none;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.16);
     position: relative;
     overflow: hidden;
   }

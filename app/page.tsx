@@ -29,16 +29,6 @@ const strategyVideo =
 const craftVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4";
 
-const deckImages = {
-  problem: "/prisma-media/problem-orbit.svg",
-  solution: "/prisma-media/solution-grid.svg",
-  market: "/prisma-media/market-globe.svg",
-  ask: "/prisma-media/ask-ascent.svg",
-  product: "/prisma-media/product-ribbon.svg",
-  competition: "/prisma-media/competition-matrix.svg",
-  traction: "/prisma-media/traction-signal.svg"
-};
-
 const navItems = [
   { label: "Problem", href: "#problem" },
   { label: "Solution", href: "#solution" },
@@ -53,7 +43,6 @@ const heroStats = [
   ["42%", "MoM growth"],
   ["88%", "retention"]
 ];
-const heroPillars = ["Editable scenes", "Director control", "Production-ready"];
 
 const problemStats = [
   {
@@ -218,9 +207,9 @@ function Reveal({
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="h-1.5 w-1.5 rounded-full bg-white/55" />
-      <p className="text-xs uppercase tracking-[0.32em] text-white/40">{children}</p>
-      <span className="section-sheen h-px flex-1 opacity-50" />
+      <span className="h-1.5 w-1.5 rounded-full bg-white/75" />
+      <p className="text-xs uppercase tracking-[0.32em] text-white/58">{children}</p>
+      <span className="section-sheen h-px flex-1 opacity-65" />
     </div>
   );
 }
@@ -241,7 +230,7 @@ function SectionShell({
   backgroundClassName?: string;
 }) {
   return (
-    <section id={id} className={`relative px-6 py-28 md:py-36 ${className}`}>
+    <section id={id} className={`relative flex min-h-[90svh] items-center px-5 py-14 md:px-6 md:py-16 ${className}`}>
       {(backgroundVideoSrc || backgroundImageSrc) ? (
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {backgroundVideoSrc ? (
@@ -251,7 +240,7 @@ function SectionShell({
               muted
               playsInline
               preload="auto"
-              className={`absolute inset-0 h-full w-full scale-[1.05] object-cover opacity-[0.14] saturate-0 ${backgroundClassName}`}
+              className={`absolute inset-0 h-full w-full scale-[1.05] object-cover opacity-[0.16] saturate-[0.32] ${backgroundClassName}`}
               src={backgroundVideoSrc}
             />
           ) : null}
@@ -264,13 +253,13 @@ function SectionShell({
             />
           ) : null}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_34%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/72 to-black" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/68 to-black/96" />
         </div>
       ) : null}
-      <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-white/8" />
-      <div className="relative z-10 mx-auto max-w-6xl px-1">
-        <div className="section-frame pointer-events-none absolute inset-0 rounded-[2.6rem] opacity-60" />
-        <div className="relative rounded-[2.6rem] px-4 py-6 md:px-6 md:py-8">{children}</div>
+      <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/8 md:inset-x-6" />
+      <div className="relative z-10 mx-auto w-full max-w-[1080px] px-1">
+        <div className="section-frame pointer-events-none absolute inset-0 rounded-[2.2rem] opacity-60" />
+        <div className="relative rounded-[2.2rem] bg-black/18 px-3 py-4 md:px-5 md:py-5">{children}</div>
       </div>
     </section>
   );
@@ -328,7 +317,7 @@ function MediaPanel({
   children?: React.ReactNode;
 }) {
   return (
-    <div className={`shadow-panel group relative overflow-hidden rounded-[1.9rem] border border-white/8 bg-white/[0.02] ${className}`}>
+    <div className={`shadow-panel group relative overflow-hidden rounded-[1.9rem] border border-white/10 bg-white/[0.035] ${className}`}>
       <video
         autoPlay
         loop
@@ -343,12 +332,13 @@ function MediaPanel({
           src={imageSrc}
           alt=""
           aria-hidden="true"
-          className={`absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-screen ${imageClassName}`}
+          className={`absolute inset-0 h-full w-full object-cover opacity-28 mix-blend-screen ${imageClassName}`}
         />
       ) : null}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.09),_transparent_42%)]" />
-      <div className="absolute inset-x-6 top-0 h-px bg-white/12" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/34 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.1),_transparent_40%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_40%,rgba(0,0,0,0.36)_100%)]" />
+      <div className="absolute inset-x-6 top-0 h-px bg-white/16" />
       {children ? <div className="relative z-10 h-full">{children}</div> : null}
     </div>
   );
@@ -371,8 +361,8 @@ function FeatureCard({
 }) {
   return (
     <Reveal delay={delay}>
-      <div className="liquid-glass shadow-panel group overflow-hidden rounded-[1.7rem]">
-        <div className="relative aspect-[16/10] overflow-hidden">
+      <div className="liquid-glass shadow-panel group overflow-hidden rounded-[1.5rem]">
+        <div className="relative aspect-[16/9] overflow-hidden">
           {video ? (
             <video
               autoPlay
@@ -392,19 +382,19 @@ function FeatureCard({
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
         </div>
-        <div className="p-6">
+        <div className="p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">{number}</p>
-              <h3 className="mt-3 text-xl tracking-tight text-white">{title}</h3>
+              <h3 className="mt-2 text-lg tracking-tight text-white">{title}</h3>
             </div>
             <span className="liquid-glass rounded-full p-2 text-white/60 transition duration-300 group-hover:text-white">
               <ArrowUpRight className="h-4 w-4" />
             </span>
           </div>
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 space-y-2.5">
             {points.map((point) => (
-              <div key={point} className="flex items-start gap-3 text-sm leading-relaxed text-white/55">
+              <div key={point} className="flex items-start gap-2.5 text-sm leading-relaxed text-white/55">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-white/70" />
                 <span>{point}</span>
               </div>
@@ -513,7 +503,7 @@ function HeroSection() {
   const videoOpacity = useHeroVideoLoop(videoRef);
 
   return (
-    <section className="relative flex min-h-screen flex-col overflow-hidden bg-black px-6 pb-8 pt-6">
+    <section className="relative flex min-h-screen flex-col overflow-hidden bg-black px-5 pb-6 pt-5 md:px-6 md:pb-8 md:pt-6">
       <video
         ref={videoRef}
         muted
@@ -533,19 +523,19 @@ function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black" />
       <div className="hero-vignette absolute inset-0" />
 
-      <div className="relative z-20 mx-auto w-full max-w-6xl">
-        <div className="liquid-glass shadow-panel flex items-center justify-between rounded-full px-5 py-3 md:px-6">
+      <div className="relative z-20 mx-auto w-full max-w-[1080px]">
+        <div className="liquid-glass shadow-panel flex items-center justify-between rounded-full px-4 py-2.5 md:px-5 md:py-3">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <Globe className="h-6 w-6 text-white" />
-              <span className="text-lg font-semibold text-white">Unstable ML</span>
+              <span className="text-base font-semibold text-white md:text-lg">Unstable ML</span>
             </div>
             <nav className="hidden items-center gap-6 md:flex">
               {navItems.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="text-sm font-medium text-white/80 transition hover:text-white"
+                  className="text-xs font-medium text-white/80 transition hover:text-white md:text-sm"
                 >
                   {item.label}
                 </a>
@@ -553,42 +543,32 @@ function HeroSection() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <a href="#product" className="hidden text-sm font-medium text-white md:inline-flex">
+            <a href="#product" className="hidden text-xs font-medium text-white md:inline-flex md:text-sm">
               View the workflow
             </a>
-            <GlassButton href="#team-ask" className="px-5 py-2">
+            <GlassButton href="#team-ask" className="px-4 py-2 md:px-5">
               Request intro
             </GlassButton>
           </div>
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 items-center [-webkit-transform:translateY(-9%)] [transform:translateY(-9%)]">
-        <div className="grid w-full gap-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-end">
-          <Reveal className="max-w-[52rem] text-center lg:text-left" y={40}>
+      <div className="relative z-10 mx-auto flex w-full max-w-[1080px] flex-1 items-center [-webkit-transform:translateY(-4%)] [transform:translateY(-4%)]">
+        <div className="grid w-full gap-7 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
+          <Reveal className="max-w-[48rem] text-center lg:text-left" y={40}>
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/18 px-4 py-2 backdrop-blur-md lg:mx-0">
               <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
               <p className="text-[10px] uppercase tracking-[0.34em] text-white/50">Seed Narrative 01 / 08</p>
             </div>
             <p className="mt-7 text-xs uppercase tracking-[0.34em] text-white/40">Unstable ML</p>
-            <h1 className="mt-6 text-5xl tracking-tight text-white md:text-6xl lg:text-[6.2rem] lg:leading-[0.94]">
+            <h1 className="mt-4 text-[2.75rem] tracking-tight text-white md:text-[3.8rem] lg:text-[4.55rem] lg:leading-[0.97]">
               Generate cinematic <Accent>3D scenes</Accent> from text in seconds.
             </h1>
-            <div className="mt-6 flex items-center justify-center gap-4 lg:justify-start">
+            <div className="mt-5 flex items-center justify-center gap-4 lg:justify-start">
               <span className="h-px w-12 bg-white/20" />
               <p className="text-[11px] uppercase tracking-[0.28em] text-white/45">Cinematic text-to-3D infrastructure</p>
             </div>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-              {heroPillars.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-white/50 backdrop-blur-md"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
               <GlassButton href="#product">
                 View the workflow
                 <ArrowRight className="h-4 w-4" />
@@ -598,49 +578,39 @@ function HeroSection() {
           </Reveal>
 
           <Reveal className="lg:justify-self-end" delay={0.16} x={24}>
-            <div className="liquid-glass shadow-panel max-w-[26rem] rounded-[2rem] p-5 md:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/45">Investor Snapshot</p>
-                  <p className="mt-3 max-w-[18rem] text-lg leading-relaxed text-white/88">
-                    Premium creative tooling built around editable output and fast production loops.
-                  </p>
-                </div>
-                <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/45">
-                  Live
-                </span>
+            <div className="liquid-glass shadow-panel max-w-[21rem] rounded-[1.6rem] p-4 md:p-5">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/45">Investor Snapshot</p>
+                <p className="mt-3 max-w-[14rem] text-sm leading-relaxed text-white/88 md:text-base">
+                  Editable scenes. Faster production loops.
+                </p>
               </div>
-              <div className="mt-6 grid grid-cols-3 gap-3">
+              <div className="mt-5 grid grid-cols-3 gap-2.5">
                 {heroStats.map(([value, label]) => (
                   <StatPill key={label} value={value} label={label} />
                 ))}
               </div>
-              <div className="mt-6 overflow-hidden rounded-[1.5rem]">
+              <div className="mt-4 overflow-hidden rounded-[1.2rem]">
                 <MediaPanel
                   videoSrc={featuredVideo}
-                  className="aspect-[16/11] min-h-[14rem]"
+                  className="aspect-[16/11] min-h-[10.5rem]"
                   videoClassName="object-center brightness-[0.56]"
                 >
                   <div className="flex h-full items-end p-4">
                     <div className="liquid-glass max-w-[13rem] rounded-[1.2rem] p-4">
                       <p className="text-[10px] uppercase tracking-[0.28em] text-white/45">Output State</p>
-                      <p className="mt-2 text-lg leading-tight text-white">Prompt-first. Production-ready. Director-controlled.</p>
+                      <p className="mt-2 text-base leading-tight text-white md:text-lg">Shot-ready scenes with director control.</p>
                     </div>
                   </div>
                 </MediaPanel>
               </div>
-              <div className="mt-5 flex items-center justify-between gap-4">
-                <p className="text-sm text-white/45">[Founder Name], CEO | [Founder Name], CTO</p>
-                <a href="#team-ask" className="text-sm text-white/78 transition hover:text-white">
-                  Meet the team
-                </a>
-              </div>
+              <p className="mt-4 text-sm text-white/45">[Founder Name], CEO | [Founder Name], CTO</p>
             </div>
           </Reveal>
         </div>
       </div>
 
-      <div className="relative z-10 mt-auto flex items-center justify-center gap-3 lg:justify-start lg:pl-[max(0px,calc((100vw-72rem)/2+1.5rem))]">
+      <div className="relative z-10 mt-auto flex items-center justify-center gap-3 lg:justify-start lg:pl-[max(0px,calc((100vw-70rem)/2+1.5rem))]">
         {[
           { icon: Instagram, href: "#" },
           { icon: Twitter, href: "#" },
@@ -650,7 +620,7 @@ function HeroSection() {
             key={index}
             href={item.href}
             whileHover={{ y: -3 }}
-            className="liquid-glass rounded-full p-4 text-white/80 transition hover:bg-white/[0.04] hover:text-white"
+            className="liquid-glass rounded-full p-3 text-white/80 transition hover:bg-white/[0.04] hover:text-white md:p-4"
           >
             <item.icon className="h-5 w-5" />
           </motion.a>
@@ -669,17 +639,16 @@ function ProblemSection() {
       <Reveal>
         <SectionLabel>Problem</SectionLabel>
       </Reveal>
-      <div className="mt-6 grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+      <div className="mt-5 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
         <div>
           <Reveal delay={0.05}>
-            <h2 className="max-w-[14ch] text-4xl leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+            <h2 className="max-w-[14ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
               Video and 3D production is still slow, expensive, and <Accent>gated by expertise.</Accent>
             </h2>
           </Reveal>
           <Reveal delay={0.12} className="mt-8 max-w-xl">
             <p className="text-base leading-relaxed text-white/60">
-              Great ideas lose force when the workflow becomes the blocker. Creative teams still spend weeks on
-              manual build, lighting, motion, and review before they reach the shot.
+              Creative teams still spend weeks building, lighting, and reviewing before they reach the shot.
             </p>
           </Reveal>
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -698,16 +667,14 @@ function ProblemSection() {
         <Reveal delay={0.16} x={30}>
           <MediaPanel
             videoSrc={problemVideo}
-            imageSrc={deckImages.problem}
-            className="aspect-[4/5] min-h-[29rem]"
+            className="aspect-[4/5] min-h-[21rem]"
             videoClassName="object-[72%_48%] brightness-[0.5]"
-            imageClassName="object-[70%_50%]"
           >
             <div className="flex h-full items-end p-6 md:p-8">
               <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Production Friction</p>
                 <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
-                  Creative momentum dies when every shot still needs a specialist pipeline.
+                  Every shot still depends on a specialist pipeline.
                 </p>
               </div>
             </div>
@@ -723,42 +690,39 @@ function SolutionSection() {
     <SectionShell
       id="solution"
       backgroundVideoSrc={featuredVideo}
-      backgroundImageSrc={deckImages.solution}
       backgroundClassName="object-center"
     >
-      <div className="grid gap-8">
+      <div className="grid gap-6">
         <Reveal>
           <SectionLabel>Solution</SectionLabel>
         </Reveal>
         <Reveal delay={0.08}>
-          <h2 className="max-w-[14ch] text-4xl leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
-            Text-to-3D that turns ideas into <Accent>shot-ready scenes</Accent> in minutes.
+          <h2 className="max-w-[17ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:max-w-[18ch] md:text-[3rem] lg:max-w-[19ch] lg:text-[4rem]">
+            <span className="lg:block">Text-to-3D that turns ideas into</span>{" "}
+            <span className="lg:block lg:whitespace-nowrap">
+              <Accent>shot-ready scenes</Accent> in minutes.
+            </span>
           </h2>
         </Reveal>
       </div>
 
-      <Reveal delay={0.16} className="mt-12">
+      <Reveal delay={0.16} className="mt-6">
         <MediaPanel
           videoSrc={productVideo}
-          imageSrc={deckImages.solution}
-          className="aspect-video rounded-[2rem]"
+          className="aspect-[16/7] rounded-[1.55rem]"
           videoClassName="object-cover brightness-[0.58]"
-          imageClassName="object-center"
         >
-          <div className="flex h-full flex-col justify-end p-6 md:p-10">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6 md:p-8">
+          <div className="flex h-full flex-col justify-end p-4 md:p-6">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="liquid-glass shadow-panel max-w-md rounded-[1.45rem] p-4 md:p-5">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Workflow Shift</p>
-                <p className="mt-3 text-base leading-relaxed text-white md:text-lg">
-                  Replace weeks of production overhead with an AI-native workflow that stays editable and usable in
-                  production.
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-white md:text-base">AI-native workflow that stays editable in production.</p>
               </div>
               <motion.a
                 href="#product"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="liquid-glass shadow-panel inline-flex items-center justify-center rounded-full px-8 py-3 text-sm font-medium text-white"
+                className="liquid-glass shadow-panel inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-medium text-white"
               >
                 Explore more
               </motion.a>
@@ -767,18 +731,18 @@ function SolutionSection() {
         </MediaPanel>
       </Reveal>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
         <Reveal delay={0.24}>
-          <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
+          <div className="liquid-glass shadow-panel rounded-[1.5rem] p-5">
             <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Proof</p>
-            <p className="mt-5 text-5xl tracking-tight text-white md:text-6xl">10-100x</p>
-            <p className="mt-4 text-sm leading-relaxed text-white/55">Faster, lower cost, still editable.</p>
+            <p className="mt-3 text-4xl tracking-tight text-white md:text-5xl">10-100x</p>
+            <p className="mt-3 text-sm leading-relaxed text-white/55">Faster, lower cost, still editable.</p>
           </div>
         </Reveal>
         <Reveal delay={0.32}>
-          <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
+          <div className="liquid-glass shadow-panel rounded-[1.5rem] p-5">
             <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Outcome</p>
-            <p className="mt-5 text-xl leading-relaxed text-white md:text-2xl">
+            <p className="mt-3 text-lg leading-relaxed text-white md:text-xl">
               Prompt-first. Production-ready. Director-controlled.
             </p>
           </div>
@@ -793,47 +757,46 @@ function ProductSection() {
     <SectionShell
       id="product"
       backgroundVideoSrc={philosophyVideo}
-      backgroundImageSrc={deckImages.product}
       backgroundClassName="object-center"
     >
       <Reveal>
         <SectionLabel>Product</SectionLabel>
       </Reveal>
-      <div className="mt-6 grid gap-12 md:grid-cols-2 md:gap-10">
+      <div className="mt-5 grid gap-8 md:grid-cols-2 md:gap-7">
         <div>
           <Reveal delay={0.06}>
-            <h2 className="max-w-[14ch] text-4xl leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+            <h2 className="max-w-[14ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
               Studio-grade workflow from raw intent to shot-ready 3D. <Accent>Built for speed and control.</Accent>
             </h2>
           </Reveal>
-          <Reveal delay={0.16} className="mt-10">
-            <MediaPanel videoSrc={productVideo} imageSrc={deckImages.product} className="aspect-[4/5] min-h-[30rem]">
-              <div className="flex h-full items-end p-6 md:p-8">
-                <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
+          <Reveal delay={0.16} className="mt-6">
+            <MediaPanel videoSrc={productVideo} className="aspect-[4/5] min-h-[18.5rem]">
+              <div className="flex h-full items-end p-4 md:p-5">
+                <div className="liquid-glass shadow-panel max-w-md rounded-[1.4rem] p-4">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Creative Canvas</p>
-                  <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
+                  <p className="mt-2 text-xl leading-tight text-white md:text-2xl">
                     One workflow from prompt to editable scene.
                   </p>
-                  <p className="mt-4 text-sm leading-relaxed text-white/60">
-                    Text, sketch, or motion reference in. Scene graph, lighting, motion, and engine-ready output out.
-                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-white/60">Text, sketch, or motion reference in. Editable scene out.</p>
                 </div>
               </div>
             </MediaPanel>
           </Reveal>
         </div>
 
-        <div className="space-y-6 pt-1">
-          {featureCards.map((card, index) => (
-            <FeatureCard key={card.title} {...card} delay={0.18 + index * 0.12} />
-          ))}
-          <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid content-start gap-4 pt-1">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {featureCards.map((card, index) => (
+              <FeatureCard key={card.title} {...card} delay={0.18 + index * 0.1} />
+            ))}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
             {productSteps.map((step, index) => (
-              <Reveal key={step.number} delay={0.22 + index * 0.1}>
-                <div className="liquid-glass shadow-panel rounded-[1.5rem] p-5">
+              <Reveal key={step.number} delay={0.24 + index * 0.08}>
+                <div className="liquid-glass shadow-panel rounded-[1.35rem] p-4">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">{step.number}</p>
-                  <p className="mt-3 text-lg tracking-tight text-white">{step.title}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/55">{step.text}</p>
+                  <p className="mt-2 text-base tracking-tight text-white">{step.title}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-white/55">{step.text}</p>
                 </div>
               </Reveal>
             ))}
@@ -849,16 +812,15 @@ function MarketSection() {
     <SectionShell
       id="market"
       backgroundVideoSrc={craftVideo}
-      backgroundImageSrc={deckImages.market}
       backgroundClassName="object-[50%_45%]"
     >
       <Reveal>
         <SectionLabel>Market</SectionLabel>
       </Reveal>
-      <div className="mt-6 grid gap-12 md:grid-cols-[0.92fr_1.08fr] md:items-end">
+      <div className="mt-5 grid gap-8 md:grid-cols-[0.92fr_1.08fr] md:items-end">
         <div>
           <Reveal delay={0.08}>
-            <h2 className="max-w-[12ch] text-4xl leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+            <h2 className="max-w-[12ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
               A $150B+ opportunity <Accent>at the right inflection point.</Accent>
             </h2>
           </Reveal>
@@ -877,10 +839,8 @@ function MarketSection() {
         <Reveal delay={0.14} x={30}>
           <MediaPanel
             videoSrc={marketVideo}
-            imageSrc={deckImages.market}
-            className="aspect-[4/5] min-h-[31rem]"
+            className="aspect-[4/5] min-h-[22.5rem]"
             videoClassName="object-[58%_44%] brightness-[0.48]"
-            imageClassName="object-[56%_50%]"
           >
             <div className="flex h-full flex-col justify-between p-6 md:p-8">
               <div className="grid gap-4 sm:grid-cols-3">
@@ -899,9 +859,7 @@ function MarketSection() {
               </div>
               <div className="liquid-glass shadow-panel max-w-sm rounded-[1.5rem] p-5 md:p-6">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Why Now</p>
-                <p className="mt-3 text-lg leading-relaxed text-white">
-                  Demand is global, visual, and increasingly native to AI-first production.
-                </p>
+                <p className="mt-3 text-lg leading-relaxed text-white">AI-first production is becoming standard behavior.</p>
               </div>
             </div>
           </MediaPanel>
@@ -916,25 +874,22 @@ function CompetitionSection() {
     <SectionShell
       id="competition"
       backgroundVideoSrc={philosophyVideo}
-      backgroundImageSrc={deckImages.competition}
       backgroundClassName="object-center"
     >
       <Reveal>
         <SectionLabel>Competition</SectionLabel>
       </Reveal>
       <Reveal delay={0.08} className="mt-6">
-        <h2 className="max-w-[14ch] text-4xl leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+        <h2 className="max-w-[14ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
           The only platform combining <Accent>AI speed</Accent> with true 3D control.
         </h2>
       </Reveal>
-      <div className="mt-12 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mt-8 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <Reveal delay={0.16}>
           <MediaPanel
             videoSrc={philosophyVideo}
-            imageSrc={deckImages.competition}
-            className="aspect-[16/10] min-h-[24rem]"
-            videoClassName="object-center brightness-[0.42]"
-            imageClassName="object-center opacity-24"
+            className="aspect-[16/10] min-h-[18rem]"
+            videoClassName="object-center brightness-[0.58]"
           >
             <div className="flex h-full items-end p-6 md:p-8">
               <div className="liquid-glass shadow-panel max-w-md rounded-[1.6rem] p-6">
@@ -950,20 +905,18 @@ function CompetitionSection() {
           <div className="grid gap-4">
             <div className="liquid-glass shadow-panel rounded-[1.7rem] p-6">
               <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Positioning</p>
-              <p className="mt-4 text-xl leading-relaxed text-white">
-                UnstableML sits between legacy 3D software and flat gen-video tools.
-              </p>
+              <p className="mt-4 text-xl leading-relaxed text-white">Between legacy 3D suites and flat gen-video tools.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="liquid-glass shadow-panel rounded-[1.6rem] p-5">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Speed</p>
                 <p className="mt-3 text-3xl tracking-tight text-white">mins</p>
-                <p className="mt-2 text-sm text-white/55">Fast enough for creative iteration.</p>
+                <p className="mt-2 text-sm text-white/55">Fast for iteration.</p>
               </div>
               <div className="liquid-glass shadow-panel rounded-[1.6rem] p-5">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Control</p>
                 <p className="mt-3 text-3xl tracking-tight text-white">true 3D</p>
-                <p className="mt-2 text-sm text-white/55">Editable, scene-aware, production ready.</p>
+                <p className="mt-2 text-sm text-white/55">Editable and production ready.</p>
               </div>
             </div>
           </div>
@@ -1025,16 +978,15 @@ function TractionSection() {
       id="traction"
       className="bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.02)_0%,_transparent_60%)]"
       backgroundVideoSrc={strategyVideo}
-      backgroundImageSrc={deckImages.traction}
       backgroundClassName="object-center"
     >
       <Reveal>
         <SectionLabel>Traction</SectionLabel>
       </Reveal>
-      <div className="mt-6 grid gap-12 lg:grid-cols-[0.88fr_1.12fr]">
+      <div className="mt-5 grid gap-8 lg:grid-cols-[0.88fr_1.12fr]">
         <div>
           <Reveal delay={0.08}>
-            <h2 className="max-w-[13ch] text-4xl leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+            <h2 className="max-w-[13ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
               Low-friction entry. <Accent>Expansion revenue by usage.</Accent>
             </h2>
           </Reveal>
@@ -1054,16 +1006,14 @@ function TractionSection() {
           <Reveal delay={0.16} className="md:col-span-2">
             <MediaPanel
               videoSrc={featuredVideo}
-              imageSrc={deckImages.traction}
-              className="aspect-[16/8] min-h-[20rem]"
-              videoClassName="object-center brightness-[0.42]"
-              imageClassName="object-center opacity-24"
+              className="aspect-[16/8] min-h-[14rem]"
+              videoClassName="object-center brightness-[0.56]"
             >
               <div className="flex h-full items-end p-6 md:p-8">
                 <div className="liquid-glass shadow-panel max-w-lg rounded-[1.6rem] p-6">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/50">Revenue Engine</p>
                   <p className="mt-3 text-2xl leading-tight text-white md:text-3xl">
-                    Free entry creates habit. Paid plans and refills expand revenue over time.
+                    Free entry drives habit. Paid plans and refills expand revenue.
                   </p>
                 </div>
               </div>
@@ -1080,7 +1030,6 @@ function TractionSection() {
                         <p className="text-xl tracking-tight text-white">{tier.title}</p>
                         <p className="mt-2 text-sm text-white/70">{tier.credits}</p>
                         <p className="mt-3 text-sm leading-relaxed text-white/55">{tier.text}</p>
-                        <p className="mt-2 text-xs leading-relaxed text-white/35">{tier.detail}</p>
                       </div>
                       <p className="text-right text-3xl tracking-tight text-white">
                         {tier.price}
@@ -1124,17 +1073,16 @@ function TeamAskSection() {
     <SectionShell
       id="team-ask"
       className="pb-20"
-      backgroundVideoSrc={craftVideo}
-      backgroundImageSrc={deckImages.ask}
-      backgroundClassName="object-top"
+      backgroundVideoSrc={philosophyVideo}
+      backgroundClassName="object-center"
     >
       <Reveal>
         <SectionLabel>Team & Ask</SectionLabel>
       </Reveal>
-      <div className="mt-6 grid gap-12 lg:grid-cols-[0.88fr_1.12fr]">
+      <div className="mt-5 grid gap-8 lg:grid-cols-[0.88fr_1.12fr]">
         <div>
           <Reveal delay={0.08}>
-            <h2 className="max-w-[14ch] text-4xl leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+            <h2 className="max-w-[14ch] text-[2.35rem] leading-[1.05] tracking-tight text-white md:text-[3rem] lg:text-[4rem]">
               The team to build it. <Accent>The capital to scale it.</Accent>
             </h2>
           </Reveal>
@@ -1143,12 +1091,12 @@ function TeamAskSection() {
               {
                 name: "[Founder Name]",
                 role: "CEO",
-                text: "Ex-Pixar tools lead. PhD in 3D Vision."
+                text: "Ex-Pixar tools lead."
               },
               {
                 name: "[Founder Name]",
                 role: "CTO",
-                text: "Ex-OpenAI researcher. Gen-video models."
+                text: "Ex-OpenAI researcher."
               }
             ].map((person, index) => (
               <Reveal key={person.role} delay={0.18 + index * 0.12}>
@@ -1165,11 +1113,9 @@ function TeamAskSection() {
         <div className="grid gap-6 md:grid-cols-[1fr_0.9fr]">
           <Reveal delay={0.18}>
             <MediaPanel
-              videoSrc={askVideo}
-              imageSrc={deckImages.ask}
-              className="aspect-[4/5] min-h-[30rem]"
-              videoClassName="object-top brightness-[0.52]"
-              imageClassName="object-top"
+              videoSrc={philosophyVideo}
+              className="aspect-[4/5] min-h-[22rem]"
+              videoClassName="object-center brightness-[0.5] saturate-[0.5]"
             >
               <div className="flex h-full items-end p-6 md:p-8">
                 <div className="liquid-glass shadow-panel max-w-sm rounded-[1.6rem] p-6">
