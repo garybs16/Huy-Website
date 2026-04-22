@@ -58,7 +58,7 @@ export default function ServicesSection() {
               initial={{ opacity: 0, y: 34 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 34 }}
               transition={{ duration: 0.8, delay: idx * 0.15 }}
-              className="grid gap-4 border-b border-white/10 pb-5 md:grid-cols-[0.16fr_0.34fr_1fr_180px] md:items-center"
+              className="grid gap-4 border-b border-white/8 pb-5 md:grid-cols-[0.16fr_0.34fr_1fr_180px] md:items-center"
             >
               <span className="text-[11px] uppercase tracking-[0.28em] text-white/32">
                 {service.tag}
@@ -68,12 +68,12 @@ export default function ServicesSection() {
                 <h3 className="text-xl tracking-tight text-white md:text-[1.6rem]">
                   {service.title}
                 </h3>
-                <div className="rounded-full border border-white/10 p-2 text-white/55">
+                <div className="rounded-full border border-white/8 p-2 text-white/50">
                   <ArrowUpRight className="h-4 w-4" />
                 </div>
               </div>
 
-              <p className="max-w-md text-sm leading-relaxed text-white/42">
+              <p className="max-w-md text-sm leading-relaxed text-white/38">
                 {service.desc}
               </p>
 
@@ -96,13 +96,13 @@ export default function ServicesSection() {
             initial={{ opacity: 0, y: 36 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
             transition={{ duration: 0.85, delay: 0.35 }}
-            className="grid gap-6 pt-8 md:grid-cols-[0.42fr_1fr]"
+            className="grid gap-5 pt-8 md:grid-cols-[0.42fr_1fr]"
           >
             <div className="flex flex-col justify-end">
-              <p className="mb-3 text-2xl tracking-tight text-white md:text-[1.9rem]">
+              <p className="mb-2 text-2xl tracking-tight text-white md:text-[1.8rem]">
                 Curiosity as a compass
               </p>
-              <p className="max-w-xs text-sm leading-relaxed text-white/42">
+              <p className="max-w-xs text-sm leading-relaxed text-white/38">
                 Discovery stays close to execution, so ideas keep their energy
                 from first concept through final launch.
               </p>

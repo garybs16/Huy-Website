@@ -35,12 +35,12 @@ export default function FeaturedVideoSection() {
             </p>
           </div>
 
-          <div className="absolute bottom-0 inset-x-0 flex flex-col justify-between gap-6 p-6 md:flex-row md:items-end md:p-10">
-            <div className="liquid-glass deck-frame deck-tint-warm max-w-md rounded-2xl p-6 md:p-8">
+          <div className="absolute bottom-0 inset-x-0 flex flex-col justify-between gap-5 p-6 md:flex-row md:items-end md:p-8">
+            <div className="deck-panel deck-frame max-w-md rounded-2xl p-5 md:p-6">
               <p className="mb-3 text-xs uppercase tracking-widest text-white/50">
                 OUR APPROACH
               </p>
-              <p className="text-sm leading-relaxed text-white md:text-base">
+              <p className="text-sm leading-relaxed text-white/84 md:text-[15px]">
                 Curiosity first. Visual depth second. Execution always close to launch.
               </p>
             </div>
@@ -49,7 +49,7 @@ export default function FeaturedVideoSection() {
               {["Motion", "Story"].map((item) => (
                 <div
                   key={item}
-                  className="liquid-glass deck-frame rounded-full px-5 py-3 text-center text-sm font-medium text-white"
+                  className="deck-panel-soft rounded-full px-5 py-3 text-center text-sm font-medium text-white/86"
                 >
                   {item}
                 </div>

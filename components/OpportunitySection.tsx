@@ -97,7 +97,7 @@ export default function OpportunitySection() {
             initial={{ opacity: 0, y: 42 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 42 }}
             transition={{ duration: 0.8, delay: 0.18 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-3">
               {marketSignals.map((signal, index) => (
@@ -106,7 +106,7 @@ export default function OpportunitySection() {
                   initial={{ opacity: 0, y: 24 }}
                   animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                   transition={{ duration: 0.7, delay: 0.16 + index * 0.08 }}
-                  className={`${index === 1 ? "deck-tint-cool" : "deck-tint-warm"} liquid-glass deck-frame rounded-3xl p-4`}
+                  className={`${index === 1 ? "deck-tint-cool" : "deck-tint-warm"} deck-panel deck-frame rounded-3xl p-4`}
                 >
                   <p className="text-2xl tracking-tight text-white md:text-3xl">
                     {signal.value}
@@ -135,7 +135,7 @@ export default function OpportunitySection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
 
-              <div className="liquid-glass deck-frame rounded-[1.75rem] p-5">
+              <div className="deck-panel deck-frame rounded-[1.75rem] p-5">
                 <p className="text-xs uppercase tracking-[0.32em] text-white/36">
                   What Changed
                 </p>

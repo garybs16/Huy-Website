@@ -68,7 +68,7 @@ export default function TeamAskSection() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                 transition={{ duration: 0.7, delay: 0.14 + index * 0.08 }}
-                className={`${index === 0 ? "deck-tint-warm" : "deck-tint-cool"} liquid-glass deck-frame rounded-[1.5rem] p-5`}
+                className={`${index === 0 ? "deck-tint-warm" : "deck-tint-cool"} deck-panel deck-frame rounded-[1.5rem] p-5`}
               >
                 <p className="text-lg tracking-tight text-white">{member.name}</p>
                 <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/34">
@@ -84,7 +84,7 @@ export default function TeamAskSection() {
               initial={{ opacity: 0, y: 28 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
               transition={{ duration: 0.75, delay: 0.3 }}
-              className="deck-frame deck-tint-warm rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5"
+              className="deck-panel deck-frame deck-tint-warm rounded-[1.5rem] p-5"
             >
               <p className="text-xs uppercase tracking-[0.32em] text-white/36">
                 Operator Fit
@@ -99,7 +99,7 @@ export default function TeamAskSection() {
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: 0.8, delay: 0.16 }}
-            className="liquid-glass deck-frame overflow-hidden rounded-[2rem] p-0"
+            className="deck-panel deck-frame overflow-hidden rounded-[2rem] p-0"
           >
             <div className="relative">
               <video
@@ -150,7 +150,7 @@ export default function TeamAskSection() {
               </div>
 
               <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-                <div className="deck-frame rounded-[1.5rem] border border-white/10 bg-black/30 p-5">
+                <div className="deck-panel-soft deck-frame rounded-[1.5rem] p-5">
                   <p className="text-xs uppercase tracking-[0.28em] text-white/34">
                     Next Step
                   </p>

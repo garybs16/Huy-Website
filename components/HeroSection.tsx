@@ -83,18 +83,18 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/16 via-black/26 to-black/58" />
 
       <div className="z-20 mx-auto w-full max-w-5xl px-6 py-6">
-        <nav className="liquid-glass deck-frame flex items-center justify-between rounded-full px-6 py-3">
+        <nav className="liquid-glass deck-frame flex items-center justify-between rounded-full px-5 py-3">
           <div className="flex items-center gap-2">
-            <Globe className="h-6 w-6 text-white" />
-            <span className="text-lg font-semibold text-white">Asme</span>
+            <Globe className="h-5 w-5 text-white" />
+            <span className="text-base font-semibold text-white">Asme</span>
           </div>
 
-          <div className="hidden items-center gap-8 md:flex">
+          <div className="hidden items-center gap-7 md:flex">
             {navLinks.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+                className="text-[13px] font-medium text-white/74 transition-colors hover:text-white"
               >
                 {item.label}
               </a>
@@ -102,32 +102,32 @@ export default function HeroSection() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="hidden text-sm font-medium text-white transition-colors hover:text-white/80 sm:block">
+            <button className="hidden text-[13px] font-medium text-white/76 transition-colors hover:text-white sm:block">
               Sign Up
             </button>
-            <button className="rounded-full border border-white/10 bg-white/10 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15">
+            <button className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/15">
               Login
             </button>
           </div>
         </nav>
       </div>
 
-      <div className="z-10 flex flex-1 items-center px-6 pb-20 pt-8">
-        <div className="mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-[1.1fr_0.44fr] lg:items-end">
+      <div className="z-10 flex flex-1 items-center px-6 pb-18 pt-8">
+        <div className="mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-[1.08fr_0.42fr] lg:items-end">
           <div className="-translate-y-[7%]">
             <h1
-              className="mb-6 max-w-4xl text-5xl leading-[0.94] tracking-tight text-white md:text-6xl lg:text-[5.1rem]"
+              className="mb-5 max-w-4xl text-5xl leading-[0.94] tracking-tight text-white md:text-6xl lg:text-[5rem]"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
               Built for the curious
             </h1>
 
-            <div className="mt-8 flex w-full max-w-md flex-col gap-4">
-              <div className="liquid-glass deck-frame flex w-full flex-row items-center rounded-full py-2 pl-6 pr-2">
+            <div className="mt-7 flex w-full max-w-md flex-col gap-4">
+              <div className="liquid-glass deck-frame flex w-full flex-row items-center rounded-full py-2 pl-5 pr-2">
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="flex-1 border-none bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+                  className="flex-1 border-none bg-transparent text-[13px] text-white outline-none placeholder:text-white/40"
                 />
                 <button className="flex items-center justify-center rounded-full bg-white p-2 transition-colors hover:bg-white/90">
                   <ArrowRight className="h-5 w-5 text-black" />
@@ -136,18 +136,18 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="hidden lg:grid lg:gap-4">
-            <div className="liquid-glass deck-frame deck-tint-warm rounded-[1.9rem] p-5">
+          <div className="hidden lg:grid lg:gap-3">
+            <div className="deck-panel deck-frame rounded-[1.7rem] p-4">
               <p className="deck-kicker text-[10px]">Deck Format</p>
-              <p className="mt-4 text-3xl tracking-tight text-white">8 sections</p>
-              <p className="mt-2 text-sm text-white/48">
+              <p className="mt-3 text-[1.7rem] tracking-tight text-white">8 sections</p>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-white/44">
                 Narrative, proof, market, traction, and ask.
               </p>
             </div>
 
-            <div className="liquid-glass deck-frame deck-tint-cool rounded-[1.9rem] p-5">
+            <div className="deck-panel-soft deck-frame rounded-[1.7rem] p-4">
               <p className="deck-kicker text-[10px]">Positioning</p>
-              <p className="mt-4 text-lg leading-tight text-white">
+              <p className="mt-3 text-[15px] leading-tight text-white/88">
                 Premium output
                 <br />
                 with startup speed.
@@ -157,14 +157,14 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <div className="absolute bottom-10 left-0 right-0 z-10 flex justify-center gap-4">
+      <div className="absolute bottom-8 left-0 right-0 z-10 flex justify-center gap-3">
         {[Instagram, Twitter, Globe].map((Icon, idx) => (
           <a
             key={idx}
             href="#"
-            className="liquid-glass rounded-full p-4 text-white/80 transition-all hover:bg-white/5 hover:text-white"
+            className="deck-panel-soft rounded-full p-3 text-white/72 transition-all hover:bg-white/5 hover:text-white"
           >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-4 w-4" />
           </a>
         ))}
       </div>

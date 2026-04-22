@@ -59,7 +59,7 @@ export default function TractionSection() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                 transition={{ duration: 0.7, delay: 0.14 + index * 0.08 }}
-                className={`${index % 2 === 0 ? "deck-tint-warm" : "deck-tint-cool"} liquid-glass deck-frame rounded-[1.5rem] p-5`}
+                className={`${index % 2 === 0 ? "deck-tint-warm" : "deck-tint-cool"} deck-panel deck-frame rounded-[1.5rem] p-5`}
               >
                 <p className="text-3xl tracking-tight text-white md:text-4xl">
                   {stat.value}
@@ -125,7 +125,7 @@ export default function TractionSection() {
               </div>
 
               <div className="mt-5 grid gap-3 md:grid-cols-2">
-                <div className="liquid-glass deck-frame deck-tint-cool rounded-3xl p-4">
+                <div className="deck-panel deck-frame deck-tint-cool rounded-3xl p-4">
                   <p className="text-xs uppercase tracking-[0.28em] text-white/34">
                     Expansion
                   </p>
@@ -133,7 +133,7 @@ export default function TractionSection() {
                     Bigger scopes, longer retention.
                   </p>
                 </div>
-                <div className="liquid-glass deck-frame deck-tint-warm rounded-3xl p-4">
+                <div className="deck-panel deck-frame deck-tint-warm rounded-3xl p-4">
                   <p className="text-xs uppercase tracking-[0.28em] text-white/34">
                     Retention
                   </p>
