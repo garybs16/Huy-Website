@@ -32,35 +32,35 @@ export default function TeamAskSection() {
     <section
       id="ask"
       ref={ref}
-      className="bg-[radial-gradient(ellipse_at_bottom,_rgba(151,176,209,0.08)_0%,_transparent_62%)] px-6 pb-24 pt-20 md:pb-28 md:pt-24"
+      className="bg-[radial-gradient(ellipse_at_bottom,_rgba(151,176,209,0.08)_0%,_transparent_62%)] px-6 pb-18 pt-18 md:pb-22 md:pt-20"
     >
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.7 }}
-          className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+          className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
         >
           <div>
             <p className="deck-kicker mb-5 text-xs">
               08 / TEAM & ASK
             </p>
-            <h2 className="max-w-4xl text-4xl tracking-tight text-white md:text-6xl">
+            <h2 className="max-w-4xl text-3xl tracking-tight text-white md:text-5xl">
               Ready to begin?
             </h2>
           </div>
 
-          <p className="max-w-sm text-sm leading-relaxed text-white/48 md:text-right">
-            A concise close with team signal, the raise, and a clean next step.
+          <p className="max-w-xs text-sm leading-relaxed text-white/44 md:text-right">
+            Compact close. Clear team. Clear ask.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 lg:grid-cols-[0.86fr_1.14fr]">
+        <div className="grid gap-4 lg:grid-cols-[0.78fr_1.22fr]">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: 0.8, delay: 0.08 }}
-            className="grid gap-4"
+            className="grid gap-3"
           >
             {teamMembers.map((member, index) => (
               <motion.div
@@ -68,13 +68,13 @@ export default function TeamAskSection() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                 transition={{ duration: 0.7, delay: 0.14 + index * 0.08 }}
-                className={`${index === 0 ? "deck-tint-warm" : "deck-tint-cool"} liquid-glass deck-frame rounded-[2rem] p-7`}
+                className={`${index === 0 ? "deck-tint-warm" : "deck-tint-cool"} liquid-glass deck-frame rounded-[1.5rem] p-5`}
               >
-                <p className="text-xl tracking-tight text-white">{member.name}</p>
-                <p className="mt-2 text-xs uppercase tracking-[0.24em] text-white/34">
+                <p className="text-lg tracking-tight text-white">{member.name}</p>
+                <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/34">
                   {member.role}
                 </p>
-                <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/50">
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/50">
                   {member.description}
                 </p>
               </motion.div>
@@ -84,12 +84,12 @@ export default function TeamAskSection() {
               initial={{ opacity: 0, y: 28 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
               transition={{ duration: 0.75, delay: 0.3 }}
-              className="deck-frame deck-tint-warm rounded-[2rem] border border-white/10 bg-white/[0.03] p-7"
+              className="deck-frame deck-tint-warm rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5"
             >
               <p className="text-xs uppercase tracking-[0.32em] text-white/36">
                 Operator Fit
               </p>
-              <p className="mt-4 text-base leading-relaxed text-white/70 md:text-lg">
+              <p className="mt-3 text-sm leading-relaxed text-white/68 md:text-base">
                 Small team. High taste. Clear execution ownership.
               </p>
             </motion.div>
@@ -109,25 +109,25 @@ export default function TeamAskSection() {
                 loop
                 playsInline
                 preload="auto"
-              className="aspect-[16/10] h-full w-full object-cover"
+                className="aspect-[16/8.2] h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,_rgba(230,215,192,0.18),_transparent_28%)]" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
                 <p className="text-xs uppercase tracking-[0.32em] text-white/36">
                   The Ask
                 </p>
-                <p className="mt-4 text-6xl leading-none tracking-tight text-white md:text-7xl">
+                <p className="mt-3 text-5xl leading-none tracking-tight text-white md:text-6xl">
                   $3M
                 </p>
-                <p className="mt-3 text-lg text-white/52">
+                <p className="mt-2 text-base text-white/52">
                   Seed round to scale capacity and compound demand.
                 </p>
               </div>
             </div>
 
-            <div className="p-7 md:p-8">
-              <div className="space-y-5">
+            <div className="p-5 md:p-6">
+              <div className="space-y-4">
                 {fundAllocation.map((item, index) => (
                   <motion.div
                     key={item.label}
@@ -149,16 +149,17 @@ export default function TeamAskSection() {
                 ))}
               </div>
 
-              <div className="deck-frame mt-10 rounded-[1.75rem] border border-white/10 bg-black/30 p-6">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/34">
-                  Next Step
-                </p>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-white/50">
-                  Looking for aligned partners with taste, patience, and
-                  long-term conviction.
-                </p>
+              <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                <div className="deck-frame rounded-[1.5rem] border border-white/10 bg-black/30 p-5">
+                  <p className="text-xs uppercase tracking-[0.28em] text-white/34">
+                    Next Step
+                  </p>
+                  <p className="mt-2 max-w-md text-sm leading-relaxed text-white/50">
+                    Looking for aligned partners with taste and long-term conviction.
+                  </p>
+                </div>
 
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
                   <a
                     href="mailto:hello@asme.co"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
@@ -170,7 +171,7 @@ export default function TeamAskSection() {
                     href="#about"
                     className="liquid-glass inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium text-white"
                   >
-                    Revisit the story
+                    Revisit
                   </a>
                 </div>
               </div>

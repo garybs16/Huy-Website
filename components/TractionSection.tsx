@@ -24,35 +24,34 @@ export default function TractionSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="traction" ref={ref} className="bg-black px-6 py-28 md:py-40">
+    <section id="traction" ref={ref} className="bg-black px-6 py-18 md:py-24">
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.7 }}
-          className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+          className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
         >
           <div>
             <p className="deck-kicker mb-5 text-xs">
               07 / TRACTION
             </p>
-            <h2 className="text-4xl tracking-tight text-white md:text-6xl">
+            <h2 className="max-w-3xl text-3xl tracking-tight text-white md:text-5xl lg:text-[3.8rem]">
               Early proof, tightening demand, and a repeatable growth pattern.
             </h2>
           </div>
 
-          <p className="max-w-sm text-sm leading-relaxed text-white/48 md:text-right">
-            This is the proof layer: enough momentum to show the market is real,
-            but still early enough that expansion feels asymmetric.
+          <p className="max-w-xs text-sm leading-relaxed text-white/44 md:text-right">
+            Proof, retention, and a clearer growth line.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+        <div className="grid gap-4 lg:grid-cols-[0.84fr_1.16fr]">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: 0.8, delay: 0.08 }}
-            className="grid gap-4 sm:grid-cols-2"
+            className="grid gap-3 sm:grid-cols-2"
           >
             {tractionStats.map((stat, index) => (
               <motion.div
@@ -60,12 +59,12 @@ export default function TractionSection() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                 transition={{ duration: 0.7, delay: 0.14 + index * 0.08 }}
-                className={`${index % 2 === 0 ? "deck-tint-warm" : "deck-tint-cool"} liquid-glass deck-frame rounded-[1.75rem] p-6`}
+                className={`${index % 2 === 0 ? "deck-tint-warm" : "deck-tint-cool"} liquid-glass deck-frame rounded-[1.5rem] p-5`}
               >
-                <p className="text-4xl tracking-tight text-white md:text-5xl">
+                <p className="text-3xl tracking-tight text-white md:text-4xl">
                   {stat.value}
                 </p>
-                <p className="mt-3 text-sm uppercase tracking-[0.22em] text-white/34">
+                <p className="mt-2 text-[11px] uppercase tracking-[0.22em] text-white/34">
                   {stat.label}
                 </p>
               </motion.div>
@@ -85,25 +84,25 @@ export default function TractionSection() {
               loop
               playsInline
               preload="auto"
-              className="aspect-[16/12] h-full w-full object-cover"
+              className="aspect-[16/10] h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/10" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_22%,_rgba(151,176,209,0.18),_transparent_24%)]" />
 
-            <div className="absolute inset-0 p-7 md:p-8">
+            <div className="absolute inset-0 p-5 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.32em] text-white/36">
                     Revenue Signal
                   </p>
-                  <p className="mt-3 text-2xl tracking-tight text-white">
+                  <p className="mt-2 text-xl tracking-tight text-white md:text-2xl">
                     Momentum that already compounds.
                   </p>
                 </div>
                 <p className="hidden text-sm text-white/34 md:block">Last 6 months</p>
               </div>
 
-              <div className="mt-10 flex h-56 items-end gap-3 md:gap-4">
+              <div className="mt-6 flex h-40 items-end gap-2 md:gap-3">
                 {growthSeries.map((point, index) => (
                   <motion.div
                     key={point.month}
@@ -112,7 +111,7 @@ export default function TractionSection() {
                     transition={{ duration: 0.65, delay: 0.22 + index * 0.06 }}
                     className="flex flex-1 flex-col items-center gap-3"
                   >
-                    <div className="flex h-44 w-full items-end rounded-full bg-white/[0.08] p-1">
+                    <div className="flex h-32 w-full items-end rounded-full bg-white/[0.08] p-1">
                       <div
                         className="w-full rounded-full bg-gradient-to-t from-[rgba(151,176,209,0.28)] via-[rgba(230,215,192,0.76)] to-white"
                         style={{ height: `${point.value}%` }}
@@ -125,20 +124,20 @@ export default function TractionSection() {
                 ))}
               </div>
 
-              <div className="mt-8 grid gap-4 md:grid-cols-2">
-                <div className="liquid-glass deck-frame deck-tint-cool rounded-3xl p-5">
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <div className="liquid-glass deck-frame deck-tint-cool rounded-3xl p-4">
                   <p className="text-xs uppercase tracking-[0.28em] text-white/34">
                     Expansion
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/56">
+                  <p className="mt-2 text-sm leading-relaxed text-white/56">
                     Bigger scopes, longer retention.
                   </p>
                 </div>
-                <div className="liquid-glass deck-frame deck-tint-warm rounded-3xl p-5">
+                <div className="liquid-glass deck-frame deck-tint-warm rounded-3xl p-4">
                   <p className="text-xs uppercase tracking-[0.28em] text-white/34">
                     Retention
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/56">
+                  <p className="mt-2 text-sm leading-relaxed text-white/56">
                     Repeat work is the strongest signal.
                   </p>
                 </div>

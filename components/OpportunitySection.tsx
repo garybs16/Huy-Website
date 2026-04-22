@@ -29,20 +29,20 @@ export default function OpportunitySection() {
     <section
       id="market"
       ref={ref}
-      className="bg-[radial-gradient(ellipse_at_top,_rgba(230,215,192,0.08)_0%,_transparent_68%)] px-6 py-28 md:py-40"
+      className="bg-[radial-gradient(ellipse_at_top,_rgba(230,215,192,0.08)_0%,_transparent_68%)] px-6 py-18 md:py-24"
     >
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
           transition={{ duration: 0.7 }}
-          className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+          className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
         >
           <div>
             <p className="deck-kicker mb-5 text-xs">
               06 / OPPORTUNITY
             </p>
-            <h2 className="max-w-4xl text-4xl leading-[1.02] tracking-tight text-white md:text-6xl lg:text-7xl">
+            <h2 className="max-w-3xl text-3xl leading-[1.02] tracking-tight text-white md:text-5xl lg:text-[3.9rem]">
               The window is open for{" "}
               <span
                 className="text-white/55"
@@ -57,14 +57,12 @@ export default function OpportunitySection() {
             </h2>
           </div>
 
-          <p className="max-w-sm text-sm leading-relaxed text-white/48 md:text-right">
-            This section frames the market case: the appetite for sharper
-            creative systems is growing faster than traditional agencies and
-            slower internal teams can respond.
+          <p className="max-w-xs text-sm leading-relaxed text-white/44 md:text-right">
+            Faster demand, fewer full-stack creative partners.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid gap-4 md:grid-cols-[1.02fr_0.98fr]">
           <motion.div
             initial={{ opacity: 0, y: 42 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 42 }}
@@ -78,16 +76,17 @@ export default function OpportunitySection() {
               loop
               playsInline
               preload="auto"
-              className="aspect-[16/12] h-full w-full object-cover"
+              className="aspect-[16/10] h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,_rgba(151,176,209,0.16),_transparent_24%)]" />
 
             <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-              <div className="liquid-glass deck-frame deck-tint-warm max-w-xl rounded-[1.75rem] p-6">
+              <div className="liquid-glass deck-frame deck-tint-warm max-w-md rounded-[1.75rem] p-5">
                 <p className="mb-3 text-xs uppercase tracking-[0.32em] text-white/36">
                   Market Thesis
                 </p>
-                <p className="text-lg leading-relaxed text-white/80 md:text-2xl">
+                <p className="text-lg leading-relaxed text-white/80 md:text-xl">
                   One partner. Premium output. Startup speed.
                 </p>
               </div>
@@ -100,45 +99,60 @@ export default function OpportunitySection() {
             transition={{ duration: 0.8, delay: 0.18 }}
             className="space-y-6"
           >
-            <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-1">
+            <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-3">
               {marketSignals.map((signal, index) => (
                 <motion.div
                   key={signal.label}
                   initial={{ opacity: 0, y: 24 }}
                   animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                   transition={{ duration: 0.7, delay: 0.16 + index * 0.08 }}
-                  className={`${index === 1 ? "deck-tint-cool" : "deck-tint-warm"} liquid-glass deck-frame rounded-3xl p-5`}
+                  className={`${index === 1 ? "deck-tint-cool" : "deck-tint-warm"} liquid-glass deck-frame rounded-3xl p-4`}
                 >
-                  <p className="text-3xl tracking-tight text-white md:text-4xl">
+                  <p className="text-2xl tracking-tight text-white md:text-3xl">
                     {signal.value}
                   </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.22em] text-white/35">
+                  <p className="mt-2 text-[11px] uppercase tracking-[0.22em] text-white/35">
                     {signal.label}
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/45">
+                  <p className="mt-2 text-xs leading-relaxed text-white/45">
                     {signal.detail}
                   </p>
                 </motion.div>
               ))}
             </div>
 
-            <div className="liquid-glass deck-frame rounded-[2rem] p-7">
-              <p className="text-xs uppercase tracking-[0.32em] text-white/36">
-                What Changed
-              </p>
-              <div className="mt-6 grid gap-3">
-                {[
-                  "Lean teams need investor-grade assets.",
-                  "Cycles are shorter and expectations are higher.",
-                  "Premium no longer means slow."
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-white/10 bg-black/25 px-4 py-4 text-sm text-white/58"
-                  >
-                    {item}
-                  </div>
-                ))}
+            <div className="grid gap-4 md:grid-cols-[0.94fr_1.06fr]">
+              <div className="deck-frame relative overflow-hidden rounded-[1.75rem]">
+                <video
+                  src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="aspect-[6/5] h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              </div>
+
+              <div className="liquid-glass deck-frame rounded-[1.75rem] p-5">
+                <p className="text-xs uppercase tracking-[0.32em] text-white/36">
+                  What Changed
+                </p>
+                <div className="mt-4 grid gap-2">
+                  {[
+                    "Lean teams need investor-grade assets.",
+                    "Cycles are shorter.",
+                    "Premium can no longer feel slow."
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/56"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>

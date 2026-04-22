@@ -115,24 +115,12 @@ export default function HeroSection() {
       <div className="z-10 flex flex-1 items-center px-6 pb-20 pt-8">
         <div className="mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-[1.1fr_0.44fr] lg:items-end">
           <div className="-translate-y-[7%]">
-            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/20 px-4 py-2 backdrop-blur-sm">
-              <span className="deck-kicker text-[11px]">01 / HERO</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--deck-warm))]" />
-            </div>
-
             <h1
-              className="mb-6 max-w-4xl text-5xl leading-[0.94] tracking-tight text-white md:text-6xl lg:text-[5.4rem]"
+              className="mb-6 max-w-4xl text-5xl leading-[0.94] tracking-tight text-white md:text-6xl lg:text-[5.1rem]"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
-              Built for the curious.
-              <br />
-              Refined for the decisive.
+              Built for the curious
             </h1>
-
-            <p className="max-w-lg text-sm leading-relaxed text-white/70 md:text-base">
-              A tighter, cinematic pitch-deck landing page for strategy,
-              creative systems, and investor-facing storytelling.
-            </p>
 
             <div className="mt-8 flex w-full max-w-md flex-col gap-4">
               <div className="liquid-glass deck-frame flex w-full flex-row items-center rounded-full py-2 pl-6 pr-2">
@@ -144,21 +132,6 @@ export default function HeroSection() {
                 <button className="flex items-center justify-center rounded-full bg-white p-2 transition-colors hover:bg-white/90">
                   <ArrowRight className="h-5 w-5 text-black" />
                 </button>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                {[
-                  "Investor-ready",
-                  "Narrative-led",
-                  "High-speed execution"
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-full border border-white/10 bg-black/18 px-4 py-2 text-xs text-white/64 backdrop-blur-sm"
-                  >
-                    {item}
-                  </div>
-                ))}
               </div>
             </div>
           </div>
