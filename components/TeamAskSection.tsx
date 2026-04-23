@@ -6,11 +6,13 @@ import { ArrowRight } from "lucide-react";
 
 const teamMembers = [
   {
+    slotLabel: "Founder portrait",
     name: "CEO / 3D Vision",
     role: "Product, research translation, company direction",
     description: "Ex-Pixar tools lead. 3D vision."
   },
   {
+    slotLabel: "Co-founder portrait",
     name: "CTO / Generative Models",
     role: "Model architecture, infrastructure, core rendering stack",
     description: "Ex-OpenAI researcher. Generative video systems."
@@ -63,13 +65,26 @@ export default function TeamAskSection() {
                 transition={{ duration: 0.7, delay: 0.14 + index * 0.08 }}
                 className={`${index === 0 ? "deck-tint-warm" : "deck-tint-cool"} deck-panel-matte deck-frame rounded-[1.5rem] p-5`}
               >
-                <p className="text-lg tracking-tight text-white">{member.name}</p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/46">
-                  {member.role}
-                </p>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/66">
-                  {member.description}
-                </p>
+                <div className="grid gap-4 sm:grid-cols-[0.42fr_1fr] sm:items-end">
+                  <div className="deck-media relative overflow-hidden rounded-[1.25rem] bg-black/58">
+                    <div className="aspect-[4/5] w-full bg-[radial-gradient(circle_at_50%_28%,_rgba(255,255,255,0.12),_transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)),radial-gradient(circle_at_50%_118%,_rgba(255,255,255,0.08),_transparent_28%)]" />
+                    <div className="absolute inset-x-0 bottom-0 p-3">
+                      <div className="deck-panel-soft rounded-full px-3 py-1.5 text-[11px] text-white/76">
+                        {member.slotLabel}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-lg tracking-tight text-white">{member.name}</p>
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/46">
+                      {member.role}
+                    </p>
+                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/66">
+                      {member.description}
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             ))}
 
