@@ -6,22 +6,15 @@ import { ArrowRight } from "lucide-react";
 
 const teamMembers = [
   {
-    name: "Founder / Strategy",
-    role: "Narrative, positioning, client architecture",
-    description: "Narrative, positioning, and client architecture."
+    name: "CEO / 3D Vision",
+    role: "Product, research translation, company direction",
+    description: "Ex-Pixar tools lead. 3D vision."
   },
   {
-    name: "Founder / Creative",
-    role: "Design direction, motion, systems execution",
-    description: "Visual language, motion, and launch-ready execution."
+    name: "CTO / Generative Models",
+    role: "Model architecture, infrastructure, core rendering stack",
+    description: "Ex-OpenAI researcher. Generative video systems."
   }
-];
-
-const fundAllocation = [
-  { label: "Creative systems", value: 40 },
-  { label: "Production capacity", value: 30 },
-  { label: "Growth and pipeline", value: 20 },
-  { label: "Operations", value: 10 }
 ];
 
 export default function TeamAskSection() {
@@ -30,9 +23,9 @@ export default function TeamAskSection() {
 
   return (
     <section
-      id="ask"
+      id="team"
       ref={ref}
-      className="bg-[radial-gradient(ellipse_at_bottom,_rgba(151,176,209,0.08)_0%,_transparent_62%)] px-6 pb-18 pt-18 md:pb-22 md:pt-20"
+      className="deck-section bg-[radial-gradient(ellipse_at_bottom,_rgba(151,176,209,0.08)_0%,_transparent_62%)] px-6 pb-18 pt-18 md:pb-22 md:pt-20"
     >
       <div className="mx-auto max-w-5xl">
         <motion.div
@@ -43,15 +36,15 @@ export default function TeamAskSection() {
         >
           <div>
             <p className="deck-kicker mb-5 text-xs">
-              08 / TEAM & ASK
+              06 / TEAM
             </p>
             <h2 className="max-w-4xl text-3xl tracking-tight text-white md:text-5xl">
-              Ready to begin?
+              Built by operators who know the stack.
             </h2>
           </div>
 
-          <p className="max-w-xs text-sm leading-relaxed text-white/44 md:text-right">
-            Compact close. Clear team. Clear ask.
+          <p className="max-w-xs text-sm leading-relaxed text-white/56 md:text-right">
+            Product depth. Model depth. Clear taste.
           </p>
         </motion.div>
 
@@ -68,13 +61,13 @@ export default function TeamAskSection() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                 transition={{ duration: 0.7, delay: 0.14 + index * 0.08 }}
-                className={`${index === 0 ? "deck-tint-warm" : "deck-tint-cool"} deck-panel deck-frame rounded-[1.5rem] p-5`}
+                className={`${index === 0 ? "deck-tint-warm" : "deck-tint-cool"} deck-panel-matte deck-frame rounded-[1.5rem] p-5`}
               >
                 <p className="text-lg tracking-tight text-white">{member.name}</p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/34">
+                <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/46">
                   {member.role}
                 </p>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/50">
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/66">
                   {member.description}
                 </p>
               </motion.div>
@@ -84,13 +77,13 @@ export default function TeamAskSection() {
               initial={{ opacity: 0, y: 28 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
               transition={{ duration: 0.75, delay: 0.3 }}
-              className="deck-panel deck-frame deck-tint-warm rounded-[1.5rem] p-5"
+              className="deck-panel-soft deck-frame rounded-[1.5rem] p-5"
             >
-              <p className="text-xs uppercase tracking-[0.32em] text-white/36">
+              <p className="text-xs uppercase tracking-[0.32em] text-white/50">
                 Operator Fit
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-white/68 md:text-base">
-                Small team. High taste. Clear execution ownership.
+              <p className="mt-3 text-sm leading-relaxed text-white/78 md:text-base">
+                Small team. Senior depth.
               </p>
             </motion.div>
           </motion.div>
@@ -111,67 +104,58 @@ export default function TeamAskSection() {
                 preload="auto"
                 className="aspect-[16/8.2] h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/84 via-black/28 to-transparent" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,_rgba(230,215,192,0.18),_transparent_28%)]" />
               <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
-                <p className="text-xs uppercase tracking-[0.32em] text-white/36">
-                  The Ask
+                <p className="text-xs uppercase tracking-[0.32em] text-white/52">
+                  Company Build
                 </p>
-                <p className="mt-3 text-5xl leading-none tracking-tight text-white md:text-6xl">
-                  $3M
+                <p className="mt-3 max-w-xl text-3xl leading-[1.02] tracking-tight text-white/96 md:text-[2.8rem]">
+                  Research, infrastructure, product.
                 </p>
-                <p className="mt-2 text-base text-white/52">
-                  Seed round to scale capacity and compound demand.
+                <p className="mt-3 max-w-md text-base text-white/68">
+                  One compact team across the stack.
                 </p>
               </div>
             </div>
 
             <div className="p-5 md:p-6">
-              <div className="space-y-4">
-                {fundAllocation.map((item, index) => (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-                    transition={{ duration: 0.6, delay: 0.24 + index * 0.06 }}
-                  >
-                    <div className="mb-2 flex items-center justify-between text-sm">
-                      <span className="text-white/50">{item.label}</span>
-                      <span className="text-white/72">{item.value}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-white/[0.05]">
-                      <div
-                        className="h-2 rounded-full bg-gradient-to-r from-white/30 via-white/60 to-white"
-                        style={{ width: `${item.value}%` }}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+              <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-stretch">
+                <div className="deck-panel-matte deck-frame flex flex-col justify-between rounded-[1.6rem] p-5">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-white/48">
+                      Reach
+                    </p>
+                    <p className="mt-2 max-w-md text-sm leading-relaxed text-white/72">
+                      Product walkthroughs and technical deep dives.
+                    </p>
+                  </div>
 
-              <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-                <div className="deck-panel-soft deck-frame rounded-[1.5rem] p-5">
-                  <p className="text-xs uppercase tracking-[0.28em] text-white/34">
-                    Next Step
-                  </p>
-                  <p className="mt-2 max-w-md text-sm leading-relaxed text-white/50">
-                    Looking for aligned partners with taste and long-term conviction.
-                  </p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {["Research", "Infrastructure", "Product"].map((item) => (
+                      <div
+                        key={item}
+                        className="deck-panel-soft deck-frame rounded-full px-4 py-2 text-[12px] text-white/82"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
                   <a
-                    href="mailto:hello@asme.co"
+                    href="mailto:founders@unstableml.ai"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
                   >
-                    Request intro
+                    Contact team
                     <ArrowRight className="h-4 w-4" />
                   </a>
                   <a
-                    href="#about"
+                    href="#demo"
                     className="liquid-glass inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium text-white"
                   >
-                    Revisit
+                    Watch demo
                   </a>
                 </div>
               </div>
@@ -185,11 +169,11 @@ export default function TeamAskSection() {
           transition={{ duration: 0.7, delay: 0.4 }}
           className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-4 text-[10px] text-white/28 md:flex-row md:items-center md:justify-between"
         >
-          <p>Asme</p>
+          <p>Unstable ML</p>
           <div className="flex items-center gap-5">
-            <a href="#about">About</a>
-            <a href="#services">Services</a>
-            <a href="#ask">Ask</a>
+            <a href="#features">Features</a>
+            <a href="#services">Pricing</a>
+            <a href="#team">Team</a>
           </div>
         </motion.div>
       </div>

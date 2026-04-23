@@ -50,7 +50,7 @@
   }
 
   .deck-kicker {
-    color: rgba(255, 255, 255, 0.42);
+    color: rgba(255, 255, 255, 0.52);
     letter-spacing: 0.35em;
     text-transform: uppercase;
   }
@@ -75,7 +75,7 @@
 
   .deck-panel {
     background: rgba(255, 255, 255, 0.028);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.04),
       0 20px 70px rgba(0, 0, 0, 0.22);
@@ -83,7 +83,80 @@
 
   .deck-panel-soft {
     background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .deck-panel-matte {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.01)),
+      rgba(7, 7, 7, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.02),
+      0 24px 80px rgba(0, 0, 0, 0.24);
+  }
+
+  .deck-section {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .deck-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 18% 20%, rgba(var(--deck-warm), 0.08), transparent 26%),
+      radial-gradient(circle at 82% 18%, rgba(var(--deck-cool), 0.08), transparent 24%);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .deck-section > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .deck-divider {
+    position: relative;
+  }
+
+  .deck-divider::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -1px;
+    height: 1px;
+    width: min(100%, 72rem);
+    transform: translateX(-50%);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.1) 18%,
+      rgba(255, 255, 255, 0.16) 50%,
+      rgba(255, 255, 255, 0.1) 82%,
+      rgba(255, 255, 255, 0)
+    );
+    pointer-events: none;
+  }
+
+  .deck-media {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+      0 40px 120px rgba(0, 0, 0, 0.34);
+  }
+
+  .deck-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 26%),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), transparent 38%);
   }
 }
 
@@ -98,4 +171,5 @@ body {
     #000;
   color: white;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
