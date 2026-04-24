@@ -8,12 +8,14 @@ import LazyVideo from "@/components/LazyVideo";
 const teamMembers = [
   {
     slotLabel: "Founder portrait",
+    portraitInitials: "CEO",
     name: "CEO / 3D Vision",
     role: "Product, research translation, company direction",
     description: "Ex-Pixar tools lead. 3D vision."
   },
   {
     slotLabel: "Co-founder portrait",
+    portraitInitials: "CTO",
     name: "CTO / Generative Models",
     role: "Model architecture, infrastructure, core rendering stack",
     description: "Ex-OpenAI researcher. Generative video systems."
@@ -68,7 +70,11 @@ export default function TeamAskSection() {
               >
                 <div className="grid gap-4 sm:grid-cols-[0.42fr_1fr] sm:items-end">
                   <div className="deck-media relative overflow-hidden rounded-[1.25rem] bg-black/58">
-                    <div className="aspect-[4/5] w-full bg-[radial-gradient(circle_at_50%_28%,_rgba(255,255,255,0.12),_transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)),radial-gradient(circle_at_50%_118%,_rgba(255,255,255,0.08),_transparent_28%)]" />
+                    <div className="flex aspect-[4/5] w-full items-center justify-center bg-[radial-gradient(circle_at_50%_28%,_rgba(255,255,255,0.14),_transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.01)),radial-gradient(circle_at_50%_118%,_rgba(255,255,255,0.08),_transparent_28%)]">
+                      <span className="text-2xl text-white/34 md:text-3xl">
+                        {member.portraitInitials}
+                      </span>
+                    </div>
                     <div className="absolute inset-x-0 bottom-0 p-3">
                       <div className="deck-panel-soft rounded-full px-3 py-1.5 text-[11px] text-white/76">
                         {member.slotLabel}
@@ -117,7 +123,7 @@ export default function TeamAskSection() {
                 autoPlay
                 loop
                 playsInline
-                preload="metadata"
+                preload="auto"
                 className="aspect-[16/8.2] h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/84 via-black/28 to-transparent" />

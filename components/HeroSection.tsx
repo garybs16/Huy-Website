@@ -66,6 +66,7 @@ export default function HeroSection() {
 
   return (
     <section className="deck-section relative flex min-h-screen flex-col overflow-hidden bg-black">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_52%_36%,_rgba(255,255,255,0.16),_transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)_42%,rgba(0,0,0,1))]" />
       <video
         ref={videoRef}
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260404_050931_6b868bbb-85a4-498d-921e-e815d5a55906.mp4"
