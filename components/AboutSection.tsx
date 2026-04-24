@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import LazyVideo from "@/components/LazyVideo";
 
 const features = [
   {
@@ -65,13 +66,13 @@ export default function AboutSection() {
             transition={{ duration: 0.75, delay: 0.12 }}
             className="deck-frame deck-media relative overflow-hidden rounded-[2rem]"
           >
-            <video
+            <LazyVideo
               src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4"
               muted
               autoPlay
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
               className="aspect-[16/13] h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/28 to-black/8" />
@@ -124,13 +125,13 @@ export default function AboutSection() {
               transition={{ duration: 0.75, delay: 0.3 }}
               className="deck-frame deck-media relative overflow-hidden rounded-[1.9rem]"
             >
-              <video
+              <LazyVideo
                 src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4"
                 muted
                 autoPlay
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 className="aspect-[16/8.6] h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/74 via-black/22 to-transparent" />

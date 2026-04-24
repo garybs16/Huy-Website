@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import LazyVideo from "@/components/LazyVideo";
 
 export default function PhilosophySection() {
   const ref = useRef<HTMLElement | null>(null);
@@ -42,13 +43,13 @@ export default function PhilosophySection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="deck-frame deck-media relative aspect-[16/11] w-full overflow-hidden rounded-[1.9rem]"
           >
-            <video
+            <LazyVideo
               src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4"
               muted
               autoPlay
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/74 via-black/16 to-transparent" />

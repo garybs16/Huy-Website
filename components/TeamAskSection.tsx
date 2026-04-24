@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import LazyVideo from "@/components/LazyVideo";
 
 const teamMembers = [
   {
@@ -110,13 +111,13 @@ export default function TeamAskSection() {
             className="deck-panel deck-frame overflow-hidden rounded-[2rem] p-0"
           >
             <div className="relative">
-              <video
+              <LazyVideo
                 src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260404_050931_6b868bbb-85a4-498d-921e-e815d5a55906.mp4"
                 muted
                 autoPlay
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 className="aspect-[16/8.2] h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/84 via-black/28 to-transparent" />

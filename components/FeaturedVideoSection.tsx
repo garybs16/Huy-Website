@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import LazyVideo from "@/components/LazyVideo";
 
 export default function FeaturedVideoSection() {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -16,13 +17,13 @@ export default function FeaturedVideoSection() {
           transition={{ duration: 0.9 }}
           className="deck-frame deck-media group relative aspect-video w-full overflow-hidden rounded-3xl"
         >
-          <video
+          <LazyVideo
             src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4"
             muted
             autoPlay
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
             className="h-full w-full object-cover"
           />
 

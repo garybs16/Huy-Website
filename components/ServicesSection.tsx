@@ -2,13 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-
-const statBlocks = [
-  { value: "800", label: "Free credits / month" },
-  { value: "15k", label: "Pro credits / month" },
-  { value: "$20", label: "Pro monthly price" },
-  { value: "$0.10", label: "On-demand billing / credit" }
-];
+import LazyVideo from "@/components/LazyVideo";
 
 const plans = [
   {
@@ -67,45 +61,20 @@ export default function ServicesSection() {
           </p>
         </motion.div>
 
-        <div className="grid gap-4 lg:grid-cols-[0.88fr_1.12fr]">
-          <motion.div
-            initial={{ opacity: 0, y: 34 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 34 }}
-            transition={{ duration: 0.8, delay: 0.08 }}
-            className="grid gap-3 sm:grid-cols-2"
-          >
-            {statBlocks.map((item, index) => (
-              <motion.div
-                key={item.label}
-                initial={{ opacity: 0, y: 22 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
-                transition={{ duration: 0.65, delay: 0.14 + index * 0.06 }}
-                className="deck-panel deck-frame rounded-[1.7rem] bg-black/50 p-5"
-              >
-                <p className="text-5xl tracking-tight text-white md:text-[3.35rem]">
-                  {item.value}
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-white/72">
-                  {item.label}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <div className="grid gap-3">
+        <div className="grid gap-3">
             <motion.div
               initial={{ opacity: 0, y: 34 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 34 }}
-              transition={{ duration: 0.8, delay: 0.12 }}
+              transition={{ duration: 0.8, delay: 0.08 }}
               className="deck-frame deck-media relative overflow-hidden rounded-[1.9rem]"
             >
-              <video
+              <LazyVideo
                 src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4"
                 muted
                 autoPlay
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 className="aspect-[16/6.7] h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/38 to-black/12" />
@@ -122,11 +91,11 @@ export default function ServicesSection() {
               </div>
             </motion.div>
 
-            <div className="grid gap-3 md:grid-cols-[0.94fr_0.72fr]">
+            <div className="grid gap-3 md:grid-cols-[1.02fr_0.78fr]">
               <motion.div
                 initial={{ opacity: 0, y: 34 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 34 }}
-                transition={{ duration: 0.8, delay: 0.18 }}
+                transition={{ duration: 0.8, delay: 0.14 }}
                 className="deck-panel deck-frame rounded-[1.9rem] bg-black/56 p-5"
               >
                 <p className="text-[11px] uppercase tracking-[0.32em] text-white/60">
@@ -165,7 +134,7 @@ export default function ServicesSection() {
               <motion.div
                 initial={{ opacity: 0, y: 34 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 34 }}
-                transition={{ duration: 0.8, delay: 0.22 }}
+                transition={{ duration: 0.8, delay: 0.18 }}
                 className="deck-panel deck-frame deck-tint-warm flex rounded-[1.9rem] bg-black/52 p-5"
               >
                 <div className="flex h-full flex-col">
@@ -196,7 +165,6 @@ export default function ServicesSection() {
                 </div>
               </motion.div>
             </div>
-          </div>
         </div>
       </div>
     </section>
