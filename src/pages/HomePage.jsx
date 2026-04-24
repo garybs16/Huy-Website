@@ -45,7 +45,7 @@ export function HomePage({ cohorts, programs }) {
                 </span>
               ))}
             </div>
-            <h1>Train with a school that makes class options, admissions support, and next steps easy to understand.</h1>
+            <h1>Healthcare training in Orange with clear schedules and hands-on support.</h1>
             <p className="hero-text">
               Explore CNA, Medication Aide, and CPR/BLS training with published schedules, direct
               support, and a clear path from first interest to confirmed enrollment.
@@ -54,6 +54,9 @@ export function HomePage({ cohorts, programs }) {
             <div className="button-row">
               <Link to="/register" className="btn btn-primary">
                 Register Now
+              </Link>
+              <Link to="/schedule" className="btn btn-secondary">
+                See Class Dates
               </Link>
               <Link to="/programs" className="btn btn-ghost">
                 View Programs

@@ -19,9 +19,12 @@ export function SiteHeader({ navItems }) {
             <a href={contactDetails.phoneHref}>{contactDetails.phone}</a>
             <a href={contactDetails.emailHref}>{contactDetails.email}</a>
           </div>
-          <Link to="/contact" className="top-strip-link">
-            Student Support
-          </Link>
+          <div className="top-strip-actions">
+            <span>Orange, CA campus</span>
+            <Link to="/contact" className="top-strip-link">
+              Student Support
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -61,6 +64,9 @@ export function SiteHeader({ navItems }) {
         </nav>
 
         <div className={`nav-actions ${navOpen ? "is-open" : ""}`}>
+          <Link to="/schedule" className="btn btn-ghost nav-button-secondary">
+            View Schedule
+          </Link>
           <Link to="/register" className="btn btn-primary nav-button">
             Register Now
           </Link>

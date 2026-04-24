@@ -235,9 +235,12 @@ function AppShell({ children }) {
 
   return (
     <div className="site-shell">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <SiteHeader navItems={navItems} />
 
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
 
       {showCtaBand ? <SiteCtaBand /> : null}
 

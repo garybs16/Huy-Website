@@ -63,7 +63,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
                 <li>Remaining seats: {cohort.remainingSeats}</li>
               </ul>
               <p className="card-note">Registration stays tied to the selected cohort and pricing.</p>
-              <Link to={buildRegisterUrl(cohort)} className="text-link">
+              <Link to={buildRegisterUrl(cohort)} className="card-action-link">
                 Register for this track
               </Link>
             </article>

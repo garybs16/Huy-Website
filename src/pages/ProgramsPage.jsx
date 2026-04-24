@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import admissionsSupport from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
@@ -38,6 +39,9 @@ export function ProgramsPage({ programs, programLoadError }) {
                   <li>Format: {program.schedule}</li>
                   <li>{meta.detail}</li>
                 </ul>
+                <Link to={`/register?programId=${program.id}`} className="card-action-link">
+                  Start registration
+                </Link>
               </article>
             );
           })}
