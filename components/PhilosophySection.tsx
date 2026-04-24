@@ -49,7 +49,7 @@ export default function PhilosophySection() {
               autoPlay
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/74 via-black/16 to-transparent" />

@@ -123,7 +123,7 @@ export default function TeamAskSection() {
                 autoPlay
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 className="aspect-[16/8.2] h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/84 via-black/28 to-transparent" />

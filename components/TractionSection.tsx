@@ -2,12 +2,13 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import LazyVideo from "@/components/LazyVideo";
 
 const tractionStats = [
-  { value: "25k+", label: "Qualified waitlist" },
+  { value: "25k+", label: "Waitlisted creators" },
   { value: "42%", label: "Month-over-month growth" },
-  { value: "88%", label: "Repeat client rate" },
-  { value: "11", label: "Active retained engagements" }
+  { value: "88%", label: "Week-four retention" },
+  { value: "12k+", label: "Renders per month" }
 ];
 
 const growthSeries = [
@@ -37,12 +38,12 @@ export default function TractionSection() {
               07 / TRACTION
             </p>
             <h2 className="max-w-3xl text-3xl tracking-tight text-white md:text-5xl lg:text-[3.8rem]">
-              Early proof, tightening demand, and a repeatable growth pattern.
+              Strong early signals and a revenue model that already reads clearly.
             </h2>
           </div>
 
           <p className="max-w-xs text-sm leading-relaxed text-white/44 md:text-right">
-            Proof, retention, and a clearer growth line.
+            Demand, retention, and monetization are already visible.
           </p>
         </motion.div>
 
@@ -77,13 +78,13 @@ export default function TractionSection() {
             transition={{ duration: 0.8, delay: 0.16 }}
             className="deck-frame relative overflow-hidden rounded-[2rem]"
           >
-            <video
+            <LazyVideo
               src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
               muted
               autoPlay
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
               className="aspect-[16/10] h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/10" />
@@ -93,7 +94,7 @@ export default function TractionSection() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.32em] text-white/36">
-                    Revenue Signal
+                    Demand Signal
                   </p>
                   <p className="mt-2 text-xl tracking-tight text-white md:text-2xl">
                     Momentum that already compounds.
@@ -127,18 +128,18 @@ export default function TractionSection() {
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 <div className="deck-panel deck-frame deck-tint-cool rounded-3xl p-4">
                   <p className="text-xs uppercase tracking-[0.28em] text-white/34">
-                    Expansion
+                    Creator
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-white/56">
-                    Bigger scopes, longer retention.
+                    $29/mo entry point for individual creators.
                   </p>
                 </div>
                 <div className="deck-panel deck-frame deck-tint-warm rounded-3xl p-4">
                   <p className="text-xs uppercase tracking-[0.28em] text-white/34">
-                    Retention
+                    Pro
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-white/56">
-                    Repeat work is the strongest signal.
+                    $99/mo plus usage-based compute for heavier teams.
                   </p>
                 </div>
               </div>

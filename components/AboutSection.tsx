@@ -72,7 +72,7 @@ export default function AboutSection() {
               autoPlay
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
               className="aspect-[16/13] h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/28 to-black/8" />
@@ -131,7 +131,7 @@ export default function AboutSection() {
                 autoPlay
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 className="aspect-[16/8.6] h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/74 via-black/22 to-transparent" />

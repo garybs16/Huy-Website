@@ -9,14 +9,15 @@ type LazyVideoProps = React.VideoHTMLAttributes<HTMLVideoElement> & {
 
 export default function LazyVideo({
   src,
-  preload = "auto",
+  preload = "metadata",
   autoPlay,
   className,
   onCanPlay,
+  onLoadedData,
   ...props
 }: LazyVideoProps) {
   const ref = useRef<HTMLVideoElement | null>(null);
-  const isNearViewport = useInView(ref, { once: true, margin: "1100px" });
+  const isNearViewport = useInView(ref, { once: true, margin: "420px" });
   const isVisible = useInView(ref, { margin: "80px" });
   const [shouldLoad, setShouldLoad] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -51,6 +52,10 @@ export default function LazyVideo({
       src={shouldLoad ? src : undefined}
       preload={shouldLoad ? preload : "none"}
       autoPlay={shouldLoad ? autoPlay : false}
+      onLoadedData={(event) => {
+        setIsReady(true);
+        onLoadedData?.(event);
+      }}
       onCanPlay={(event) => {
         setIsReady(true);
         onCanPlay?.(event);

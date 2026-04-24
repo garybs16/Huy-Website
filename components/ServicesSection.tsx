@@ -74,7 +74,7 @@ export default function ServicesSection() {
               autoPlay
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
               className="aspect-[16/6.7] h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/38 to-black/12" />

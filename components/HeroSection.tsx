@@ -23,6 +23,7 @@ export default function HeroSection() {
     }
 
     let animationFrameId = 0;
+    let isCheckingTime = false;
 
     const checkTime = () => {
       if (video.duration) {
@@ -38,9 +39,13 @@ export default function HeroSection() {
       animationFrameId = requestAnimationFrame(checkTime);
     };
 
-    const handleCanPlay = () => {
+    const handleFirstFrame = () => {
       setVideoOpacity(1);
-      animationFrameId = requestAnimationFrame(checkTime);
+
+      if (!isCheckingTime) {
+        isCheckingTime = true;
+        animationFrameId = requestAnimationFrame(checkTime);
+      }
     };
 
     const handleEnded = () => {
@@ -54,11 +59,17 @@ export default function HeroSection() {
       setVideoOpacity(1);
     };
 
-    video.addEventListener("canplay", handleCanPlay);
+    if (video.readyState >= 2) {
+      handleFirstFrame();
+    }
+
+    video.addEventListener("loadeddata", handleFirstFrame);
+    video.addEventListener("canplay", handleFirstFrame);
     video.addEventListener("ended", handleEnded);
 
     return () => {
-      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("loadeddata", handleFirstFrame);
+      video.removeEventListener("canplay", handleFirstFrame);
       video.removeEventListener("ended", handleEnded);
       cancelAnimationFrame(animationFrameId);
     };
