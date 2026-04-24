@@ -1,0 +1,16 @@
+.git
+.github
+.logs
+dist
+node_modules
+npm-debug.log*
+*.log
+.env
+.env.*
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+server/data/*.json
+server/data/backups
+vite-dev.err.log
+vite-dev.log

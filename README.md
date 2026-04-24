@@ -5,6 +5,7 @@ This project now includes:
 - A React/Vite frontend
 - A Node/Express backend API for admissions, registration, and operations
 - SQLite-backed storage for cohorts, enrollments, inquiries, and waitlist
+- Provider-neutral deployment support with Docker, Procfile, health checks, and persistent-disk configuration
 - Stripe Checkout support for online tuition payment
 - Cohort-level payment-plan support with deposit-now / balance-later tracking
 - An admin dashboard section in the frontend backed by protected APIs
@@ -68,6 +69,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `npm run check:harmony`: smoke test API contract compatibility
 - `npm run check:production`: smoke test the built frontend + Express API together in production mode
 - `npm run check:readiness`: verify seat-hold capacity protection, expired hold cleanup, operational export, and SQLite backup creation
+- `npm run check:health`: check a running app's `/api/health` endpoint (`HEALTHCHECK_URL` can override the target)
 - `npm run verify`: run build, dependency audit, readiness check, API smoke test, and production smoke test
 - `npm run build`: build frontend
 - `npm run preview`: preview frontend build
@@ -160,7 +162,9 @@ npm run admin:hash -- "YourStrongAdminPassword"
 
 ## Deployment note
 
-You now have two deployment modes:
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for Docker, AWS, VPS, and PaaS deployment details.
+
+You now have three deployment modes:
 
 1. Single-service production deploy (recommended)
 
@@ -171,7 +175,14 @@ You now have two deployment modes:
 - Run `npm run verify` before shipping any production build
 - Configure `NOTIFICATION_WEBHOOK_URL` if admissions staff need immediate alerts outside the dashboard
 
-2. GitHub Pages frontend + separate API
+2. Docker or generic Node host
+
+- Build with the included `Dockerfile`, or run Node directly with `npm run start`
+- Mount a persistent volume at `/var/data`
+- Set `DATA_DIR=/var/data` and `DATABASE_URL=/var/data/enrollment.db`
+- Use `/api/health` as the health check path
+
+3. GitHub Pages frontend + separate API
 
 - GitHub Pages can host the frontend build only
 - The backend must be deployed separately (Render, Railway, Fly.io, VPS, etc.)
@@ -182,9 +193,7 @@ You now have two deployment modes:
 ## CI note
 
 - The GitHub Actions workflow now validates the full stack by running:
-  - `npm run build`
-  - `npm run check:harmony`
-  - `npm run check:production`
+  - `npm run verify`
 - It no longer publishes a frontend-only GitHub Pages deploy by default, because that deploy mode does not include the backend
 
 ## Render deploy

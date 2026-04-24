@@ -14,6 +14,7 @@
     "check:harmony": "node scripts/harmony-check.mjs",
     "check:production": "node scripts/production-smoke.mjs",
     "check:readiness": "node scripts/readiness-check.mjs",
+    "check:health": "node scripts/healthcheck.mjs",
     "admin:hash": "node scripts/hash-admin-password.mjs",
     "verify": "npm run build && npm audit && npm run check:readiness && npm run check:harmony && npm run check:production",
     "build": "vite build",

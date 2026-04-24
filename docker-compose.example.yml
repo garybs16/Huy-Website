@@ -1,0 +1,28 @@
+services:
+  web:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      SERVE_STATIC_APP: "true"
+      TRUST_PROXY: "true"
+      DATA_DIR: /var/data
+      DATABASE_URL: /var/data/enrollment.db
+      STATIC_DIR: /app/dist
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD before starting}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:?Set ADMIN_SESSION_SECRET before starting}
+      API_ADMIN_KEY: ${API_ADMIN_KEY:?Set API_ADMIN_KEY before starting}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:4000}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      NOTIFICATION_WEBHOOK_URL: ${NOTIFICATION_WEBHOOK_URL:-}
+      NOTIFICATION_WEBHOOK_SECRET: ${NOTIFICATION_WEBHOOK_SECRET:-}
+    volumes:
+      - app-data:/var/data
+    restart: unless-stopped
+
+volumes:
+  app-data:
