@@ -102,6 +102,8 @@ export function AdminPage({
   onCreateCohort,
   onUpdateCohort,
   onDeleteCohort,
+  onAdminExport,
+  onCreateBackup,
 }) {
   const [programForm, setProgramForm] = useState(createEmptyProgramForm);
   const [cohortForm, setCohortForm] = useState(createEmptyCohortForm);
@@ -342,6 +344,21 @@ export function AdminPage({
                 <span>Waitlist</span>
               </article>
             </div>
+
+            <article className="info-card admin-ops-card">
+              <div>
+                <p className="section-kicker">Production operations</p>
+                <h3>Export records or create a database backup before major changes.</h3>
+              </div>
+              <div className="admin-session-actions">
+                <button type="button" className="btn btn-primary" onClick={onAdminExport} disabled={adminBusy}>
+                  Export Operations
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={onCreateBackup} disabled={adminBusy}>
+                  Create Backup
+                </button>
+              </div>
+            </article>
 
             <div className="card-grid two-up">
               <article className="form-card admin-editor">

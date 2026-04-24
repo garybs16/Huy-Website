@@ -23,6 +23,10 @@ function formatMoney(cents) {
   }).format(cents / 100);
 }
 
+function backupTimestamp() {
+  return new Date().toISOString().replace(/[:.]/g, "-");
+}
+
 function hasColumn(db, tableName, columnName) {
   return db
     .prepare(`PRAGMA table_info(${tableName})`)
@@ -70,6 +74,7 @@ export class EnrollmentDatabase {
     this.db = new Database(filePath);
     this.db.pragma("journal_mode = WAL");
     this.db.pragma("foreign_keys = ON");
+    this.db.pragma("busy_timeout = 5000");
     this.migrate();
     this.seedPrograms();
     this.seedCohorts();
@@ -374,7 +379,7 @@ export class EnrollmentDatabase {
           payment_status = 'checkout_expired',
           seat_hold_expires_at = NULL,
           updated_at = @updatedAt
-        WHERE payment_status = 'checkout_pending'
+        WHERE payment_status IN ('payment_setup', 'checkout_pending')
           AND seat_hold_expires_at IS NOT NULL
           AND seat_hold_expires_at <= @now
       `)
@@ -511,6 +516,92 @@ export class EnrollmentDatabase {
       .all({ limit });
   }
 
+  exportOperationalData() {
+    return {
+      generatedAt: nowIso(),
+      programs: this.listPrograms({ includeInactive: true }),
+      cohorts: this.listCohortsForAdmin(),
+      enrollments: this.db
+        .prepare(`
+          SELECT
+            id,
+            student_full_name AS studentFullName,
+            email,
+            phone,
+            date_of_birth AS dateOfBirth,
+            address_line1 AS addressLine1,
+            city,
+            state,
+            postal_code AS postalCode,
+            emergency_contact_name AS emergencyContactName,
+            emergency_contact_phone AS emergencyContactPhone,
+            program_id AS programId,
+            cohort_id AS cohortId,
+            notes,
+            status,
+            payment_status AS paymentStatus,
+            payment_option AS paymentOption,
+            payment_amount_cents AS paymentAmountCents,
+            tuition_total_cents AS tuitionTotalCents,
+            balance_due_cents AS balanceDueCents,
+            stripe_checkout_session_id AS stripeCheckoutSessionId,
+            seat_hold_expires_at AS seatHoldExpiresAt,
+            paid_at AS paidAt,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+          FROM enrollments
+          ORDER BY created_at DESC
+        `)
+        .all(),
+      inquiries: this.db
+        .prepare(`
+          SELECT
+            id,
+            full_name AS fullName,
+            email,
+            phone,
+            program,
+            message,
+            source,
+            created_at AS createdAt
+          FROM inquiries
+          ORDER BY created_at DESC
+        `)
+        .all(),
+      waitlist: this.db
+        .prepare(`
+          SELECT
+            id,
+            full_name AS fullName,
+            email,
+            phone,
+            notes,
+            source,
+            created_at AS createdAt
+          FROM waitlist
+          ORDER BY created_at DESC
+        `)
+        .all(),
+      recentAdminActivity: this.listRecentAdminAuditEvents(50),
+    };
+  }
+
+  async createBackup({ directory } = {}) {
+    const backupDirectory = directory ?? path.join(path.dirname(this.filePath), "backups");
+    fs.mkdirSync(backupDirectory, { recursive: true });
+
+    const filename = `enrollment-${backupTimestamp()}.db`;
+    const backupPath = path.join(backupDirectory, filename);
+
+    await this.db.backup(backupPath);
+
+    return {
+      filename,
+      path: backupPath,
+      createdAt: nowIso(),
+    };
+  }
+
   listActiveCohorts() {
     this.releaseExpiredSeatHolds();
     const now = nowIso();
@@ -536,6 +627,7 @@ export class EnrollmentDatabase {
               WHEN e.payment_status = 'paid' THEN 1
               WHEN e.payment_status = 'deposit_paid' THEN 1
               WHEN e.payment_status = 'manual_pending' THEN 1
+              WHEN e.payment_status = 'payment_setup' AND e.seat_hold_expires_at > @now THEN 1
               WHEN e.payment_status = 'checkout_pending' AND e.seat_hold_expires_at > @now THEN 1
             END
           ) AS reservedSeats
@@ -701,6 +793,7 @@ export class EnrollmentDatabase {
               WHEN e.payment_status = 'paid' THEN 1
               WHEN e.payment_status = 'deposit_paid' THEN 1
               WHEN e.payment_status = 'manual_pending' THEN 1
+              WHEN e.payment_status = 'payment_setup' AND e.seat_hold_expires_at > @now THEN 1
               WHEN e.payment_status = 'checkout_pending' AND e.seat_hold_expires_at > @now THEN 1
             END
           ) AS reservedSeats
@@ -845,93 +938,99 @@ export class EnrollmentDatabase {
 
   createEnrollment(input) {
     this.releaseExpiredSeatHolds();
-    const cohort = this.getCohortById(input.cohortId);
+    const insertWithCapacityCheck = this.db.transaction((enrollmentInput) => {
+      const cohort = this.getCohortById(enrollmentInput.cohortId);
 
-    if (!cohort || !cohort.isActive) {
-      throw new Error("Selected cohort is not available.");
-    }
+      if (!cohort || !cohort.isActive) {
+        throw new Error("Selected cohort is not available.");
+      }
 
-    const activeReservationCount = this.db
-      .prepare(`
-        SELECT COUNT(*) AS count
-        FROM enrollments
-        WHERE cohort_id = @cohortId
-          AND (
-            payment_status = 'paid'
-            OR payment_status = 'deposit_paid'
-            OR payment_status = 'manual_pending'
-            OR (payment_status = 'checkout_pending' AND seat_hold_expires_at > @now)
+      const activeReservationCount = this.db
+        .prepare(`
+          SELECT COUNT(*) AS count
+          FROM enrollments
+          WHERE cohort_id = @cohortId
+            AND (
+              payment_status = 'paid'
+              OR payment_status = 'deposit_paid'
+              OR payment_status = 'manual_pending'
+              OR (payment_status = 'payment_setup' AND seat_hold_expires_at > @now)
+              OR (payment_status = 'checkout_pending' AND seat_hold_expires_at > @now)
+            )
+        `)
+        .get({ cohortId: enrollmentInput.cohortId, now: nowIso() }).count;
+
+      if (activeReservationCount >= cohort.capacity) {
+        throw new Error("This cohort is full. Please choose another class date.");
+      }
+
+      const timestamp = nowIso();
+
+      this.db
+        .prepare(`
+          INSERT INTO enrollments (
+            id,
+            student_full_name,
+            email,
+            phone,
+            date_of_birth,
+            address_line1,
+            city,
+            state,
+            postal_code,
+            emergency_contact_name,
+            emergency_contact_phone,
+            program_id,
+            cohort_id,
+            notes,
+            status,
+            payment_status,
+            payment_option,
+            payment_amount_cents,
+            tuition_total_cents,
+            balance_due_cents,
+            stripe_checkout_session_id,
+            seat_hold_expires_at,
+            paid_at,
+            created_at,
+            updated_at
+          ) VALUES (
+            @id,
+            @studentFullName,
+            @email,
+            @phone,
+            @dateOfBirth,
+            @addressLine1,
+            @city,
+            @state,
+            @postalCode,
+            @emergencyContactName,
+            @emergencyContactPhone,
+            @programId,
+            @cohortId,
+            @notes,
+            @status,
+            @paymentStatus,
+            @paymentOption,
+            @paymentAmountCents,
+            @tuitionTotalCents,
+            @balanceDueCents,
+            NULL,
+            @seatHoldExpiresAt,
+            NULL,
+            @createdAt,
+            @updatedAt
           )
-      `)
-      .get({ cohortId: input.cohortId, now: nowIso() }).count;
+        `)
+        .run({
+          ...enrollmentInput,
+          seatHoldExpiresAt: enrollmentInput.seatHoldExpiresAt ?? null,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+    });
 
-    if (activeReservationCount >= cohort.capacity) {
-      throw new Error("This cohort is full. Please choose another class date.");
-    }
-
-    const timestamp = nowIso();
-
-    this.db
-      .prepare(`
-        INSERT INTO enrollments (
-          id,
-          student_full_name,
-          email,
-          phone,
-          date_of_birth,
-          address_line1,
-          city,
-          state,
-          postal_code,
-          emergency_contact_name,
-          emergency_contact_phone,
-          program_id,
-          cohort_id,
-          notes,
-          status,
-          payment_status,
-          payment_option,
-          payment_amount_cents,
-          tuition_total_cents,
-          balance_due_cents,
-          stripe_checkout_session_id,
-          seat_hold_expires_at,
-          paid_at,
-          created_at,
-          updated_at
-        ) VALUES (
-          @id,
-          @studentFullName,
-          @email,
-          @phone,
-          @dateOfBirth,
-          @addressLine1,
-          @city,
-          @state,
-          @postalCode,
-          @emergencyContactName,
-          @emergencyContactPhone,
-          @programId,
-          @cohortId,
-          @notes,
-          @status,
-          @paymentStatus,
-          @paymentOption,
-          @paymentAmountCents,
-          @tuitionTotalCents,
-          @balanceDueCents,
-          NULL,
-          NULL,
-          NULL,
-          @createdAt,
-          @updatedAt
-        )
-      `)
-      .run({
-        ...input,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      });
+    insertWithCapacityCheck.immediate(input);
 
     return this.getEnrollmentById(input.id);
   }
@@ -979,6 +1078,7 @@ export class EnrollmentDatabase {
         SET
           status = 'payment_setup_failed',
           payment_status = 'payment_failed',
+          seat_hold_expires_at = NULL,
           notes = CASE
             WHEN @reason IS NULL OR @reason = '' THEN notes
             WHEN notes IS NULL OR notes = '' THEN @reason
@@ -1265,7 +1365,7 @@ export class EnrollmentDatabase {
           (
             SELECT COUNT(*)
             FROM enrollments
-            WHERE payment_status = 'checkout_pending'
+            WHERE payment_status IN ('payment_setup', 'checkout_pending')
               AND seat_hold_expires_at > @now
           ) AS pendingPayments,
           (SELECT COUNT(*) FROM inquiries) AS inquiries,

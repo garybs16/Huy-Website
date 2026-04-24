@@ -3,12 +3,14 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import {
   createAdminCohort,
+  createAdminBackup,
   createAdminProgram,
   createEnrollment,
   deleteAdminCohort,
   deleteAdminProgram,
   getAdminCohorts,
   getAdminEnrollments,
+  getAdminExport,
   getAdminInquiries,
   getAdminOverview,
   getAdminPrograms,
@@ -644,6 +646,60 @@ function App() {
   const handleDeleteCohort = (cohortId) =>
     runAdminMutation((key) => deleteAdminCohort(key, cohortId), "Cohort deleted.");
 
+  const handleAdminExport = async () => {
+    const key = adminSession.authenticated ? undefined : adminKey.trim();
+
+    if (!adminSession.authenticated && !key) {
+      setAdminError("Sign in or provide the fallback admin API key before exporting operations data.");
+      return;
+    }
+
+    setAdminMutationPending(true);
+    setAdminError("");
+    setAdminNotice("");
+
+    try {
+      const exportData = await getAdminExport(key);
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `operations-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setAdminNotice("Operations export downloaded.");
+    } catch (error) {
+      setAdminError(error.message || "Could not export operations data.");
+    } finally {
+      setAdminMutationPending(false);
+    }
+  };
+
+  const handleCreateBackup = async () => {
+    const key = adminSession.authenticated ? undefined : adminKey.trim();
+
+    if (!adminSession.authenticated && !key) {
+      setAdminError("Sign in or provide the fallback admin API key before creating a database backup.");
+      return;
+    }
+
+    setAdminMutationPending(true);
+    setAdminError("");
+    setAdminNotice("");
+
+    try {
+      const backup = await createAdminBackup(key);
+      setAdminNotice(`Database backup created: ${backup.filename}.`);
+    } catch (error) {
+      setAdminError(error.message || "Could not create database backup.");
+    } finally {
+      setAdminMutationPending(false);
+    }
+  };
+
   const filteredCohorts = cohorts.filter(
     (cohort) => !enrollmentForm.programId || cohort.programId === enrollmentForm.programId
   );
@@ -739,6 +795,8 @@ function App() {
                   onCreateCohort={handleCreateCohort}
                   onUpdateCohort={handleUpdateCohort}
                   onDeleteCohort={handleDeleteCohort}
+                  onAdminExport={handleAdminExport}
+                  onCreateBackup={handleCreateBackup}
                 />
               }
             />

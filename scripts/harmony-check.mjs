@@ -132,6 +132,21 @@ async function run() {
     const adminSessionBody = await adminSessionRes.json();
     assert(adminSessionBody.authenticated === true, "Admin session should be authenticated after login");
 
+    const adminExportRes = await fetch(`http://localhost:${port}/api/admin/export`, {
+      headers: { Cookie: adminCookie },
+    });
+    assert(adminExportRes.ok, "Admin operational export failed");
+    const adminExportBody = await adminExportRes.json();
+    assert(Array.isArray(adminExportBody.enrollments), "Admin export must include enrollments");
+
+    const adminBackupRes = await fetch(`http://localhost:${port}/api/admin/backups`, {
+      method: "POST",
+      headers: { Cookie: adminCookie },
+    });
+    assert(adminBackupRes.status === 201, "Admin database backup creation failed");
+    const adminBackupBody = await adminBackupRes.json();
+    assert(typeof adminBackupBody.filename === "string", "Admin backup response must include filename");
+
     const adminProgramCreateRes = await fetch(`http://localhost:${port}/api/admin/programs`, {
       method: "POST",
       headers: {

@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
+import { notifyAdmissions } from "../lib/notifications.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { inquirySchema, paginationSchema } from "../validation/schemas.js";
 
-export function createInquiriesRouter({ store, submissionLimiter, adminAuth, enrollmentDb }) {
+export function createInquiriesRouter({ store, submissionLimiter, adminAuth, enrollmentDb, notifier }) {
   const router = Router();
 
   router.post("/", submissionLimiter, async (req, res, next) => {
@@ -22,6 +23,10 @@ export function createInquiriesRouter({ store, submissionLimiter, adminAuth, enr
       };
 
       await store.insert(record);
+      notifyAdmissions(notifier, {
+        type: "inquiry.created",
+        record,
+      });
 
       res.status(201).json({
         message: "Inquiry submitted successfully.",

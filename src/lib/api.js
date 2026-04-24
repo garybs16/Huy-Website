@@ -93,6 +93,14 @@ export function getAdminOverview(apiKey) {
   return request("/api/admin/overview", { headers: adminHeaders(apiKey) });
 }
 
+export function getAdminExport(apiKey) {
+  return request("/api/admin/export", { headers: adminHeaders(apiKey) });
+}
+
+export function createAdminBackup(apiKey) {
+  return request("/api/admin/backups", { method: "POST", headers: adminHeaders(apiKey) });
+}
+
 export function getAdminEnrollments(apiKey) {
   return request("/api/enrollments", { headers: adminHeaders(apiKey) });
 }

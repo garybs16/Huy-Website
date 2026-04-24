@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
+import { notifyAdmissions } from "../lib/notifications.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { enrollmentSchema, paginationSchema } from "../validation/schemas.js";
 
@@ -49,7 +50,7 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
   };
 }
 
-export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient, publicAppUrl }) {
+export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient, publicAppUrl, notifier }) {
   const router = Router();
 
   router.get("/:id/status", (req, res) => {
@@ -88,6 +89,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
       }
 
       const pricing = resolveEnrollmentPricing(cohort, payload.paymentOption);
+      const initialSeatHoldExpiresAt = stripeClient ? new Date(Date.now() + 35 * 60 * 1000).toISOString() : null;
       const enrollment = enrollmentDb.createEnrollment({
         id: randomUUID(),
         studentFullName: payload.studentFullName,
@@ -104,17 +106,23 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         cohortId: cohort.id,
         notes: payload.notes,
         status: stripeClient ? "payment_setup" : "submitted",
-        paymentStatus: stripeClient ? "unpaid" : "manual_pending",
+        paymentStatus: stripeClient ? "payment_setup" : "manual_pending",
         paymentOption: pricing.paymentOption,
         paymentAmountCents: pricing.paymentAmountCents,
         tuitionTotalCents: pricing.tuitionTotalCents,
         balanceDueCents: pricing.balanceDueCents,
+        seatHoldExpiresAt: initialSeatHoldExpiresAt,
       });
 
       if (!stripeClient) {
         const manualEnrollment = enrollmentDb.markManualPending(enrollment.id);
         const amountDueNowLabel = formatMoney(manualEnrollment.paymentAmountCents);
         const balanceDueLabel = formatMoney(manualEnrollment.balanceDueCents);
+        notifyAdmissions(notifier, {
+          type: "enrollment.created",
+          paymentMode: "manual",
+          enrollment: manualEnrollment,
+        });
 
         return res.status(201).json({
           enrollmentId: manualEnrollment.id,
@@ -190,6 +198,11 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         enrollmentId: enrollment.id,
         sessionId: session.id,
         expiresAt: session.expires_at ? session.expires_at * 1000 : null,
+      });
+      notifyAdmissions(notifier, {
+        type: "enrollment.checkout_created",
+        paymentMode: "stripe",
+        enrollment: pendingEnrollment,
       });
 
       return res.status(201).json({

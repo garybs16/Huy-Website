@@ -1210,6 +1210,13 @@
   align-content: start;
 }
 
+.admin-ops-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .admin-record {
   display: flex;
   align-items: start;
@@ -1566,7 +1573,8 @@
   }
 
   .admin-card-top,
-  .admin-record {
+  .admin-record,
+  .admin-ops-card {
     flex-direction: column;
   }
 

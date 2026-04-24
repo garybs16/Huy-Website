@@ -1,6 +1,7 @@
 import express, { Router } from "express";
+import { notifyAdmissions } from "../lib/notifications.js";
 
-export function createStripePaymentsRouter({ stripeClient, webhookSecret, enrollmentDb }) {
+export function createStripePaymentsRouter({ stripeClient, webhookSecret, enrollmentDb, notifier }) {
   const router = Router();
 
   router.post("/", express.raw({ type: "application/json" }), (req, res) => {
@@ -23,11 +24,20 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
     }
 
     if (event.type === "checkout.session.completed") {
-      enrollmentDb.markPaidByCheckoutSession(event.data.object.id);
+      const enrollment = enrollmentDb.markPaidByCheckoutSession(event.data.object.id);
+      notifyAdmissions(notifier, {
+        type: "payment.completed",
+        stripeSessionId: event.data.object.id,
+        enrollment,
+      });
     }
 
     if (event.type === "checkout.session.expired") {
       enrollmentDb.markCheckoutExpired(event.data.object.id);
+      notifyAdmissions(notifier, {
+        type: "payment.expired",
+        stripeSessionId: event.data.object.id,
+      });
     }
 
     return res.json({ received: true });

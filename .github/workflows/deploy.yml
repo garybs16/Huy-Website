@@ -27,9 +27,5 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
-      - name: Build
-        run: npm run build
-      - name: API harmony smoke test
-        run: npm run check:harmony
-      - name: Production smoke test
-        run: npm run check:production
+      - name: Verify production readiness gates
+        run: npm run verify

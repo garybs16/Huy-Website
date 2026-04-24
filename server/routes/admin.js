@@ -201,6 +201,27 @@ export function createAdminRouter({
     res.json(enrollmentDb.getAdminOverview());
   });
 
+  router.get("/export", (req, res) => {
+    const exportData = enrollmentDb.exportOperationalData();
+    writeAdminAuditEvent(enrollmentDb, req, "admin.export.created", "Operational export downloaded.");
+
+    res.setHeader("Content-Disposition", `attachment; filename="operations-export-${Date.now()}.json"`);
+    res.json(exportData);
+  });
+
+  router.post("/backups", async (req, res, next) => {
+    try {
+      const backup = await enrollmentDb.createBackup();
+      writeAdminAuditEvent(enrollmentDb, req, "admin.backup.created", `Database backup ${backup.filename} created.`);
+      res.status(201).json({
+        filename: backup.filename,
+        createdAt: backup.createdAt,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.get("/programs", (_req, res) => {
     res.json({ items: enrollmentDb.listPrograms({ includeInactive: true }) });
   });

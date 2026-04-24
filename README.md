@@ -52,6 +52,8 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `PUBLIC_APP_URL`: absolute public app URL used for Stripe Checkout redirects
 - `STRIPE_SECRET_KEY`: Stripe secret key for Checkout session creation
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook signing secret for payment confirmation
+- `NOTIFICATION_WEBHOOK_URL`: optional admissions notification webhook for inquiries, waitlist, enrollments, and payment events
+- `NOTIFICATION_WEBHOOK_SECRET`: optional HMAC secret sent as `x-first-step-signature` for webhook verification
 - `VITE_DEV_API_TARGET`: Vite proxy target in development
 - `VITE_API_BASE_URL`: optional absolute API base URL for production frontend
 - `VITE_PUBLIC_BASE_PATH`: frontend base path used at build time (`/` for app hosting, `/Huy-Website/` for GitHub Pages)
@@ -65,7 +67,8 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `npm run admin:hash -- "YourPasswordHere"`: generate a secure admin password hash for `.env`
 - `npm run check:harmony`: smoke test API contract compatibility
 - `npm run check:production`: smoke test the built frontend + Express API together in production mode
-- `npm run verify`: run build, API smoke test, and production smoke test
+- `npm run check:readiness`: verify seat-hold capacity protection, expired hold cleanup, operational export, and SQLite backup creation
+- `npm run verify`: run build, dependency audit, readiness check, API smoke test, and production smoke test
 - `npm run build`: build frontend
 - `npm run preview`: preview frontend build
 
@@ -79,6 +82,8 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `POST /api/enrollments`: create enrollment with `paymentOption: "full" | "deposit"` and return Stripe Checkout URL when configured
 - `GET /api/enrollments/:id/status`: enrollment payment/status verification after checkout
 - `GET /api/admin/overview`: admin metrics and cohort capacity summary
+- `GET /api/admin/export`: admin-only operational JSON export
+- `POST /api/admin/backups`: admin-only SQLite backup creation
 - `GET /api/admin/session`: return current admin session state
 - `POST /api/admin/login`: start admin browser session
 - `POST /api/admin/logout`: clear admin browser session
@@ -164,6 +169,7 @@ You now have two deployment modes:
 - In production, Express will serve both the built frontend and the API from the same origin
 - This avoids the GitHub Pages + separate API mismatch entirely
 - Run `npm run verify` before shipping any production build
+- Configure `NOTIFICATION_WEBHOOK_URL` if admissions staff need immediate alerts outside the dashboard
 
 2. GitHub Pages frontend + separate API
 

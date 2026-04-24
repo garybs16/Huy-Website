@@ -24,6 +24,7 @@ export function createHealthRouter({ enrollmentDb, configReport }) {
       services: {
         database,
         payments: configReport?.paymentsEnabled ? "configured" : "manual",
+        notifications: configReport?.notificationsConfigured ? "configured" : "manual",
         admin: configReport?.adminAuthMode ?? (config.adminKey ? "api-key" : "disabled"),
       },
       warnings: configReport?.warnings ?? [],

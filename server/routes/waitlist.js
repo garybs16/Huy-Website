@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
+import { notifyAdmissions } from "../lib/notifications.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { paginationSchema, waitlistSchema } from "../validation/schemas.js";
 
-export function createWaitlistRouter({ store, submissionLimiter, adminAuth, enrollmentDb }) {
+export function createWaitlistRouter({ store, submissionLimiter, adminAuth, enrollmentDb, notifier }) {
   const router = Router();
 
   router.post("/", submissionLimiter, async (req, res, next) => {
@@ -17,6 +18,10 @@ export function createWaitlistRouter({ store, submissionLimiter, adminAuth, enro
       };
 
       await store.insert(record);
+      notifyAdmissions(notifier, {
+        type: "waitlist.created",
+        record,
+      });
 
       res.status(201).json({
         message: "Waitlist request submitted successfully.",

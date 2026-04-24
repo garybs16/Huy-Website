@@ -76,6 +76,8 @@ export const config = {
   publicAppUrl: (process.env.PUBLIC_APP_URL ?? "").trim().replace(/\/+$/, ""),
   stripeSecretKey: (process.env.STRIPE_SECRET_KEY ?? "").trim(),
   stripeWebhookSecret: (process.env.STRIPE_WEBHOOK_SECRET ?? "").trim(),
+  notificationWebhookUrl: (process.env.NOTIFICATION_WEBHOOK_URL ?? "").trim(),
+  notificationWebhookSecret: (process.env.NOTIFICATION_WEBHOOK_SECRET ?? "").trim(),
   serveStaticApp: parseBoolean(
     process.env.SERVE_STATIC_APP,
     (process.env.NODE_ENV ?? "development") === "production"
@@ -126,6 +128,10 @@ export function getRuntimeConfigReport(currentConfig = config) {
     warnings.push("Stripe is not configured. Enrollments will be created in manual payment mode.");
   }
 
+  if (!currentConfig.notificationWebhookUrl) {
+    warnings.push("Admissions notification webhook is not configured. Staff must monitor the admin dashboard directly.");
+  }
+
   if (!sessionAuthConfigured && currentConfig.adminKey) {
     warnings.push("Session-based admin login is not configured. The admin dashboard falls back to raw API key access.");
   }
@@ -150,6 +156,7 @@ export function getRuntimeConfigReport(currentConfig = config) {
     issues,
     warnings,
     stripeConfigured,
+    notificationsConfigured: Boolean(currentConfig.notificationWebhookUrl),
     sessionAuthConfigured,
     adminAuthMode,
     paymentsEnabled: stripeConfigured && Boolean(currentConfig.stripeWebhookSecret && currentConfig.publicAppUrl),

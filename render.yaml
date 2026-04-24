@@ -14,6 +14,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 22.12.0
       - key: SERVE_STATIC_APP
         value: "true"
       - key: TRUST_PROXY
@@ -37,4 +39,8 @@ services:
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: PUBLIC_APP_URL
+        sync: false
+      - key: NOTIFICATION_WEBHOOK_URL
+        sync: false
+      - key: NOTIFICATION_WEBHOOK_SECRET
         sync: false

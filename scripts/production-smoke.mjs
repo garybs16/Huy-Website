@@ -130,6 +130,21 @@ async function run() {
     const adminCookie = adminLoginRes.headers.get("set-cookie")?.split(";")[0];
     assert(adminCookie, "Production admin login did not return a cookie");
 
+    const adminExportRes = await fetch(`http://localhost:${port}/api/admin/export`, {
+      headers: { Cookie: adminCookie },
+    });
+    assert(adminExportRes.ok, "Production admin operational export failed");
+    const adminExportBody = await adminExportRes.json();
+    assert(Array.isArray(adminExportBody.enrollments), "Production admin export must include enrollments");
+
+    const adminBackupRes = await fetch(`http://localhost:${port}/api/admin/backups`, {
+      method: "POST",
+      headers: { Cookie: adminCookie },
+    });
+    assert(adminBackupRes.status === 201, "Production admin database backup creation failed");
+    const adminBackupBody = await adminBackupRes.json();
+    assert(typeof adminBackupBody.filename === "string", "Production admin backup response must include filename");
+
     const adminProgramCreateRes = await fetch(`http://localhost:${port}/api/admin/programs`, {
       method: "POST",
       headers: {

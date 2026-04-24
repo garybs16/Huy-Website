@@ -8,6 +8,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { config, getRuntimeConfigReport } from "./config.js";
 import { EnrollmentDatabase } from "./lib/enrollmentDb.js";
+import { createNotifier } from "./lib/notifications.js";
 import { createStripeClient } from "./lib/stripe.js";
 import { createAdminRouter } from "./routes/admin.js";
 import { createCohortsRouter } from "./routes/cohorts.js";
@@ -72,6 +73,10 @@ export function createApp() {
   });
   const enrollmentDb = new EnrollmentDatabase(config.databasePath);
   const stripeClient = createStripeClient(config.stripeSecretKey);
+  const notifier = createNotifier({
+    webhookUrl: config.notificationWebhookUrl,
+    signingSecret: config.notificationWebhookSecret,
+  });
   const paymentsEnabled = Boolean(stripeClient && configReport.paymentsEnabled);
   const adminAuth = {
     adminKey: config.adminKey,
@@ -100,6 +105,7 @@ export function createApp() {
       stripeClient,
       webhookSecret: config.stripeWebhookSecret,
       enrollmentDb,
+      notifier,
     })
   );
   app.use(express.json({ limit: "50kb" }));
@@ -131,6 +137,7 @@ export function createApp() {
       adminAuth,
       stripeClient: paymentsEnabled ? stripeClient : null,
       publicAppUrl: config.publicAppUrl,
+      notifier,
     })
   );
   app.use(
@@ -143,6 +150,7 @@ export function createApp() {
       submissionLimiter,
       adminAuth,
       enrollmentDb,
+      notifier,
     })
   );
   app.use(
@@ -155,6 +163,7 @@ export function createApp() {
       submissionLimiter,
       adminAuth,
       enrollmentDb,
+      notifier,
     })
   );
 
