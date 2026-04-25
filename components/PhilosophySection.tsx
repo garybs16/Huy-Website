@@ -17,7 +17,7 @@ export default function PhilosophySection() {
           transition={{ duration: 0.8 }}
           className="mb-10 grid gap-4 md:mb-12 md:grid-cols-[1fr_0.32fr] md:items-end"
         >
-          <div className="text-5xl tracking-tight text-white md:text-7xl lg:text-[4.8rem]">
+          <div className="max-w-5xl text-3xl leading-tight tracking-tight text-white md:text-5xl">
             <span className="deck-kicker mb-5 block text-xs">
               04 / VISION
             </span>

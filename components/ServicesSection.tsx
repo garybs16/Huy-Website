@@ -42,17 +42,13 @@ export default function ServicesSection() {
             <p className="deck-kicker mb-5 text-xs">
               05 / PRICING
             </p>
-            <h2 className="max-w-3xl text-4xl leading-[0.96] tracking-tight text-white md:text-6xl lg:text-[4.5rem]">
-              Pricing built
-              <br />
-              for usage.{" "}
+            <h2 className="max-w-5xl text-3xl leading-tight tracking-tight text-white md:text-5xl">
+              Pricing built for usage.{" "}
               <span
                 className="text-white/82"
                 style={{ fontStyle: "italic" }}
               >
-                Free entry,
-                <br />
-                paid depth.
+                Free entry, paid depth.
               </span>
             </h2>
           </div>

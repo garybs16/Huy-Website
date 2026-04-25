@@ -41,9 +41,8 @@ export default function AboutSection() {
               03 / FEATURES
             </p>
 
-            <h2 className="max-w-3xl text-4xl leading-[1.02] tracking-tight text-white md:text-6xl lg:text-[4.25rem]">
-              Core capabilities built for
-              <br />
+            <h2 className="max-w-5xl text-3xl leading-tight tracking-tight text-white md:text-5xl">
+              Core capabilities built for{" "}
               <span
                 className="text-white/72"
                 style={{ fontStyle: "italic" }}

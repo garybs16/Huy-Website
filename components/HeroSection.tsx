@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight } from "lucide-react";
 
 export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -99,40 +98,15 @@ export default function HeroSection() {
             <h1
               className="mb-5 max-w-4xl text-5xl leading-[0.92] tracking-tight text-white md:text-6xl lg:text-[5.15rem]"
             >
-              Generate cinematic
+              UnstableML
               <br />
-              3D scenes from text.
+              Pitch Deck
             </h1>
 
             <p className="max-w-md text-sm leading-relaxed text-white/58 md:text-[15px]">
               True 3D output in minutes.
             </p>
 
-            <div className="mt-7 flex w-full max-w-md flex-col gap-4">
-              <div className="liquid-glass deck-frame flex w-full flex-row items-center rounded-full py-2 pl-5 pr-2">
-                <input
-                  type="email"
-                  placeholder="founders@unstableml.ai"
-                  className="flex-1 border-none bg-transparent text-[13px] text-white outline-none placeholder:text-white/40"
-                />
-                <a
-                  href="mailto:founders@unstableml.ai"
-                  className="flex items-center justify-center rounded-full bg-white p-2 transition-colors hover:bg-white/90"
-                >
-                  <ArrowRight className="h-5 w-5 text-black" />
-                </a>
-              </div>
-
-              <div className="flex items-center gap-3 text-[12px] text-white/46">
-                <a href="#demo" className="transition-colors hover:text-white/78">
-                  Watch product demo
-                </a>
-                <span className="h-1 w-1 rounded-full bg-white/22" />
-                <a href="#services" className="transition-colors hover:text-white/78">
-                  View pricing
-                </a>
-              </div>
-            </div>
           </div>
 
         </div>
