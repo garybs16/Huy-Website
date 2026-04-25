@@ -48,7 +48,6 @@ export default function OpportunitySection() {
               <span
                 className="text-white/55"
                 style={{
-                  fontFamily: "'Instrument Serif', serif",
                   fontStyle: "italic"
                 }}
               >

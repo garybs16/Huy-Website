@@ -46,7 +46,7 @@ export default function AboutSection() {
               <br />
               <span
                 className="text-white/72"
-                style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
+                style={{ fontStyle: "italic" }}
               >
                 cinematic speed
               </span>{" "}

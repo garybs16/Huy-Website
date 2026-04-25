@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Globe } from "lucide-react";
-
-const navLinks = [
-  { label: "Demo", href: "#demo" },
-  { label: "Features", href: "#features" },
-  { label: "Vision", href: "#vision" },
-  { label: "Pricing", href: "#services" },
-  { label: "Team", href: "#team" }
-];
+import { ArrowRight } from "lucide-react";
 
 export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -95,44 +87,8 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/14 via-black/22 to-black/62" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_18%,transparent_82%,rgba(255,255,255,0.03))]" />
 
-      <div className="z-20 mx-auto w-full max-w-5xl px-6 py-6">
-        <nav className="liquid-glass deck-frame flex items-center justify-between rounded-full px-5 py-3">
-          <div className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-white" />
-            <span className="text-base font-semibold text-white">Unstable ML</span>
-          </div>
-
-          <div className="hidden items-center gap-7 md:flex">
-            {navLinks.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-[13px] font-medium text-white/74 transition-colors hover:text-white"
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <a
-              href="#services"
-              className="hidden text-[13px] font-medium text-white/76 transition-colors hover:text-white sm:block"
-            >
-              Pricing
-            </a>
-            <a
-              href="#team"
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/15"
-            >
-              Team
-            </a>
-          </div>
-        </nav>
-      </div>
-
       <div id="intro" className="z-10 flex flex-1 items-center px-6 pb-18 pt-8">
-        <div className="mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-[1.08fr_0.42fr] lg:items-end">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-start justify-center">
           <div className="-translate-y-[7%]">
             <p className="mb-4 text-[11px] uppercase tracking-[0.34em] text-white/48">
               01 / INTRO
@@ -142,7 +98,6 @@ export default function HeroSection() {
             </p>
             <h1
               className="mb-5 max-w-4xl text-5xl leading-[0.92] tracking-tight text-white md:text-6xl lg:text-[5.15rem]"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
             >
               Generate cinematic
               <br />
@@ -180,28 +135,6 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="hidden lg:grid lg:gap-3">
-            <div className="deck-panel deck-frame deck-tint-warm rounded-[1.7rem] p-4">
-              <p className="deck-kicker text-[10px]">Intro</p>
-              <p className="mt-3 text-[1.7rem] tracking-tight text-white">25k+</p>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-white/54">waitlist</p>
-            </div>
-
-            <div className="deck-panel-soft deck-frame deck-tint-cool rounded-[1.7rem] p-4">
-              <p className="deck-kicker text-[10px]">Signal</p>
-              <p className="mt-3 text-[15px] leading-tight text-white/88">
-                Editable scenes,
-                <br />
-                real pipeline fit.
-              </p>
-            </div>
-
-            <div className="deck-panel deck-frame rounded-[1.7rem] p-4">
-              <p className="deck-kicker text-[10px]">Latency</p>
-              <p className="mt-3 text-[1.45rem] tracking-tight text-white">2.4 min</p>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-white/52">scene time</p>
-            </div>
-          </div>
         </div>
       </div>
     </section>

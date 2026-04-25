@@ -48,7 +48,7 @@ export default function ServicesSection() {
               for usage.{" "}
               <span
                 className="text-white/82"
-                style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
+                style={{ fontStyle: "italic" }}
               >
                 Free entry,
                 <br />

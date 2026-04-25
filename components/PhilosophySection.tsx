@@ -24,7 +24,7 @@ export default function PhilosophySection() {
             A new layer for{" "}
             <span
               className="text-white/54"
-              style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}
+              style={{ fontStyle: "italic" }}
             >
               cinematic
             </span>{" "}
