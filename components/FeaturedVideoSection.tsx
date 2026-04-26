@@ -9,7 +9,7 @@ export default function FeaturedVideoSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="demo" className="deck-section deck-divider bg-black px-6 pb-20 pt-6 md:pb-24 md:pt-9">
+    <section id="demo" className="deck-section deck-divider bg-black px-6 pb-20 pt-16 md:pb-24 md:pt-24">
       <div className="mx-auto max-w-5xl" ref={ref}>
         <motion.div
           initial={{ opacity: 0, y: 60 }}

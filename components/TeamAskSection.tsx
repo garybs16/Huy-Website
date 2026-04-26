@@ -184,20 +184,6 @@ export default function TeamAskSection() {
             </div>
           </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-4 text-[10px] text-white/28 md:flex-row md:items-center md:justify-between"
-        >
-          <p>Unstable ML</p>
-          <div className="flex items-center gap-5">
-            <a href="#features">Features</a>
-            <a href="#services">Pricing</a>
-            <a href="#team">Team</a>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

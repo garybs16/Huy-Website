@@ -137,7 +137,7 @@ export default function ServicesSection() {
                 <p className="text-[11px] uppercase tracking-[0.32em] text-white/60">
                   On-demand billing
                 </p>
-                <p className="mt-5 text-6xl leading-none tracking-tight text-white md:text-[4.8rem]">
+                <p className="mt-5 text-4xl leading-none tracking-tight text-white md:text-[3.2rem]">
                   $0.10
                 </p>
                 <p className="mt-2 text-lg text-white/72">per credit</p>
