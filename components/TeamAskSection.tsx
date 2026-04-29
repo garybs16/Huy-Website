@@ -30,7 +30,7 @@ export default function TeamAskSection() {
     <section
       id="team"
       ref={ref}
-      className="deck-section bg-[radial-gradient(ellipse_at_bottom,_rgba(151,176,209,0.08)_0%,_transparent_62%)] px-6 pb-18 pt-18 md:pb-22 md:pt-20"
+      className="deck-section bg-[radial-gradient(ellipse_at_bottom,_rgba(151,176,209,0.08)_0%,_transparent_62%)] px-6 pb-28 pt-18 md:pb-32 md:pt-20"
     >
       <div className="mx-auto max-w-5xl">
         <motion.div
