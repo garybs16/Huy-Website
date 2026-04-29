@@ -21,18 +21,18 @@ export default function PhilosophySection() {
             <span className="deck-kicker mb-5 block text-xs">
               04 / VISION
             </span>
-            A new layer for{" "}
+            The midpoint where{" "}
             <span
               className="text-white/54"
               style={{ fontStyle: "italic" }}
             >
-              cinematic
+              AI
             </span>{" "}
-            production.
+            and 3D tools work together.
           </div>
 
           <p className="max-w-xs text-sm leading-relaxed text-white/58 md:justify-self-end md:text-right">
-            More than speed. A new production layer.
+            A product space where creators can use AI capabilities and professional tools in the same workflow.
           </p>
         </motion.div>
 
@@ -56,10 +56,10 @@ export default function PhilosophySection() {
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
               <div className="deck-panel deck-frame deck-tint-cool max-w-md rounded-[1.7rem] bg-black/64 p-5">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-white/48">
-                  Direction
+                  Product vision
                 </p>
                 <p className="mt-2 text-xl leading-tight tracking-tight text-white/96 md:text-[1.7rem]">
-                  From prompt to production-grade scenes.
+                  Give artists the power of AI and the control of the tools they already trust.
                 </p>
               </div>
             </div>
@@ -73,19 +73,19 @@ export default function PhilosophySection() {
           >
             <div className="deck-panel-matte deck-frame deck-tint-warm rounded-[1.75rem] p-6">
               <p className="mb-4 text-xs uppercase tracking-widest text-white/52">
-                CREATIVE LEVERAGE
+                THE GAP
               </p>
               <p className="text-sm leading-relaxed text-white/66 md:text-base">
-                Small teams can direct bigger worlds.
+                AI is powerful, and tools like Blender and Adobe are precise. Creators need a place where both strengths are available at once.
               </p>
             </div>
 
             <div className="deck-panel-matte deck-frame deck-tint-cool rounded-[1.75rem] p-6">
               <p className="mb-4 text-xs uppercase tracking-widest text-white/52">
-                LONG-TERM DIRECTION
+                OUR ROLE
               </p>
               <p className="text-sm leading-relaxed text-white/66 md:text-base">
-                A reusable infrastructure layer for cinematic 3D.
+                Build the midpoint product where generative speed and production control can live in the same creative process.
               </p>
             </div>
 
@@ -95,7 +95,7 @@ export default function PhilosophySection() {
                   Today
                 </p>
                 <p className="mt-3 text-lg leading-tight tracking-tight text-white/94">
-                  Faster scene loops.
+                  AI-assisted 3D creation.
                 </p>
               </div>
               <div className="deck-panel-soft deck-frame rounded-[1.55rem] p-5">
@@ -103,7 +103,7 @@ export default function PhilosophySection() {
                   Next
                 </p>
                 <p className="mt-3 text-lg leading-tight tracking-tight text-white/94">
-                  Production infrastructure.
+                  One creative midpoint.
                 </p>
               </div>
             </div>
