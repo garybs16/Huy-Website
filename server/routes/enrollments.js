@@ -3,7 +3,7 @@ import { Router } from "express";
 import { ZodError } from "zod";
 import { notifyAdmissions } from "../lib/notifications.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
-import { enrollmentSchema, paginationSchema } from "../validation/schemas.js";
+import { enrollmentPaymentSessionSchema, enrollmentSchema, paginationSchema } from "../validation/schemas.js";
 
 function formatMoney(cents) {
   return new Intl.NumberFormat("en-US", {
@@ -50,7 +50,76 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
   };
 }
 
-export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient, publicAppUrl, notifier }) {
+function getCheckoutPurpose(pricing) {
+  if (pricing.paymentOption === "deposit" && pricing.balanceDueCents > 0) {
+    return "deposit";
+  }
+
+  return "tuition";
+}
+
+function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose }) {
+  const isBalancePayment = purpose === "balance";
+  const amountCents = isBalancePayment ? enrollment.balanceDueCents : pricing.paymentAmountCents;
+  const amountLabel = formatMoney(amountCents);
+
+  return {
+    amountCents,
+    amountLabel,
+    purpose,
+    checkoutLabel: isBalancePayment ? "Remaining tuition balance" : pricing.checkoutLabel,
+    productName: `${program.title} - ${cohort.title} ${isBalancePayment ? "Remaining balance" : pricing.checkoutLabel}`,
+    productDescription: isBalancePayment
+      ? `${cohort.meetingPattern} | Remaining balance for enrollment ${enrollment.id}`
+      : pricing.paymentOption === "deposit"
+        ? `${cohort.meetingPattern} | Deposit now, ${formatMoney(pricing.balanceDueCents)} due before class start`
+        : `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
+  };
+}
+
+async function createEnrollmentCheckoutSession({ req, stripeClient, publicAppUrl, enrollment, program, cohort, pricing, purpose }) {
+  const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
+  const checkoutDetails = buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose });
+
+  return stripeClient.checkout.sessions.create({
+    mode: "payment",
+    success_url: `${appBaseUrl}/payment?checkout=success&enrollment=${enrollment.id}`,
+    cancel_url: `${appBaseUrl}/payment?checkout=cancelled&enrollment=${enrollment.id}`,
+    customer_email: enrollment.email,
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          unit_amount: checkoutDetails.amountCents,
+          product_data: {
+            name: checkoutDetails.productName,
+            description: checkoutDetails.productDescription,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      enrollmentId: enrollment.id,
+      cohortId: cohort.id,
+      programId: cohort.programId,
+      paymentOption: pricing.paymentOption,
+      checkoutPurpose: checkoutDetails.purpose,
+    },
+    payment_intent_data: {
+      metadata: {
+        enrollmentId: enrollment.id,
+        cohortId: cohort.id,
+        programId: cohort.programId,
+        paymentOption: pricing.paymentOption,
+        checkoutPurpose: checkoutDetails.purpose,
+      },
+    },
+  });
+}
+
+export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient, publicAppUrl, notifier, submissionLimiter }) {
   const router = Router();
 
   router.get("/:id/status", (req, res) => {
@@ -73,7 +142,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
     });
   });
 
-  router.post("/", async (req, res, next) => {
+  router.post("/", submissionLimiter, async (req, res, next) => {
     try {
       const payload = enrollmentSchema.parse(req.body);
       const cohort = enrollmentDb.getCohortById(payload.cohortId);
@@ -141,46 +210,18 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         });
       }
 
-      const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
       let session;
 
       try {
-        session = await stripeClient.checkout.sessions.create({
-          mode: "payment",
-          success_url: `${appBaseUrl}/register?checkout=success&enrollment=${enrollment.id}`,
-          cancel_url: `${appBaseUrl}/register?checkout=cancelled&enrollment=${enrollment.id}`,
-          customer_email: enrollment.email,
-          expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-          line_items: [
-            {
-              price_data: {
-                currency: "usd",
-                unit_amount: pricing.paymentAmountCents,
-                product_data: {
-                  name: `${program.title} - ${cohort.title} ${pricing.checkoutLabel}`,
-                  description:
-                    pricing.paymentOption === "deposit"
-                      ? `${cohort.meetingPattern} | Deposit now, ${formatMoney(pricing.balanceDueCents)} due before class start`
-                      : `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
-                },
-              },
-              quantity: 1,
-            },
-          ],
-          metadata: {
-            enrollmentId: enrollment.id,
-            cohortId: cohort.id,
-            programId: cohort.programId,
-            paymentOption: pricing.paymentOption,
-          },
-          payment_intent_data: {
-            metadata: {
-              enrollmentId: enrollment.id,
-              cohortId: cohort.id,
-              programId: cohort.programId,
-              paymentOption: pricing.paymentOption,
-            },
-          },
+        session = await createEnrollmentCheckoutSession({
+          req,
+          stripeClient,
+          publicAppUrl,
+          enrollment,
+          program,
+          cohort,
+          pricing,
+          purpose: getCheckoutPurpose(pricing),
         });
       } catch {
         enrollmentDb.markPaymentSetupFailed(
@@ -198,6 +239,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         enrollmentId: enrollment.id,
         sessionId: session.id,
         expiresAt: session.expires_at ? session.expires_at * 1000 : null,
+        purpose: getCheckoutPurpose(pricing),
       });
       notifyAdmissions(notifier, {
         type: "enrollment.checkout_created",
@@ -226,6 +268,123 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         return res.status(400).json({ error: error.message });
       }
 
+      return next(error);
+    }
+  });
+
+  router.post("/:id/payment-session", submissionLimiter, async (req, res, next) => {
+    try {
+      const payload = enrollmentPaymentSessionSchema.parse(req.body);
+      const enrollment = enrollmentDb.getEnrollmentById(req.params.id);
+
+      if (!enrollment || enrollment.email.toLowerCase() !== payload.email.toLowerCase()) {
+        return res.status(404).json({ error: "Enrollment not found for that email address." });
+      }
+
+      if (enrollment.paymentStatus === "paid") {
+        return res.json({
+          enrollmentId: enrollment.id,
+          paymentRequired: false,
+          status: enrollment.status,
+          paymentStatus: enrollment.paymentStatus,
+          message: "This enrollment is already paid in full.",
+        });
+      }
+
+      if (enrollment.paymentStatus === "deposit_paid" && enrollment.balanceDueCents <= 0) {
+        return res.json({
+          enrollmentId: enrollment.id,
+          paymentRequired: false,
+          status: enrollment.status,
+          paymentStatus: enrollment.paymentStatus,
+          message: "This enrollment does not have a remaining balance.",
+        });
+      }
+
+      const cohort = enrollmentDb.getCohortById(enrollment.cohortId);
+      const program = cohort ? enrollmentDb.getProgramById(cohort.programId, { includeInactive: true }) : null;
+
+      if (!cohort || !program) {
+        return res.status(409).json({ error: "Enrollment program details could not be loaded." });
+      }
+
+      const purpose = enrollment.paymentStatus === "deposit_paid" && enrollment.balanceDueCents > 0
+        ? "balance"
+        : enrollment.paymentOption === "deposit"
+          ? "deposit"
+          : "tuition";
+      const pricing = {
+        paymentOption: enrollment.paymentOption,
+        paymentAmountCents: enrollment.paymentAmountCents,
+        tuitionTotalCents: enrollment.tuitionTotalCents,
+        balanceDueCents: enrollment.balanceDueCents,
+        checkoutLabel: purpose === "deposit" ? "Enrollment deposit" : "Tuition payment",
+      };
+      const amountDueCents = purpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents;
+      const amountDueLabel = formatMoney(amountDueCents);
+
+      if (!stripeClient) {
+        return res.json({
+          enrollmentId: enrollment.id,
+          paymentRequired: false,
+          status: enrollment.status,
+          paymentStatus: enrollment.paymentStatus,
+          paymentOption: enrollment.paymentOption,
+          amountDueNowCents: amountDueCents,
+          amountDueNowLabel: amountDueLabel,
+          balanceDueCents: enrollment.balanceDueCents,
+          balanceDueLabel: formatMoney(enrollment.balanceDueCents),
+          message: `Online payment is not configured yet. Admissions will contact you to collect ${amountDueLabel}.`,
+        });
+      }
+
+      let session;
+
+      try {
+        session = await createEnrollmentCheckoutSession({
+          req,
+          stripeClient,
+          publicAppUrl,
+          enrollment,
+          program,
+          cohort,
+          pricing,
+          purpose,
+        });
+      } catch {
+        return res.status(502).json({
+          error: "Payment checkout could not be created right now. Please try again or contact admissions.",
+        });
+      }
+
+      const pendingEnrollment = enrollmentDb.markCheckoutPending({
+        enrollmentId: enrollment.id,
+        sessionId: session.id,
+        expiresAt: session.expires_at ? session.expires_at * 1000 : null,
+        purpose,
+      });
+
+      notifyAdmissions(notifier, {
+        type: "enrollment.payment_portal_checkout_created",
+        paymentMode: "stripe",
+        checkoutPurpose: purpose,
+        enrollment: pendingEnrollment,
+      });
+
+      return res.json({
+        enrollmentId: pendingEnrollment.id,
+        paymentRequired: true,
+        paymentStatus: pendingEnrollment.paymentStatus,
+        paymentOption: pendingEnrollment.paymentOption,
+        checkoutPurpose: purpose,
+        amountDueNowCents: amountDueCents,
+        amountDueNowLabel: amountDueLabel,
+        balanceDueCents: pendingEnrollment.balanceDueCents,
+        balanceDueLabel: formatMoney(pendingEnrollment.balanceDueCents),
+        checkoutUrl: session.url,
+        checkoutExpiresAt: pendingEnrollment.seatHoldExpiresAt,
+      });
+    } catch (error) {
       return next(error);
     }
   });

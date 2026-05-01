@@ -24,11 +24,31 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
     }
 
     if (event.type === "checkout.session.completed") {
-      const enrollment = enrollmentDb.markPaidByCheckoutSession(event.data.object.id);
+      const session = event.data.object;
+      const enrollment = enrollmentDb.getEnrollmentById(session.metadata?.enrollmentId);
+
+      if (
+        !enrollment ||
+        enrollment.stripeCheckoutSessionId !== session.id ||
+        session.payment_status !== "paid" ||
+        session.currency !== "usd" ||
+        session.metadata?.cohortId !== enrollment.cohortId
+      ) {
+        return res.status(400).json({ error: "Stripe checkout session did not match an active enrollment." });
+      }
+
+      const expectedAmount =
+        enrollment.stripeCheckoutPurpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents;
+
+      if (Number(session.amount_total ?? 0) !== Number(expectedAmount ?? 0)) {
+        return res.status(400).json({ error: "Stripe checkout amount did not match enrollment balance." });
+      }
+
+      const paidEnrollment = enrollmentDb.markPaidByCheckoutSession(session.id);
       notifyAdmissions(notifier, {
         type: "payment.completed",
-        stripeSessionId: event.data.object.id,
-        enrollment,
+        stripeSessionId: session.id,
+        enrollment: paidEnrollment,
       });
     }
 

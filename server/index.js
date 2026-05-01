@@ -138,6 +138,7 @@ export function createApp() {
       stripeClient: paymentsEnabled ? stripeClient : null,
       publicAppUrl: config.publicAppUrl,
       notifier,
+      submissionLimiter,
     })
   );
   app.use(

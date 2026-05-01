@@ -106,6 +106,19 @@ async function run() {
     assert(enrollmentStatusBody.paymentOption === "deposit", "Enrollment status must include deposit payment option");
     assert(enrollmentStatusBody.balanceDueCents > 0, "Enrollment status must include remaining balance");
 
+    const paymentPortalRes = await fetch(
+      `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/payment-session`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "enrollment-harmony@example.com" }),
+      }
+    );
+    assert(paymentPortalRes.ok, "Payment portal endpoint failed");
+    const paymentPortalBody = await paymentPortalRes.json();
+    assert(paymentPortalBody.paymentRequired === false, "Manual payment portal should not require checkout");
+    assert(paymentPortalBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Payment portal amount mismatch");
+
     const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
       headers: { "x-api-key": "harmony-admin-key" },
     });
@@ -122,6 +135,8 @@ async function run() {
       }),
     });
     assert(adminLoginRes.ok, "Admin session login failed");
+    const adminLoginBody = await adminLoginRes.json();
+    assert(adminLoginBody.csrfToken, "Admin login did not return a CSRF token");
     const adminCookie = adminLoginRes.headers.get("set-cookie")?.split(";")[0];
     assert(adminCookie, "Admin session login did not return a cookie");
 
@@ -131,6 +146,10 @@ async function run() {
     assert(adminSessionRes.ok, "Admin session endpoint failed");
     const adminSessionBody = await adminSessionRes.json();
     assert(adminSessionBody.authenticated === true, "Admin session should be authenticated after login");
+    const csrfHeaders = {
+      Cookie: adminCookie,
+      "x-csrf-token": adminSessionBody.csrfToken,
+    };
 
     const adminExportRes = await fetch(`http://localhost:${port}/api/admin/export`, {
       headers: { Cookie: adminCookie },
@@ -141,7 +160,7 @@ async function run() {
 
     const adminBackupRes = await fetch(`http://localhost:${port}/api/admin/backups`, {
       method: "POST",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminBackupRes.status === 201, "Admin database backup creation failed");
     const adminBackupBody = await adminBackupRes.json();
@@ -151,7 +170,7 @@ async function run() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Cookie: adminCookie,
+        ...csrfHeaders,
       },
       body: JSON.stringify({
         id: "harmony-program",
@@ -200,7 +219,7 @@ async function run() {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Cookie: adminCookie,
+        ...csrfHeaders,
       },
       body: JSON.stringify({
         id: "harmony-program",
@@ -216,19 +235,19 @@ async function run() {
 
     const adminCohortDeleteRes = await fetch(`http://localhost:${port}/api/admin/cohorts/harmony-cohort`, {
       method: "DELETE",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminCohortDeleteRes.status === 204, "Admin cohort deletion failed");
 
     const adminProgramDeleteRes = await fetch(`http://localhost:${port}/api/admin/programs/harmony-program`, {
       method: "DELETE",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminProgramDeleteRes.status === 204, "Admin program deletion failed");
 
     const adminLogoutRes = await fetch(`http://localhost:${port}/api/admin/logout`, {
       method: "POST",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminLogoutRes.status === 204, "Admin logout failed");
 

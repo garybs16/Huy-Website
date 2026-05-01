@@ -1,4 +1,5 @@
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
+let adminCsrfToken = "";
 
 function buildUrl(path) {
   return `${apiBaseUrl}${path}`;
@@ -73,8 +74,20 @@ export function getEnrollmentStatus(enrollmentId) {
   return request(`/api/enrollments/${enrollmentId}/status`);
 }
 
+export function createEnrollmentPaymentSession(enrollmentId, payload) {
+  return request(`/api/enrollments/${enrollmentId}/payment-session`, { method: "POST", payload });
+}
+
 function adminHeaders(apiKey) {
-  return apiKey ? { "x-api-key": apiKey } : {};
+  if (apiKey) {
+    return { "x-api-key": apiKey };
+  }
+
+  return adminCsrfToken ? { "x-csrf-token": adminCsrfToken } : {};
+}
+
+export function setAdminCsrfToken(token) {
+  adminCsrfToken = token || "";
 }
 
 export function getAdminSession() {
@@ -86,7 +99,7 @@ export function loginAdmin(payload) {
 }
 
 export function logoutAdmin() {
-  return request("/api/admin/logout", { method: "POST" });
+  return request("/api/admin/logout", { method: "POST", headers: adminHeaders() });
 }
 
 export function getAdminOverview(apiKey) {

@@ -28,6 +28,14 @@ function signSessionId(sessionId, secret) {
   return createHmac("sha256", secret).update(sessionId).digest("base64url");
 }
 
+export function createAdminCsrfToken(sessionId, secret) {
+  if (!sessionId || !secret) {
+    return "";
+  }
+
+  return createHmac("sha256", secret).update(`csrf:${sessionId}`).digest("base64url");
+}
+
 function formatSameSite(value) {
   const normalized = (value ?? "Lax").toLowerCase();
 
@@ -129,6 +137,22 @@ export function getAdminSessionIdFromRequest(req, sessionSecret) {
   }
 
   return sessionId;
+}
+
+export function verifyAdminCsrfToken(sessionId, providedToken, secret) {
+  if (!sessionId || !providedToken || !secret) {
+    return false;
+  }
+
+  const expectedToken = createAdminCsrfToken(sessionId, secret);
+  const expectedBuffer = Buffer.from(expectedToken);
+  const providedBuffer = Buffer.from(providedToken);
+
+  if (expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(expectedBuffer, providedBuffer);
 }
 
 export function createAdminSessionCookie(sessionId, { sessionSecret, sameSite, secure, maxAgeSeconds }) {

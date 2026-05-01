@@ -3,14 +3,16 @@ import { Router } from "express";
 import { ZodError } from "zod";
 import {
   clearAdminSessionCookie,
+  createAdminCsrfToken,
   createAdminSessionCookie,
   getAdminSessionIdFromRequest,
+  verifyAdminCsrfToken,
   verifyPassword,
 } from "../lib/adminSecurity.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { adminCohortSchema, adminLoginSchema, adminProgramSchema } from "../validation/schemas.js";
 
-function buildSessionPayload({ req, session, sessionAuthConfigured, apiKeySupported, adminAuthMode }) {
+function buildSessionPayload({ req, session, adminSessionSecret, sessionAuthConfigured, apiKeySupported, adminAuthMode }) {
   return {
     authenticated: Boolean(session),
     username: session?.username ?? null,
@@ -19,6 +21,7 @@ function buildSessionPayload({ req, session, sessionAuthConfigured, apiKeySuppor
     apiKeySupported,
     adminAuthMode,
     authMethod: req.adminAuth?.method ?? (session ? "session" : null),
+    csrfToken: session?.id ? createAdminCsrfToken(session.id, adminSessionSecret) : "",
   };
 }
 
@@ -83,6 +86,7 @@ export function createAdminRouter({
       buildSessionPayload({
         req,
         session,
+        adminSessionSecret,
         sessionAuthConfigured,
         apiKeySupported: Boolean(adminKey),
         adminAuthMode,
@@ -147,8 +151,9 @@ export function createAdminRouter({
 
       return res.json(
         buildSessionPayload({
-          req: { adminAuth: { method: "session" } },
+          req: { adminAuth: { method: "session" }, adminSessionSecret },
           session,
+          adminSessionSecret,
           sessionAuthConfigured,
           apiKeySupported: Boolean(adminKey),
           adminAuthMode,
@@ -162,6 +167,10 @@ export function createAdminRouter({
   router.post("/logout", (req, res) => {
     const sessionId = getAdminSessionIdFromRequest(req, adminSessionSecret);
     const session = sessionId ? enrollmentDb.getAdminSessionById(sessionId) : null;
+
+    if (session && !verifyAdminCsrfToken(sessionId, req.get("x-csrf-token"), adminSessionSecret)) {
+      return res.status(403).json({ error: "Invalid or missing CSRF token." });
+    }
 
     if (sessionId) {
       enrollmentDb.deleteAdminSession(sessionId);

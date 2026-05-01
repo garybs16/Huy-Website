@@ -4,6 +4,7 @@ export const navItems = [
   { label: "Home", to: "/" },
   { label: "Programs", to: "/programs" },
   { label: "Schedule", to: "/schedule" },
+  { label: "Payment", to: "/payment" },
   { label: "Admissions", to: "/admissions" },
   { label: "Contact", to: "/contact" },
 ];
@@ -192,6 +193,7 @@ export const footerGroups = [
     title: "Enrollment",
     items: [
       { label: "Register Now", to: "/register" },
+      { label: "Payment Portal", to: "/payment" },
       { label: "Class Schedule", to: "/schedule" },
       { label: "Admissions Checklist", to: "/admissions" },
     ],

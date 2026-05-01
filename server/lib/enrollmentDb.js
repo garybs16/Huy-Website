@@ -134,6 +134,7 @@ export class EnrollmentDatabase {
         tuition_total_cents INTEGER NOT NULL DEFAULT 0,
         balance_due_cents INTEGER NOT NULL DEFAULT 0,
         stripe_checkout_session_id TEXT,
+        stripe_checkout_purpose TEXT,
         seat_hold_expires_at TEXT,
         paid_at TEXT,
         created_at TEXT NOT NULL,
@@ -198,6 +199,7 @@ export class EnrollmentDatabase {
     addColumnIfMissing(this.db, "enrollments", "payment_option", "TEXT NOT NULL DEFAULT 'full'");
     addColumnIfMissing(this.db, "enrollments", "tuition_total_cents", "INTEGER NOT NULL DEFAULT 0");
     addColumnIfMissing(this.db, "enrollments", "balance_due_cents", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing(this.db, "enrollments", "stripe_checkout_purpose", "TEXT");
 
     this.db.exec(`
       UPDATE cohorts
@@ -545,6 +547,7 @@ export class EnrollmentDatabase {
             tuition_total_cents AS tuitionTotalCents,
             balance_due_cents AS balanceDueCents,
             stripe_checkout_session_id AS stripeCheckoutSessionId,
+            stripe_checkout_purpose AS stripeCheckoutPurpose,
             seat_hold_expires_at AS seatHoldExpiresAt,
             paid_at AS paidAt,
             created_at AS createdAt,
@@ -990,6 +993,7 @@ export class EnrollmentDatabase {
             tuition_total_cents,
             balance_due_cents,
             stripe_checkout_session_id,
+            stripe_checkout_purpose,
             seat_hold_expires_at,
             paid_at,
             created_at,
@@ -1015,6 +1019,7 @@ export class EnrollmentDatabase {
             @paymentAmountCents,
             @tuitionTotalCents,
             @balanceDueCents,
+            NULL,
             NULL,
             @seatHoldExpiresAt,
             NULL,
@@ -1061,6 +1066,7 @@ export class EnrollmentDatabase {
           tuition_total_cents AS tuitionTotalCents,
           balance_due_cents AS balanceDueCents,
           stripe_checkout_session_id AS stripeCheckoutSessionId,
+          stripe_checkout_purpose AS stripeCheckoutPurpose,
           seat_hold_expires_at AS seatHoldExpiresAt,
           paid_at AS paidAt,
           created_at AS createdAt,
@@ -1096,7 +1102,7 @@ export class EnrollmentDatabase {
     return this.getEnrollmentById(enrollmentId);
   }
 
-  markCheckoutPending({ enrollmentId, sessionId, expiresAt }) {
+  markCheckoutPending({ enrollmentId, sessionId, expiresAt, purpose }) {
     this.db
       .prepare(`
         UPDATE enrollments
@@ -1104,6 +1110,7 @@ export class EnrollmentDatabase {
           status = 'payment_pending',
           payment_status = 'checkout_pending',
           stripe_checkout_session_id = @sessionId,
+          stripe_checkout_purpose = @purpose,
           seat_hold_expires_at = @expiresAt,
           updated_at = @updatedAt
         WHERE id = @enrollmentId
@@ -1111,6 +1118,7 @@ export class EnrollmentDatabase {
       .run({
         enrollmentId,
         sessionId,
+        purpose: purpose ?? null,
         expiresAt: toIsoOrNull(expiresAt),
         updatedAt: nowIso(),
       });
@@ -1142,7 +1150,11 @@ export class EnrollmentDatabase {
   markPaidByCheckoutSession(sessionId) {
     const record = this.db
       .prepare(`
-        SELECT id
+        SELECT
+          id,
+          payment_option AS paymentOption,
+          balance_due_cents AS balanceDueCents,
+          stripe_checkout_purpose AS stripeCheckoutPurpose
         FROM enrollments
         WHERE stripe_checkout_session_id = ?
       `)
@@ -1152,18 +1164,19 @@ export class EnrollmentDatabase {
       return null;
     }
 
+    const paidAt = nowIso();
+    const isBalancePayment = record.stripeCheckoutPurpose === "balance";
+    const isDepositPayment =
+      record.stripeCheckoutPurpose === "deposit" ||
+      (record.paymentOption === "deposit" && Number(record.balanceDueCents ?? 0) > 0 && !isBalancePayment);
+
     this.db
       .prepare(`
         UPDATE enrollments
         SET
-          status = CASE
-            WHEN payment_option = 'deposit' AND balance_due_cents > 0 THEN 'payment_plan_active'
-            ELSE 'registered'
-          END,
-          payment_status = CASE
-            WHEN payment_option = 'deposit' AND balance_due_cents > 0 THEN 'deposit_paid'
-            ELSE 'paid'
-          END,
+          status = @status,
+          payment_status = @paymentStatus,
+          balance_due_cents = @balanceDueCents,
           seat_hold_expires_at = NULL,
           paid_at = @paidAt,
           updated_at = @updatedAt
@@ -1171,8 +1184,11 @@ export class EnrollmentDatabase {
       `)
       .run({
         sessionId,
-        paidAt: nowIso(),
-        updatedAt: nowIso(),
+        status: isDepositPayment ? "payment_plan_active" : "registered",
+        paymentStatus: isDepositPayment ? "deposit_paid" : "paid",
+        balanceDueCents: isDepositPayment ? Number(record.balanceDueCents ?? 0) : 0,
+        paidAt,
+        updatedAt: paidAt,
       });
 
     return this.getEnrollmentById(record.id);

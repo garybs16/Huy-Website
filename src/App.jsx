@@ -22,6 +22,7 @@ import {
   joinWaitlist,
   loginAdmin,
   logoutAdmin,
+  setAdminCsrfToken,
   submitInquiry,
   updateAdminCohort,
   updateAdminProgram,
@@ -40,6 +41,7 @@ const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ defau
 const ProgramsPage = lazy(() =>
   import("./pages/ProgramsPage").then((module) => ({ default: module.ProgramsPage }))
 );
+const PaymentPage = lazy(() => import("./pages/PaymentPage").then((module) => ({ default: module.PaymentPage })));
 const RegisterPage = lazy(() =>
   import("./pages/RegisterPage").then((module) => ({ default: module.RegisterPage }))
 );
@@ -72,6 +74,7 @@ const initialAdminSessionState = {
   apiKeySupported: false,
   adminAuthMode: "disabled",
   authMethod: "",
+  csrfToken: "",
 };
 
 const initialEnrollmentState = {
@@ -96,6 +99,7 @@ const pageTitles = {
   "/programs": "Programs | First Step Healthcare Academy",
   "/schedule": "Schedule | First Step Healthcare Academy",
   "/register": "Register | First Step Healthcare Academy",
+  "/payment": "Payment Portal | First Step Healthcare Academy",
   "/admissions": "Admissions | First Step Healthcare Academy",
   "/contact": "Contact | First Step Healthcare Academy",
   "/admin": "Admin | First Step Healthcare Academy",
@@ -116,7 +120,7 @@ function AppEffects({ setEnrollmentStatus }) {
     const enrollmentId = url.searchParams.get("enrollment");
 
     async function syncCheckoutStatus() {
-      if (!checkoutStatus || !enrollmentId) {
+      if (location.pathname !== "/register" || !checkoutStatus || !enrollmentId) {
         return;
       }
 
@@ -160,7 +164,7 @@ function AppEffects({ setEnrollmentStatus }) {
 
     syncCheckoutStatus();
 
-    if (checkoutStatus) {
+    if (location.pathname === "/register" && checkoutStatus) {
       url.searchParams.delete("checkout");
       url.searchParams.delete("enrollment");
       window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
@@ -319,10 +323,12 @@ function App() {
 
         if (active) {
           setAdminSession({ ...initialAdminSessionState, ...session, checked: true });
+          setAdminCsrfToken(session.csrfToken);
         }
       } catch {
         if (active) {
           setAdminSession((current) => ({ ...current, checked: true }));
+          setAdminCsrfToken("");
         }
       }
     }
@@ -537,6 +543,7 @@ function App() {
       });
 
       setAdminSession({ ...initialAdminSessionState, ...session, checked: true });
+      setAdminCsrfToken(session.csrfToken);
       setAdminPassword("");
       setAdminNotice(`Signed in as ${session.username}.`);
 
@@ -571,6 +578,7 @@ function App() {
       await logoutAdmin();
       const session = await getAdminSession();
       setAdminSession({ ...initialAdminSessionState, ...session, checked: true });
+      setAdminCsrfToken(session.csrfToken);
       setAdminOverview(null);
       setAdminEnrollments([]);
       setAdminInquiries([]);
@@ -749,6 +757,7 @@ function App() {
                 />
               }
             />
+            <Route path="/payment" element={<PaymentPage />} />
             <Route path="/admissions" element={<AdmissionsPage />} />
             <Route
               path="/contact"

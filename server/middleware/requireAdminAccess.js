@@ -1,4 +1,6 @@
-import { getAdminSessionIdFromRequest } from "../lib/adminSecurity.js";
+import { getAdminSessionIdFromRequest, verifyAdminCsrfToken } from "../lib/adminSecurity.js";
+
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export function requireAdminAccess({ adminKey, adminSessionSecret, enrollmentDb }) {
   return (req, res, next) => {
@@ -24,6 +26,14 @@ export function requireAdminAccess({ adminKey, adminSessionSecret, enrollmentDb 
       const session = enrollmentDb.getAdminSessionById(sessionId);
 
       if (session) {
+        if (!SAFE_METHODS.has(req.method)) {
+          const csrfToken = req.get("x-csrf-token");
+
+          if (!verifyAdminCsrfToken(sessionId, csrfToken, adminSessionSecret)) {
+            return res.status(403).json({ error: "Invalid or missing CSRF token." });
+          }
+        }
+
         enrollmentDb.touchAdminSession(sessionId);
         req.adminAuth = {
           method: "session",

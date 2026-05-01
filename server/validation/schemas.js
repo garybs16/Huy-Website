@@ -99,6 +99,10 @@ export const enrollmentSchema = z.object({
   notes: optionalString(600),
 });
 
+export const enrollmentPaymentSessionSchema = z.object({
+  email: emailString,
+});
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),

@@ -46,6 +46,9 @@ async function run() {
     const programsRouteRes = await fetch(`http://localhost:${port}/programs`);
     assert(programsRouteRes.ok, "Programs route did not resolve in production mode");
 
+    const paymentRouteRes = await fetch(`http://localhost:${port}/payment`);
+    assert(paymentRouteRes.ok, "Payment portal route did not resolve in production mode");
+
     const programsRes = await fetch(`http://localhost:${port}/api/programs`);
     assert(programsRes.ok, "Production API failed to serve programs");
     const programsBody = await programsRes.json();
@@ -113,6 +116,18 @@ async function run() {
     const enrollmentStatusBody = await enrollmentStatusRes.json();
     assert(enrollmentStatusBody.paymentOption === "deposit", "Production enrollment status must include payment option");
 
+    const paymentPortalRes = await fetch(
+      `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/payment-session`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "production-enrollment@example.com" }),
+      }
+    );
+    assert(paymentPortalRes.ok, "Production payment portal endpoint failed");
+    const paymentPortalBody = await paymentPortalRes.json();
+    assert(paymentPortalBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Production payment portal amount mismatch");
+
     const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
       headers: { "x-api-key": "production-admin-key" },
     });
@@ -127,8 +142,14 @@ async function run() {
       }),
     });
     assert(adminLoginRes.ok, "Production admin login failed");
+    const adminLoginBody = await adminLoginRes.json();
+    assert(adminLoginBody.csrfToken, "Production admin login did not return a CSRF token");
     const adminCookie = adminLoginRes.headers.get("set-cookie")?.split(";")[0];
     assert(adminCookie, "Production admin login did not return a cookie");
+    const csrfHeaders = {
+      Cookie: adminCookie,
+      "x-csrf-token": adminLoginBody.csrfToken,
+    };
 
     const adminExportRes = await fetch(`http://localhost:${port}/api/admin/export`, {
       headers: { Cookie: adminCookie },
@@ -139,7 +160,7 @@ async function run() {
 
     const adminBackupRes = await fetch(`http://localhost:${port}/api/admin/backups`, {
       method: "POST",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminBackupRes.status === 201, "Production admin database backup creation failed");
     const adminBackupBody = await adminBackupRes.json();
@@ -149,7 +170,7 @@ async function run() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Cookie: adminCookie,
+        ...csrfHeaders,
       },
       body: JSON.stringify({
         id: "production-program",
@@ -167,7 +188,7 @@ async function run() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Cookie: adminCookie,
+        ...csrfHeaders,
       },
       body: JSON.stringify({
         id: "production-cohort",
@@ -196,19 +217,19 @@ async function run() {
 
     const adminCohortDeleteRes = await fetch(`http://localhost:${port}/api/admin/cohorts/production-cohort`, {
       method: "DELETE",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminCohortDeleteRes.status === 204, "Production admin cohort deletion failed");
 
     const adminProgramDeleteRes = await fetch(`http://localhost:${port}/api/admin/programs/production-program`, {
       method: "DELETE",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminProgramDeleteRes.status === 204, "Production admin program deletion failed");
 
     const adminLogoutRes = await fetch(`http://localhost:${port}/api/admin/logout`, {
       method: "POST",
-      headers: { Cookie: adminCookie },
+      headers: csrfHeaders,
     });
     assert(adminLogoutRes.status === 204, "Production admin logout failed");
 
