@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
+import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
+import academyLogo from "../assets/new-logo.jpg";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
+import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import {
   admissionsSteps,
   miscFeeItems,
@@ -30,6 +33,23 @@ export function HomePage({ cohorts, programs }) {
     { value: String(programs.length), label: "training paths" },
     { value: String(cohorts.length), label: "current class options" },
     { value: String(openSeats), label: "open seats published" },
+  ];
+  const visualProofItems = [
+    {
+      src: programsSupportPhoto,
+      alt: "Healthcare students practicing patient care techniques in a clinical simulation room",
+      label: "Skills lab",
+    },
+    {
+      src: admissionsLabPhoto,
+      alt: "Instructor guiding healthcare students through hands-on equipment training",
+      label: "Instructor guidance",
+    },
+    {
+      src: heroTraining,
+      alt: "Healthcare instructor demonstrating bedside skills while students observe",
+      label: "Hands-on practice",
+    },
   ];
 
   return (
@@ -102,6 +122,15 @@ export function HomePage({ cohorts, programs }) {
                 </article>
               ))}
             </div>
+
+            <div className="hero-proof-grid" aria-label="Training environment photos">
+              {visualProofItems.map((item) => (
+                <figure key={item.label} className="hero-proof-card">
+                  <img src={item.src} alt={item.alt} />
+                  <figcaption>{item.label}</figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -128,6 +157,39 @@ export function HomePage({ cohorts, programs }) {
               <span>Open page</span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="section visual-story-section">
+        <div className="container visual-story-grid">
+          <div className="visual-feature">
+            <img src={programsSupportPhoto} alt="Students in scrubs practicing patient care in a classroom lab" />
+            <div className="visual-feature-caption">
+              <span>Career-ready classroom</span>
+              <strong>Training built around real practice, clear expectations, and visible next steps.</strong>
+            </div>
+          </div>
+
+          <div className="visual-story-copy">
+            <p className="section-kicker">Student experience</p>
+            <h2>Show the training environment before students ever call admissions.</h2>
+            <p>
+              Photos of the lab, instructors, and student practice make the school feel concrete,
+              local, and easier to trust for applicants comparing programs.
+            </p>
+            <div className="visual-brand-panel">
+              <img src={academyLogo} alt="First Step Healthcare Academy logo" />
+              <div>
+                <strong>First Step Healthcare Academy</strong>
+                <span>Your first step into healthcare training in Orange, California.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="visual-stack">
+            <img src={admissionsLabPhoto} alt="Healthcare instructor leading students through clinical equipment training" />
+            <img src={heroTraining} alt="Instructor demonstrating bedside care skills during healthcare training" />
+          </div>
         </div>
       </section>
 

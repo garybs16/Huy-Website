@@ -1,4 +1,5 @@
 import { PageIntro } from "../components/PageIntro";
+import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import { contactDetails, faqItems } from "../siteData";
 
 export function ContactPage({
@@ -49,49 +50,57 @@ export function ContactPage({
           </div>
         </article>
 
-        <article className="form-card">
-          <h2>Request Information</h2>
-          <p className="form-helper">Share your program interest and an admissions coordinator will follow up.</p>
-          <form className="form-stack" onSubmit={onInquirySubmit}>
-            <label>
-              <span>Full name</span>
-              <input name="fullName" value={inquiryForm.fullName} onChange={onInquiryInput} required />
-            </label>
-            <label>
-              <span>Email address</span>
-              <input name="email" type="email" value={inquiryForm.email} onChange={onInquiryInput} required />
-            </label>
-            <label>
-              <span>Phone number</span>
-              <input name="phone" type="tel" value={inquiryForm.phone} onChange={onInquiryInput} />
-            </label>
-            <label>
-              <span>Program of interest</span>
-              <select name="program" value={inquiryForm.program} onChange={onInquiryInput} required>
-                <option value="" disabled>
-                  Select a program
-                </option>
-                {programs.map((program) => (
-                  <option key={program.id} value={program.id}>
-                    {program.title}
+        <div className="stack-panel">
+          <div className="media-panel contact-photo-panel">
+            <img
+              src={programsSupportPhoto}
+              alt="Healthcare students practicing patient care skills in a classroom lab"
+            />
+          </div>
+          <article className="form-card">
+            <h2>Request Information</h2>
+            <p className="form-helper">Share your program interest and an admissions coordinator will follow up.</p>
+            <form className="form-stack" onSubmit={onInquirySubmit}>
+              <label>
+                <span>Full name</span>
+                <input name="fullName" value={inquiryForm.fullName} onChange={onInquiryInput} required />
+              </label>
+              <label>
+                <span>Email address</span>
+                <input name="email" type="email" value={inquiryForm.email} onChange={onInquiryInput} required />
+              </label>
+              <label>
+                <span>Phone number</span>
+                <input name="phone" type="tel" value={inquiryForm.phone} onChange={onInquiryInput} />
+              </label>
+              <label>
+                <span>Program of interest</span>
+                <select name="program" value={inquiryForm.program} onChange={onInquiryInput} required>
+                  <option value="" disabled>
+                    Select a program
                   </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Your message</span>
-              <textarea name="message" rows="4" value={inquiryForm.message} onChange={onInquiryInput} required />
-            </label>
-            <button type="submit" className="btn btn-primary" disabled={inquiryPending}>
-              {inquiryPending ? "Submitting..." : "Submit Inquiry"}
-            </button>
-          </form>
-          {inquiryStatus.text ? (
-            <p className={`form-status ${inquiryStatus.type === "success" ? "is-success" : "is-error"}`}>
-              {inquiryStatus.text}
-            </p>
-          ) : null}
-        </article>
+                  {programs.map((program) => (
+                    <option key={program.id} value={program.id}>
+                      {program.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Your message</span>
+                <textarea name="message" rows="4" value={inquiryForm.message} onChange={onInquiryInput} required />
+              </label>
+              <button type="submit" className="btn btn-primary" disabled={inquiryPending}>
+                {inquiryPending ? "Submitting..." : "Submit Inquiry"}
+              </button>
+            </form>
+            {inquiryStatus.text ? (
+              <p className={`form-status ${inquiryStatus.type === "success" ? "is-success" : "is-error"}`}>
+                {inquiryStatus.text}
+              </p>
+            ) : null}
+          </article>
+        </div>
       </div>
 
       <div className="container split-panel">
