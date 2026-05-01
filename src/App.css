@@ -1163,6 +1163,15 @@
   aspect-ratio: 16 / 9;
 }
 
+.embedded-checkout-panel {
+  overflow: hidden;
+  margin-top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: var(--shadow-soft);
+}
+
 .form-stack label,
 .admin-access label {
   display: grid;

@@ -21,6 +21,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^6.3.0",
+    "@stripe/stripe-js": "^9.4.0",
     "better-sqlite3": "^12.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

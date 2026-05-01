@@ -77,14 +77,22 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
   };
 }
 
-async function createEnrollmentCheckoutSession({ req, stripeClient, publicAppUrl, enrollment, program, cohort, pricing, purpose }) {
+async function createEnrollmentCheckoutSession({
+  req,
+  stripeClient,
+  publicAppUrl,
+  enrollment,
+  program,
+  cohort,
+  pricing,
+  purpose,
+  checkoutMode = "redirect",
+}) {
   const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
   const checkoutDetails = buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose });
 
-  return stripeClient.checkout.sessions.create({
+  const sessionPayload = {
     mode: "payment",
-    success_url: `${appBaseUrl}/payment?checkout=success&enrollment=${enrollment.id}`,
-    cancel_url: `${appBaseUrl}/payment?checkout=cancelled&enrollment=${enrollment.id}`,
     customer_email: enrollment.email,
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     line_items: [
@@ -116,7 +124,17 @@ async function createEnrollmentCheckoutSession({ req, stripeClient, publicAppUrl
         checkoutPurpose: checkoutDetails.purpose,
       },
     },
-  });
+  };
+
+  if (checkoutMode === "embedded") {
+    sessionPayload.ui_mode = "embedded";
+    sessionPayload.return_url = `${appBaseUrl}/payment?checkout=complete&enrollment=${enrollment.id}`;
+  } else {
+    sessionPayload.success_url = `${appBaseUrl}/payment?checkout=success&enrollment=${enrollment.id}`;
+    sessionPayload.cancel_url = `${appBaseUrl}/payment?checkout=cancelled&enrollment=${enrollment.id}`;
+  }
+
+  return stripeClient.checkout.sessions.create(sessionPayload);
 }
 
 export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient, publicAppUrl, notifier, submissionLimiter }) {
@@ -350,6 +368,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
           cohort,
           pricing,
           purpose,
+          checkoutMode: payload.checkoutMode,
         });
       } catch {
         return res.status(502).json({
@@ -377,11 +396,13 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         paymentStatus: pendingEnrollment.paymentStatus,
         paymentOption: pendingEnrollment.paymentOption,
         checkoutPurpose: purpose,
+        checkoutMode: payload.checkoutMode,
         amountDueNowCents: amountDueCents,
         amountDueNowLabel: amountDueLabel,
         balanceDueCents: pendingEnrollment.balanceDueCents,
         balanceDueLabel: formatMoney(pendingEnrollment.balanceDueCents),
         checkoutUrl: session.url,
+        checkoutClientSecret: session.client_secret,
         checkoutExpiresAt: pendingEnrollment.seatHoldExpiresAt,
       });
     } catch (error) {

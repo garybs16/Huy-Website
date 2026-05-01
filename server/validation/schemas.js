@@ -101,6 +101,7 @@ export const enrollmentSchema = z.object({
 
 export const enrollmentPaymentSessionSchema = z.object({
   email: emailString,
+  checkoutMode: z.enum(["redirect", "embedded"]).default("redirect"),
 });
 
 export const paginationSchema = z.object({

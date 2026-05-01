@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { PageIntro } from "../components/PageIntro";
 import { createEnrollmentPaymentSession, getEnrollmentStatus } from "../lib/api";
+
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "";
 
 const initialPaymentForm = {
   enrollmentId: "",
@@ -34,6 +38,11 @@ export function PaymentPage() {
   const [paymentForm, setPaymentForm] = useState(initialPaymentForm);
   const [paymentPending, setPaymentPending] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState({ type: "", text: "" });
+  const [checkoutClientSecret, setCheckoutClientSecret] = useState("");
+  const stripePromise = useMemo(
+    () => (stripePublishableKey ? loadStripe(stripePublishableKey) : null),
+    []
+  );
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -85,11 +94,22 @@ export function PaymentPage() {
     event.preventDefault();
     setPaymentPending(true);
     setPaymentStatus({ type: "", text: "" });
+    setCheckoutClientSecret("");
 
     try {
       const response = await createEnrollmentPaymentSession(paymentForm.enrollmentId.trim(), {
         email: paymentForm.email,
+        checkoutMode: stripePromise ? "embedded" : "redirect",
       });
+
+      if (response.paymentRequired && response.checkoutClientSecret && stripePromise) {
+        setCheckoutClientSecret(response.checkoutClientSecret);
+        setPaymentStatus({
+          type: "success",
+          text: "Secure card checkout is ready below.",
+        });
+        return;
+      }
 
       if (response.paymentRequired && response.checkoutUrl) {
         window.location.assign(response.checkoutUrl);
@@ -120,21 +140,23 @@ export function PaymentPage() {
       <div className="container split-panel">
         <article className="info-card dark-card">
           <p className="section-kicker">Before you pay</p>
-          <h2>Use the same email address from your enrollment form.</h2>
+          <h2>Enter your card number in the secure Stripe checkout panel.</h2>
           <p>
-            The portal checks the enrollment record before creating a checkout session, then sends
-            you to the correct payment amount for the deposit, tuition, or remaining balance.
+            The portal checks the enrollment record before creating checkout, then loads the
+            correct card payment amount for the deposit, tuition, or remaining balance.
           </p>
           <ul className="detail-list">
             <li>Enrollment ID from your registration confirmation</li>
             <li>Email address used during registration</li>
-            <li>Secure Stripe checkout when online payments are configured</li>
+            <li>Card number, expiration, and CVC are entered directly into Stripe</li>
           </ul>
         </article>
 
         <article className="form-card">
-          <h2>Open Payment Checkout</h2>
-          <p className="form-helper">Your enrollment ID is included in the registration or checkout status message.</p>
+          <h2>Pay by Card</h2>
+          <p className="form-helper">
+            Verify the enrollment first. The card fields appear after the payment amount is loaded.
+          </p>
           <form className="form-stack" onSubmit={handleSubmit}>
             <label>
               <span>Enrollment ID</span>
@@ -151,13 +173,20 @@ export function PaymentPage() {
               <input name="email" type="email" value={paymentForm.email} onChange={handleInput} required />
             </label>
             <button type="submit" className="btn btn-primary" disabled={paymentPending}>
-              {paymentPending ? "Preparing checkout..." : "Continue to Payment"}
+              {paymentPending ? "Preparing card checkout..." : "Load Secure Card Form"}
             </button>
           </form>
           {paymentStatus.text ? (
             <p className={`form-status ${paymentStatus.type === "success" ? "is-success" : "is-error"}`}>
               {paymentStatus.text}
             </p>
+          ) : null}
+          {checkoutClientSecret && stripePromise ? (
+            <div className="embedded-checkout-panel">
+              <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret: checkoutClientSecret }}>
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            </div>
           ) : null}
         </article>
       </div>
