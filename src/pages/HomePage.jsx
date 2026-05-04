@@ -25,14 +25,26 @@ export function HomePage({ cohorts, programs }) {
   const openSeats = cohorts.reduce((total, cohort) => total + Math.max(cohort.remainingSeats ?? 0, 0), 0);
   const primaryCohorts = cohorts.filter((cohort) => cohort.programId === "cna").slice(0, 3);
   const heroTrustItems = [
+    "State approved CNA program",
+    "Theory and clinical classes",
     "Orange County campus",
-    "Live class visibility",
-    "Direct admissions guidance",
   ];
   const heroHighlights = [
-    { value: String(programs.length), label: "training paths" },
-    { value: String(cohorts.length), label: "current class options" },
+    { value: "6", label: "week CNA pathway" },
+    { value: "2", label: "training portions" },
     { value: String(openSeats), label: "open seats published" },
+  ];
+  const trainingTimeline = [
+    {
+      title: "Theory Class",
+      detail: "Classroom instruction, care standards, resident safety, and exam readiness.",
+      to: "/schedule",
+    },
+    {
+      title: "Clinical Class",
+      detail: "Supervised hands-on practice that connects skills lab learning to patient-care settings.",
+      to: "/programs",
+    },
   ];
   const visualProofItems = [
     {
@@ -65,11 +77,25 @@ export function HomePage({ cohorts, programs }) {
                 </span>
               ))}
             </div>
-            <h1>Healthcare training in Orange with clear schedules and hands-on support.</h1>
+            <h1 className="hero-title">
+              <span>Certified Nursing Assistant</span>
+              <span>in 6 Weeks</span>
+            </h1>
             <p className="hero-text">
-              Explore CNA, Medication Aide, and CPR/BLS training with published schedules, direct
-              support, and a clear path from first interest to confirmed enrollment.
+              State approved nursing assistant program. First Step Healthcare Academy stays aligned
+              with California compliance requirements so students can train with clear expectations
+              from the start.
             </p>
+
+            <div className="training-timeline" aria-label="CNA training timeline">
+              {trainingTimeline.map((item, index) => (
+                <Link key={item.title} to={item.to} className="training-phase-card">
+                  <span>{`0${index + 1}`}</span>
+                  <strong>{item.title}</strong>
+                  <p>{item.detail}</p>
+                </Link>
+              ))}
+            </div>
 
             <div className="button-row">
               <Link to="/register" className="btn btn-primary">
@@ -84,8 +110,8 @@ export function HomePage({ cohorts, programs }) {
             </div>
 
             <p className="hero-inline-note">
-              Weekday, weekend, evening, and short-format options stay visible so students can plan
-              around work, family, and start-date goals.
+              Compare theory and clinical timelines before registration so your schedule, documents,
+              and start-date goals stay clear.
             </p>
 
             <div className="metric-strip">
@@ -135,28 +161,61 @@ export function HomePage({ cohorts, programs }) {
         </div>
       </section>
 
-      <section className="section">
-        <div className="container">
-          <div className="announcement-banner">
-            <div>
-              <p className="section-kicker">Why students choose First Step</p>
-              <h2>Programs, schedules, and admissions details stay visible from the first visit.</h2>
-            </div>
+      <section className="section workforce-impact-section">
+        <div className="container workforce-impact-grid">
+          <div className="workforce-impact-copy">
+            <p className="section-kicker">Healthcare career demand</p>
+            <h2>
+              Health care and social assistance grew by <span>680,500 jobs</span>.
+            </h2>
             <p>
-              Students can compare options faster, reach the right contact sooner, and move into
-              registration without bouncing between disconnected pages.
+              From March 2025 to March 2026, the U.S. Bureau of Labor Statistics reported a 2.9%
+              employment increase across health care and social assistance. CNA training gives
+              students a practical first step into that growing workforce.
             </p>
-          </div>
-        </div>
 
-        <div className="container quick-grid">
-          {quickLinks.map((item) => (
-            <Link key={item.title} to={item.to} className="quick-card">
-              <strong>{item.title}</strong>
-              <p>{item.detail}</p>
-              <span>Open page</span>
-            </Link>
-          ))}
+            <div className="impact-stat-row" aria-label="Healthcare employment statistics">
+              <article>
+                <strong>680,500</strong>
+                <span>more jobs</span>
+              </article>
+              <article>
+                <strong>2.9%</strong>
+                <span>employment growth</span>
+              </article>
+              <article>
+                <strong>CNA</strong>
+                <span>direct patient-care pathway</span>
+              </article>
+            </div>
+
+            <div className="quick-grid impact-links">
+              {quickLinks.map((item) => (
+                <Link key={item.title} to={item.to} className="quick-card">
+                  <strong>{item.title}</strong>
+                  <p>{item.detail}</p>
+                  <span>Open page</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="workforce-poster" aria-label="Healthcare workforce growth visual">
+            <div className="poster-copy">
+              <span>Healthcare workforce growth</span>
+              <strong>680,500</strong>
+              <p>new health care and social assistance jobs from March 2025 to March 2026</p>
+            </div>
+            <div className="poster-photo-band">
+              <img src={programsSupportPhoto} alt="Healthcare students in scrubs training together" />
+              <img src={admissionsLabPhoto} alt="Instructor guiding students through healthcare training" />
+            </div>
+            <div className="poster-footer">
+              <span>Stronger workforce</span>
+              <span>Stronger communities</span>
+              <span>Brighter future</span>
+            </div>
+          </div>
         </div>
       </section>
 

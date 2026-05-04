@@ -1,26 +1,26 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --bg: #f7fafc;
+  --bg: #f5fbf8;
   --surface: #ffffff;
-  --surface-soft: #eef5fb;
+  --surface-soft: #eaf7f3;
   --surface-strong: #fbfdff;
-  --surface-accent: #e8f1fc;
+  --surface-accent: #dff3ee;
   --ink: #334155;
-  --ink-strong: #111827;
-  --muted: #52616f;
-  --brand: #075ebf;
-  --brand-strong: #084f9f;
-  --brand-deep: #0b2545;
-  --accent: #c78a18;
-  --accent-soft: #fff4d6;
-  --accent-strong: #865e0e;
+  --ink-strong: #10202a;
+  --muted: #53666b;
+  --brand: #0f766e;
+  --brand-strong: #0b5f67;
+  --brand-deep: #123a4a;
+  --accent: #7da756;
+  --accent-soft: #eef8df;
+  --accent-strong: #537631;
   --line: rgba(80, 103, 130, 0.18);
-  --line-strong: rgba(7, 94, 191, 0.26);
-  --dark: #0d1726;
+  --line-strong: rgba(15, 118, 110, 0.26);
+  --dark: #102129;
   --shadow-soft: 0 16px 32px rgba(14, 30, 52, 0.08);
   --shadow-strong: 0 24px 56px rgba(9, 27, 47, 0.15);
-  --shadow-glow: 0 18px 36px rgba(7, 94, 191, 0.16);
+  --shadow-glow: 0 18px 36px rgba(15, 118, 110, 0.16);
   --radius: 0.75rem;
   --radius-sm: 0.5rem;
   --font-body: "Manrope", "Segoe UI", sans-serif;
@@ -44,7 +44,7 @@ body,
 body {
   position: relative;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #f5f9fd 0%, #ffffff 28%, #f8fbff 100%);
+  background: linear-gradient(180deg, #f2faf7 0%, #ffffff 28%, #f8fcfb 100%);
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.6;
@@ -87,6 +87,6 @@ textarea {
 }
 
 ::selection {
-  background: rgba(11, 95, 193, 0.18);
+  background: rgba(15, 118, 110, 0.18);
   color: var(--ink-strong);
 }
