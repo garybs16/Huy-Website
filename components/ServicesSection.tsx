@@ -138,12 +138,13 @@ export default function ServicesSection() {
                   On-demand billing
                 </p>
                 <p className="mt-5 text-4xl leading-none tracking-tight text-white md:text-[3.2rem]">
-                  $0.10
+                  $0.05
                 </p>
                 <p className="mt-2 text-lg text-white/72">per credit</p>
 
                 <div className="mt-6 space-y-3">
                   {[
+                    "1 credit = 5 cents (double what the plans offer)",
                     "Pro only",
                     "After 15,000 credits",
                     "Billed weekly"
@@ -156,7 +157,7 @@ export default function ServicesSection() {
                 </div>
 
                 <p className="mt-auto pt-7 text-sm leading-relaxed text-white/68">
-                  Extra credit when monthly usage runs out.
+                  Extra credit when monthly usage runs out, priced at double what the plans offer.
                 </p>
               </div>
             </motion.div>

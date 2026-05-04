@@ -103,8 +103,8 @@ export default function HeroSection() {
               Pitch Deck
             </h1>
 
-            <p className="max-w-md text-sm leading-relaxed text-white/58 md:text-[15px]">
-              True 3D output in minutes.
+            <p className="max-w-2xl text-sm leading-relaxed text-white/58 md:text-[15px]">
+              World agent that builds 3D scenes on your browser and renders them as video in real-time.
             </p>
 
           </div>

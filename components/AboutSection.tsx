@@ -6,16 +6,28 @@ import LazyVideo from "@/components/LazyVideo";
 
 const features = [
   {
-    title: "Text to scene",
-    detail: "Prompt to environment."
+    tag: "01",
+    title: "Browser-based 3D scene",
+    detail:
+      "Full Blender-like control over every aspect of the 3D scene directly in the browser, including exact character motion, camera movement, staging, and edits."
   },
   {
-    title: "True 3D output",
-    detail: "Editable after generation."
+    tag: "02",
+    title: "Real-time video-to-video model",
+    detail:
+      "As the creator or agent edits, the video reshapes immediately for live previsualization and co-pilot style iteration."
   },
   {
-    title: "Team-ready workflow",
-    detail: "Built for real pipelines."
+    tag: "03",
+    title: "Splat-based and image-based skyboxes",
+    detail:
+      "The world agent supports flat image-based skyboxes and Gaussian splat skyboxes, understands the movable 3D world or mesh, and places characters inside it."
+  },
+  {
+    tag: "04",
+    title: "Rigging and 700+ animations",
+    detail:
+      "Rig humanoid characters and apply 700+ built-in animations for blocking, movement, and fast performance iteration."
   }
 ];
 
@@ -34,7 +46,7 @@ export default function AboutSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
-          className="mb-10 grid gap-4 md:grid-cols-[1fr_0.34fr] md:items-end"
+          className="mb-10"
         >
           <div>
             <p className="deck-kicker mb-6 text-xs">
@@ -42,23 +54,12 @@ export default function AboutSection() {
             </p>
 
             <h2 className="max-w-5xl text-3xl leading-tight tracking-tight text-white md:text-5xl">
-              Core capabilities built for{" "}
-              <span
-                className="text-white/72"
-                style={{ fontStyle: "italic" }}
-              >
-                cinematic speed
-              </span>{" "}
-              and control.
+              Core capabilities
             </h2>
           </div>
-
-          <p className="max-w-xs text-sm leading-relaxed text-white/58 md:justify-self-end md:text-right">
-            Fast enough to explore. Structured enough to ship.
-          </p>
         </motion.div>
 
-        <div className="grid gap-4 lg:grid-cols-[1.02fr_0.98fr]">
+        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -72,7 +73,7 @@ export default function AboutSection() {
               loop
               playsInline
               preload="metadata"
-              className="aspect-[16/13] h-full w-full object-cover"
+              className="aspect-[4/5] w-full object-cover lg:aspect-[5/6]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/28 to-black/8" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_24%,_rgba(151,176,209,0.16),_transparent_24%)]" />
@@ -80,78 +81,44 @@ export default function AboutSection() {
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-7">
               <div className="deck-panel deck-frame max-w-md rounded-[1.8rem] bg-black/64 p-5">
                 <p className="text-xs uppercase tracking-[0.3em] text-white/52">
-                  Feature Stack
+                  Browser-Based 3D Scene
                 </p>
                 <p className="mt-3 text-2xl leading-[1.02] tracking-tight text-white md:text-[2.2rem]">
-                  Scene generation in minutes.
+                  Full control over the world, camera, characters, and motion.
                 </p>
               </div>
             </div>
           </motion.div>
 
           <div className="grid gap-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <motion.div
-                initial={{ opacity: 0, y: 28 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-                transition={{ duration: 0.7, delay: 0.18 }}
-                className="deck-panel deck-frame deck-tint-warm rounded-[1.7rem] p-5"
-              >
-                <p className="text-xs uppercase tracking-[0.3em] text-white/48">
-                  Speed
-                </p>
-                <p className="mt-4 text-4xl tracking-tight text-white">Minutes</p>
-                <p className="mt-2 text-sm leading-relaxed text-white/68">Not 3 to 6 weeks.</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 28 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-                transition={{ duration: 0.7, delay: 0.24 }}
-                className="deck-panel deck-frame deck-tint-cool rounded-[1.7rem] p-5"
-              >
-                <p className="text-xs uppercase tracking-[0.3em] text-white/48">
-                  Output
-                </p>
-                <p className="mt-4 text-4xl tracking-tight text-white">True 3D</p>
-                <p className="mt-2 text-sm leading-relaxed text-white/68">Not flattened output.</p>
-              </motion.div>
-            </div>
-
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.75, delay: 0.3 }}
-              className="deck-frame deck-media relative overflow-hidden rounded-[1.9rem]"
+              initial={{ opacity: 0, y: 28 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+              transition={{ duration: 0.7, delay: 0.18 }}
+              className="deck-panel deck-frame deck-tint-warm rounded-[1.7rem] p-5"
             >
-              <LazyVideo
-                src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4"
-                muted
-                autoPlay
-                loop
-                playsInline
-                preload="metadata"
-                className="aspect-[16/8.6] h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/74 via-black/22 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <p className="max-w-sm text-lg leading-tight tracking-tight text-white/96 md:text-xl">
-                  Built for creators, studios, and teams.
-                </p>
-              </div>
+              <p className="text-xs uppercase tracking-[0.3em] text-white/48">
+                Black box vs. controllable scene
+              </p>
+              <p className="mt-4 text-2xl leading-tight tracking-tight text-white md:text-3xl">
+                Regular video generation is a black box. This keeps the 3D scene editable.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-white/68">
+                Instead of accepting a flattened output from a prompt, creators and agents can tangibly control character movement, camera movement, motion, and scene changes.
+              </p>
             </motion.div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               {features.map((feature, index) => (
                 <motion.div
                   key={feature.title}
                   initial={{ opacity: 0, y: 30 }}
                   animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                   transition={{ duration: 0.7, delay: 0.34 + index * 0.06 }}
-                  className="deck-panel-matte deck-frame rounded-[1.55rem] p-5"
+                  className="deck-panel-matte deck-frame min-h-[14rem] rounded-[1.55rem] p-5"
                 >
                   <p className="text-[11px] uppercase tracking-[0.3em] text-white/44">
-                    0{index + 1}
+                    {feature.tag}
                   </p>
                   <p className="mt-3 text-xl leading-tight tracking-tight text-white">
                     {feature.title}
