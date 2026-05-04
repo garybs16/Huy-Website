@@ -2,8 +2,6 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import LazyVideo from "@/components/LazyVideo";
-
 const features = [
   {
     tag: "01",
@@ -60,35 +58,52 @@ export default function AboutSection() {
         </motion.div>
 
         <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.75, delay: 0.12 }}
-            className="deck-frame deck-media relative overflow-hidden rounded-[2rem]"
-          >
-            <LazyVideo
-              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4"
-              muted
-              autoPlay
-              loop
-              playsInline
-              preload="metadata"
-              className="aspect-[4/5] w-full object-cover lg:aspect-[5/6]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/28 to-black/8" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_24%,_rgba(151,176,209,0.16),_transparent_24%)]" />
+          <div className="grid gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.75, delay: 0.12 }}
+              className="deck-frame deck-media relative overflow-hidden rounded-[2rem]"
+            >
+              <img
+                src="/core-capabilities-scene.jpg"
+                alt=""
+                className="aspect-[4/3] w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/24 to-black/6" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_24%,_rgba(151,176,209,0.16),_transparent_24%)]" />
 
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-7">
-              <div className="deck-panel deck-frame max-w-md rounded-[1.8rem] bg-black/64 p-5">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/52">
-                  Browser-Based 3D Scene
-                </p>
-                <p className="mt-3 text-2xl leading-[1.02] tracking-tight text-white md:text-[2.2rem]">
-                  Full control over the world, camera, characters, and motion.
+              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+                <div className="deck-panel deck-frame max-w-md rounded-[1.6rem] bg-black/64 p-4 md:p-5">
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/52">
+                    Browser-Based 3D Scene
+                  </p>
+                  <p className="mt-3 text-2xl leading-[1.02] tracking-tight text-white md:text-[2rem]">
+                    Full control over the world, camera, characters, and motion.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.75, delay: 0.2 }}
+              className="deck-frame deck-media relative overflow-hidden rounded-[1.7rem]"
+            >
+              <img
+                src="/core-capabilities-world.jpg"
+                alt=""
+                className="aspect-[16/9] w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/24 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <p className="max-w-sm text-lg leading-tight tracking-tight text-white/96 md:text-xl">
+                  Skyboxes, world mapping, and real-time visual feedback.
                 </p>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
           <div className="grid gap-4">
             <motion.div
