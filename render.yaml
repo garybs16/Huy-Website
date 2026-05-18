@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: landing-pitchdeck
+    runtime: static
+    repo: https://github.com/garybs16/Huy-Website
+    branch: gemini
+    buildCommand: npm install; npm run build
+    staticPublishPath: out
+    autoDeployTrigger: commit
