@@ -37,6 +37,9 @@ const AdmissionsPage = lazy(() =>
   import("./pages/AdmissionsPage").then((module) => ({ default: module.AdmissionsPage }))
 );
 const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
+const CareerQuizPage = lazy(() =>
+  import("./pages/CareerQuizPage").then((module) => ({ default: module.CareerQuizPage }))
+);
 const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ default: module.HomePage })));
 const ProgramsPage = lazy(() =>
   import("./pages/ProgramsPage").then((module) => ({ default: module.ProgramsPage }))
@@ -44,6 +47,9 @@ const ProgramsPage = lazy(() =>
 const PaymentPage = lazy(() => import("./pages/PaymentPage").then((module) => ({ default: module.PaymentPage })));
 const RegisterPage = lazy(() =>
   import("./pages/RegisterPage").then((module) => ({ default: module.RegisterPage }))
+);
+const RewardsGuidancePage = lazy(() =>
+  import("./pages/RewardsGuidancePage").then((module) => ({ default: module.RewardsGuidancePage }))
 );
 const SchedulePage = lazy(() =>
   import("./pages/SchedulePage").then((module) => ({ default: module.SchedulePage }))
@@ -97,6 +103,8 @@ const initialEnrollmentState = {
 const pageTitles = {
   "/": "First Step Healthcare Academy",
   "/programs": "Programs | First Step Healthcare Academy",
+  "/rewards-guidance": "Rewards & Guidance | First Step Healthcare Academy",
+  "/career-quiz": "Career Quiz | First Step Healthcare Academy",
   "/schedule": "Schedule | First Step Healthcare Academy",
   "/register": "Register | First Step Healthcare Academy",
   "/payment": "Payment Portal | First Step Healthcare Academy",
@@ -735,6 +743,8 @@ function App() {
               path="/programs"
               element={<ProgramsPage programs={programs} programLoadError={programLoadError} />}
             />
+            <Route path="/rewards-guidance" element={<RewardsGuidancePage />} />
+            <Route path="/career-quiz" element={<CareerQuizPage />} />
             <Route
               path="/schedule"
               element={<SchedulePage cohorts={cohorts} cohortLoadError={cohortLoadError} />}

@@ -1,14 +1,6 @@
 import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
 
-function formatDateLabel(value) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T12:00:00Z`));
-}
-
 function getSeatTone(remainingSeats) {
   if (remainingSeats <= 4) {
     return "is-limited";
@@ -34,10 +26,10 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
     <section className="section section-soft">
       <PageIntro
         kicker="Schedule"
-        title="See upcoming class dates, meeting times, pricing, and open seats in one place."
-        description="Compare current cohorts by program, schedule, and tuition so students can identify the right track before they register."
+        title="See upcoming class formats, meeting times, pricing, and open seats in one place."
+        description="Compare current cohorts by program, schedule format, and tuition so students can identify the right track before they register."
         accent="Real class visibility"
-        note="Dates, meeting patterns, and seat availability stay visible together."
+        note="Exact public cohort dates are coming soon while approved calendars are finalized."
       />
 
       <div className="container">
@@ -55,11 +47,9 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
               <h3>{cohort.title}</h3>
               <p className="schedule-program">{cohort.programTitle}</p>
               <ul className="detail-list">
-                <li>
-                  Dates: {formatDateLabel(cohort.startDate)} to {formatDateLabel(cohort.endDate)}
-                </li>
+                <li>Dates: Coming soon</li>
                 <li>Schedule: {cohort.meetingPattern}</li>
-                <li>Tuition: {cohort.tuitionLabel}</li>
+                <li>Program total: {cohort.tuitionLabel}</li>
                 <li>Remaining seats: {cohort.remainingSeats}</li>
               </ul>
               <p className="card-note">Registration stays tied to the selected cohort and pricing.</p>

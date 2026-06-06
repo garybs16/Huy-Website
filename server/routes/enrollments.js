@@ -37,7 +37,7 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
       paymentAmountCents: cohort.paymentPlanDepositCents,
       tuitionTotalCents: cohort.tuitionCents,
       balanceDueCents: Math.max(cohort.tuitionCents - cohort.paymentPlanDepositCents, 0),
-      checkoutLabel: "Enrollment deposit",
+      checkoutLabel: "Registration fee deposit",
     };
   }
 
@@ -46,7 +46,7 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
     paymentAmountCents: cohort.tuitionCents,
     tuitionTotalCents: cohort.tuitionCents,
     balanceDueCents: 0,
-    checkoutLabel: "Tuition payment",
+    checkoutLabel: "Program payment",
   };
 }
 
@@ -67,7 +67,7 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
     amountCents,
     amountLabel,
     purpose,
-    checkoutLabel: isBalancePayment ? "Remaining tuition balance" : pricing.checkoutLabel,
+    checkoutLabel: isBalancePayment ? "Remaining program balance" : pricing.checkoutLabel,
     productName: `${program.title} - ${cohort.title} ${isBalancePayment ? "Remaining balance" : pricing.checkoutLabel}`,
     productDescription: isBalancePayment
       ? `${cohort.meetingPattern} | Remaining balance for enrollment ${enrollment.id}`
@@ -224,7 +224,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
           message:
             manualEnrollment.paymentOption === "deposit"
               ? `Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the ${amountDueNowLabel} deposit and confirm the remaining ${balanceDueLabel} balance plan.`
-              : "Registration submitted. Online payment is not configured yet, so admissions will contact you to collect tuition.",
+              : "Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the program payment.",
         });
       }
 
@@ -336,7 +336,7 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         paymentAmountCents: enrollment.paymentAmountCents,
         tuitionTotalCents: enrollment.tuitionTotalCents,
         balanceDueCents: enrollment.balanceDueCents,
-        checkoutLabel: purpose === "deposit" ? "Enrollment deposit" : "Tuition payment",
+        checkoutLabel: purpose === "deposit" ? "Registration fee deposit" : "Program payment",
       };
       const amountDueCents = purpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents;
       const amountDueLabel = formatMoney(amountDueCents);

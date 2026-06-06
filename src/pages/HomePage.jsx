@@ -1,69 +1,34 @@
 import { Link } from "react-router-dom";
-import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
-import academyLogo from "../assets/new-logo.jpg";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
-import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import {
   admissionsSteps,
+  industryGrowthRows,
   miscFeeItems,
   programMeta,
-  quickLinks,
+  rewardsGuidanceItems,
   requirementItems,
   supportItems,
   tuitionItems,
+  workforceProjectionStats,
 } from "../siteData";
 
-function formatDateLabel(value) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T12:00:00Z`));
-}
-
-export function HomePage({ cohorts, programs }) {
-  const openSeats = cohorts.reduce((total, cohort) => total + Math.max(cohort.remainingSeats ?? 0, 0), 0);
-  const primaryCohorts = cohorts.filter((cohort) => cohort.programId === "cna").slice(0, 3);
+export function HomePage({ programs }) {
   const heroTrustItems = [
-    "State approved CNA program",
-    "Theory and clinical classes",
-    "Orange County campus",
-  ];
-  const heroHighlights = [
-    { value: "6", label: "week CNA pathway" },
-    { value: "2", label: "training portions" },
-    { value: String(openSeats), label: "open seats published" },
+    { label: "State approved CNA program" },
+    { label: "Career Quiz Assessment", to: "/career-quiz" },
   ];
   const trainingTimeline = [
     {
-      title: "Theory Class",
-      detail: "Classroom instruction, care standards, resident safety, and exam readiness.",
-      to: "/schedule",
+      title: "Earn $100 Per Referral",
+      detail: "Both the referrer and the referred student can receive $100 when an eligible referred student enrolls.",
+      to: "/rewards-guidance",
     },
     {
-      title: "Clinical Class",
-      detail: "Supervised hands-on practice that connects skills lab learning to patient-care settings.",
-      to: "/programs",
+      title: "Study Tools & Career Support",
+      detail: "Students receive study guides, skills checklists, quick-reference resources, and career guidance.",
+      to: "/rewards-guidance",
     },
   ];
-  const visualProofItems = [
-    {
-      src: programsSupportPhoto,
-      alt: "Healthcare students practicing patient care techniques in a clinical simulation room",
-      label: "Skills lab",
-    },
-    {
-      src: admissionsLabPhoto,
-      alt: "Instructor guiding healthcare students through hands-on equipment training",
-      label: "Instructor guidance",
-    },
-    {
-      src: heroTraining,
-      alt: "Healthcare instructor demonstrating bedside skills while students observe",
-      label: "Hands-on practice",
-    },
-  ];
-
   return (
     <>
       <section className="hero-panel">
@@ -72,9 +37,15 @@ export function HomePage({ cohorts, programs }) {
             <p className="eyebrow">Healthcare career training in Orange, California</p>
             <div className="hero-trust-list" aria-label="School highlights">
               {heroTrustItems.map((item) => (
-                <span key={item} className="hero-trust-item">
-                  {item}
-                </span>
+                item.to ? (
+                  <Link key={item.label} to={item.to} className="hero-trust-item">
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span key={item.label} className="hero-trust-item">
+                    {item.label}
+                  </span>
+                )
               ))}
             </div>
             <h1 className="hero-title">
@@ -101,26 +72,9 @@ export function HomePage({ cohorts, programs }) {
               <Link to="/register" className="btn btn-primary">
                 Register Now
               </Link>
-              <Link to="/schedule" className="btn btn-secondary">
-                See Class Dates
+              <Link to="/rewards-guidance" className="btn btn-secondary">
+                Reward & Guidance
               </Link>
-              <Link to="/programs" className="btn btn-ghost">
-                View Programs
-              </Link>
-            </div>
-
-            <p className="hero-inline-note">
-              Compare theory and clinical timelines before registration so your schedule, documents,
-              and start-date goals stay clear.
-            </p>
-
-            <div className="metric-strip">
-              {heroHighlights.map((item) => (
-                <article key={item.label} className="metric-card">
-                  <strong>{item.value}</strong>
-                  <span>{item.label}</span>
-                </article>
-              ))}
             </div>
           </div>
 
@@ -130,32 +84,11 @@ export function HomePage({ cohorts, programs }) {
                 src={heroTraining}
                 alt="Healthcare instructor guiding students through hands-on bedside skills training"
               />
+              <div className="hero-status-chip">Enrollment flow live</div>
               <div className="hero-photo-badge">
                 <span>Hands-on instruction</span>
                 <strong>Real training, visible schedules, and a faster path to enrollment</strong>
               </div>
-            </div>
-
-            <div className="hero-floating-panel hero-schedule-panel">
-              <p className="section-kicker">Featured upcoming starts</p>
-              {primaryCohorts.map((cohort) => (
-                <article key={cohort.id} className="schedule-snapshot">
-                  <div>
-                    <strong>{cohort.title}</strong>
-                    <span>{cohort.meetingPattern}</span>
-                  </div>
-                  <p>{`${formatDateLabel(cohort.startDate)} to ${formatDateLabel(cohort.endDate)}`}</p>
-                </article>
-              ))}
-            </div>
-
-            <div className="hero-proof-grid" aria-label="Training environment photos">
-              {visualProofItems.map((item) => (
-                <figure key={item.label} className="hero-proof-card">
-                  <img src={item.src} alt={item.alt} />
-                  <figcaption>{item.label}</figcaption>
-                </figure>
-              ))}
             </div>
           </div>
         </div>
@@ -166,89 +99,88 @@ export function HomePage({ cohorts, programs }) {
           <div className="workforce-impact-copy">
             <p className="section-kicker">Healthcare career demand</p>
             <h2>
-              Health care and social assistance grew by <span>680,500 jobs</span>.
+              Healthcare is projected to be the nation's <span>fastest-growing major industry sector</span>.
             </h2>
             <p>
-              From March 2025 to March 2026, the U.S. Bureau of Labor Statistics reported a 2.9%
-              employment increase across health care and social assistance. CNA training gives
-              students a practical first step into that growing workforce.
+              According to the U.S. Bureau of Labor Statistics, healthcare and social assistance is
+              projected to add about 2.0 million jobs from 2024 to 2034, growing 8.4% compared with
+              3.1% for overall wage and salary employment.
+            </p>
+            <p>
+              Since the elderly population is projected to climb from 59.7 million in 2024 to 72.5
+              million in 2034, demand for medical and social services is expected to continue
+              increasing.
             </p>
 
             <div className="impact-stat-row" aria-label="Healthcare employment statistics">
-              <article>
-                <strong>680,500</strong>
-                <span>more jobs</span>
-              </article>
-              <article>
-                <strong>2.9%</strong>
-                <span>employment growth</span>
-              </article>
-              <article>
-                <strong>CNA</strong>
-                <span>direct patient-care pathway</span>
-              </article>
-            </div>
-
-            <div className="quick-grid impact-links">
-              {quickLinks.map((item) => (
-                <Link key={item.title} to={item.to} className="quick-card">
-                  <strong>{item.title}</strong>
+              {workforceProjectionStats.map((item) => (
+                <article key={item.label}>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
                   <p>{item.detail}</p>
-                  <span>Open page</span>
-                </Link>
+                </article>
               ))}
             </div>
+
+            <Link to="/programs" className="quick-card impact-opportunity-card">
+              <strong>Turn Growth Into Opportunity. Your First Step Matters.</strong>
+              <p>
+                Join the growing healthcare field with CNA training that builds hands-on skills,
+                patient-care experience, and a stronger foundation for what comes next.
+              </p>
+              <span>Explore Programs</span>
+            </Link>
           </div>
 
-          <div className="workforce-poster" aria-label="Healthcare workforce growth visual">
-            <div className="poster-copy">
-              <span>Healthcare workforce growth</span>
-              <strong>680,500</strong>
-              <p>new health care and social assistance jobs from March 2025 to March 2026</p>
+          <div className="workforce-chart-card" aria-label="Projected industry employment growth chart">
+            <div className="chart-heading">
+              <span>2024-2034 projected employment growth</span>
+              <strong>Healthcare leads major sectors</strong>
             </div>
-            <div className="poster-photo-band">
-              <img src={programsSupportPhoto} alt="Healthcare students in scrubs training together" />
-              <img src={admissionsLabPhoto} alt="Instructor guiding students through healthcare training" />
+            <div className="growth-bar-list">
+              {industryGrowthRows.map((row) => (
+                <div key={row.label} className="growth-bar-row">
+                  <div className="growth-bar-label">
+                    <span>{row.label}</span>
+                    <strong>{row.percent}%</strong>
+                  </div>
+                  <div className="growth-bar-track">
+                    <span style={{ width: `${(row.percent / 8.4) * 100}%` }} />
+                  </div>
+                  <small>{row.change} jobs</small>
+                </div>
+              ))}
             </div>
-            <div className="poster-footer">
-              <span>Stronger workforce</span>
-              <span>Stronger communities</span>
-              <span>Brighter future</span>
-            </div>
+            <a
+              className="source-link"
+              href="https://www.bls.gov/opub/mlr/2026/article/industry-and-occupational-employment-projections-overview.htm"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Source: U.S. Bureau of Labor Statistics, Monthly Labor Review, 2024-34 projections
+            </a>
           </div>
         </div>
       </section>
 
       <section className="section visual-story-section">
-        <div className="container visual-story-grid">
-          <div className="visual-feature">
-            <img src={programsSupportPhoto} alt="Students in scrubs practicing patient care in a classroom lab" />
-            <div className="visual-feature-caption">
-              <span>Career-ready classroom</span>
-              <strong>Training built around real practice, clear expectations, and visible next steps.</strong>
-            </div>
+        <div className="container section-heading">
+          <div>
+            <p className="section-kicker">Rewards & Guidance</p>
+            <h2>Support that helps students keep moving before, during, and after training.</h2>
           </div>
+          <Link to="/rewards-guidance" className="card-action-link">
+            Reward & Guidance
+          </Link>
+        </div>
 
-          <div className="visual-story-copy">
-            <p className="section-kicker">Student experience</p>
-            <h2>Show the training environment before students ever call admissions.</h2>
-            <p>
-              Photos of the lab, instructors, and student practice make the school feel concrete,
-              local, and easier to trust for applicants comparing programs.
-            </p>
-            <div className="visual-brand-panel">
-              <img src={academyLogo} alt="First Step Healthcare Academy logo" />
-              <div>
-                <strong>First Step Healthcare Academy</strong>
-                <span>Your first step into healthcare training in Orange, California.</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="visual-stack">
-            <img src={admissionsLabPhoto} alt="Healthcare instructor leading students through clinical equipment training" />
-            <img src={heroTraining} alt="Instructor demonstrating bedside care skills during healthcare training" />
-          </div>
+        <div className="container card-grid four-up">
+          {rewardsGuidanceItems.map((item) => (
+            <article key={item.title} className="support-card">
+              <h3>{item.title}</h3>
+              <p>{item.detail}</p>
+            </article>
+          ))}
         </div>
       </section>
 

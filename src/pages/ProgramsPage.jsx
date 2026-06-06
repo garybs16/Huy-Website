@@ -2,7 +2,17 @@ import { Link } from "react-router-dom";
 import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import admissionsSupport from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
-import { admissionsSteps, programMeta, supportItems } from "../siteData";
+import {
+  admissionsSteps,
+  courseModules,
+  locationDetails,
+  miscFeeItems,
+  programMeta,
+  programRequirementSections,
+  requirementItems,
+  supportItems,
+  tuitionItems,
+} from "../siteData";
 
 export function ProgramsPage({ programs, programLoadError }) {
   return (
@@ -93,6 +103,116 @@ export function ProgramsPage({ programs, programLoadError }) {
             ))}
           </ol>
         </article>
+      </div>
+
+      <div className="container program-requirements">
+        <div className="section-heading">
+          <div>
+            <p className="section-kicker">Online Nurse Assistant Training Program Requirements</p>
+            <h2>Required program information for CNA/NATP students.</h2>
+          </div>
+          <p>
+            Students are responsible for reviewing and meeting all program requirements before
+            enrollment, during training, before clinical participation, and before successful
+            completion.
+          </p>
+        </div>
+
+        <article className="info-card">
+          <p className="section-kicker">Required coursework</p>
+          <h3>Students complete a structured CNA/NATP curriculum.</h3>
+          <div className="module-grid">
+            {courseModules.map(([title, detail], index) => (
+              <div key={title} className="module-card">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{title}</strong>
+                <p>{detail}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <div className="card-grid two-up">
+          {programRequirementSections.map((section) => (
+            <article key={section.title} className="info-card">
+              <p className="section-kicker">{section.title}</p>
+              <h3>{section.title}</h3>
+              <ul className="detail-list compact-list">
+                {section.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+
+        <div className="card-grid two-up">
+          <article className="info-card">
+            <p className="section-kicker">Enrollment and clinical readiness</p>
+            <h3>Documents and screenings required before enrollment or training milestones.</h3>
+            <ul className="detail-list compact-list">
+              {requirementItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <p className="card-note">
+              Original enrollment requirement documents must be hand-delivered to a school official
+              by appointment.
+            </p>
+          </article>
+
+          <article className="info-card">
+            <p className="section-kicker">Program fees and payment plan</p>
+            <h3>Published fees and possible additional costs.</h3>
+            <div className="stack-panel">
+              {tuitionItems.map((item) => (
+                <div key={item.title} className="tuition-line">
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.detail}</p>
+                  </div>
+                  <span>{item.amount}</span>
+                </div>
+              ))}
+            </div>
+            <ul className="detail-list compact-list">
+              {miscFeeItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        </div>
+
+        <div className="card-grid two-up">
+          <article className="info-card">
+            <p className="section-kicker">Clinical training site locations</p>
+            <h3>Clinical training is completed in person at approved clinical training sites.</h3>
+            <ul className="detail-list compact-list">
+              {locationDetails.clinicalCities.map((city) => (
+                <li key={city}>{city}</li>
+              ))}
+            </ul>
+            <p>{locationDetails.note}</p>
+          </article>
+
+          <article className="info-card dark-card">
+            <p className="section-kicker">Next step</p>
+            <h3>Review current availability and payment options before submitting enrollment.</h3>
+            <p>
+              Exact public start dates are coming soon. Students can still review class formats,
+              pricing, payment-plan structure, and admissions requirements before contacting the
+              school.
+            </p>
+            <div className="button-row">
+              <Link to="/schedule" className="btn btn-secondary">
+                View Schedule
+              </Link>
+              <Link to="/contact" className="btn btn-primary">
+                Send Inquiry
+              </Link>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
   );

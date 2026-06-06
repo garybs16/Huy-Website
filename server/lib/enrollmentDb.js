@@ -217,6 +217,20 @@ export class EnrollmentDatabase {
       UPDATE enrollments
       SET balance_due_cents = 0
       WHERE balance_due_cents IS NULL;
+
+      UPDATE cohorts
+      SET
+        tuition_cents = 200000,
+        allow_payment_plan = 1,
+        payment_plan_deposit_cents = 25000,
+        updated_at = '${nowIso()}'
+      WHERE id IN ('cna-weekday-apr-2026', 'cna-weekend-apr-2026', 'cna-evening-may-2026')
+        AND (
+          tuition_cents = 196000
+          OR payment_plan_deposit_cents = 65000
+          OR payment_plan_deposit_cents IS NULL
+          OR allow_payment_plan = 0
+        );
     `);
   }
 

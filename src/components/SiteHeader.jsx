@@ -20,7 +20,6 @@ export function SiteHeader({ navItems }) {
             <a href={contactDetails.emailHref}>{contactDetails.email}</a>
           </div>
           <div className="top-strip-actions">
-            <span>Orange, CA campus</span>
             <Link to="/contact" className="top-strip-link">
               Student Support
             </Link>

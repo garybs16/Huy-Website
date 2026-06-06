@@ -1,18 +1,6 @@
 import { PageIntro } from "../components/PageIntro";
 import { registrationChecklist } from "../siteData";
 
-function formatDateLabel(value) {
-  if (!value) {
-    return "";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T12:00:00Z`));
-}
-
 function formatMoney(cents) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -79,11 +67,9 @@ export function RegisterPage({
               <h3>{selectedCohort.title}</h3>
               <ul className="detail-list">
                 <li>{selectedCohort.programTitle}</li>
-                <li>
-                  Dates: {formatDateLabel(selectedCohort.startDate)} to {formatDateLabel(selectedCohort.endDate)}
-                </li>
+                <li>Dates: Coming soon</li>
                 <li>Schedule: {selectedCohort.meetingPattern}</li>
-                <li>Tuition: {selectedCohort.tuitionLabel}</li>
+                <li>Program total: {selectedCohort.tuitionLabel}</li>
                 <li>Remaining seats: {selectedCohort.remainingSeats}</li>
                 {selectedCohort.allowPaymentPlan ? (
                   <li>
@@ -205,7 +191,7 @@ export function RegisterPage({
                   </option>
                   {filteredCohorts.map((cohort) => (
                     <option key={cohort.id} value={cohort.id} disabled={cohort.remainingSeats <= 0}>
-                      {`${cohort.title} | ${formatDateLabel(cohort.startDate)} | ${cohort.remainingSeats} seats left`}
+                      {`${cohort.title} | Coming soon | ${cohort.remainingSeats} seats left`}
                     </option>
                   ))}
                 </select>
@@ -234,7 +220,7 @@ export function RegisterPage({
                     />
                     <span>Pay in full</span>
                     <strong>{selectedCohort.tuitionLabel}</strong>
-                    <small>Complete tuition now and confirm the seat after payment clears.</small>
+                    <small>Complete the full program total now and confirm the seat after payment clears.</small>
                   </label>
 
                   <label
