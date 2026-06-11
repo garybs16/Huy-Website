@@ -3,11 +3,14 @@ import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
 import {
   admissionsSteps,
+  collectionsChargebackPolicy,
   faqItems,
   locationDetails,
   miscFeeItems,
   requirementItems,
+  refundRequestDetails,
   tuitionItems,
+  withdrawalRefundPolicies,
 } from "../siteData";
 
 export function AdmissionsPage() {
@@ -16,10 +19,18 @@ export function AdmissionsPage() {
       <PageIntro
         kicker="Admissions"
         title="Know what to prepare before you apply, enroll, and start class."
-        description="Review the admissions checklist, tuition notes, locations, and common questions in one organized place."
+        description="Review the admissions checklist, tuition notes, refund policy, locations, and common questions in one organized place."
         accent="Everything students should prepare"
-        note="Documents, pricing, and clinical logistics stay visible before enrollment."
+        note="Documents, pricing, policies, and clinical logistics stay visible before enrollment."
       />
+
+      <div className="container page-jump-nav" aria-label="Admissions sections">
+        <a href="#admissions-requirements">Requirements</a>
+        <a href="#tuition-fees">Tuition & Fees</a>
+        <a href="#refund-policy">Refund Policy</a>
+        <a href="#locations">Locations</a>
+        <a href="#questions">Questions</a>
+      </div>
 
       <div className="container card-grid two-up photo-showcase">
         <div className="media-panel">
@@ -47,7 +58,7 @@ export function AdmissionsPage() {
           </ul>
         </article>
 
-        <article className="info-card">
+        <article id="admissions-requirements" className="info-card">
           <p className="section-kicker">Requirements</p>
           <h3>What students should prepare before enrollment</h3>
           <ul className="detail-list">
@@ -58,7 +69,7 @@ export function AdmissionsPage() {
         </article>
       </div>
 
-      <div className="container split-panel">
+      <div id="tuition-fees" className="container split-panel">
         <article className="info-card">
           <p className="section-kicker">Tuition and fees</p>
           <h3>Published tuition stays visible before a student commits.</h3>
@@ -80,7 +91,7 @@ export function AdmissionsPage() {
           </ul>
         </article>
 
-        <article className="info-card">
+        <article id="locations" className="info-card">
           <p className="section-kicker">Location details</p>
           <h3>Classroom and clinical placement details</h3>
           <p>{locationDetails.classroom}</p>
@@ -94,7 +105,43 @@ export function AdmissionsPage() {
         </article>
       </div>
 
-      <div className="container card-grid three-up">
+      <div id="refund-policy" className="container policy-section">
+        <div className="section-heading">
+          <div>
+            <p className="section-kicker">Withdrawal and refund policies</p>
+            <h2>Refund rules are based on timing, registration fees, and completed hours.</h2>
+          </div>
+          <p>
+            Students should review these policies before enrollment and submit any refund request
+            in writing.
+          </p>
+        </div>
+
+        <div className="policy-grid">
+          {withdrawalRefundPolicies.map((item) => (
+            <article key={item.title} className="policy-card">
+              <h3>{item.title}</h3>
+              <p>{item.detail}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="card-grid two-up policy-support-grid">
+          <article className="info-card">
+            <p className="section-kicker">Written request required</p>
+            <h3>{refundRequestDetails.title}</h3>
+            <p>{refundRequestDetails.detail}</p>
+          </article>
+
+          <article className="info-card">
+            <p className="section-kicker">Payment responsibilities</p>
+            <h3>{collectionsChargebackPolicy.title}</h3>
+            <p>{collectionsChargebackPolicy.detail}</p>
+          </article>
+        </div>
+      </div>
+
+      <div id="questions" className="container card-grid three-up">
         {faqItems.map((item) => (
           <article key={item.question} className="info-card">
             <h3>{item.question}</h3>

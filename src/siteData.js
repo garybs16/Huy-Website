@@ -3,7 +3,7 @@ import { cohortCatalogSeed, programCatalogSeed } from "../shared/catalogSeed";
 export const navItems = [
   { label: "Home", to: "/" },
   { label: "Programs", to: "/programs" },
-  { label: "Rewards", to: "/rewards-guidance" },
+  { label: "Rewards & Guidance", to: "/rewards-guidance" },
   { label: "Schedule", to: "/schedule" },
   { label: "Payment", to: "/payment" },
   { label: "Admissions", to: "/admissions" },
@@ -102,7 +102,7 @@ export const rewardsGuidanceItems = [
   {
     title: "Referral Incentives",
     detail:
-      "Both the referrer and the referred student can receive $100 when an eligible referred student enrolls. There is no referral limit.",
+      "Referred students may receive a $100 tuition credit, and eligible referrers may receive a $100 reward after first-day attendance is confirmed.",
   },
   {
     title: "Retention Incentives",
@@ -119,6 +119,65 @@ export const rewardsGuidanceItems = [
     detail:
       "First Step supports students with CNA job-readiness guidance, resume and interview preparation, workplace professionalism, and future nursing pathway planning.",
   },
+];
+
+export const referralProgramSteps = [
+  "A student receives a personal referral code after enrolling with First Step Healthcare Academy.",
+  "The student shares the referral code with someone interested in CNA training.",
+  "The referred student enters the referral code during enrollment.",
+  "The referred student receives a $100 tuition credit applied to their payment plan.",
+  "One week after the theory cohort start date, the referrer may receive a $100 referral reward if the referred student attends the first day of the theory cohort.",
+];
+
+export const referralRules = [
+  "Each enrolled student may receive one personal referral code.",
+  "Referral codes may remain active after graduation unless program terms change.",
+  "A referred student may use only one referral code.",
+  "Referral codes must be submitted before or during enrollment. Retroactive referral claims may not be accepted.",
+  "Students may not refer themselves.",
+  "Eligible referrers may refer more than one qualified student.",
+  "Referral rewards apply to new students who meet program eligibility requirements.",
+  "The referrer reward is issued only after the referred student attends the first day of the theory cohort.",
+];
+
+export const retentionMilestones = [
+  {
+    title: "Hired by the clinical training facility",
+    amount: "$50 recognition award",
+  },
+  {
+    title: "Maintains successful employment for at least 90 days",
+    amount: "Additional $50 retention award",
+  },
+  {
+    title: "Total possible recognition",
+    amount: "$100",
+  },
+];
+
+export const studyToolItems = [
+  "CNA study guides",
+  "Skills checklists",
+  "Quick-reference guides",
+  "Clinical preparation guides",
+  "Exam review resources",
+  "Vocabulary and key terms review",
+  "Resident care reminders",
+  "Infection control and safety review sheets",
+  "Documentation and reporting reminders",
+  "Skills practice guidance",
+];
+
+export const careerSupportItems = [
+  "CNA resume guidance",
+  "Interview preparation tips",
+  "Job search guidance",
+  "Professional communication support",
+  "Help understanding CNA career pathways",
+  "Guidance on using CNA experience for future nursing school applications",
+  "Education pathway overview: CNA to LVN to RN to BSN",
+  "Employer expectations and workplace professionalism",
+  "Support understanding clinical readiness and resident care expectations",
 ];
 
 export const workforceProjectionStats = [
@@ -182,7 +241,7 @@ export const tuitionItems = [
     title: "CNA Cohorts",
     amount: "$1,750 + $250",
     detail:
-      "Official CNA tuition is $1,750 plus a $250 non-refundable registration fee, for a $2,000 program total.",
+      "Current promotional CNA tuition is $1,750 after a $600 discount, plus a $250 non-refundable registration fee, for a $2,000 program total.",
   },
   {
     title: "Medication Aide",
@@ -197,11 +256,57 @@ export const tuitionItems = [
 ];
 
 export const miscFeeItems = [
+  "Regular CNA tuition is $2,350 plus the $250 registration fee before current promotional discounts",
+  "Eligible veterans may receive an additional $100 discount when approved before enrollment",
   "$250 registration fee is non-refundable and may be used as the payment-plan deposit",
   "Payment plan example: $250 registration fee deposit, then $1,750 remaining balance through scheduled installments",
   "Additional possible costs may include uniform or dress code items, textbooks or learning materials, health clearance documents, TB testing, CPR/BLS certification, Live Scan, and state testing fees",
   "Payment deadlines are provided before enrollment and must stay current for continued participation",
 ];
+
+export const withdrawalRefundPolicies = [
+  {
+    title: "Withdraw at least 5 business days before class",
+    detail:
+      "Students may withdraw and receive a refund of charges paid, minus the $250 non-refundable registration fee.",
+  },
+  {
+    title: "Withdraw less than 5 business days before class",
+    detail:
+      "Students may receive a refund minus the $250 non-refundable registration fee and a 30% penalty calculated from the total tuition fee.",
+  },
+  {
+    title: "Refund request before 60 course hours have elapsed",
+    detail:
+      "Students who have started class may request a refund for half of the total tuition fee, not including the non-refundable registration fee.",
+  },
+  {
+    title: "Payment-plan students before 60 hours",
+    detail:
+      "If the student is on a payment plan and has only paid half of the tuition, no refund is available.",
+  },
+  {
+    title: "After 60 course hours have elapsed",
+    detail: "No refund will be given after 60 hours of class have elapsed.",
+  },
+  {
+    title: "Dismissal from the program",
+    detail:
+      "Students dismissed for academic, attendance, punctuality, or behavior issues are not eligible for refunds.",
+  },
+];
+
+export const refundRequestDetails = {
+  title: "Refund requests must be in writing",
+  detail:
+    "Submit refund requests to the Administrator at administrator@laskillsacademy.com or to the Enrollment Coordinator.",
+};
+
+export const collectionsChargebackPolicy = {
+  title: "Collections and chargebacks",
+  detail:
+    "Any unpaid fees or fraudulent credit card chargebacks may result in further action, including collection efforts and, if necessary, legal action. Students are encouraged to address outstanding balances promptly to avoid additional charges or complications. The team is available to discuss concerns and help resolve balances within reason and policy.",
+};
 
 export const locationDetails = {
   classroom: "2445 W. Chapman Ave. Suite 210, Orange, CA 92868",
@@ -379,6 +484,7 @@ export const footerGroups = [
       { label: "Pre-CNA Quiz", to: "/career-quiz" },
       { label: "Class Schedule", to: "/schedule" },
       { label: "Admissions Checklist", to: "/admissions" },
+      { label: "Refund Policy", to: "/admissions#refund-policy" },
     ],
   },
 ];

@@ -6,9 +6,9 @@
   --surface-soft: #eaf7f3;
   --surface-strong: #fbfdff;
   --surface-accent: #dff3ee;
-  --ink: #334155;
-  --ink-strong: #10202a;
-  --muted: #53666b;
+  --ink: #273844;
+  --ink-strong: #0d1d26;
+  --muted: #435861;
   --brand: #0f766e;
   --brand-strong: #0b5f67;
   --brand-deep: #123a4a;
@@ -18,11 +18,11 @@
   --gold: #d59b2d;
   --gold-soft: #fff4d9;
   --blue: #1d5f99;
-  --line: rgba(80, 103, 130, 0.18);
-  --line-strong: rgba(15, 118, 110, 0.26);
+  --line: rgba(80, 103, 130, 0.22);
+  --line-strong: rgba(15, 118, 110, 0.32);
   --dark: #102129;
-  --shadow-soft: 0 16px 32px rgba(14, 30, 52, 0.08);
-  --shadow-strong: 0 24px 56px rgba(9, 27, 47, 0.15);
+  --shadow-soft: 0 12px 28px rgba(14, 30, 52, 0.075);
+  --shadow-strong: 0 22px 52px rgba(9, 27, 47, 0.14);
   --shadow-glow: 0 18px 36px rgba(15, 118, 110, 0.16);
   --radius: 0.75rem;
   --radius-sm: 0.5rem;
@@ -53,6 +53,15 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+p,
+li {
+  overflow-wrap: anywhere;
+}
+
+[id] {
+  scroll-margin-top: 9.5rem;
 }
 
 h1,

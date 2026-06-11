@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
 import { registrationChecklist } from "../siteData";
 
@@ -52,6 +53,17 @@ export function RegisterPage({
             Review the basics, choose the right class option, and keep the important next-step
             details visible while the form is being completed.
           </p>
+          <div className="registration-policy-callout">
+            <p className="section-kicker">Before you submit</p>
+            <h3>Review refund and payment policies before checkout.</h3>
+            <p>
+              Refund eligibility depends on withdrawal timing, completed course hours, payment-plan
+              status, and program standing.
+            </p>
+            <Link to="/admissions#refund-policy" className="card-action-link">
+              View refund policy
+            </Link>
+          </div>
           <div className="register-checkpoints">
             {registrationSteps.map((item, index) => (
               <div key={item} className="checkpoint-item">

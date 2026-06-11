@@ -4,14 +4,17 @@ import admissionsSupport from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
 import {
   admissionsSteps,
+  collectionsChargebackPolicy,
   courseModules,
   locationDetails,
   miscFeeItems,
   programMeta,
   programRequirementSections,
+  refundRequestDetails,
   requirementItems,
   supportItems,
   tuitionItems,
+  withdrawalRefundPolicies,
 } from "../siteData";
 
 export function ProgramsPage({ programs, programLoadError }) {
@@ -20,12 +23,20 @@ export function ProgramsPage({ programs, programLoadError }) {
       <PageIntro
         kicker="Programs"
         title="Choose the healthcare training path that fits your timeline and credential goals."
-        description="Compare current program options, review format details, and move into the next admissions step without digging through extra pages."
+        description="Compare current program options, review format details, program requirements, fees, policies, and next steps without digging through extra pages."
         accent="Program comparison made clear"
         note="Format, duration, and admissions context stay visible together."
       />
 
-      <div className="container">
+      <div className="container page-jump-nav" aria-label="Program sections">
+        <a href="#program-options">Programs</a>
+        <a href="#program-requirements">Requirements</a>
+        <a href="#program-fees">Fees</a>
+        <a href="#program-policies">Policies</a>
+        <a href="#program-next-step">Next Step</a>
+      </div>
+
+      <div id="program-options" className="container">
         {programLoadError ? <p className="section-note">{programLoadError}</p> : null}
 
         <div className="card-grid three-up">
@@ -105,7 +116,7 @@ export function ProgramsPage({ programs, programLoadError }) {
         </article>
       </div>
 
-      <div className="container program-requirements">
+      <div id="program-requirements" className="container program-requirements">
         <div className="section-heading">
           <div>
             <p className="section-kicker">Online Nurse Assistant Training Program Requirements</p>
@@ -146,7 +157,7 @@ export function ProgramsPage({ programs, programLoadError }) {
           ))}
         </div>
 
-        <div className="card-grid two-up">
+        <div id="program-fees" className="card-grid two-up">
           <article className="info-card">
             <p className="section-kicker">Enrollment and clinical readiness</p>
             <h3>Documents and screenings required before enrollment or training milestones.</h3>
@@ -183,6 +194,42 @@ export function ProgramsPage({ programs, programLoadError }) {
           </article>
         </div>
 
+        <div id="program-policies" className="program-policy-panel">
+          <div className="section-heading">
+            <div>
+              <p className="section-kicker">Withdrawal, refund, and payment policies</p>
+              <h2>Students should review policy details before enrolling.</h2>
+            </div>
+            <p>
+              Refund eligibility depends on when the student withdraws, how many course hours have
+              elapsed, and whether the student remains in good standing.
+            </p>
+          </div>
+
+          <div className="policy-grid">
+            {withdrawalRefundPolicies.map((item) => (
+              <article key={item.title} className="policy-card">
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="card-grid two-up policy-support-grid">
+            <article className="info-card">
+              <p className="section-kicker">Written requests</p>
+              <h3>{refundRequestDetails.title}</h3>
+              <p>{refundRequestDetails.detail}</p>
+            </article>
+
+            <article className="info-card">
+              <p className="section-kicker">Outstanding balances</p>
+              <h3>{collectionsChargebackPolicy.title}</h3>
+              <p>{collectionsChargebackPolicy.detail}</p>
+            </article>
+          </div>
+        </div>
+
         <div className="card-grid two-up">
           <article className="info-card">
             <p className="section-kicker">Clinical training site locations</p>
@@ -195,7 +242,7 @@ export function ProgramsPage({ programs, programLoadError }) {
             <p>{locationDetails.note}</p>
           </article>
 
-          <article className="info-card dark-card">
+          <article id="program-next-step" className="info-card dark-card">
             <p className="section-kicker">Next step</p>
             <h3>Review current availability and payment options before submitting enrollment.</h3>
             <p>
