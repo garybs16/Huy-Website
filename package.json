@@ -13,10 +13,11 @@
     "start": "node server/index.js",
     "check:harmony": "node scripts/harmony-check.mjs",
     "check:production": "node scripts/production-smoke.mjs",
+    "check:content": "node scripts/content-regression.mjs",
     "check:readiness": "node scripts/readiness-check.mjs",
     "check:health": "node scripts/healthcheck.mjs",
     "admin:hash": "node scripts/hash-admin-password.mjs",
-    "verify": "npm run build && npm audit && npm run check:readiness && npm run check:harmony && npm run check:production",
+    "verify": "npm run build && npm audit && npm run check:content && npm run check:readiness && npm run check:harmony && npm run check:production",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -38,7 +39,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.1",
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.3",
     "nodemon": "^3.1.11",
     "vite": "^8.0.10"
   }
