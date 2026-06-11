@@ -17,6 +17,7 @@
     "check:readiness": "node scripts/readiness-check.mjs",
     "check:health": "node scripts/healthcheck.mjs",
     "admin:hash": "node scripts/hash-admin-password.mjs",
+    "env:production": "node scripts/generate-production-env.mjs",
     "verify": "npm run build && npm audit && npm run check:content && npm run check:readiness && npm run check:harmony && npm run check:production",
     "build": "vite build",
     "preview": "vite preview"

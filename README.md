@@ -70,6 +70,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `npm run check:production`: smoke test the built frontend + Express API together in production mode
 - `npm run check:readiness`: verify seat-hold capacity protection, expired hold cleanup, operational export, and SQLite backup creation
 - `npm run check:health`: check a running app's `/api/health` endpoint (`HEALTHCHECK_URL` can override the target)
+- `npm run env:production -- "AdminPassword" "https://your-domain.com"`: generate AWS/production env values without committing secrets
 - `npm run verify`: run build, dependency audit, readiness check, API smoke test, and production smoke test
 - `npm run build`: build frontend
 - `npm run preview`: preview frontend build

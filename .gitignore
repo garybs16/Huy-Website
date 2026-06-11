@@ -3,6 +3,8 @@ dist
 .DS_Store
 *.log
 .env
+.env.*
+!.env.example
 server/data/*.json
 server/data/*.db
 server/data/*.db-shm

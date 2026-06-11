@@ -22,6 +22,14 @@ Those can host the frontend, but the API, admin dashboard, SQLite data, backups,
 
 ## Required Production Variables
 
+Generate production-ready secret values with:
+
+```bash
+npm run env:production -- "YourStrongAdminPassword" "https://your-domain.com"
+```
+
+Paste the output into your AWS service environment variables, then fill in Stripe and notification values if you are using those services. A non-secret template is also available in `aws-production.env.example`.
+
 ```env
 NODE_ENV=production
 PORT=4000
@@ -32,9 +40,9 @@ DATABASE_URL=/var/data/enrollment.db
 STATIC_DIR=dist
 
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=replace-with-a-strong-password
-ADMIN_SESSION_SECRET=replace-with-a-long-random-secret
-API_ADMIN_KEY=replace-with-a-long-random-key
+ADMIN_PASSWORD_HASH=replace-with-generated-password-hash
+ADMIN_SESSION_SECRET=replace-with-generated-secret
+API_ADMIN_KEY=replace-with-generated-api-key
 
 PUBLIC_APP_URL=https://your-domain.com
 STRIPE_SECRET_KEY=
@@ -98,6 +106,26 @@ Recommended shape:
 - PM2 or systemd for process supervision
 - Persistent attached disk or instance volume for `/var/data`
 - HTTPS certificate through Let’s Encrypt, AWS ACM behind a load balancer, or Lightsail certificate tooling
+
+Minimum server setup:
+
+```bash
+git clone https://github.com/garybs16/Huy-Website.git
+cd Huy-Website
+npm install
+npm run verify
+npm run build
+npm run env:production -- "YourStrongAdminPassword" "https://your-domain.com"
+```
+
+Create `/var/data` and keep it persistent:
+
+```bash
+sudo mkdir -p /var/data
+sudo chown -R "$USER":"$USER" /var/data
+```
+
+Set the generated environment variables in your process manager, then start the app.
 
 Nginx proxy:
 
