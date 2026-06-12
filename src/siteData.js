@@ -3,6 +3,7 @@ import { cohortCatalogSeed, programCatalogSeed } from "../shared/catalogSeed";
 export const navItems = [
   { label: "Home", to: "/" },
   { label: "Programs", to: "/programs" },
+  { label: "Quiz", to: "/career-quiz" },
   { label: "Rewards & Guidance", to: "/rewards-guidance" },
   { label: "Schedule", to: "/schedule" },
   { label: "Payment", to: "/payment" },

@@ -29,6 +29,11 @@ export function HomePage({ programs }) {
       to: "/rewards-guidance",
     },
   ];
+  const decisionStats = [
+    { value: "6 weeks", label: "CNA training path" },
+    { value: "$100", label: "eligible referral reward" },
+    { value: "Direct", label: "admissions guidance" },
+  ];
   return (
     <>
       <section className="hero-panel">
@@ -61,6 +66,15 @@ export function HomePage({ programs }) {
               with California compliance requirements so students can train with clear expectations
               from the start.
             </p>
+
+            <div className="hero-decision-strip" aria-label="Program decision highlights">
+              {decisionStats.map((item) => (
+                <div key={item.label}>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
 
             <div className="training-timeline" aria-label="CNA training timeline">
               {trainingTimeline.map((item, index) => (
