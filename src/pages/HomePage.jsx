@@ -15,7 +15,7 @@ import {
 export function HomePage({ programs }) {
   const heroTrustItems = [
     { label: "State approved CNA program" },
-    { label: "Career Quiz Assessment", to: "/career-quiz" },
+    { label: "Take the Quiz Assessment", to: "/career-quiz", featured: true },
   ];
   const trainingTimeline = [
     {
@@ -38,7 +38,11 @@ export function HomePage({ programs }) {
             <div className="hero-trust-list" aria-label="School highlights">
               {heroTrustItems.map((item) => (
                 item.to ? (
-                  <Link key={item.label} to={item.to} className="hero-trust-item">
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    className={`hero-trust-item ${item.featured ? "hero-trust-item-featured" : ""}`}
+                  >
                     {item.label}
                   </Link>
                 ) : (
