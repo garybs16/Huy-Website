@@ -48,7 +48,7 @@ export function HomePage({ programs }) {
                 )
               ))}
             </div>
-            <h1 className="hero-title">
+            <h1 className="hero-title" aria-label="Certified Nursing Assistant in 6 Weeks">
               <span>Certified Nursing Assistant</span>
               <span>in 6 Weeks</span>
             </h1>

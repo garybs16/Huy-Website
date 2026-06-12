@@ -290,6 +290,12 @@
   gap: 1.05rem;
 }
 
+.page-intro-aside {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+}
+
 .hero-copy h1,
 .page-intro h1,
 .register-intro h1,
@@ -446,10 +452,12 @@
 }
 
 .page-intro-aside strong {
+  display: block;
   color: var(--brand);
   font-size: 1.28rem;
   font-weight: 800;
   letter-spacing: 0;
+  line-height: 1.25;
   text-transform: none;
 }
 
@@ -2682,7 +2690,7 @@
   }
 
   .brand-copy {
-    max-width: min(50vw, 220px);
+    max-width: min(56vw, 245px);
   }
 
   .brand-icon-image {
@@ -2691,7 +2699,13 @@
   }
 
   .brand-title {
-    font-size: 0.95rem;
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.92rem;
+    line-height: 1.12;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .hero-copy h1,
