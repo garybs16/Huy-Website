@@ -47,7 +47,7 @@ export function RewardsGuidancePage() {
           <p>
             Students can use study guides, skills checklists, quick-reference resources, clinical
             preparation support, and job-readiness guidance while building toward CNA employment
-            and future LVN, RN, or nursing school goals.
+            and future healthcare goals.
           </p>
           <Link to="/career-quiz" className="card-action-link">
             Take the pre-CNA quiz
@@ -148,7 +148,7 @@ export function RewardsGuidancePage() {
 
         <article id="career-support" className="info-card">
           <p className="section-kicker">Career support</p>
-          <h2>Guidance for CNA jobs and future nursing goals.</h2>
+          <h2>Guidance for CNA jobs and future healthcare goals.</h2>
           <ul className="detail-list compact-list">
             {careerSupportItems.map((item) => (
               <li key={item}>{item}</li>

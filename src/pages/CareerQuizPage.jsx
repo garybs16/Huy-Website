@@ -117,7 +117,7 @@ export function CareerQuizPage() {
               ) : null}
 
               <Link to="/programs" className="card-action-link">
-                Explore programs
+                Explore CNA training
               </Link>
             </div>
           ) : null}

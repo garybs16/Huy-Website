@@ -430,7 +430,7 @@ export function AdminPage({
                 <div className="admin-card-top">
                   <div>
                     <p className="section-kicker">Current programs</p>
-                    <h3>Manage public training options</h3>
+                    <h3>Manage CNA public catalog</h3>
                   </div>
                 </div>
                 <div className="admin-list">
@@ -500,7 +500,7 @@ export function AdminPage({
                       <span>Program</span>
                       <select name="programId" value={cohortForm.programId} onChange={handleCohortInput} required>
                         <option value="" disabled>
-                          Select a program
+                          Select CNA program
                         </option>
                         {adminPrograms.map((program) => (
                           <option key={program.id} value={program.id}>

@@ -33,6 +33,7 @@ async function run() {
     const programsBody = await programsRes.json();
     assert(Array.isArray(programsBody.items), "Programs payload must contain items array");
     assert(programsBody.items.length > 0, "Programs array cannot be empty");
+    assert(programsBody.items.every((item) => item.id === "cna"), "Public programs must remain CNA-only");
 
     const cohortsRes = await fetch(`http://localhost:${port}/api/cohorts`);
     assert(cohortsRes.ok, "Failed to load cohorts from API");
@@ -211,8 +212,8 @@ async function run() {
     const publicProgramsAfterCreateRes = await fetch(`http://localhost:${port}/api/programs`);
     const publicProgramsAfterCreate = await publicProgramsAfterCreateRes.json();
     assert(
-      publicProgramsAfterCreate.items.some((item) => item.id === "harmony-program"),
-      "Public programs did not reflect the created admin program"
+      publicProgramsAfterCreate.items.every((item) => item.id === "cna"),
+      "Public programs must not expose admin-created non-CNA programs"
     );
 
     const adminProgramUpdateRes = await fetch(`http://localhost:${port}/api/admin/programs/harmony-program`, {

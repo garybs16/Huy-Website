@@ -53,11 +53,13 @@ async function run() {
     assert(programsRes.ok, "Production API failed to serve programs");
     const programsBody = await programsRes.json();
     assert(Array.isArray(programsBody.items) && programsBody.items.length > 0, "Programs payload is invalid");
+    assert(programsBody.items.every((item) => item.id === "cna"), "Production public programs must remain CNA-only");
 
     const cohortsRes = await fetch(`http://localhost:${port}/api/cohorts`);
     assert(cohortsRes.ok, "Production API failed to serve cohorts");
     const cohortsBody = await cohortsRes.json();
     assert(Array.isArray(cohortsBody.items) && cohortsBody.items.length > 0, "Cohorts payload is invalid");
+    assert(cohortsBody.items.every((item) => item.programId === "cna"), "Production public cohorts must remain CNA-only");
     const depositCohort = cohortsBody.items.find((item) => item.allowPaymentPlan);
     assert(depositCohort, "Production cohorts must expose at least one payment-plan option");
 
@@ -211,8 +213,8 @@ async function run() {
     const publicProgramsAfterCreateRes = await fetch(`http://localhost:${port}/api/programs`);
     const publicProgramsAfterCreate = await publicProgramsAfterCreateRes.json();
     assert(
-      publicProgramsAfterCreate.items.some((item) => item.id === "production-program"),
-      "Production public programs did not reflect admin CRUD changes"
+      publicProgramsAfterCreate.items.every((item) => item.id === "cna"),
+      "Production public programs must not expose admin-created non-CNA programs"
     );
 
     const adminCohortDeleteRes = await fetch(`http://localhost:${port}/api/admin/cohorts/production-cohort`, {

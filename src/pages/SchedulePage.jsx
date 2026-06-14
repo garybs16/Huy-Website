@@ -27,7 +27,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
       <PageIntro
         kicker="Schedule"
         title="See upcoming class formats, meeting times, pricing, and open seats in one place."
-        description="Compare current cohorts by program, schedule format, and tuition so students can identify the right track before they register."
+        description="Compare current CNA cohorts by schedule format and tuition so students can identify the right track before they register."
         accent="Real class visibility"
         note="Exact public cohort dates are coming soon while approved calendars are finalized."
       />
@@ -54,7 +54,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
               </ul>
               <p className="card-note">Registration stays tied to the selected cohort and pricing.</p>
               <Link to={buildRegisterUrl(cohort)} className="card-action-link">
-                Register for this track
+                Register for this cohort
               </Link>
             </article>
           ))}
@@ -73,7 +73,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
 
         <article className="info-card">
           <p className="section-kicker">Next step</p>
-          <h3>Once a student sees the right track, they can move straight into registration.</h3>
+          <h3>Once a student sees the right cohort, they can move straight into registration.</h3>
           <p>
             The published schedule and the registration form speak the same language, which keeps
             the experience clear from first review to seat reservation.

@@ -35,8 +35,6 @@ async function run() {
     "referralRules",
     "Quick-reference guides",
     "Retention",
-    "LVN",
-    "RN",
   ]) {
     assertIncludes(siteData, expected, "Shared site data");
   }

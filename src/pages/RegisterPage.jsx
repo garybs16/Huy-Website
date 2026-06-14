@@ -22,8 +22,8 @@ export function RegisterPage({
   onSubmit,
 }) {
   const registrationSteps = [
-    "Choose the program that matches your goal.",
-    "Select the cohort with the best timing and available seats.",
+    "Review the CNA program details.",
+    "Select the CNA cohort with the best timing and available seats.",
     "Choose full tuition or a published deposit plan before checkout or admissions follow-up.",
   ];
   const dueTodayCents =
@@ -40,9 +40,9 @@ export function RegisterPage({
       <PageIntro
         kicker="Registration"
         title="Reserve a seat with a registration flow that stays clear from cohort selection to checkout."
-        description="Choose a program, confirm the right cohort, and submit one organized student record before payment or admissions follow-up."
+        description="Choose the CNA program, confirm the right cohort, and submit one organized student record before payment or admissions follow-up."
         accent="Ready-to-enroll workflow"
-        note="Program choice, cohort details, and student intake stay connected."
+        note="CNA program choice, cohort details, and student intake stay connected."
       />
 
       <div className="container register-layout">
@@ -106,7 +106,7 @@ export function RegisterPage({
 
         <article className="form-card register-form-card">
           <h2>Start Enrollment</h2>
-          <p className="form-helper">Choose a program and cohort, then submit student details for the next step.</p>
+          <p className="form-helper">Choose the CNA program and cohort, then submit student details for the next step.</p>
           {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}
 
           <form className="form-stack" onSubmit={onSubmit}>
@@ -176,10 +176,10 @@ export function RegisterPage({
 
             <div className="form-grid two-up">
               <label>
-                <span>Program</span>
+                <span>CNA program</span>
                 <select name="programId" value={enrollmentForm.programId} onChange={onInput} required>
                   <option value="" disabled>
-                    Select a program
+                    Select CNA program
                   </option>
                   {programs.map((program) => (
                     <option key={program.id} value={program.id}>
@@ -199,7 +199,7 @@ export function RegisterPage({
                   disabled={!enrollmentForm.programId}
                 >
                   <option value="" disabled>
-                    {enrollmentForm.programId ? "Select a cohort" : "Choose a program first"}
+                    {enrollmentForm.programId ? "Select a cohort" : "Choose the CNA program first"}
                   </option>
                   {filteredCohorts.map((cohort) => (
                     <option key={cohort.id} value={cohort.id} disabled={cohort.remainingSeats <= 0}>

@@ -21,15 +21,15 @@ export function ProgramsPage({ programs, programLoadError }) {
   return (
     <section className="section">
       <PageIntro
-        kicker="Programs"
-        title="Choose the healthcare training path that fits your timeline and credential goals."
-        description="Compare current program options, review format details, program requirements, fees, policies, and next steps without digging through extra pages."
-        accent="Program comparison made clear"
+        kicker="CNA Program"
+        title="Review the Certified Nurse Assistant training path, requirements, and next steps."
+        description="Review CNA format details, program requirements, fees, policies, and next steps without digging through extra pages."
+        accent="CNA training details made clear"
         note="Format, duration, and admissions context stay visible together."
       />
 
-      <div className="container page-jump-nav" aria-label="Program sections">
-        <a href="#program-options">Programs</a>
+      <div className="container page-jump-nav" aria-label="CNA program sections">
+        <a href="#program-options">CNA Program</a>
         <a href="#program-requirements">Requirements</a>
         <a href="#program-fees">Fees</a>
         <a href="#program-policies">Policies</a>
@@ -97,17 +97,17 @@ export function ProgramsPage({ programs, programLoadError }) {
 
       <div className="container card-grid two-up">
         <article className="info-card">
-          <p className="section-kicker">Program planning</p>
-          <h3>Students can compare schedules, formats, and next steps without extra clicks.</h3>
+          <p className="section-kicker">CNA planning</p>
+          <h3>Students can review schedules, formats, and next steps without extra clicks.</h3>
           <p>
-            Each card is structured to answer the first questions most applicants ask: what the
-            training covers, how long it takes, and how it fits into enrollment.
+            The CNA overview is structured to answer the first questions most applicants ask: what
+            the training covers, how long it takes, and how it fits into enrollment.
           </p>
         </article>
 
         <article className="info-card">
           <p className="section-kicker">Admissions flow</p>
-          <h3>Once a student finds the right track, the next step stays simple.</h3>
+          <h3>Once a student confirms the right schedule, the next step stays simple.</h3>
           <ol className="detail-list ordered-list">
             {admissionsSteps.slice(0, 3).map((step) => (
               <li key={step}>{step}</li>

@@ -7,22 +7,6 @@ export const programCatalogSeed = [
     duration: "4-6 weeks",
     schedule: "Weekday, evening, and weekend cohorts",
   },
-  {
-    id: "med-aide",
-    title: "Medication Aide Fundamentals",
-    summary:
-      "Safe medication administration training designed for caregivers and support staff expanding responsibilities.",
-    duration: "3 weeks",
-    schedule: "Evening and Saturday formats",
-  },
-  {
-    id: "cpr",
-    title: "CPR / BLS Certification",
-    summary:
-      "AHA-aligned emergency response certification for healthcare professionals and teams needing immediate compliance.",
-    duration: "1 day",
-    schedule: "Daily open sessions",
-  },
 ];
 
 export const cohortCatalogSeed = [
@@ -70,35 +54,5 @@ export const cohortCatalogSeed = [
     capacity: 15,
     isActive: true,
     sortOrder: 30,
-  },
-  {
-    id: "med-aide-evening-may-2026",
-    programId: "med-aide",
-    title: "Medication Aide Evening Cohort",
-    startDate: "2026-05-04",
-    endDate: "2026-05-22",
-    scheduleLabel: "Evening",
-    meetingPattern: "Monday to Thursday | 5:30 PM to 9:00 PM",
-    tuitionCents: 202000,
-    allowPaymentPlan: true,
-    paymentPlanDepositCents: 70000,
-    capacity: 12,
-    isActive: true,
-    sortOrder: 40,
-  },
-  {
-    id: "cpr-open-session",
-    programId: "cpr",
-    title: "CPR / BLS Open Session",
-    startDate: "2026-04-15",
-    endDate: "2026-04-15",
-    scheduleLabel: "Open Session",
-    meetingPattern: "Single-day certification session",
-    tuitionCents: 12500,
-    allowPaymentPlan: false,
-    paymentPlanDepositCents: null,
-    capacity: 20,
-    isActive: true,
-    sortOrder: 50,
   },
 ];

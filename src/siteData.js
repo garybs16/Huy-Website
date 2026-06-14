@@ -2,7 +2,7 @@ import { cohortCatalogSeed, programCatalogSeed } from "../shared/catalogSeed";
 
 export const navItems = [
   { label: "Home", to: "/" },
-  { label: "Programs", to: "/programs" },
+  { label: "CNA Program", to: "/programs" },
   { label: "Quiz", to: "/career-quiz" },
   { label: "Rewards & Guidance", to: "/rewards-guidance" },
   { label: "Schedule", to: "/schedule" },
@@ -54,27 +54,17 @@ export const programMeta = {
     badge: "Flagship Track",
     detail: "Includes classroom instruction, lab skills, and supervised clinical preparation.",
   },
-  "med-aide": {
-    tag: "Bridge",
-    badge: "Short Format",
-    detail: "Designed for students who need a faster pathway into medication-support workflows.",
-  },
-  cpr: {
-    tag: "Certification",
-    badge: "Fast Turnaround",
-    detail: "Built for direct renewal needs and employer-driven compliance timelines.",
-  },
 };
 
 export const quickLinks = [
   {
-    title: "Explore programs",
-    detail: "Compare the current training options and decide which path matches your goals.",
+    title: "Explore CNA training",
+    detail: "Review the current CNA training option and decide which schedule matches your goals.",
     to: "/programs",
   },
   {
     title: "Review class timing",
-    detail: "See weekday, weekend, evening, and open-session formats in one place.",
+    detail: "See weekday, weekend, and evening CNA formats in one place.",
     to: "/schedule",
   },
   {
@@ -175,8 +165,8 @@ export const careerSupportItems = [
   "Job search guidance",
   "Professional communication support",
   "Help understanding CNA career pathways",
-  "Guidance on using CNA experience for future nursing school applications",
-  "Education pathway overview: CNA to LVN to RN to BSN",
+  "Guidance on using CNA experience for future healthcare applications",
+  "Education pathway overview for continued healthcare career planning",
   "Employer expectations and workplace professionalism",
   "Support understanding clinical readiness and resident care expectations",
 ];
@@ -211,7 +201,7 @@ export const industryGrowthRows = [
 ];
 
 export const admissionsSteps = [
-  "Choose a program and review the published cohort options.",
+  "Review the CNA program and published cohort options.",
   "Submit your inquiry or enrollment details for admissions review.",
   "Prepare identification, health documents, and screening requirements.",
   "Confirm payment, onboarding, and final class readiness before your start date.",
@@ -244,16 +234,6 @@ export const tuitionItems = [
     detail:
       "Current promotional CNA tuition is $1,750 after a $600 discount, plus a $250 non-refundable registration fee, for a $2,000 program total.",
   },
-  {
-    title: "Medication Aide",
-    amount: "$2,020.00",
-    detail: "Short-format evening training built for a faster bridge into medication support.",
-  },
-  {
-    title: "CPR / BLS",
-    amount: "$125.00",
-    detail: "Single-day certification pricing for open-session scheduling.",
-  },
 ];
 
 export const miscFeeItems = [
@@ -261,7 +241,7 @@ export const miscFeeItems = [
   "Eligible veterans may receive an additional $100 discount when approved before enrollment",
   "$250 registration fee is non-refundable and may be used as the payment-plan deposit",
   "Payment plan example: $250 registration fee deposit, then $1,750 remaining balance through scheduled installments",
-  "Additional possible costs may include uniform or dress code items, textbooks or learning materials, health clearance documents, TB testing, CPR/BLS certification, Live Scan, and state testing fees",
+  "Additional possible costs may include uniform or dress code items, textbooks or learning materials, health clearance documents, TB testing, required health and safety certifications, Live Scan, and state testing fees",
   "Payment deadlines are provided before enrollment and must stay current for continued participation",
 ];
 
@@ -460,7 +440,7 @@ export const footerGroups = [
     title: "Quick Menu",
     items: [
       { label: "Home", to: "/" },
-      { label: "Programs", to: "/programs" },
+      { label: "CNA Program", to: "/programs" },
       { label: "Rewards & Guidance", to: "/rewards-guidance" },
       { label: "Career Quiz", to: "/career-quiz" },
       { label: "Schedule", to: "/schedule" },
@@ -469,11 +449,9 @@ export const footerGroups = [
     ],
   },
   {
-    title: "Programs",
+    title: "CNA Program",
     items: [
       { label: "Certified Nurse Assistant", to: "/programs" },
-      { label: "Medication Aide Fundamentals", to: "/programs" },
-      { label: "CPR / BLS Certification", to: "/programs" },
     ],
   },
   {

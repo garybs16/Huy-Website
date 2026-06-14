@@ -146,7 +146,7 @@ export function HomePage({ programs }) {
                 Join the growing healthcare field with CNA training that builds hands-on skills,
                 patient-care experience, and a stronger foundation for what comes next.
               </p>
-              <span>Explore Programs</span>
+              <span>Explore CNA Training</span>
             </Link>
           </div>
 
@@ -205,11 +205,11 @@ export function HomePage({ programs }) {
       <section className="section section-soft">
         <div className="container section-heading">
           <div>
-            <p className="section-kicker">Programs</p>
-            <h2>Explore current training paths with the key details already surfaced.</h2>
+            <p className="section-kicker">CNA Program</p>
+            <h2>Explore CNA training with the key details already surfaced.</h2>
           </div>
           <p>
-            Students can compare delivery format, timeline, and admissions context before they ever
+            Students can review delivery format, timeline, and admissions context before they ever
             contact the school.
           </p>
         </div>

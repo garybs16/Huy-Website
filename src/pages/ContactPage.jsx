@@ -19,7 +19,7 @@ export function ContactPage({
     <section className="section">
       <PageIntro
         kicker="Contact"
-        title="Talk to admissions when you need help choosing a program, preparing documents, or planning a start date."
+        title="Talk to admissions when you need help with CNA training, required documents, or planning a start date."
         description="Reach the admissions desk directly, submit an inquiry, or join the interest list for upcoming classes and schedule updates."
         accent="Admissions support in one place"
         note="Phone, email, office details, and follow-up forms stay easy to reach."
@@ -59,7 +59,7 @@ export function ContactPage({
           </div>
           <article className="form-card">
             <h2>Request Information</h2>
-            <p className="form-helper">Share your program interest and an admissions coordinator will follow up.</p>
+            <p className="form-helper">Share your CNA training interest and an admissions coordinator will follow up.</p>
             <form className="form-stack" onSubmit={onInquirySubmit}>
               <label>
                 <span>Full name</span>
@@ -74,10 +74,10 @@ export function ContactPage({
                 <input name="phone" type="tel" value={inquiryForm.phone} onChange={onInquiryInput} />
               </label>
               <label>
-                <span>Program of interest</span>
+                <span>CNA program of interest</span>
                 <select name="program" value={inquiryForm.program} onChange={onInquiryInput} required>
                   <option value="" disabled>
-                    Select a program
+                    Select CNA program
                   </option>
                   {programs.map((program) => (
                     <option key={program.id} value={program.id}>
