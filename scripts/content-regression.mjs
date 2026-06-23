@@ -50,8 +50,32 @@ async function run() {
     assertIncludes(programsPage, anchor, "Programs page anchor");
   }
 
-  for (const anchor of ["referral-rewards", "retention-recognition", "study-tools", "career-support"]) {
+  for (const anchor of [
+    "cohorts",
+    "tuition",
+    "free-resources",
+    "referral-rewards",
+    "retention-recognition",
+    "study-tools",
+    "career-support",
+    "callback",
+  ]) {
     assertIncludes(rewardsPage, anchor, "Rewards page anchor");
+  }
+
+  for (const expected of [
+    "Train with a friend",
+    "Payment plan available",
+    "California Department of Public Health approved",
+    "CNA Career Starter Guide",
+    "OC Nursing School Pathway Guide",
+    "Request a support phone call",
+    "Preferred callback window",
+    "What would you like to discuss?",
+    "Which best describes your goal?",
+    "Request a Callback",
+  ]) {
+    assertIncludes(rewardsPage, expected, "Rewards landing-page content");
   }
 
   assertIncludes(registerPage, "/admissions#refund-policy", "Registration policy link");

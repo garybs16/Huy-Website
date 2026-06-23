@@ -1,166 +1,467 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { PageIntro } from "../components/PageIntro";
+import heroTraining from "../assets/hero-training-photo-v2.jpg";
+import programsSupport from "../assets/programs-support-photo.jpg";
+import { submitInquiry } from "../lib/api";
 import {
   careerSupportItems,
-  referralProgramSteps,
   referralRules,
   retentionMilestones,
-  rewardsGuidanceItems,
   studyToolItems,
 } from "../siteData";
 
-export function RewardsGuidancePage() {
-  return (
-    <section className="section section-soft">
-      <PageIntro
-        kicker="Rewards & Guidance"
-        title="CNA support that helps students save money, stay organized, and plan ahead."
-        description="Review referral rewards, retention recognition, study tools, and career guidance for students using CNA training as a first step into healthcare."
-        accent="$100 referral reward"
-        note="Referral rewards are tied to eligibility, enrollment, referral-code use, and first-day theory attendance."
-      />
+const scheduleOptions = [
+  { label: "Weekday", time: "Monday–Friday", note: "Accelerated daytime format" },
+  { label: "Evening", time: "Monday–Friday", note: "Designed around daytime commitments" },
+  { label: "Weekend", time: "Saturday–Sunday", note: "Focused weekend training" },
+];
 
-      <div className="container page-jump-nav" aria-label="Rewards and guidance sections">
-        <a href="#referral-rewards">Referral Rewards</a>
-        <a href="#retention-recognition">Retention</a>
+const supportPillars = [
+  { number: "01", title: "Referral rewards", text: "Eligible students can save together when program requirements are met." },
+  { number: "02", title: "Retention recognition", text: "Qualifying graduates may be recognized for continuing into CNA employment." },
+  { number: "03", title: "Study tools included", text: "Structured resources support theory, clinical preparation, and exam review." },
+  { number: "04", title: "Career guidance", text: "Practical help for CNA jobs and longer-term healthcare education goals." },
+];
+
+const referralSteps = [
+  ["Get your referral code", "After enrolling, students receive a personal referral code."],
+  ["Share it with someone", "Invite a friend, sibling, cousin, coworker, or loved one to explore CNA training."],
+  ["Move forward together", "When eligibility and attendance terms are met, each person may receive a $100 benefit."],
+];
+
+const callbackTopics = [
+  "Class schedule",
+  "Tuition and payment plan",
+  "Enrollment requirements",
+  "Upcoming cohort availability",
+  "Clinical training expectations",
+  "Online theory format",
+  "CNA jobs or career guidance",
+  "CNA as a first step toward LVN/RN or nursing school",
+  "I am ready to apply",
+  "Other",
+];
+
+const goalOptions = [
+  "I want CNA training as a first step toward LVN/RN or nursing school",
+  "I want a stable healthcare job to support myself or my family",
+  "I am changing careers and exploring healthcare",
+  "I already work in healthcare or caregiving and want to become certified",
+  "I am not sure yet and want to learn more",
+  "Other",
+];
+
+const initialForm = {
+  fullName: "",
+  city: "",
+  phone: "",
+  email: "",
+  callbackWindow: "",
+  topics: [],
+  goal: "",
+  details: "",
+  consent: false,
+  updates: false,
+};
+
+function formatDate(dateValue) {
+  if (!dateValue) return "Date announced soon";
+  const date = new Date(`${dateValue}T12:00:00`);
+  return Number.isNaN(date.getTime())
+    ? "Date announced soon"
+    : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+}
+
+export function RewardsGuidancePage({ cohorts = [] }) {
+  const [form, setForm] = useState(initialForm);
+  const [pending, setPending] = useState(false);
+  const [status, setStatus] = useState({ type: "", text: "" });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const activeCohorts = cohorts
+    .filter((cohort) => {
+      if (cohort.isActive === false || !cohort.startDate) return false;
+      const startDate = new Date(`${cohort.startDate}T12:00:00`);
+      return !Number.isNaN(startDate.getTime()) && startDate >= today;
+    })
+    .slice(0, 3);
+
+  function updateField(event) {
+    const { name, value, checked, type } = event.target;
+    setForm((current) => ({ ...current, [name]: type === "checkbox" ? checked : value }));
+  }
+
+  function updateTopic(event) {
+    const { value, checked } = event.target;
+    setForm((current) => ({
+      ...current,
+      topics: checked ? [...current.topics, value] : current.topics.filter((topic) => topic !== value),
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setPending(true);
+    setStatus({ type: "", text: "" });
+
+    const message = [
+      `City: ${form.city}`,
+      `Preferred callback window: ${form.callbackWindow}`,
+      `Topics: ${form.topics.length ? form.topics.join(", ") : "Not specified"}`,
+      `Goal: ${form.goal}`,
+      `Additional details: ${form.details || "None provided"}`,
+      `Program updates consent: ${form.updates ? "Yes" : "No"}`,
+    ].join("\n");
+
+    try {
+      await submitInquiry({
+        fullName: form.fullName,
+        email: form.email,
+        phone: form.phone,
+        program: "cna",
+        message,
+        source: "rewards-guidance-landing",
+      });
+      setForm(initialForm);
+      setStatus({ type: "success", text: "Your callback request was sent. Admissions will follow up as soon as possible." });
+    } catch (error) {
+      setStatus({ type: "error", text: error.message || "We could not send your request. Please call admissions for immediate help." });
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="rewards-landing">
+      <section className="rg-hero">
+        <div className="container rg-hero-grid">
+          <div className="rg-hero-copy">
+            <p className="rg-eyebrow">CNA training in Orange, California</p>
+            <h1>Train with a friend. <span>Build your future together.</span></h1>
+            <p className="rg-hero-lead">
+              <strong>Refer a friend. You both may get $100.</strong> Starting something new can feel
+              easier with someone by your side. Build skills, accountability, and confidence together
+              while preparing for a meaningful role in healthcare. Healthcare is built on connection,
+              and your first step can feel stronger when you take it together.
+            </p>
+            <div className="button-row">
+              <Link to="/register" className="btn btn-primary">Start Your Application</Link>
+              <a href="#callback" className="btn btn-ghost">Talk to Admissions</a>
+            </div>
+            <div className="rg-trust-row" aria-label="Program highlights">
+              <span>160-hour CNA program</span>
+              <span>Flexible cohort formats</span>
+              <span>Payment plan available</span>
+            </div>
+          </div>
+
+          <div className="rg-hero-visual">
+            <img src={heroTraining} alt="CNA students receiving hands-on clinical skills instruction" />
+            <div className="rg-offer-card">
+              <span>Referral offer</span>
+              <strong>$100 for your friend + $100 for you</strong>
+              <small>Eligibility, enrollment, referral-code, and attendance terms apply.</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <nav className="container rg-section-nav" aria-label="Page sections">
+        <a href="#cohorts">Cohorts</a>
+        <a href="#tuition">Tuition</a>
+        <a href="#free-resources">Free Resources</a>
+        <a href="#rewards">Rewards</a>
         <a href="#study-tools">Study Tools</a>
         <a href="#career-support">Career Support</a>
-      </div>
+        <a href="#callback">Request a Call</a>
+      </nav>
 
-      <div className="container rewards-hero-panel">
-        <article id="referral-rewards" className="info-card dark-card">
-          <p className="section-kicker">Referral rewards</p>
-          <h2>Refer a friend and you may both benefit.</h2>
-          <p>
-            Current, incoming, and graduate students can share a personal referral code with
-            someone ready to start CNA training. When eligibility requirements are met, the referred
-            student may receive $100 off tuition and the referrer may receive a $100 reward.
-          </p>
-          <Link to="/contact" className="card-action-link">
-            Ask about referral eligibility
-          </Link>
-        </article>
+      <section id="cohorts" className="rg-section rg-cohort-section">
+        <div className="container">
+          <div className="rg-centered-heading">
+            <p className="section-kicker">Choose a format that fits your life</p>
+            <h2>Multiple cohort options. One practical first step.</h2>
+            <p>Compare the typical formats below, then review the live schedule for current dates and availability.</p>
+          </div>
+          <div className="rg-cohort-grid">
+            {scheduleOptions.map((option, index) => {
+              const cohort = activeCohorts.find((item) => item.scheduleLabel?.toLowerCase() === option.label.toLowerCase()) ?? activeCohorts[index];
+              return (
+                <article className="rg-cohort-card" key={option.label}>
+                  <span className="rg-card-tag">{option.label}</span>
+                  <h3>{cohort?.meetingPattern || option.time}</h3>
+                  <p>{cohort ? `Next listed start: ${formatDate(cohort.startDate)}` : option.note}</p>
+                  <Link to={cohort ? `/register?programId=cna&cohortId=${cohort.id}` : "/schedule"}>Review this option <span aria-hidden="true">→</span></Link>
+                </article>
+              );
+            })}
+          </div>
+          <div className="rg-inline-action">
+            <p>Dates, seats, and clinical timing can change as cohorts are finalized.</p>
+            <Link to="/schedule" className="btn btn-ghost">View Current Schedule</Link>
+          </div>
+        </div>
+      </section>
 
-        <article className="info-card">
-          <p className="section-kicker">Student tools</p>
-          <h2>Study support and career planning stay connected.</h2>
-          <p>
-            Students can use study guides, skills checklists, quick-reference resources, clinical
-            preparation support, and job-readiness guidance while building toward CNA employment
-            and future healthcare goals.
-          </p>
-          <Link to="/career-quiz" className="card-action-link">
-            Take the pre-CNA quiz
-          </Link>
-        </article>
-      </div>
+      <section id="tuition" className="rg-section rg-tuition-section">
+        <div className="container">
+          <div className="rg-centered-heading">
+            <p className="section-kicker">Straightforward payment options</p>
+            <h2>Choose the payment path that works for you.</h2>
+            <p>Current promotional program total: $2,000, including the $250 non-refundable registration fee.</p>
+          </div>
+          <div className="rg-pricing-grid">
+            <article className="rg-price-card rg-price-featured">
+              <span className="rg-price-label">Option 1 · simplest</span>
+              <h3>Pay in full</h3>
+              <p>Complete tuition payment before class and keep enrollment straightforward.</p>
+              <div className="rg-price-line"><span>Registration fee</span><strong>$250</strong></div>
+              <div className="rg-price-line"><span>Remaining tuition</span><strong>$1,750</strong></div>
+              <div className="rg-price-total"><span>Total</span><strong>$2,000</strong></div>
+              <Link to="/register" className="btn btn-primary">Register Now</Link>
+            </article>
+            <article className="rg-price-card">
+              <span className="rg-price-label">Option 2 · flexible</span>
+              <h3>Start with the deposit</h3>
+              <p>Begin with the registration-fee deposit, then complete the remaining balance on the approved schedule.</p>
+              <div className="rg-price-line"><span>Due at registration</span><strong>$250</strong></div>
+              <div className="rg-price-line"><span>Remaining balance</span><strong>$1,750</strong></div>
+              <div className="rg-price-total"><span>Program total</span><strong>$2,000</strong></div>
+              <a href="#callback" className="btn btn-ghost">Discuss a Payment Plan</a>
+            </article>
+          </div>
+          <p className="rg-fine-print">Payment plans, deadlines, and eligibility are confirmed during enrollment. Additional third-party costs may apply for required documents, certifications, screening, uniforms, learning materials, or state testing.</p>
+        </div>
+      </section>
 
-      <div className="container card-grid four-up">
-        {rewardsGuidanceItems.map((item) => (
-          <article key={item.title} className="support-card">
-            <h3>{item.title}</h3>
-            <p>{item.detail}</p>
-          </article>
-        ))}
-      </div>
+      <section className="rg-approval-band" aria-label="Program approval">
+        <div className="container rg-approval-inner">
+          <div className="rg-approval-mark" aria-hidden="true">CA</div>
+          <div>
+            <p>Formal program approval</p>
+            <h2>California Department of Public Health approved CNA training</h2>
+            <span>Train through an approved program designed around required theory and supervised clinical preparation.</span>
+          </div>
+          <Link to="/programs" className="btn btn-ghost">Review Program Details</Link>
+        </div>
+      </section>
 
-      <div className="container split-panel rewards-detail-section">
-        <article className="info-card">
-          <p className="section-kicker">How referrals work</p>
-          <h2>Referral code steps</h2>
-          <ol className="detail-list ordered-list policy-timeline">
-            {referralProgramSteps.map((step) => (
-              <li key={step}>{step}</li>
+      <section id="free-resources" className="rg-section rg-resources-section">
+        <div className="container rg-free-resources">
+          <div className="rg-free-resource-copy">
+            <p className="section-kicker">Free resources for your journey</p>
+            <h2>Take the first step toward your nursing future.</h2>
+            <p>
+              Start with practical planning tools designed to help future nursing students and
+              working adults understand their options with more clarity and confidence.
+            </p>
+            <div className="rg-resource-benefits" aria-label="Resource benefits">
+              <span>Explore career fit</span>
+              <span>Plan with clarity</span>
+              <span>Build confidence</span>
+              <span>Understand next steps</span>
+            </div>
+            <div className="button-row">
+              <Link to="/career-quiz" className="btn btn-primary">Take the Free Career Quiz</Link>
+              <a href="#career-support" className="btn btn-ghost">See the Nursing Pathway</a>
+            </div>
+          </div>
+          <div className="rg-guide-grid" aria-label="Free planning resources">
+            <article className="rg-guide-card rg-guide-card-blue">
+              <span>Free planning tool</span>
+              <div className="rg-guide-monogram" aria-hidden="true">CNA</div>
+              <h3>CNA Career Starter Guide</h3>
+              <p>Explore how your goals, strengths, and priorities may connect with CNA training.</p>
+              <Link to="/career-quiz">Start the career quiz <span aria-hidden="true">→</span></Link>
+            </article>
+            <article className="rg-guide-card rg-guide-card-gold">
+              <span>Education pathway</span>
+              <div className="rg-guide-monogram" aria-hidden="true">OC</div>
+              <h3>OC Nursing School Pathway Guide</h3>
+              <p>Review how CNA experience may support a longer-term LVN, RN, or BSN goal.</p>
+              <a href="#career-support">Review the pathway <span aria-hidden="true">→</span></a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="rewards" className="rg-section">
+        <div className="container rg-support-intro">
+          <div>
+            <p className="section-kicker">Rewards, guidance & support</p>
+            <h2>Support that continues beyond the classroom.</h2>
+            <p>First Step Healthcare Academy combines practical training with resources that help students prepare, persist, and plan what comes next.</p>
+          </div>
+          <div className="rg-pillar-grid">
+            {supportPillars.map((item) => (
+              <article key={item.title}>
+                <span>{item.number}</span>
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </article>
             ))}
-          </ol>
-        </article>
+          </div>
+        </div>
+      </section>
 
-        <article className="info-card">
-          <p className="section-kicker">Referral code rules</p>
-          <h2>Eligibility stays clear before enrollment.</h2>
-          <ul className="detail-list compact-list">
-            {referralRules.map((rule) => (
-              <li key={rule}>{rule}</li>
-            ))}
-          </ul>
-          <p className="card-note">
-            First Step Healthcare Academy may verify eligibility, deny duplicate or ineligible
-            referrals, modify terms, or discontinue the referral program at any time.
-          </p>
-        </article>
-      </div>
-
-      <div id="retention-recognition" className="container split-panel rewards-detail-section">
-        <article className="info-card">
-          <p className="section-kicker">Retention recognition</p>
-          <h2>Graduates may be recognized for staying in the field.</h2>
-          <p>
-            Eligible graduates may qualify for recognition when they are hired by the facility where
-            they completed clinical training and remain employed in good standing.
-          </p>
-          <div className="stack-panel">
-            {retentionMilestones.map((item) => (
-              <div key={item.title} className="tuition-line">
-                <div>
-                  <strong>{item.title}</strong>
+      <section id="referral-rewards" className="rg-section rg-referral-section">
+        <div className="container rg-feature-split">
+          <div className="rg-feature-copy">
+            <p className="section-kicker">Refer a friend</p>
+            <h2>You both may benefit.</h2>
+            <p>Starting with someone you trust can make the journey more encouraging, accountable, and meaningful.</p>
+            <div className="rg-step-list">
+              {referralSteps.map(([title, text], index) => (
+                <div key={title}>
+                  <span>{index + 1}</span>
+                  <div><h3>{title}</h3><p>{text}</p></div>
                 </div>
-                <span>{item.amount}</span>
+              ))}
+            </div>
+            <details className="rg-disclosure">
+              <summary>Review referral eligibility details</summary>
+              <ul>{referralRules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
+            </details>
+          </div>
+          <div className="rg-feature-photo">
+            <img src={programsSupport} alt="Healthcare students learning together during training" />
+            <div><strong>Build skills together</strong><span>Encouragement · accountability · shared progress</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="retention-recognition" className="rg-section rg-retention-section">
+        <div className="container rg-retention-panel">
+          <div>
+            <p className="section-kicker">Retention recognition</p>
+            <h2>Get recognized for staying in the field.</h2>
+            <p>Eligible graduates may qualify for recognition when they continue into CNA employment and demonstrate reliability and early workplace commitment.</p>
+          </div>
+          <div className="rg-milestone-grid">
+            {retentionMilestones.map((item, index) => (
+              <article key={item.title}>
+                <span>{index + 1}</span>
+                <h3>{item.title}</h3>
+                <strong>{item.amount}</strong>
+              </article>
+            ))}
+          </div>
+          <p className="rg-fine-print">Recognition is not guaranteed and may depend on program terms, employer participation, employment verification, conduct, and supervisor feedback.</p>
+        </div>
+      </section>
+
+      <section id="study-tools" className="rg-section">
+        <div className="container rg-resource-layout">
+          <div className="rg-resource-copy">
+            <p className="section-kicker">Study tools included</p>
+            <h2>Know what to study, practice, and prepare for.</h2>
+            <p>Organized resources help students stay focused through theory, clinical preparation, and exam review.</p>
+            <div className="rg-tool-grid">
+              {studyToolItems.slice(0, 8).map((item, index) => (
+                <div key={item}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item}</strong></div>
+              ))}
+            </div>
+          </div>
+          <div className="rg-study-visual">
+            <img src={heroTraining} alt="Instructor demonstrating a hands-on CNA skill to students" />
+            <blockquote>“Preparation becomes manageable when students know what to focus on next.”</blockquote>
+          </div>
+        </div>
+      </section>
+
+      <section id="career-support" className="rg-section rg-career-section">
+        <div className="container">
+          <div className="rg-centered-heading">
+            <p className="section-kicker">Career support beyond the classroom</p>
+            <h2>Prepare for a CNA job—and the path beyond it.</h2>
+            <p>Students receive practical guidance for entering the workforce and understanding how CNA experience may support future healthcare goals.</p>
+          </div>
+          <div className="rg-career-grid">
+            {careerSupportItems.slice(0, 6).map((item, index) => (
+              <article key={item}><span>{index + 1}</span><p>{item}</p></article>
+            ))}
+          </div>
+          <div className="rg-pathway" aria-label="Example healthcare education pathway">
+            <span>CNA</span><i>→</i><span>LVN</span><i>→</i><span>RN</span><i>→</i><span>BSN</span>
+          </div>
+          <p className="rg-fine-print">Career support is educational guidance and does not guarantee employment, employer acceptance, certification results, or nursing school admission.</p>
+        </div>
+      </section>
+
+      <section className="rg-section rg-ready-section">
+        <div className="container rg-ready-panel">
+          <div>
+            <p className="section-kicker">Ready to take your first step?</p>
+            <h2>Choose the next action that fits where you are today.</h2>
+          </div>
+          <div className="rg-ready-actions">
+            <Link to="/register" className="btn btn-primary">Register Now</Link>
+            <Link to="/schedule" className="btn btn-secondary">View the Schedule</Link>
+            <a href="#callback" className="btn btn-ghost">Request Support</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="callback" className="rg-section rg-callback-section">
+        <div className="container rg-callback-layout">
+          <div className="rg-callback-copy">
+            <p className="section-kicker">Request a support phone call</p>
+            <h2>Talk to admissions about schedule and tuition.</h2>
+            <p>Share what you need help with and our admissions team will contact you during your preferred callback window when available.</p>
+            <div className="rg-callout-list">
+              <div><strong>Ask specific questions</strong><span>Get clarity on tuition, documents, schedules, and clinical expectations.</span></div>
+              <div><strong>Plan your next step</strong><span>Discuss cohort fit whether you are ready now or still exploring.</span></div>
+              <div><strong>No pressure</strong><span>The call is for guidance; submitting the form does not enroll you.</span></div>
+            </div>
+          </div>
+
+          <form className="rg-callback-form form-stack" onSubmit={handleSubmit}>
+            <div className="form-grid two-up">
+              <label><span>Full name *</span><input name="fullName" value={form.fullName} onChange={updateField} required autoComplete="name" /></label>
+              <label><span>City *</span><input name="city" value={form.city} onChange={updateField} required autoComplete="address-level2" /></label>
+              <label><span>Phone number *</span><input name="phone" value={form.phone} onChange={updateField} required type="tel" autoComplete="tel" /></label>
+              <label><span>Email address *</span><input name="email" value={form.email} onChange={updateField} required type="email" autoComplete="email" /></label>
+            </div>
+
+            <label>
+              <span>Preferred callback window *</span>
+              <select name="callbackWindow" value={form.callbackWindow} onChange={updateField} required>
+                <option value="">Select a timeframe</option>
+                <option>Morning: 9 AM–12 PM</option>
+                <option>Afternoon: 12 PM–4 PM</option>
+                <option>Evening: 4 PM–7 PM</option>
+                <option>No preference</option>
+              </select>
+            </label>
+            <p className="rg-field-note">Callback windows are preferred timeframes and are not guaranteed appointment times.</p>
+
+            <fieldset className="rg-checkbox-fieldset">
+              <legend>What would you like to discuss? <span>Select all that apply.</span></legend>
+              <div className="rg-checkbox-grid">
+                {callbackTopics.map((topic) => (
+                  <label key={topic}><input type="checkbox" value={topic} checked={form.topics.includes(topic)} onChange={updateTopic} /><span>{topic}</span></label>
+                ))}
               </div>
-            ))}
-          </div>
-          <p className="card-note">
-            Retention incentives are not guaranteed and may depend on facility approval,
-            employment verification, graduate conduct, supervisor feedback, and program terms.
-          </p>
-        </article>
+            </fieldset>
 
-        <article className="info-card dark-card">
-          <p className="section-kicker">Ready to take your first step?</p>
-          <h2>Choose the next action that matches where you are.</h2>
-          <p>
-            Start your CNA journey with a program designed to support more than classroom
-            completion.
-          </p>
-          <div className="button-row">
-            <Link to="/register" className="btn btn-primary">
-              Apply Now
-            </Link>
-            <Link to="/contact" className="btn btn-ghost">
-              Talk to Admissions
-            </Link>
-            <Link to="/programs" className="btn btn-secondary">
-              View Requirements
-            </Link>
-          </div>
-        </article>
-      </div>
+            <label>
+              <span>Which best describes your goal? *</span>
+              <select name="goal" value={form.goal} onChange={updateField} required>
+                <option value="">Select your primary goal</option>
+                {goalOptions.map((goal) => <option key={goal}>{goal}</option>)}
+              </select>
+            </label>
 
-      <div className="container card-grid two-up rewards-detail-section">
-        <article id="study-tools" className="info-card">
-          <p className="section-kicker">Study tools included</p>
-          <h2>Structured resources help students know what to study and practice.</h2>
-          <ul className="detail-list compact-list">
-            {studyToolItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
+            <label><span>Anything else that would make the call more useful?</span><textarea name="details" value={form.details} onChange={updateField} maxLength="1000" rows="5" /></label>
 
-        <article id="career-support" className="info-card">
-          <p className="section-kicker">Career support</p>
-          <h2>Guidance for CNA jobs and future healthcare goals.</h2>
-          <ul className="detail-list compact-list">
-            {careerSupportItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <p className="card-note">
-            Career support is provided for educational and guidance purposes. First Step Healthcare
-            Academy does not guarantee employment, employer acceptance, nursing school admission,
-            or certification exam results.
-          </p>
-        </article>
-      </div>
-    </section>
+            <label className="rg-consent-row"><input type="checkbox" name="consent" checked={form.consent} onChange={updateField} required /><span>By submitting this form, I agree that First Step Healthcare Academy may contact me by phone, text, or email about CNA training. Message and data rates may apply. *</span></label>
+            <label className="rg-consent-row"><input type="checkbox" name="updates" checked={form.updates} onChange={updateField} /><span>I would also like program updates, upcoming cohort information, career resources, and admissions reminders. I can opt out at any time.</span></label>
+
+            <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Sending Request…" : "Request a Callback"}</button>
+            {status.text ? <p className={`form-status ${status.type === "success" ? "is-success" : "is-error"}`} role="status">{status.text}</p> : null}
+          </form>
+        </div>
+      </section>
+    </div>
   );
 }

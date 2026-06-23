@@ -103,7 +103,7 @@ const initialEnrollmentState = {
 const pageTitles = {
   "/": "First Step Healthcare Academy",
   "/programs": "Programs | First Step Healthcare Academy",
-  "/rewards-guidance": "Rewards & Guidance | First Step Healthcare Academy",
+  "/rewards-guidance": "CNA Training Rewards, Tuition & Guidance | First Step Healthcare Academy",
   "/career-quiz": "Career Quiz | First Step Healthcare Academy",
   "/schedule": "Schedule | First Step Healthcare Academy",
   "/register": "Register | First Step Healthcare Academy",
@@ -113,11 +113,24 @@ const pageTitles = {
   "/admin": "Admin | First Step Healthcare Academy",
 };
 
+const pageDescriptions = {
+  "/rewards-guidance":
+    "Explore CNA class formats, tuition and payment options, $100 referral rewards, study tools, career guidance, and admissions support from First Step Healthcare Academy in Orange, California.",
+};
+
 function AppEffects({ setEnrollmentStatus }) {
   const location = useLocation();
 
   useEffect(() => {
     document.title = pageTitles[location.pathname] ?? pageTitles["/"];
+    const description = document.querySelector('meta[name="description"]');
+    if (description) {
+      description.setAttribute(
+        "content",
+        pageDescriptions[location.pathname] ??
+          "Explore CNA training, class schedules, admissions, and student support at First Step Healthcare Academy in Orange, California."
+      );
+    }
 
     if (!location.hash) {
       window.scrollTo({ top: 0, behavior: "auto" });
@@ -755,7 +768,7 @@ function App() {
               path="/programs"
               element={<ProgramsPage programs={programs} programLoadError={programLoadError} />}
             />
-            <Route path="/rewards-guidance" element={<RewardsGuidancePage />} />
+            <Route path="/rewards-guidance" element={<RewardsGuidancePage cohorts={cohorts} />} />
             <Route path="/career-quiz" element={<CareerQuizPage />} />
             <Route
               path="/schedule"
