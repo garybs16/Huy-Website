@@ -3169,6 +3169,9 @@
 }
 
 .rg-section-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: 0.58rem 0.78rem;
   border-radius: var(--radius-sm);
   color: var(--rg-navy);

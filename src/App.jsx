@@ -138,12 +138,33 @@ function AppEffects({ setEnrollmentStatus }) {
     }
 
     const targetId = decodeURIComponent(location.hash.slice(1));
-    window.requestAnimationFrame(() => {
+    let cancelled = false;
+    let frameId = 0;
+    let attempts = 0;
+
+    const scrollToTarget = () => {
+      if (cancelled) {
+        return;
+      }
+
       const target = document.getElementById(targetId);
       if (target) {
         target.scrollIntoView({ block: "start", behavior: "auto" });
+        return;
       }
-    });
+
+      attempts += 1;
+      if (attempts < 60) {
+        frameId = window.requestAnimationFrame(scrollToTarget);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(scrollToTarget);
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frameId);
+    };
   }, [location.pathname, location.hash]);
 
   useEffect(() => {
