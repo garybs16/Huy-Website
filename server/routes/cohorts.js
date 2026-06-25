@@ -7,7 +7,15 @@ export function createCohortsRouter({ enrollmentDb }) {
 
   router.get("/", (_req, res) => {
     res.set("Cache-Control", "no-store");
-    res.json({ items: enrollmentDb.listActiveCohorts().filter((cohort) => cohort.programId === PUBLIC_PROGRAM_ID) });
+    res.json({
+      items: enrollmentDb
+        .listActiveCohorts()
+        .filter(
+          (cohort) =>
+            cohort.programId === PUBLIC_PROGRAM_ID &&
+            cohort.scheduleLabel?.toLowerCase() !== "weekend"
+        ),
+    });
   });
 
   return router;

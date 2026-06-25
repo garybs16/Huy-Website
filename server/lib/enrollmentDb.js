@@ -231,6 +231,25 @@ export class EnrollmentDatabase {
           OR payment_plan_deposit_cents IS NULL
           OR allow_payment_plan = 0
         );
+
+      UPDATE programs
+      SET
+        summary = 'Structured classroom, lab, and supervised clinical training built for direct patient-care roles.',
+        duration = '160 approved program hours',
+        schedule = 'Approved weekday schedule with online theory and in-person clinical training listed separately',
+        updated_at = '${nowIso()}'
+      WHERE id = 'cna'
+        AND (
+          duration IN ('4-6 weeks', '6-12 weeks')
+          OR schedule LIKE '%weekend%'
+          OR schedule LIKE '%Weekend%'
+        );
+
+      UPDATE cohorts
+      SET
+        is_active = 0,
+        updated_at = '${nowIso()}'
+      WHERE id = 'cna-weekend-apr-2026';
     `);
   }
 
@@ -636,6 +655,7 @@ export class EnrollmentDatabase {
           c.allow_payment_plan AS allowPaymentPlan,
           c.payment_plan_deposit_cents AS paymentPlanDepositCents,
           c.capacity,
+          c.is_active AS isActive,
           c.sort_order AS sortOrder,
           p.title AS programTitle,
           p.summary AS programSummary,

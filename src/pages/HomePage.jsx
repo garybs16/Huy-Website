@@ -30,7 +30,7 @@ export function HomePage({ programs }) {
     },
   ];
   const decisionStats = [
-    { value: "6 weeks", label: "CNA training path" },
+    { value: "160 hrs", label: "approved program length" },
     { value: "$100", label: "eligible referral reward" },
     { value: "Direct", label: "admissions guidance" },
   ];
@@ -57,9 +57,9 @@ export function HomePage({ programs }) {
                 )
               ))}
             </div>
-            <h1 className="hero-title" aria-label="Certified Nursing Assistant in 6 Weeks">
+            <h1 className="hero-title" aria-label="Certified Nursing Assistant Training">
               <span>Certified Nursing Assistant</span>
-              <span>in 6 Weeks</span>
+              <span>Training</span>
             </h1>
             <p className="hero-text">
               State approved nursing assistant program. First Step Healthcare Academy stays aligned

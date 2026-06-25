@@ -134,8 +134,8 @@ export function ContactPage({
               <select name="trackPreference" value={waitlistForm.trackPreference} onChange={onWaitlistInput}>
                 <option value="">Select a track</option>
                 <option value="Weekday track">Weekday track</option>
-                <option value="Weekend track">Weekend track</option>
-                <option value="Evening track">Evening track</option>
+                <option value="Approved schedule updates">Approved schedule updates</option>
+                <option value="Future cohort updates">Future cohort updates</option>
               </select>
             </label>
             <label>

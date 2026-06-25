@@ -2,19 +2,17 @@ import { Link } from "react-router-dom";
 import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import admissionsSupport from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
+import { RefundPolicy } from "../components/RefundPolicy";
 import {
   admissionsSteps,
-  collectionsChargebackPolicy,
   courseModules,
   locationDetails,
   miscFeeItems,
   programMeta,
   programRequirementSections,
-  refundRequestDetails,
   requirementItems,
   supportItems,
   tuitionItems,
-  withdrawalRefundPolicies,
 } from "../siteData";
 
 export function ProgramsPage({ programs, programLoadError }) {
@@ -195,39 +193,7 @@ export function ProgramsPage({ programs, programLoadError }) {
         </div>
 
         <div id="program-policies" className="program-policy-panel">
-          <div className="section-heading">
-            <div>
-              <p className="section-kicker">Withdrawal, refund, and payment policies</p>
-              <h2>Students should review policy details before enrolling.</h2>
-            </div>
-            <p>
-              Refund eligibility depends on when the student withdraws, how many course hours have
-              elapsed, and whether the student remains in good standing.
-            </p>
-          </div>
-
-          <div className="policy-grid">
-            {withdrawalRefundPolicies.map((item) => (
-              <article key={item.title} className="policy-card">
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="card-grid two-up policy-support-grid">
-            <article className="info-card">
-              <p className="section-kicker">Written requests</p>
-              <h3>{refundRequestDetails.title}</h3>
-              <p>{refundRequestDetails.detail}</p>
-            </article>
-
-            <article className="info-card">
-              <p className="section-kicker">Outstanding balances</p>
-              <h3>{collectionsChargebackPolicy.title}</h3>
-              <p>{collectionsChargebackPolicy.detail}</p>
-            </article>
-          </div>
+          <RefundPolicy />
         </div>
 
         <div className="card-grid two-up">

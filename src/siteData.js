@@ -31,7 +31,7 @@ function formatMoney(cents) {
 
 export const defaultPrograms = programCatalogSeed;
 
-export const defaultCohorts = cohortCatalogSeed.map((cohort) => {
+export const defaultCohorts = cohortCatalogSeed.filter((cohort) => cohort.isActive !== false).map((cohort) => {
   const program = programCatalogSeed.find((item) => item.id === cohort.programId);
   const paymentPlanDepositCents = cohort.allowPaymentPlan ? cohort.paymentPlanDepositCents ?? 0 : null;
   const paymentPlanRemainingCents =
@@ -64,7 +64,7 @@ export const quickLinks = [
   },
   {
     title: "Review class timing",
-    detail: "See weekday, weekend, and evening CNA formats in one place.",
+    detail: "See current CNA schedule details and availability in one place.",
     to: "/schedule",
   },
   {
@@ -245,42 +245,46 @@ export const miscFeeItems = [
   "Payment deadlines are provided before enrollment and must stay current for continued participation",
 ];
 
-export const withdrawalRefundPolicies = [
-  {
-    title: "Withdraw at least 5 business days before class",
-    detail:
-      "Students may withdraw and receive a refund of charges paid, minus the $250 non-refundable registration fee.",
-  },
-  {
-    title: "Withdraw less than 5 business days before class",
-    detail:
-      "Students may receive a refund minus the $250 non-refundable registration fee and a 30% penalty calculated from the total tuition fee.",
-  },
-  {
-    title: "Refund request before 60 course hours have elapsed",
-    detail:
-      "Students who have started class may request a refund for half of the total tuition fee, not including the non-refundable registration fee.",
-  },
-  {
-    title: "Payment-plan students before 60 hours",
-    detail:
-      "If the student is on a payment plan and has only paid half of the tuition, no refund is available.",
-  },
-  {
-    title: "After 60 course hours have elapsed",
-    detail: "No refund will be given after 60 hours of class have elapsed.",
-  },
-  {
-    title: "Dismissal from the program",
-    detail:
-      "Students dismissed for academic, attendance, punctuality, or behavior issues are not eligible for refunds.",
-  },
-];
+export const refundPolicy = {
+  title: "Refund Policy",
+  registrationFee: "The $250 registration fee is non-refundable & non-transferable.",
+  programTitle: "CNA Program (Self-Paced OR Instructor-Led)",
+  description:
+    "Refunds for tuition of CNA Program are granted based on the timing of withdrawal or cancellation:",
+  columns: [
+    "Withdrawal / Cancellation Timing",
+    "Refund for Full-Pay & Klarna/AfterPay Students",
+    "Obligation for Deferred-Pay Students to SisuCare",
+  ],
+  rows: [
+    {
+      timing: "Within 1 Day (24 hours) of enrollment",
+      refund: "100% refund of tuition paid",
+      deferred: "$0 tuition owed",
+    },
+    {
+      timing: "Between Day 2 and Day 5 from the enrollment date",
+      refund: "50% refund of tuition paid",
+      deferred: "50% tuition owed = $825",
+    },
+    {
+      timing: "After Day 5 from the enrollment date",
+      refund: "No refund",
+      deferred: "100% tuition owed = $1650",
+    },
+  ],
+  notes: [
+    "Students on a deferred-payment plan are responsible for any unpaid tuition balance according to the schedule above, even if payment has not yet been made.",
+    "All refunds will be issued using the same payment method within 30 days of withdrawal determination.",
+    "No refunds will be provided for third-party or program-related costs, including but not limited to LiveScan fingerprinting, Physical Exam, TB Test, Chest X-ray, vaccinations, malpractice insurance, or equipment.",
+  ],
+};
+
+export const withdrawalRefundPolicies = refundPolicy.rows;
 
 export const refundRequestDetails = {
-  title: "Refund requests must be in writing",
-  detail:
-    "Submit refund requests to the Administrator at administrator@laskillsacademy.com or to the Enrollment Coordinator.",
+  title: refundPolicy.title,
+  detail: refundPolicy.notes[1],
 };
 
 export const collectionsChargebackPolicy = {
@@ -322,7 +326,8 @@ export const programRequirementSections = [
       "Live online theory instruction: 60 hours",
       "In-person supervised clinical training: 100 hours",
       "Total program length: 160 hours",
-      "Most cohorts are expected to be completed in approximately 6 to 12 weeks, depending on the approved class calendar, clinical site availability, holidays, instructor availability, and student document completion.",
+      "The approved class calendar controls the exact program timeline, including any holidays, instructor availability, clinical site availability, and student document completion requirements.",
+      "The online theory portion is separate from the in-person supervised clinical training portion.",
       "Program completion requires all required theory hours, clinical hours, quizzes, skills requirements, remediation if assigned, and program documentation.",
     ],
   },

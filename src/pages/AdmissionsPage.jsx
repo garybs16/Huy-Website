@@ -1,16 +1,14 @@
 import heroTrainingPhoto from "../assets/hero-training-photo-v2.jpg";
 import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import { PageIntro } from "../components/PageIntro";
+import { RefundPolicy } from "../components/RefundPolicy";
 import {
   admissionsSteps,
-  collectionsChargebackPolicy,
   faqItems,
   locationDetails,
   miscFeeItems,
   requirementItems,
-  refundRequestDetails,
   tuitionItems,
-  withdrawalRefundPolicies,
 } from "../siteData";
 
 export function AdmissionsPage() {
@@ -106,39 +104,7 @@ export function AdmissionsPage() {
       </div>
 
       <div id="refund-policy" className="container policy-section">
-        <div className="section-heading">
-          <div>
-            <p className="section-kicker">Withdrawal and refund policies</p>
-            <h2>Refund rules are based on timing, registration fees, and completed hours.</h2>
-          </div>
-          <p>
-            Students should review these policies before enrollment and submit any refund request
-            in writing.
-          </p>
-        </div>
-
-        <div className="policy-grid">
-          {withdrawalRefundPolicies.map((item) => (
-            <article key={item.title} className="policy-card">
-              <h3>{item.title}</h3>
-              <p>{item.detail}</p>
-            </article>
-          ))}
-        </div>
-
-        <div className="card-grid two-up policy-support-grid">
-          <article className="info-card">
-            <p className="section-kicker">Written request required</p>
-            <h3>{refundRequestDetails.title}</h3>
-            <p>{refundRequestDetails.detail}</p>
-          </article>
-
-          <article className="info-card">
-            <p className="section-kicker">Payment responsibilities</p>
-            <h3>{collectionsChargebackPolicy.title}</h3>
-            <p>{collectionsChargebackPolicy.detail}</p>
-          </article>
-        </div>
+        <RefundPolicy />
       </div>
 
       <div id="questions" className="container card-grid three-up">

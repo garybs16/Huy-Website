@@ -11,9 +11,21 @@ import {
 } from "../siteData";
 
 const scheduleOptions = [
-  { label: "Weekday", time: "Monday–Friday", note: "Accelerated daytime format" },
-  { label: "Evening", time: "Monday–Friday", note: "Designed around daytime commitments" },
-  { label: "Weekend", time: "Saturday–Sunday", note: "Focused weekend training" },
+  {
+    label: "Approved schedule",
+    time: "Current class calendar",
+    note: "Review the schedule page for approved dates and meeting patterns",
+  },
+  {
+    label: "Online theory",
+    time: "60 hours",
+    note: "Theory instruction is listed separately from in-person clinical training",
+  },
+  {
+    label: "In-person clinical",
+    time: "100 hours",
+    note: "Supervised clinical training is completed in person",
+  },
 ];
 
 const supportPillars = [
@@ -150,7 +162,7 @@ export function RewardsGuidancePage({ cohorts = [] }) {
             </div>
             <div className="rg-trust-row" aria-label="Program highlights">
               <span>160-hour CNA program</span>
-              <span>Flexible cohort formats</span>
+              <span>Approved schedule details</span>
               <span>Payment plan available</span>
             </div>
           </div>
@@ -179,13 +191,13 @@ export function RewardsGuidancePage({ cohorts = [] }) {
       <section id="cohorts" className="rg-section rg-cohort-section">
         <div className="container">
           <div className="rg-centered-heading">
-            <p className="section-kicker">Choose a format that fits your life</p>
-            <h2>Multiple cohort options. One practical first step.</h2>
-            <p>Compare the typical formats below, then review the live schedule for current dates and availability.</p>
+            <p className="section-kicker">Review approved training details</p>
+            <h2>Clear schedule information. One practical first step.</h2>
+            <p>Review current dates, theory hours, clinical expectations, and availability before registering.</p>
           </div>
           <div className="rg-cohort-grid">
             {scheduleOptions.map((option, index) => {
-              const cohort = activeCohorts.find((item) => item.scheduleLabel?.toLowerCase() === option.label.toLowerCase()) ?? activeCohorts[index];
+              const cohort = index === 0 ? activeCohorts[0] : null;
               return (
                 <article className="rg-cohort-card" key={option.label}>
                   <span className="rg-card-tag">{option.label}</span>
