@@ -1,31 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --bg: #f5fbf8;
+  --bg: #f6f8fb;
   --surface: #ffffff;
-  --surface-soft: #eaf7f3;
+  --surface-soft: #eef3f8;
   --surface-strong: #fbfdff;
-  --surface-accent: #dff3ee;
-  --ink: #273844;
-  --ink-strong: #0d1d26;
-  --muted: #435861;
-  --brand: #0f766e;
-  --brand-strong: #0b5f67;
-  --brand-deep: #123a4a;
-  --accent: #7da756;
-  --accent-soft: #eef8df;
-  --accent-strong: #537631;
-  --gold: #d59b2d;
-  --gold-soft: #fff4d9;
-  --blue: #1d5f99;
-  --line: rgba(80, 103, 130, 0.22);
-  --line-strong: rgba(15, 118, 110, 0.32);
-  --dark: #102129;
-  --shadow-soft: 0 12px 28px rgba(14, 30, 52, 0.075);
-  --shadow-strong: 0 22px 52px rgba(9, 27, 47, 0.14);
-  --shadow-glow: 0 18px 36px rgba(15, 118, 110, 0.16);
-  --radius: 0.75rem;
-  --radius-sm: 0.5rem;
+  --surface-accent: #e5eef8;
+  --ink: #26313f;
+  --ink-strong: #061a33;
+  --muted: #4f6072;
+  --brand: #00598c;
+  --brand-strong: #003b6f;
+  --brand-deep: #071f41;
+  --accent: #2774ae;
+  --accent-soft: #e9f3fb;
+  --accent-strong: #00598c;
+  --gold: #ffb81c;
+  --gold-soft: #fff5d6;
+  --blue: #2774ae;
+  --line: rgba(37, 58, 85, 0.18);
+  --line-strong: rgba(0, 89, 140, 0.28);
+  --dark: #071f41;
+  --shadow-soft: 0 10px 24px rgba(6, 26, 51, 0.07);
+  --shadow-strong: 0 22px 52px rgba(6, 26, 51, 0.14);
+  --shadow-glow: 0 18px 36px rgba(0, 89, 140, 0.16);
+  --radius: 0.5rem;
+  --radius-sm: 0.375rem;
   --font-body: "Manrope", "Segoe UI", sans-serif;
   --font-display: "Fraunces", Georgia, serif;
 }
@@ -47,7 +47,7 @@ body,
 body {
   position: relative;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #f2faf7 0%, #ffffff 28%, #f8fcfb 100%);
+  background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 32%, #f7f9fc 100%);
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.6;

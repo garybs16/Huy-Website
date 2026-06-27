@@ -14,7 +14,7 @@ export function SiteCtaBand() {
         <div className="site-cta-panel">
           <div className="site-cta-copy">
             <p className="section-kicker">Plan your start with confidence</p>
-            <h2>Move from interest to enrollment with a site that keeps the next step obvious.</h2>
+            <h2>Move from interest to enrollment with a clear next step.</h2>
             <p>
               Review the current schedule, choose the right training path, and speak with admissions
               before seats tighten.

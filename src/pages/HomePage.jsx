@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
+import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import {
   admissionsSteps,
   industryGrowthRows,
@@ -15,17 +17,18 @@ import {
 export function HomePage({ programs }) {
   const heroTrustItems = [
     { label: "State approved CNA program" },
-    { label: "Take the Quiz Assessment", to: "/career-quiz", featured: true },
+    { label: "160 hour training path" },
+    { label: "Orange, California" },
   ];
   const trainingTimeline = [
     {
-      title: "Earn $100 Per Referral",
-      detail: "Both the referrer and the referred student can receive $100 when an eligible referred student enrolls.",
-      to: "/rewards-guidance",
+      title: "Find your start window",
+      detail: "Compare schedules, tuition context, and document requirements before you commit.",
+      to: "/schedule",
     },
     {
-      title: "Study Tools & Career Support",
-      detail: "Students receive study guides, skills checklists, quick-reference resources, and career guidance.",
+      title: "Get supported through enrollment",
+      detail: "Admissions helps you move from inquiry to registration with fewer missed steps.",
       to: "/rewards-guidance",
     },
   ];
@@ -34,27 +37,23 @@ export function HomePage({ programs }) {
     { value: "$100", label: "eligible referral reward" },
     { value: "Direct", label: "admissions guidance" },
   ];
+  const heroQuickLinks = [
+    { label: "Schedules", to: "/schedule" },
+    { label: "Admissions", to: "/admissions" },
+    { label: "Payment", to: "/payment" },
+  ];
+
   return (
     <>
       <section className="hero-panel">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Healthcare career training in Orange, California</p>
+            <p className="eyebrow">First Step Healthcare Academy</p>
             <div className="hero-trust-list" aria-label="School highlights">
               {heroTrustItems.map((item) => (
-                item.to ? (
-                  <Link
-                    key={item.label}
-                    to={item.to}
-                    className={`hero-trust-item ${item.featured ? "hero-trust-item-featured" : ""}`}
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <span key={item.label} className="hero-trust-item">
-                    {item.label}
-                  </span>
-                )
+                <span key={item.label} className="hero-trust-item">
+                  {item.label}
+                </span>
               ))}
             </div>
             <h1 className="hero-title" aria-label="Certified Nursing Assistant Training">
@@ -62,37 +61,25 @@ export function HomePage({ programs }) {
               <span>Training</span>
             </h1>
             <p className="hero-text">
-              State approved nursing assistant program. First Step Healthcare Academy stays aligned
-              with California compliance requirements so students can train with clear expectations
-              from the start.
+              Train for patient care with a clear CNA path, real admissions guidance, published
+              program details, and a registration flow built to keep your next step obvious.
             </p>
-
-            <div className="hero-decision-strip" aria-label="Program decision highlights">
-              {decisionStats.map((item) => (
-                <div key={item.label}>
-                  <strong>{item.value}</strong>
-                  <span>{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="training-timeline" aria-label="CNA training timeline">
-              {trainingTimeline.map((item, index) => (
-                <Link key={item.title} to={item.to} className="training-phase-card">
-                  <span>{`0${index + 1}`}</span>
-                  <strong>{item.title}</strong>
-                  <p>{item.detail}</p>
-                </Link>
-              ))}
-            </div>
 
             <div className="button-row">
               <Link to="/register" className="btn btn-primary">
                 Register Now
               </Link>
-              <Link to="/rewards-guidance" className="btn btn-secondary">
-                Reward & Guidance
+              <Link to="/career-quiz" className="btn btn-secondary">
+                Take the Quiz
               </Link>
+            </div>
+
+            <div className="hero-quick-links" aria-label="Fast access">
+              {heroQuickLinks.map((item) => (
+                <Link key={item.label} to={item.to}>
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -102,13 +89,31 @@ export function HomePage({ programs }) {
                 src={heroTraining}
                 alt="Healthcare instructor guiding students through hands-on bedside skills training"
               />
-              <div className="hero-status-chip">Enrollment flow live</div>
+              <div className="hero-status-chip">Enrollment open</div>
               <div className="hero-photo-badge">
                 <span>Hands-on instruction</span>
-                <strong>Real training, visible schedules, and a faster path to enrollment</strong>
+                <strong>Skills lab, online theory, and admissions support in one path</strong>
               </div>
             </div>
+            <div className="hero-decision-strip" aria-label="Program decision highlights">
+              {decisionStats.map((item) => (
+                <div key={item.label}>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+
+        <div className="container hero-pathway" aria-label="Next steps">
+          {trainingTimeline.map((item, index) => (
+            <Link key={item.title} to={item.to} className="training-phase-card">
+              <span>{`0${index + 1}`}</span>
+              <strong>{item.title}</strong>
+              <p>{item.detail}</p>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -182,23 +187,33 @@ export function HomePage({ programs }) {
       </section>
 
       <section className="section visual-story-section">
-        <div className="container section-heading">
-          <div>
+        <div className="container visual-story-showcase">
+          <div className="visual-story-media">
+            <img
+              src={programsSupportPhoto}
+              alt="Healthcare students practicing patient care skills in a training lab"
+            />
+            <img
+              src={admissionsLabPhoto}
+              alt="Instructor guiding students through a clinical classroom exercise"
+            />
+          </div>
+
+          <div className="visual-story-copy">
             <p className="section-kicker">Rewards & Guidance</p>
             <h2>Support that helps students keep moving before, during, and after training.</h2>
+            <div className="support-feature-list">
+              {rewardsGuidanceItems.map((item) => (
+                <article key={item.title} className="support-card">
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+            <Link to="/rewards-guidance" className="card-action-link">
+              Reward & Guidance
+            </Link>
           </div>
-          <Link to="/rewards-guidance" className="card-action-link">
-            Reward & Guidance
-          </Link>
-        </div>
-
-        <div className="container card-grid four-up">
-          {rewardsGuidanceItems.map((item) => (
-            <article key={item.title} className="support-card">
-              <h3>{item.title}</h3>
-              <p>{item.detail}</p>
-            </article>
-          ))}
         </div>
       </section>
 

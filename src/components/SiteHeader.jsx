@@ -32,7 +32,7 @@ export function SiteHeader({ navItems }) {
           <img className="brand-icon-image" src={academyLogo} alt={contactDetails.brand} />
           <div className="brand-copy">
             <strong className="brand-title">{contactDetails.brand}</strong>
-            <span className="brand-subtitle">Orange, California | Direct admissions support</span>
+            <span className="brand-subtitle">Orange, California</span>
           </div>
         </Link>
 
