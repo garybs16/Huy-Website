@@ -38,6 +38,13 @@ function isAllowedOrigin(origin, req) {
   return !origin || isSameOriginRequest(origin, req) || config.corsOrigins.includes(origin);
 }
 
+function isHiddenFileProbe(requestPath) {
+  return requestPath
+    .split("/")
+    .filter(Boolean)
+    .some((segment) => segment.startsWith("."));
+}
+
 export function createApp() {
   const configReport = getRuntimeConfigReport(config);
 
@@ -169,7 +176,15 @@ export function createApp() {
   );
 
   if (config.serveStaticApp && existsSync(config.staticDir)) {
-    app.use(express.static(config.staticDir));
+    app.use((req, res, next) => {
+      if (isHiddenFileProbe(req.path)) {
+        res.status(404).json({ error: "Route not found" });
+        return;
+      }
+
+      next();
+    });
+    app.use(express.static(config.staticDir, { dotfiles: "deny" }));
     app.get("/{*splat}", (req, res, next) => {
       if (req.path.startsWith("/api")) {
         next();
@@ -187,6 +202,10 @@ export function createApp() {
   app.use((error, _req, res, _next) => {
     if (error.message === "CORS origin not allowed") {
       return res.status(403).json({ error: error.message });
+    }
+
+    if (error instanceof URIError) {
+      return res.status(400).json({ error: "Bad request" });
     }
 
     console.error(error);
