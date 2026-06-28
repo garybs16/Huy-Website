@@ -165,6 +165,20 @@ export function RewardsGuidancePage({ cohorts = [] }) {
               <span>Approved schedule details</span>
               <span>Payment plan available</span>
             </div>
+            <div className="rg-hero-proof" aria-label="Landing page highlights">
+              <div>
+                <strong>$100</strong>
+                <span>eligible referral credit</span>
+              </div>
+              <div>
+                <strong>$250</strong>
+                <span>registration deposit</span>
+              </div>
+              <div>
+                <strong>160 hrs</strong>
+                <span>approved training path</span>
+              </div>
+            </div>
           </div>
 
           <div className="rg-hero-visual">

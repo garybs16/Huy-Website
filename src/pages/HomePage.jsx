@@ -16,9 +16,14 @@ import {
 
 export function HomePage({ programs }) {
   const heroTrustItems = [
-    { label: "State approved CNA program" },
+    { label: "CDPH approved CNA program" },
     { label: "160 hour training path" },
     { label: "Orange, California" },
+  ];
+  const heroAssuranceItems = [
+    ["Program total", "$2,000"],
+    ["Registration deposit", "$250"],
+    ["Admissions help", "Direct"],
   ];
   const trainingTimeline = [
     {
@@ -79,6 +84,15 @@ export function HomePage({ programs }) {
                 <Link key={item.label} to={item.to}>
                   {item.label}
                 </Link>
+              ))}
+            </div>
+
+            <div className="hero-assurance-panel" aria-label="Enrollment highlights">
+              {heroAssuranceItems.map(([label, value]) => (
+                <div key={label}>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </div>
               ))}
             </div>
           </div>
