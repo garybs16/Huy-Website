@@ -93,7 +93,15 @@ export function createApp() {
   app.locals.configReport = configReport;
 
   app.disable("x-powered-by");
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          "upgrade-insecure-requests": null,
+        },
+      },
+    })
+  );
   app.use(
     cors((req, callback) => {
       const origin = req.header("Origin");
