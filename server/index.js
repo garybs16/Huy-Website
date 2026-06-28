@@ -215,11 +215,11 @@ export function createApp() {
   return app;
 }
 
-export function startServer(port = config.port) {
+export function startServer(port = config.port, host = config.host) {
   const app = createApp();
-  const server = app.listen(port, () => {
+  const server = app.listen(port, host, () => {
     const mode = config.serveStaticApp ? "API + frontend" : "API";
-    console.log(`${mode} listening on http://localhost:${port}`);
+    console.log(`${mode} listening on http://${host}:${port}`);
 
     for (const warning of app.locals.configReport?.warnings ?? []) {
       console.warn(`Configuration warning: ${warning}`);

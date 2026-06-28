@@ -73,6 +73,7 @@ export const config = {
   dataDir,
   databasePath,
   staticDir,
+  host: (process.env.HOST ?? "0.0.0.0").trim() || "0.0.0.0",
   publicAppUrl: (process.env.PUBLIC_APP_URL ?? "").trim().replace(/\/+$/, ""),
   stripeSecretKey: (process.env.STRIPE_SECRET_KEY ?? "").trim(),
   stripeWebhookSecret: (process.env.STRIPE_WEBHOOK_SECRET ?? "").trim(),
