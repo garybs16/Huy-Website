@@ -3,7 +3,7 @@ import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import {
-  admissionsSteps,
+  aboutLeaderItems,
   industryGrowthRows,
   miscFeeItems,
   programMeta,
@@ -16,36 +16,36 @@ import {
 
 export function HomePage({ programs }) {
   const heroTrustItems = [
-    { label: "CDPH approved CNA program" },
-    { label: "160 hour training path" },
-    { label: "Orange, California" },
+    { label: "Hands-on training" },
+    { label: "Career-focused programs" },
+    { label: "Supportive instructors" },
   ];
   const heroAssuranceItems = [
-    ["Program total", "$2,000"],
-    ["Registration deposit", "$250"],
+    ["Current program", "CNA"],
+    ["Training path", "160 hrs"],
     ["Admissions help", "Direct"],
   ];
-  const trainingTimeline = [
+  const gettingStartedSteps = [
     {
-      title: "Find your start window",
-      detail: "Compare schedules, tuition context, and document requirements before you commit.",
-      to: "/schedule",
+      title: "Choose a program",
+      detail: "Review the CNA program format, schedule, tuition, and admissions requirements.",
+      to: "/programs",
     },
     {
-      title: "Get supported through enrollment",
-      detail: "Admissions helps you move from inquiry to registration with fewer missed steps.",
-      to: "/rewards-guidance",
+      title: "Submit your application",
+      detail: "Send your enrollment details or contact admissions for help before applying.",
+      to: "/register",
+    },
+    {
+      title: "Begin training",
+      detail: "Complete onboarding, prepare required documents, and start your healthcare training path.",
+      to: "/schedule",
     },
   ];
   const decisionStats = [
     { value: "160 hrs", label: "approved program length" },
-    { value: "$100", label: "eligible referral reward" },
-    { value: "Direct", label: "admissions guidance" },
-  ];
-  const heroQuickLinks = [
-    { label: "Schedules", to: "/schedule" },
-    { label: "Admissions", to: "/admissions" },
-    { label: "Payment", to: "/payment" },
+    { value: "Hybrid", label: "online theory and in-person clinicals" },
+    { value: "Orange", label: "California training location" },
   ];
 
   return (
@@ -61,30 +61,23 @@ export function HomePage({ programs }) {
                 </span>
               ))}
             </div>
-            <h1 className="hero-title" aria-label="Certified Nursing Assistant Training">
-              <span>Certified Nursing Assistant</span>
-              <span>Training</span>
+            <h1 className="hero-title" aria-label="Start your healthcare career with confidence">
+              <span>Start Your Healthcare Career</span>
+              <span>With Confidence</span>
             </h1>
             <p className="hero-text">
-              Train for patient care with a clear CNA path, real admissions guidance, published
-              program details, and a registration flow built to keep your next step obvious.
+              First Step Healthcare Academy helps students train for healthcare careers through
+              hands-on CNA instruction, clear admissions guidance, and practical support from first
+              inquiry through enrollment.
             </p>
 
             <div className="button-row">
               <Link to="/register" className="btn btn-primary">
-                Register Now
+                Enroll Now
               </Link>
-              <Link to="/career-quiz" className="btn btn-secondary">
-                Take the Quiz
+              <Link to="/programs" className="btn btn-secondary">
+                View Programs
               </Link>
-            </div>
-
-            <div className="hero-quick-links" aria-label="Fast access">
-              {heroQuickLinks.map((item) => (
-                <Link key={item.label} to={item.to}>
-                  {item.label}
-                </Link>
-              ))}
             </div>
 
             <div className="hero-assurance-panel" aria-label="Enrollment highlights">
@@ -102,11 +95,12 @@ export function HomePage({ programs }) {
               <img
                 src={heroTraining}
                 alt="Healthcare instructor guiding students through hands-on bedside skills training"
+                fetchPriority="high"
               />
-              <div className="hero-status-chip">Enrollment open</div>
+              <div className="hero-status-chip">Now enrolling</div>
               <div className="hero-photo-badge">
-                <span>Hands-on instruction</span>
-                <strong>Skills lab, online theory, and admissions support in one path</strong>
+                <span>Healthcare training</span>
+                <strong>CNA classroom instruction, skills lab preparation, and admissions support</strong>
               </div>
             </div>
             <div className="hero-decision-strip" aria-label="Program decision highlights">
@@ -120,8 +114,92 @@ export function HomePage({ programs }) {
           </div>
         </div>
 
-        <div className="container hero-pathway" aria-label="Next steps">
-          {trainingTimeline.map((item, index) => (
+      </section>
+
+      <section className="section section-soft home-programs-section" id="home-programs">
+        <div className="container section-heading">
+          <div>
+            <p className="section-kicker">Programs</p>
+            <h2>Healthcare training with the key details up front.</h2>
+          </div>
+          <p>
+            Start by reviewing the available CNA training path, format, duration, and next step
+            before you apply.
+          </p>
+        </div>
+
+        <div className="container card-grid three-up">
+          {programs.map((program) => {
+            const meta = programMeta[program.id] ?? {
+              tag: "Program",
+              badge: "Admissions Ready",
+              detail: "Structured for clearer comparison and faster decisions.",
+            };
+
+            return (
+              <article key={program.id} className="program-card featured-program-card">
+                <div className="program-topline">
+                  <span>{meta.tag}</span>
+                  <strong>{meta.badge}</strong>
+                </div>
+                <h3>{program.title}</h3>
+                <p>{program.summary}</p>
+                <ul className="detail-list">
+                  <li>Duration: {program.duration}</li>
+                  <li>Schedule: {program.schedule}</li>
+                  <li>{meta.detail}</li>
+                </ul>
+                <div className="program-card-actions">
+                  <Link to="/programs" className="card-action-link">
+                    Learn More
+                  </Link>
+                  <Link to={`/register?programId=${program.id}`} className="card-action-link">
+                    Enroll
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="section why-choose-section">
+        <div className="container section-heading">
+          <div>
+            <p className="section-kicker">Why Choose First Step Healthcare Academy?</p>
+            <h2>Built for students who want a clear, supported start.</h2>
+          </div>
+          <p>
+            The academy focuses on practical preparation, approachable admissions support, and
+            training details students can understand before making an enrollment decision.
+          </p>
+        </div>
+
+        <div className="container card-grid four-up why-card-grid">
+          {supportItems.map((item, index) => (
+            <article key={item.title} className="support-card why-card">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{item.title}</h3>
+              <p>{item.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section section-soft get-started-section">
+        <div className="container section-heading">
+          <div>
+            <p className="section-kicker">How to Get Started</p>
+            <h2>Three steps from interest to training.</h2>
+          </div>
+          <p>
+            Students can move at their own pace while keeping the important enrollment tasks easy
+            to find.
+          </p>
+        </div>
+
+        <div className="container hero-pathway get-started-grid" aria-label="Enrollment steps">
+          {gettingStartedSteps.map((item, index) => (
             <Link key={item.title} to={item.to} className="training-phase-card">
               <span>{`0${index + 1}`}</span>
               <strong>{item.title}</strong>
@@ -206,10 +284,14 @@ export function HomePage({ programs }) {
             <img
               src={programsSupportPhoto}
               alt="Healthcare students practicing patient care skills in a training lab"
+              loading="lazy"
+              decoding="async"
             />
             <img
               src={admissionsLabPhoto}
               alt="Instructor guiding students through a clinical classroom exercise"
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
@@ -231,69 +313,28 @@ export function HomePage({ programs }) {
         </div>
       </section>
 
-      <section className="section section-soft">
-        <div className="container section-heading">
-          <div>
-            <p className="section-kicker">CNA Program</p>
-            <h2>Explore CNA training with the key details already surfaced.</h2>
+      <section className="section about-us-section" id="about-us">
+        <div className="container about-us-layout">
+          <div className="about-us-copy">
+            <p className="section-kicker">About Us</p>
+            <h2>Founded to make the first step into healthcare feel clear and supported.</h2>
+            <p>
+              First Step Healthcare Academy is led by people who understand that starting a
+              healthcare career can feel overwhelming. Our leadership team focuses on practical
+              training, clear communication, and a student experience that helps each learner move
+              forward with confidence.
+            </p>
           </div>
-          <p>
-            Students can review delivery format, timeline, and admissions context before they ever
-            contact the school.
-          </p>
-        </div>
 
-        <div className="container card-grid three-up">
-          {programs.map((program) => {
-            const meta = programMeta[program.id] ?? {
-              tag: "Program",
-              badge: "Admissions Ready",
-              detail: "Structured for clearer comparison and faster decisions.",
-            };
-
-            return (
-              <article key={program.id} className="program-card">
-                <div className="program-topline">
-                  <span>{meta.tag}</span>
-                  <strong>{meta.badge}</strong>
-                </div>
-                <h3>{program.title}</h3>
-                <p>{program.summary}</p>
-                <ul className="detail-list">
-                  <li>Duration: {program.duration}</li>
-                  <li>Schedule: {program.schedule}</li>
-                  <li>{meta.detail}</li>
-                </ul>
+          <div className="about-leader-grid" aria-label="First Step Healthcare Academy leadership">
+            {aboutLeaderItems.map((item) => (
+              <article key={item.role} className="about-leader-card">
+                <span>{item.role}</span>
+                <h3>{item.name}</h3>
+                <p>{item.detail}</p>
               </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container split-panel">
-          <article className="info-card accent-card">
-            <p className="section-kicker">Student support</p>
-            <h2>Get direct guidance on schedules, documents, and readiness before you enroll.</h2>
-            <div className="stack-panel">
-              {supportItems.map((item) => (
-                <div key={item.title} className="support-line">
-                  <strong>{item.title}</strong>
-                  <p>{item.detail}</p>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article className="info-card">
-            <p className="section-kicker">Enrollment path</p>
-            <h2>A simple step-by-step path keeps the next move obvious.</h2>
-            <ol className="detail-list ordered-list">
-              {admissionsSteps.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-          </article>
+            ))}
+          </div>
         </div>
       </section>
 

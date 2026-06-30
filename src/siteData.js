@@ -2,12 +2,9 @@ import { cohortCatalogSeed, programCatalogSeed } from "../shared/catalogSeed";
 
 export const navItems = [
   { label: "Home", to: "/" },
-  { label: "CNA Program", to: "/programs" },
-  { label: "Quiz", to: "/career-quiz" },
-  { label: "Rewards & Guidance", to: "/rewards-guidance" },
-  { label: "Schedule", to: "/schedule" },
-  { label: "Payment", to: "/payment" },
+  { label: "Programs", to: "/programs" },
   { label: "Admissions", to: "/admissions" },
+  { label: "About", to: "/#about-us" },
   { label: "Contact", to: "/contact" },
 ];
 
@@ -76,16 +73,35 @@ export const quickLinks = [
 
 export const supportItems = [
   {
-    title: "Admissions planning support",
+    title: "Hands-on instruction",
+    detail: "Students train through classroom instruction, lab skills, and supervised clinical preparation.",
+  },
+  {
+    title: "Supportive learning environment",
     detail: "Students can compare class timing, cohort fit, and document readiness before they commit.",
   },
   {
-    title: "Registration follow-through",
+    title: "Career-focused training",
     detail: "The enrollment flow keeps student information, cohort choice, and payment handoff tied together.",
   },
   {
-    title: "Career-focused preparation",
+    title: "Accessible enrollment support",
     detail: "Training pages, published schedules, and direct support reduce friction between interest and start date.",
+  },
+];
+
+export const aboutLeaderItems = [
+  {
+    role: "Founder",
+    name: contactDetails.coordinator,
+    detail:
+      "Huy Hoang founded First Step Healthcare Academy to give future healthcare workers a structured, supportive place to begin CNA training with confidence.",
+  },
+  {
+    role: "Technical Co-Founder",
+    name: "Gary Samuel",
+    detail:
+      "As technical co-founder, Gary Samuel supports the digital systems, student-facing workflows, and technical foundation that help the academy operate clearly and efficiently.",
   },
 ];
 

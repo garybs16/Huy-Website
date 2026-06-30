@@ -50,24 +50,31 @@ export function SiteHeader({ navItems }) {
         </button>
 
         <nav id="primary-navigation" className={`site-nav ${navOpen ? "is-open" : ""}`} aria-label="Primary">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) => `nav-link ${isActive ? "is-active" : ""}`}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {navItems.map((item) =>
+            item.to.includes("#") ? (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`nav-link ${location.pathname + location.hash === item.to ? "is-active" : ""}`}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/"}
+                className={({ isActive }) => `nav-link ${isActive ? "is-active" : ""}`}
+              >
+                {item.label}
+              </NavLink>
+            )
+          )}
         </nav>
 
         <div className={`nav-actions ${navOpen ? "is-open" : ""}`}>
-          <Link to="/schedule" className="btn btn-ghost nav-button-secondary">
-            View Schedule
-          </Link>
           <Link to="/register" className="btn btn-primary nav-button">
-            Register Now
+            Enroll Now
           </Link>
         </div>
       </div>

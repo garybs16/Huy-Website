@@ -55,6 +55,8 @@ export function ContactPage({
             <img
               src={programsSupportPhoto}
               alt="Healthcare students practicing patient care skills in a classroom lab"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <article className="form-card">

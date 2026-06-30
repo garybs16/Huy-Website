@@ -182,7 +182,11 @@ export function RewardsGuidancePage({ cohorts = [] }) {
           </div>
 
           <div className="rg-hero-visual">
-            <img src={heroTraining} alt="CNA students receiving hands-on clinical skills instruction" />
+            <img
+              src={heroTraining}
+              alt="CNA students receiving hands-on clinical skills instruction"
+              fetchPriority="high"
+            />
             <div className="rg-offer-card">
               <span>Referral offer</span>
               <strong>$100 for your friend + $100 for you</strong>
@@ -350,7 +354,12 @@ export function RewardsGuidancePage({ cohorts = [] }) {
             </details>
           </div>
           <div className="rg-feature-photo">
-            <img src={programsSupport} alt="Healthcare students learning together during training" />
+            <img
+              src={programsSupport}
+              alt="Healthcare students learning together during training"
+              loading="lazy"
+              decoding="async"
+            />
             <div><strong>Build skills together</strong><span>Encouragement · accountability · shared progress</span></div>
           </div>
         </div>
@@ -389,7 +398,12 @@ export function RewardsGuidancePage({ cohorts = [] }) {
             </div>
           </div>
           <div className="rg-study-visual">
-            <img src={heroTraining} alt="Instructor demonstrating a hands-on CNA skill to students" />
+            <img
+              src={heroTraining}
+              alt="Instructor demonstrating a hands-on CNA skill to students"
+              loading="lazy"
+              decoding="async"
+            />
             <blockquote>“Preparation becomes manageable when students know what to focus on next.”</blockquote>
           </div>
         </div>

@@ -73,12 +73,16 @@ export function ProgramsPage({ programs, programLoadError }) {
             <img
               src={admissionsSupport}
               alt="Healthcare students receiving hands-on instruction during a clinical skills lab"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="media-panel">
             <img
               src={admissionsLabPhoto}
               alt="Instructor leading healthcare students through a classroom simulation exercise"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
