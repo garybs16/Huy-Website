@@ -35,16 +35,12 @@ export function AdmissionsPage() {
           <img
             src={heroTrainingPhoto}
             alt="Healthcare instructor demonstrating bedside skills with students observing during lab training"
-            loading="lazy"
-            decoding="async"
           />
         </div>
         <div className="media-panel">
           <img
             src={programsSupportPhoto}
             alt="Students practicing patient care techniques in a clinical simulation room"
-            loading="lazy"
-            decoding="async"
           />
         </div>
       </div>

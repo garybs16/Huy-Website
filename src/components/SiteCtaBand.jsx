@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { contactDetails } from "../siteData";
 
 const ctaHighlights = [
-  "Hands-on CNA training",
-  "Admissions guidance",
-  "Clear next steps",
+  "Published schedules",
+  "Flexible cohort timing",
+  "Direct admissions guidance",
 ];
 
 export function SiteCtaBand() {
@@ -13,19 +13,19 @@ export function SiteCtaBand() {
       <div className="container">
         <div className="site-cta-panel">
           <div className="site-cta-copy">
-            <p className="section-kicker">Ready to begin?</p>
-            <h2>Ready to take your first step into healthcare?</h2>
+            <p className="section-kicker">Plan your start with confidence</p>
+            <h2>Move from interest to enrollment with a clear next step.</h2>
             <p>
-              Apply online or contact admissions for help choosing the right program, preparing
-              documents, and planning your start.
+              Review the current schedule, choose the right training path, and speak with admissions
+              before seats tighten.
             </p>
 
             <div className="button-row">
               <Link to="/register" className="btn btn-primary">
-                Apply Now
+                Reserve a Seat
               </Link>
               <Link to="/contact" className="btn btn-ghost">
-                Contact Us
+                Talk to Admissions
               </Link>
             </div>
           </div>
