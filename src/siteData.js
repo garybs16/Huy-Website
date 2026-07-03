@@ -5,10 +5,6 @@ export const navItems = [
   { label: "CNA Program", to: "/programs" },
   { label: "Quiz", to: "/career-quiz" },
   { label: "Rewards & Guidance", to: "/rewards-guidance" },
-  { label: "Schedule", to: "/schedule" },
-  { label: "Payment", to: "/payment" },
-  { label: "Admissions", to: "/admissions" },
-  { label: "Contact", to: "/contact" },
 ];
 
 export const contactDetails = {
@@ -86,6 +82,36 @@ export const supportItems = [
   {
     title: "Career-focused preparation",
     detail: "Training pages, published schedules, and direct support reduce friction between interest and start date.",
+  },
+];
+
+export const aboutLeaderItems = [
+  {
+    role: "Founder",
+    name: contactDetails.coordinator,
+    detail:
+      "Huy Hoang founded First Step Healthcare Academy to give future healthcare workers a structured, supportive place to begin CNA training with confidence.",
+  },
+  {
+    role: "Technical Co-Founder",
+    name: "Gary Samuel",
+    detail:
+      "Gary Samuel supports the digital systems, student-facing workflows, and technical foundation that help the academy operate clearly and efficiently.",
+  },
+];
+
+export const trustProofItems = [
+  {
+    title: "Approved CNA training",
+    detail: "The CNA program is presented around the approved class calendar and training milestones.",
+  },
+  {
+    title: "Transparent enrollment details",
+    detail: "Tuition, registration fee, payment-plan context, and refund policy details are available before enrollment.",
+  },
+  {
+    title: "Direct admissions contact",
+    detail: `Students can reach ${contactDetails.coordinator} directly by phone or email for enrollment questions.`,
   },
 ];
 
@@ -232,12 +258,12 @@ export const tuitionItems = [
     title: "CNA Cohorts",
     amount: "$1,750 + $250",
     detail:
-      "Current promotional CNA tuition is $1,750 after a $600 discount, plus a $250 non-refundable registration fee, for a $2,000 program total.",
+      "Published CNA tuition is $1,750 plus a $250 non-refundable registration fee, for a $2,000 program total.",
   },
 ];
 
 export const miscFeeItems = [
-  "Regular CNA tuition is $2,350 plus the $250 registration fee before current promotional discounts",
+  "Published CNA tuition and fees are reviewed before enrollment and may change for future cohorts",
   "Eligible veterans may receive an additional $100 discount when approved before enrollment",
   "$250 registration fee is non-refundable and may be used as the payment-plan deposit",
   "Payment plan example: $250 registration fee deposit, then $1,750 remaining balance through scheduled installments",
@@ -325,7 +351,6 @@ export const programRequirementSections = [
     items: [
       "Live online theory instruction: 60 hours",
       "In-person supervised clinical training: 100 hours",
-      "Total program length: 160 hours",
       "The approved class calendar controls the exact program timeline, including any holidays, instructor availability, clinical site availability, and student document completion requirements.",
       "The online theory portion is separate from the in-person supervised clinical training portion.",
       "Program completion requires all required theory hours, clinical hours, quizzes, skills requirements, remediation if assigned, and program documentation.",

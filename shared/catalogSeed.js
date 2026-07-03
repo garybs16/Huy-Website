@@ -4,7 +4,7 @@ export const programCatalogSeed = [
     title: "Certified Nurse Assistant",
     summary:
       "Structured classroom, lab, and supervised clinical training built for direct patient-care roles.",
-    duration: "160 approved program hours",
+    duration: "6-12 weeks",
     schedule: "Approved weekday schedule with online theory and in-person clinical training listed separately",
   },
 ];

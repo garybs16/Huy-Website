@@ -1,120 +1,89 @@
 import { Link } from "react-router-dom";
 import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
-import admissionsSupport from "../assets/programs-support-photo.jpg";
-import { PageIntro } from "../components/PageIntro";
-import { RefundPolicy } from "../components/RefundPolicy";
 import {
-  admissionsSteps,
-  courseModules,
-  locationDetails,
   miscFeeItems,
-  programMeta,
   programRequirementSections,
   requirementItems,
-  supportItems,
   tuitionItems,
 } from "../siteData";
 
-export function ProgramsPage({ programs, programLoadError }) {
-  return (
-    <section className="section">
-      <PageIntro
-        kicker="CNA Program"
-        title="Review the Certified Nurse Assistant training path, requirements, and next steps."
-        description="Review CNA format details, program requirements, fees, policies, and next steps without digging through extra pages."
-        accent="CNA training details made clear"
-        note="Format, duration, and admissions context stay visible together."
-      />
+const certificationSteps = [
+  {
+    step: "Step 1",
+    title: "Instructor-Led Online Theory",
+    time: "60 hours",
+    detail:
+      "Learn the fundamentals of nursing in online training sessions with live instructor guidance, schedule support, and personalized feedback.",
+  },
+  {
+    step: "Step 2",
+    title: "On-Site Clinical Training",
+    time: "103 hours",
+    detail:
+      "Strengthen your skills with hands-on clinical experience at approved California locations. Additional lab hours may be required during clinicals.",
+  },
+  {
+    step: "Step 3",
+    title: "State Certification Exam",
+    time: "4-6 hours",
+    detail:
+      "Prepare for the state exam, confirm testing steps, and move toward certification with nearby CNA testing-site guidance.",
+  },
+];
 
+const documentationRows = [
+  {
+    deadline: "At Enrollment",
+    items:
+      "Enrollment application, government ID, proof of age, proof of flu vaccination, clinical-clearance acknowledgment.",
+  },
+  {
+    deadline: "Before Clinical Clearance Deadline (1 week after Theory start)",
+    items:
+      "Physical exam/health clearance, medical history, TB clearance, chest X-ray if positive TB test, facility-required immunizations, drug screen, Live Scan/background process, facility onboarding documents, HIPAA/confidentiality acknowledgment, dress code acknowledgment.",
+  },
+  {
+    deadline: "Before Clinical Start",
+    items: "Verification of all requirements at clinical clearance deadline submission.",
+  },
+];
+
+export function ProgramsPage({ programLoadError }) {
+  const displayedRequirementSections = programRequirementSections.filter((section) =>
+    ["Program Length", "Grade and Passing Requirements", "Technology Requirements"].includes(section.title)
+  );
+
+  return (
+    <section className="section program-page">
       <div className="container page-jump-nav" aria-label="CNA program sections">
         <a href="#program-options">CNA Program</a>
         <a href="#program-requirements">Requirements</a>
+        <a href="#program-documentation">Documentation</a>
         <a href="#program-fees">Fees</a>
-        <a href="#program-policies">Policies</a>
         <a href="#program-next-step">Next Step</a>
       </div>
 
-      <div id="program-options" className="container">
+      <div id="program-options" className="container program-certification-frame">
         {programLoadError ? <p className="section-note">{programLoadError}</p> : null}
-
-        <div className="card-grid three-up">
-          {programs.map((program) => {
-            const meta = programMeta[program.id] ?? {
-              tag: "Program",
-              badge: "Admissions",
-              detail: "Training details are structured for easier side-by-side review.",
-            };
-
-            return (
-              <article key={program.id} className="program-card">
-                <div className="program-topline">
-                  <span>{meta.tag}</span>
-                  <strong>{meta.badge}</strong>
-                </div>
-                <h3>{program.title}</h3>
-                <p>{program.summary}</p>
-                <ul className="detail-list">
-                  <li>Duration: {program.duration}</li>
-                  <li>Format: {program.schedule}</li>
-                  <li>{meta.detail}</li>
-                </ul>
-                <Link to={`/register?programId=${program.id}`} className="card-action-link">
-                  Start registration
-                </Link>
-              </article>
-            );
-          })}
+        <div className="program-certification-heading">
+          <p className="section-kicker">CNA certification</p>
+          <h1>Your CNA Certification Is Just 3 Simple Steps Away.</h1>
+          <p>It is easy to start a high-demand CNA career when the next steps are clear.</p>
         </div>
-      </div>
-
-      <div className="container split-panel">
-        <div className="stack-panel">
-          <div className="media-panel">
-            <img
-              src={admissionsSupport}
-              alt="Healthcare students receiving hands-on instruction during a clinical skills lab"
-            />
-          </div>
-          <div className="media-panel">
-            <img
-              src={admissionsLabPhoto}
-              alt="Instructor leading healthcare students through a classroom simulation exercise"
-            />
-          </div>
-        </div>
-
-        <div className="stack-panel">
-          {supportItems.map((item) => (
-            <article key={item.title} className="support-card">
-              <h3>{item.title}</h3>
+        <div className="program-step-grid">
+          {certificationSteps.map((item) => (
+            <article key={item.step} className="program-step-card">
+              <span>{item.step}</span>
+              <div className="program-step-icon" aria-hidden="true" />
+              <h2>{item.title}</h2>
+              <strong>{item.time}</strong>
               <p>{item.detail}</p>
             </article>
           ))}
         </div>
       </div>
 
-      <div className="container card-grid two-up">
-        <article className="info-card">
-          <p className="section-kicker">CNA planning</p>
-          <h3>Students can review schedules, formats, and next steps without extra clicks.</h3>
-          <p>
-            The CNA overview is structured to answer the first questions most applicants ask: what
-            the training covers, how long it takes, and how it fits into enrollment.
-          </p>
-        </article>
-
-        <article className="info-card">
-          <p className="section-kicker">Admissions flow</p>
-          <h3>Once a student confirms the right schedule, the next step stays simple.</h3>
-          <ol className="detail-list ordered-list">
-            {admissionsSteps.slice(0, 3).map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        </article>
-      </div>
-
-      <div id="program-requirements" className="container program-requirements">
+      <div id="program-requirements" className="container program-requirements program-requirements-focused">
         <div className="section-heading">
           <div>
             <p className="section-kicker">Online Nurse Assistant Training Program Requirements</p>
@@ -127,105 +96,110 @@ export function ProgramsPage({ programs, programLoadError }) {
           </p>
         </div>
 
-        <article className="info-card">
-          <p className="section-kicker">Required coursework</p>
-          <h3>Students complete a structured CNA/NATP curriculum.</h3>
-          <div className="module-grid">
-            {courseModules.map(([title, detail], index) => (
-              <div key={title} className="module-card">
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{title}</strong>
-                <p>{detail}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <div className="card-grid two-up">
-          {programRequirementSections.map((section) => (
-            <article key={section.title} className="info-card">
+        <div className="program-detail-pillars">
+          {displayedRequirementSections.map((section) => (
+            <article
+              key={section.title}
+              className={`info-card program-detail-pillar ${
+                section.title === "Technology Requirements" ? "technology-pillar" : ""
+              }`}
+            >
               <p className="section-kicker">{section.title}</p>
               <h3>{section.title}</h3>
+              {section.title === "Technology Requirements" ? (
+                <img
+                  src={admissionsLabPhoto}
+                  alt="Student using training technology during a healthcare classroom session"
+                />
+              ) : null}
               <ul className="detail-list compact-list">
-                {section.items.map((item) => (
-                  <li key={item}>{item}</li>
+                {section.items.map((item, index) => (
+                  <li
+                    key={item}
+                    className={
+                      section.title === "Grade and Passing Requirements" && index < 3
+                        ? "requirement-highlight"
+                        : ""
+                    }
+                  >
+                    {item}
+                  </li>
                 ))}
               </ul>
+              {section.title === "Program Length" ? (
+                <Link to="/schedule" className="btn btn-secondary program-schedule-cta">
+                  View Schedule
+                </Link>
+              ) : null}
             </article>
           ))}
         </div>
+      </div>
 
-        <div id="program-fees" className="card-grid two-up">
-          <article className="info-card">
-            <p className="section-kicker">Enrollment and clinical readiness</p>
-            <h3>Documents and screenings required before enrollment or training milestones.</h3>
-            <ul className="detail-list compact-list">
-              {requirementItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <p className="card-note">
-              Original enrollment requirement documents must be hand-delivered to a school official
-              by appointment.
-            </p>
-          </article>
+      <div id="program-documentation" className="container program-frame">
+        <article className="info-card documentation-card">
+          <p className="section-kicker">Enrollment and clinical readiness</p>
+          <h2>Documentation requirements and deadline.</h2>
+          <div className="documentation-table" role="table" aria-label="Documentation requirements and deadline">
+            <div className="documentation-row documentation-head" role="row">
+              <strong role="columnheader">Deadline</strong>
+              <strong role="columnheader">Student Must Submit / Complete</strong>
+            </div>
+            {documentationRows.map((row) => (
+              <div className="documentation-row" role="row" key={row.deadline}>
+                <strong role="cell">{row.deadline}</strong>
+                <p role="cell">{row.items}</p>
+              </div>
+            ))}
+          </div>
+          <p className="card-note">
+            Enrollment requirements still include core admissions documents such as active
+            government-issued identification and proof of age. Clinical-readiness documents are
+            reviewed against the class and facility deadlines above.
+          </p>
+        </article>
+      </div>
 
-          <article className="info-card">
-            <p className="section-kicker">Program fees and payment plan</p>
-            <h3>Published fees and possible additional costs.</h3>
-            <div className="stack-panel">
-              {tuitionItems.map((item) => (
-                <div key={item.title} className="tuition-line">
-                  <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.detail}</p>
-                  </div>
-                  <span>{item.amount}</span>
+      <div id="program-fees" className="container program-frame">
+        <article className="info-card">
+          <p className="section-kicker">Program fees and payment plan</p>
+          <h2>Published fees and possible additional costs.</h2>
+          <div className="stack-panel">
+            {tuitionItems.map((item) => (
+              <div key={item.title} className="tuition-line">
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.detail}</p>
                 </div>
-              ))}
-            </div>
-            <ul className="detail-list compact-list">
-              {miscFeeItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
-        </div>
+                <span>{item.amount}</span>
+              </div>
+            ))}
+          </div>
+          <ul className="detail-list compact-list">
+            {miscFeeItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
 
-        <div id="program-policies" className="program-policy-panel">
-          <RefundPolicy />
-        </div>
-
-        <div className="card-grid two-up">
-          <article className="info-card">
-            <p className="section-kicker">Clinical training site locations</p>
-            <h3>Clinical training is completed in person at approved clinical training sites.</h3>
-            <ul className="detail-list compact-list">
-              {locationDetails.clinicalCities.map((city) => (
-                <li key={city}>{city}</li>
-              ))}
-            </ul>
-            <p>{locationDetails.note}</p>
-          </article>
-
-          <article id="program-next-step" className="info-card dark-card">
-            <p className="section-kicker">Next step</p>
-            <h3>Review current availability and payment options before submitting enrollment.</h3>
-            <p>
-              Exact public start dates are coming soon. Students can still review class formats,
-              pricing, payment-plan structure, and admissions requirements before contacting the
-              school.
-            </p>
-            <div className="button-row">
-              <Link to="/schedule" className="btn btn-secondary">
-                View Schedule
-              </Link>
-              <Link to="/contact" className="btn btn-primary">
-                Send Inquiry
-              </Link>
-            </div>
-          </article>
-        </div>
+      <div id="program-next-step" className="container program-frame">
+        <article className="info-card dark-card">
+          <p className="section-kicker">Next step</p>
+          <h2>Review current availability and payment options before submitting enrollment.</h2>
+          <p>
+            Students can review class formats, pricing, payment-plan structure, admissions
+            requirements, and documentation deadlines before contacting the school.
+          </p>
+          <div className="button-row">
+            <Link to="/schedule" className="btn btn-secondary">
+              View Schedule
+            </Link>
+            <Link to="/contact" className="btn btn-primary">
+              Send Inquiry
+            </Link>
+          </div>
+        </article>
       </div>
     </section>
   );

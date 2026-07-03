@@ -47,18 +47,23 @@ async function run() {
     assertIncludes(admissionsPage, anchor, "Admissions page anchor");
   }
 
-  for (const anchor of ["program-options", "program-requirements", "program-fees", "program-policies"]) {
+  for (const anchor of [
+    "program-options",
+    "program-requirements",
+    "program-documentation",
+    "program-fees",
+    "program-next-step",
+  ]) {
     assertIncludes(programsPage, anchor, "Programs page anchor");
   }
 
   for (const anchor of [
-    "cohorts",
-    "tuition",
     "free-resources",
     "referral-rewards",
     "retention-recognition",
     "study-tools",
     "career-support",
+    "tuition",
     "callback",
   ]) {
     assertIncludes(rewardsPage, anchor, "Rewards page anchor");

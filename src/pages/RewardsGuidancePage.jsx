@@ -10,24 +10,6 @@ import {
   studyToolItems,
 } from "../siteData";
 
-const scheduleOptions = [
-  {
-    label: "Approved schedule",
-    time: "Current class calendar",
-    note: "Review the schedule page for approved dates and meeting patterns",
-  },
-  {
-    label: "Online theory",
-    time: "60 hours",
-    note: "Theory instruction is listed separately from in-person clinical training",
-  },
-  {
-    label: "In-person clinical",
-    time: "100 hours",
-    note: "Supervised clinical training is completed in person",
-  },
-];
-
 const supportPillars = [
   { number: "01", title: "Referral rewards", text: "Eligible students can save together when program requirements are met." },
   { number: "02", title: "Retention recognition", text: "Qualifying graduates may be recognized for continuing into CNA employment." },
@@ -76,27 +58,20 @@ const initialForm = {
   updates: false,
 };
 
-function formatDate(dateValue) {
-  if (!dateValue) return "Date announced soon";
-  const date = new Date(`${dateValue}T12:00:00`);
-  return Number.isNaN(date.getTime())
-    ? "Date announced soon"
-    : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
-}
+const initialResourceForm = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+};
 
-export function RewardsGuidancePage({ cohorts = [] }) {
+export function RewardsGuidancePage() {
   const [form, setForm] = useState(initialForm);
+  const [resourceForm, setResourceForm] = useState(initialResourceForm);
   const [pending, setPending] = useState(false);
+  const [resourcePending, setResourcePending] = useState(false);
   const [status, setStatus] = useState({ type: "", text: "" });
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const activeCohorts = cohorts
-    .filter((cohort) => {
-      if (cohort.isActive === false || !cohort.startDate) return false;
-      const startDate = new Date(`${cohort.startDate}T12:00:00`);
-      return !Number.isNaN(startDate.getTime()) && startDate >= today;
-    })
-    .slice(0, 3);
+  const [resourceStatus, setResourceStatus] = useState({ type: "", text: "" });
 
   function updateField(event) {
     const { name, value, checked, type } = event.target;
@@ -109,6 +84,40 @@ export function RewardsGuidancePage({ cohorts = [] }) {
       ...current,
       topics: checked ? [...current.topics, value] : current.topics.filter((topic) => topic !== value),
     }));
+  }
+
+  function updateResourceField(event) {
+    const { name, value } = event.target;
+    setResourceForm((current) => ({ ...current, [name]: value }));
+  }
+
+  async function handleResourceSubmit(event) {
+    event.preventDefault();
+    setResourcePending(true);
+    setResourceStatus({ type: "", text: "" });
+
+    try {
+      await submitInquiry({
+        fullName: `${resourceForm.firstName} ${resourceForm.lastName}`.trim(),
+        email: resourceForm.email,
+        phone: resourceForm.phone,
+        program: "cna",
+        message: "Please send the CNA Career Starter Guide and OC Nursing School Pathway Guide.",
+        source: "rewards-free-handouts",
+      });
+      setResourceForm(initialResourceForm);
+      setResourceStatus({
+        type: "success",
+        text: "Request sent. Admissions will send the free handouts shortly.",
+      });
+    } catch (error) {
+      setResourceStatus({
+        type: "error",
+        text: error.message || "We could not send your handout request. Please call admissions for help.",
+      });
+    } finally {
+      setResourcePending(false);
+    }
   }
 
   async function handleSubmit(event) {
@@ -161,22 +170,22 @@ export function RewardsGuidancePage({ cohorts = [] }) {
               <a href="#callback" className="btn btn-ghost">Talk to Admissions</a>
             </div>
             <div className="rg-trust-row" aria-label="Program highlights">
-              <span>160-hour CNA program</span>
               <span>Approved schedule details</span>
               <span>Payment plan available</span>
+              <span>Student support available</span>
             </div>
             <div className="rg-hero-proof" aria-label="Landing page highlights">
               <div>
                 <strong>$100</strong>
-                <span>eligible referral credit</span>
+                <span>for your friend</span>
               </div>
               <div>
                 <strong>$250</strong>
                 <span>registration deposit</span>
               </div>
               <div>
-                <strong>160 hrs</strong>
-                <span>approved training path</span>
+                <strong>$100</strong>
+                <span>for you</span>
               </div>
             </div>
           </div>
@@ -193,72 +202,41 @@ export function RewardsGuidancePage({ cohorts = [] }) {
       </section>
 
       <nav className="container rg-section-nav" aria-label="Page sections">
-        <a href="#cohorts">Cohorts</a>
-        <a href="#tuition">Tuition</a>
         <a href="#free-resources">Free Resources</a>
+        <a href="#referral-rewards">Referral</a>
         <a href="#rewards">Rewards</a>
         <a href="#study-tools">Study Tools</a>
         <a href="#career-support">Career Support</a>
+        <a href="#tuition">Tuition</a>
         <a href="#callback">Request a Call</a>
       </nav>
 
-      <section id="cohorts" className="rg-section rg-cohort-section">
-        <div className="container">
-          <div className="rg-centered-heading">
-            <p className="section-kicker">Review approved training details</p>
-            <h2>Clear schedule information. One practical first step.</h2>
-            <p>Review current dates, theory hours, clinical expectations, and availability before registering.</p>
+      <section id="referral-rewards" className="rg-section rg-referral-section">
+        <div className="container rg-feature-split">
+          <div className="rg-feature-copy">
+            <p className="section-kicker">Refer a friend</p>
+            <h2>You both may benefit.</h2>
+            <p>Starting with someone you trust can make the journey more encouraging, accountable, and meaningful.</p>
+            <div className="rg-step-list">
+              {referralSteps.map(([title, text], index) => (
+                <div key={title}>
+                  <span>{index + 1}</span>
+                  <div><h3>{title}</h3><p>{text}</p></div>
+                </div>
+              ))}
+            </div>
+            <details className="rg-disclosure">
+              <summary>Review referral eligibility details</summary>
+              <ul>{referralRules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
+            </details>
           </div>
-          <div className="rg-cohort-grid">
-            {scheduleOptions.map((option, index) => {
-              const cohort = index === 0 ? activeCohorts[0] : null;
-              return (
-                <article className="rg-cohort-card" key={option.label}>
-                  <span className="rg-card-tag">{option.label}</span>
-                  <h3>{cohort?.meetingPattern || option.time}</h3>
-                  <p>{cohort ? `Next listed start: ${formatDate(cohort.startDate)}` : option.note}</p>
-                  <Link to={cohort ? `/register?programId=cna&cohortId=${cohort.id}` : "/schedule"}>Review this option <span aria-hidden="true">→</span></Link>
-                </article>
-              );
-            })}
-          </div>
-          <div className="rg-inline-action">
-            <p>Dates, seats, and clinical timing can change as cohorts are finalized.</p>
-            <Link to="/schedule" className="btn btn-ghost">View Current Schedule</Link>
+          <div className="rg-feature-photo">
+            <img src={programsSupport} alt="Instructor guiding students through CNA skills practice" />
+            <div><strong>Build skills together</strong><span>Encouragement - accountability - shared progress</span></div>
           </div>
         </div>
       </section>
 
-      <section id="tuition" className="rg-section rg-tuition-section">
-        <div className="container">
-          <div className="rg-centered-heading">
-            <p className="section-kicker">Straightforward payment options</p>
-            <h2>Choose the payment path that works for you.</h2>
-            <p>Current promotional program total: $2,000, including the $250 non-refundable registration fee.</p>
-          </div>
-          <div className="rg-pricing-grid">
-            <article className="rg-price-card rg-price-featured">
-              <span className="rg-price-label">Option 1 · simplest</span>
-              <h3>Pay in full</h3>
-              <p>Complete tuition payment before class and keep enrollment straightforward.</p>
-              <div className="rg-price-line"><span>Registration fee</span><strong>$250</strong></div>
-              <div className="rg-price-line"><span>Remaining tuition</span><strong>$1,750</strong></div>
-              <div className="rg-price-total"><span>Total</span><strong>$2,000</strong></div>
-              <Link to="/register" className="btn btn-primary">Register Now</Link>
-            </article>
-            <article className="rg-price-card">
-              <span className="rg-price-label">Option 2 · flexible</span>
-              <h3>Start with the deposit</h3>
-              <p>Begin with the registration-fee deposit, then complete the remaining balance on the approved schedule.</p>
-              <div className="rg-price-line"><span>Due at registration</span><strong>$250</strong></div>
-              <div className="rg-price-line"><span>Remaining balance</span><strong>$1,750</strong></div>
-              <div className="rg-price-total"><span>Program total</span><strong>$2,000</strong></div>
-              <a href="#callback" className="btn btn-ghost">Discuss a Payment Plan</a>
-            </article>
-          </div>
-          <p className="rg-fine-print">Payment plans, deadlines, and eligibility are confirmed during enrollment. Additional third-party costs may apply for required documents, certifications, screening, uniforms, learning materials, or state testing.</p>
-        </div>
-      </section>
 
       <section className="rg-approval-band" aria-label="Program approval">
         <div className="container rg-approval-inner">
@@ -278,19 +256,50 @@ export function RewardsGuidancePage({ cohorts = [] }) {
             <p className="section-kicker">Free resources for your journey</p>
             <h2>Take the first step toward your nursing future.</h2>
             <p>
-              Start with practical planning tools designed to help future nursing students and
-              working adults understand their options with more clarity and confidence.
+              Download the two free handouts created to help future nursing students and working
+              adults plan with clarity and confidence.
             </p>
             <div className="rg-resource-benefits" aria-label="Resource benefits">
-              <span>Explore career fit</span>
+              <span>Expertly prepared</span>
               <span>Plan with clarity</span>
               <span>Build confidence</span>
-              <span>Understand next steps</span>
+              <span>Create your future</span>
             </div>
-            <div className="button-row">
-              <Link to="/career-quiz" className="btn btn-primary">Take the Free Career Quiz</Link>
-              <a href="#career-support" className="btn btn-ghost">See the Nursing Pathway</a>
-            </div>
+            <form className="rg-handout-form handout-form" onSubmit={handleResourceSubmit}>
+              <h3>Get Your Free Handouts Now.</h3>
+              <div className="form-grid two-up">
+                <label>
+                  <span>First name *</span>
+                  <input name="firstName" value={resourceForm.firstName} onChange={updateResourceField} required />
+                </label>
+                <label>
+                  <span>Last name *</span>
+                  <input name="lastName" value={resourceForm.lastName} onChange={updateResourceField} required />
+                </label>
+                <label>
+                  <span>Email address *</span>
+                  <input
+                    name="email"
+                    type="email"
+                    value={resourceForm.email}
+                    onChange={updateResourceField}
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Phone number</span>
+                  <input name="phone" type="tel" value={resourceForm.phone} onChange={updateResourceField} />
+                </label>
+              </div>
+              <button className="btn btn-primary" type="submit" disabled={resourcePending}>
+                {resourcePending ? "Sending..." : "Send Me My Free Handouts"}
+              </button>
+              {resourceStatus.text ? (
+                <p className={`form-status ${resourceStatus.type === "success" ? "is-success" : "is-error"}`}>
+                  {resourceStatus.text}
+                </p>
+              ) : null}
+            </form>
           </div>
           <div className="rg-guide-grid" aria-label="Free planning resources">
             <article className="rg-guide-card rg-guide-card-blue">
@@ -330,31 +339,6 @@ export function RewardsGuidancePage({ cohorts = [] }) {
         </div>
       </section>
 
-      <section id="referral-rewards" className="rg-section rg-referral-section">
-        <div className="container rg-feature-split">
-          <div className="rg-feature-copy">
-            <p className="section-kicker">Refer a friend</p>
-            <h2>You both may benefit.</h2>
-            <p>Starting with someone you trust can make the journey more encouraging, accountable, and meaningful.</p>
-            <div className="rg-step-list">
-              {referralSteps.map(([title, text], index) => (
-                <div key={title}>
-                  <span>{index + 1}</span>
-                  <div><h3>{title}</h3><p>{text}</p></div>
-                </div>
-              ))}
-            </div>
-            <details className="rg-disclosure">
-              <summary>Review referral eligibility details</summary>
-              <ul>{referralRules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
-            </details>
-          </div>
-          <div className="rg-feature-photo">
-            <img src={programsSupport} alt="Healthcare students learning together during training" />
-            <div><strong>Build skills together</strong><span>Encouragement · accountability · shared progress</span></div>
-          </div>
-        </div>
-      </section>
 
       <section id="retention-recognition" className="rg-section rg-retention-section">
         <div className="container rg-retention-panel">
@@ -425,6 +409,38 @@ export function RewardsGuidancePage({ cohorts = [] }) {
             <Link to="/schedule" className="btn btn-secondary">View the Schedule</Link>
             <a href="#callback" className="btn btn-ghost">Request Support</a>
           </div>
+        </div>
+      </section>
+
+      <section id="tuition" className="rg-section rg-tuition-section">
+        <div className="container">
+          <div className="rg-centered-heading">
+            <p className="section-kicker">Straightforward payment options</p>
+            <h2>Choose the payment path that works for you.</h2>
+            <p>Program total is $2,000, including the $250 non-refundable registration fee.</p>
+          </div>
+          <div className="rg-pricing-grid">
+            <article className="rg-price-card rg-price-featured">
+              <span className="rg-price-label">Option 1 - simplest</span>
+              <h3>Pay in full</h3>
+              <p>Complete tuition payment before class and receive an additional $100 pay-in-full savings.</p>
+              <div className="rg-price-line"><span>Registration fee</span><strong>$250</strong></div>
+              <div className="rg-price-line"><span>Remaining tuition</span><strong>$1,750</strong></div>
+              <div className="rg-price-line rg-savings-line"><span>Pay-in-full savings</span><strong>-$100</strong></div>
+              <div className="rg-price-total"><span>Total</span><strong>$1,900</strong></div>
+              <Link to="/register" className="btn btn-primary">Register Now</Link>
+            </article>
+            <article className="rg-price-card">
+              <span className="rg-price-label">Option 2 - flexible</span>
+              <h3>Start with the deposit</h3>
+              <p>Begin with the registration-fee deposit, then complete the remaining balance on the approved schedule.</p>
+              <div className="rg-price-line"><span>Due at registration</span><strong>$250</strong></div>
+              <div className="rg-price-line"><span>Remaining balance</span><strong>$1,750</strong></div>
+              <div className="rg-price-total"><span>Program total</span><strong>$2,000</strong></div>
+              <a href="#callback" className="btn btn-ghost">Discuss a Payment Plan</a>
+            </article>
+          </div>
+          <p className="rg-fine-print">Payment plans, deadlines, and eligibility are confirmed during enrollment. Additional third-party costs may apply for required documents, certifications, screening, uniforms, learning materials, or state testing.</p>
         </div>
       </section>
 

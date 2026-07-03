@@ -1,23 +1,39 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import programsSupportPhoto from "../assets/programs-support-photo.jpg";
+import { submitInquiry } from "../lib/api";
 import {
-  admissionsSteps,
+  aboutLeaderItems,
   industryGrowthRows,
   miscFeeItems,
   programMeta,
   rewardsGuidanceItems,
   requirementItems,
-  supportItems,
   tuitionItems,
+  trustProofItems,
   workforceProjectionStats,
 } from "../siteData";
 
+const initialHandoutForm = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+};
+
+function parseJobsChange(value) {
+  return Number.parseFloat(value.replace(/,/g, "").replace("k", ""));
+}
+
 export function HomePage({ programs }) {
+  const [handoutForm, setHandoutForm] = useState(initialHandoutForm);
+  const [handoutPending, setHandoutPending] = useState(false);
+  const [handoutStatus, setHandoutStatus] = useState({ type: "", text: "" });
   const heroTrustItems = [
     { label: "CDPH approved CNA program" },
-    { label: "160 hour training path" },
+    { label: "Approved schedule details" },
     { label: "Orange, California" },
   ];
   const heroAssuranceItems = [
@@ -38,7 +54,7 @@ export function HomePage({ programs }) {
     },
   ];
   const decisionStats = [
-    { value: "160 hrs", label: "approved program length" },
+    { value: "Schedule", label: "approved class details" },
     { value: "$100", label: "eligible referral reward" },
     { value: "Direct", label: "admissions guidance" },
   ];
@@ -47,6 +63,42 @@ export function HomePage({ programs }) {
     { label: "Admissions", to: "/admissions" },
     { label: "Payment", to: "/payment" },
   ];
+  const sectorRows = industryGrowthRows.filter((row) => row.label !== "Total wage and salary employment");
+  const maxJobsChange = Math.max(...sectorRows.map((row) => parseJobsChange(row.change)));
+
+  function updateHandoutField(event) {
+    const { name, value } = event.target;
+    setHandoutForm((current) => ({ ...current, [name]: value }));
+  }
+
+  async function handleHandoutSubmit(event) {
+    event.preventDefault();
+    setHandoutPending(true);
+    setHandoutStatus({ type: "", text: "" });
+
+    try {
+      await submitInquiry({
+        fullName: `${handoutForm.firstName} ${handoutForm.lastName}`.trim(),
+        email: handoutForm.email,
+        phone: handoutForm.phone,
+        program: "cna",
+        message: "Please send the CNA Career Starter Guide and OC Nursing School Pathway Guide.",
+        source: "home-free-handouts",
+      });
+      setHandoutForm(initialHandoutForm);
+      setHandoutStatus({
+        type: "success",
+        text: "Request sent. Admissions will send the free handouts shortly.",
+      });
+    } catch (error) {
+      setHandoutStatus({
+        type: "error",
+        text: error.message || "We could not send the request. Please contact admissions directly.",
+      });
+    } finally {
+      setHandoutPending(false);
+    }
+  }
 
   return (
     <>
@@ -74,8 +126,8 @@ export function HomePage({ programs }) {
               <Link to="/register" className="btn btn-primary">
                 Register Now
               </Link>
-              <Link to="/career-quiz" className="btn btn-secondary">
-                Take the Quiz
+              <Link to="/programs" className="btn btn-secondary">
+                View Programs
               </Link>
             </div>
 
@@ -171,22 +223,25 @@ export function HomePage({ programs }) {
 
           <div className="workforce-chart-card" aria-label="Projected industry employment growth chart">
             <div className="chart-heading">
-              <span>2024-2034 projected employment growth</span>
-              <strong>Healthcare leads major sectors</strong>
+              <span>2024-2034 projected employment change</span>
+              <strong>Healthcare adds the most sector jobs</strong>
             </div>
             <div className="growth-bar-list">
-              {industryGrowthRows.map((row) => (
+              {sectorRows.map((row) => {
+                const change = parseJobsChange(row.change);
+                return (
                 <div key={row.label} className="growth-bar-row">
                   <div className="growth-bar-label">
                     <span>{row.label}</span>
-                    <strong>{row.percent}%</strong>
+                    <strong>{row.change}</strong>
                   </div>
                   <div className="growth-bar-track">
-                    <span style={{ width: `${(row.percent / 8.4) * 100}%` }} />
+                    <span style={{ width: `${(change / maxJobsChange) * 100}%` }} />
                   </div>
-                  <small>{row.change} jobs</small>
+                  <small>{row.percent}% projected growth</small>
                 </div>
-              ))}
+                );
+              })}
             </div>
             <a
               className="source-link"
@@ -231,7 +286,40 @@ export function HomePage({ programs }) {
         </div>
       </section>
 
-      <section className="section section-soft">
+      <section className="section modern-trust-section" id="about-us">
+        <div className="container modern-trust-layout">
+          <div className="modern-trust-copy">
+            <p className="section-kicker">About First Step</p>
+            <h2>Built for students who want a clear, supported start in healthcare.</h2>
+            <p>
+              First Step Healthcare Academy combines practical CNA training, direct admissions
+              guidance, and transparent program details so students and families can make enrollment
+              decisions with more confidence.
+            </p>
+          </div>
+
+          <div className="modern-trust-grid" aria-label="School trust signals">
+            {trustProofItems.map((item) => (
+              <article key={item.title} className="modern-trust-card">
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="modern-leader-grid" aria-label="First Step Healthcare Academy leadership">
+            {aboutLeaderItems.map((item) => (
+              <article key={item.role} className="modern-leader-card">
+                <span>{item.role}</span>
+                <h3>{item.name}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-soft home-program-section">
         <div className="container section-heading">
           <div>
             <p className="section-kicker">CNA Program</p>
@@ -243,8 +331,9 @@ export function HomePage({ programs }) {
           </p>
         </div>
 
-        <div className="container card-grid three-up">
-          {programs.map((program) => {
+        <div className="container home-program-schedule-grid">
+          <div className="home-program-card-list">
+            {programs.slice(0, 1).map((program) => {
             const meta = programMeta[program.id] ?? {
               tag: "Program",
               badge: "Admissions Ready",
@@ -266,34 +355,96 @@ export function HomePage({ programs }) {
                 </ul>
               </article>
             );
-          })}
+            })}
+          </div>
+          <article className="info-card home-schedule-card">
+            <p className="section-kicker">Schedule</p>
+            <h3>Add schedule review to your next step.</h3>
+            <p>
+              Compare approved class dates, meeting patterns, seat availability, and payment timing
+              before starting registration.
+            </p>
+            <Link to="/schedule" className="btn btn-secondary">
+              View Schedule
+            </Link>
+          </article>
         </div>
       </section>
 
-      <section className="section">
-        <div className="container split-panel">
-          <article className="info-card accent-card">
-            <p className="section-kicker">Student support</p>
-            <h2>Get direct guidance on schedules, documents, and readiness before you enroll.</h2>
-            <div className="stack-panel">
-              {supportItems.map((item) => (
-                <div key={item.title} className="support-line">
-                  <strong>{item.title}</strong>
-                  <p>{item.detail}</p>
-                </div>
-              ))}
+      <section className="section handout-section">
+        <div className="container handout-layout">
+          <div className="handout-copy">
+            <p className="handout-pill">Free resources for your journey</p>
+            <h2>Take the First Step Toward Your Nursing Future.</h2>
+            <p>
+              Download two free handouts created to help future nursing students and working adults
+              plan with clarity and confidence.
+            </p>
+            <div className="handout-benefits" aria-label="Handout benefits">
+              <span>Expertly prepared</span>
+              <span>Plan with clarity</span>
+              <span>Build confidence</span>
+              <span>Create your future</span>
             </div>
-          </article>
+            <form className="handout-form" onSubmit={handleHandoutSubmit}>
+              <h3>Get Your Free Handouts Now.</h3>
+              <div className="form-grid two-up">
+                <label>
+                  <span>First name *</span>
+                  <input name="firstName" value={handoutForm.firstName} onChange={updateHandoutField} required />
+                </label>
+                <label>
+                  <span>Last name *</span>
+                  <input name="lastName" value={handoutForm.lastName} onChange={updateHandoutField} required />
+                </label>
+                <label>
+                  <span>Email address *</span>
+                  <input
+                    name="email"
+                    type="email"
+                    value={handoutForm.email}
+                    onChange={updateHandoutField}
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Phone number</span>
+                  <input name="phone" type="tel" value={handoutForm.phone} onChange={updateHandoutField} />
+                </label>
+              </div>
+              <button className="btn btn-primary" type="submit" disabled={handoutPending}>
+                {handoutPending ? "Sending..." : "Send Me My Free Handouts"}
+              </button>
+              {handoutStatus.text ? (
+                <p className={`form-status ${handoutStatus.type === "success" ? "is-success" : "is-error"}`}>
+                  {handoutStatus.text}
+                </p>
+              ) : null}
+            </form>
+          </div>
 
-          <article className="info-card">
-            <p className="section-kicker">Enrollment path</p>
-            <h2>A simple step-by-step path keeps the next move obvious.</h2>
-            <ol className="detail-list ordered-list">
-              {admissionsSteps.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-          </article>
+          <div className="handout-visual" aria-label="Free handouts">
+            <p>You will receive instant access to:</p>
+            <div className="handout-cover-row">
+              <article className="handout-cover cna-cover">
+                <span>First Step</span>
+                <h3>CNA Career Starter Guide</h3>
+                <p>A guide to patient care, training, work settings, and future nursing growth.</p>
+              </article>
+              <article className="handout-cover pathway-cover">
+                <span>First Step</span>
+                <h3>OC Nursing School Pathway Guide</h3>
+                <p>Plan your path, prepare with purpose, and move forward with confidence.</p>
+              </article>
+            </div>
+            <div className="trusted-handout-card">
+              <strong>Trusted. Local. Student-Focused.</strong>
+              <span>
+                First Step Healthcare Academy is dedicated to helping future nursing and healthcare
+                professionals build strong beginnings.
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -320,7 +471,7 @@ export function HomePage({ programs }) {
             </ul>
           </article>
 
-          <article className="info-card">
+          <article className="info-card requirements-summary-card">
             <p className="section-kicker">Requirements</p>
             <h2>Know the core admissions requirements before you register.</h2>
             <ul className="detail-list compact-list">
