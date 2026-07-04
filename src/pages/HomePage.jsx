@@ -5,7 +5,6 @@ import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import { submitInquiry } from "../lib/api";
 import {
-  aboutLeaderItems,
   industryGrowthRows,
   miscFeeItems,
   programMeta,
@@ -301,16 +300,6 @@ export function HomePage({ programs }) {
             {trustProofItems.map((item) => (
               <article key={item.title} className="modern-trust-card">
                 <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="modern-leader-grid" aria-label="First Step Healthcare Academy leadership">
-            {aboutLeaderItems.map((item) => (
-              <article key={item.role} className="modern-leader-card">
-                <span>{item.role}</span>
-                <h3>{item.name}</h3>
                 <p>{item.detail}</p>
               </article>
             ))}
