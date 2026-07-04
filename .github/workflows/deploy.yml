@@ -31,7 +31,7 @@ jobs:
           git rev-parse HEAD
           node -e "const pkg=require('./package.json'); const lock=require('./package-lock.json'); console.log('verify=', pkg.scripts.verify); console.log('concurrently=', pkg.devDependencies.concurrently); console.log('locked concurrently=', lock.packages['node_modules/concurrently']?.version); console.log('locked shell-quote=', lock.packages['node_modules/shell-quote']?.version);"
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Verify production readiness gates
         run: npm run verify
 
@@ -41,30 +41,52 @@ jobs:
     needs: verify
     if: github.event_name != 'pull_request'
     environment: production
+    env:
+      LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+      LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+      LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER }}
     concurrency:
       group: "deploy-production"
       cancel-in-progress: true
     steps:
+      - name: Check deployment secrets
+        id: deploy-secrets
+        shell: bash
+        run: |
+          missing=()
+          [[ -n "${LIGHTSAIL_SSH_KEY}" ]] || missing+=("LIGHTSAIL_SSH_KEY")
+          [[ -n "${LIGHTSAIL_HOST}" ]] || missing+=("LIGHTSAIL_HOST")
+          [[ -n "${LIGHTSAIL_USER}" ]] || missing+=("LIGHTSAIL_USER")
+
+          if (( ${#missing[@]} )); then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            printf '::notice::Skipping production deploy because these secrets are not configured: %s\n' "${missing[*]}"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install SSH key
+        if: steps.deploy-secrets.outputs.configured == 'true'
         shell: bash
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/lightsail_deploy_key
+          printf '%s\n' "${LIGHTSAIL_SSH_KEY}" > ~/.ssh/lightsail_deploy_key
           chmod 600 ~/.ssh/lightsail_deploy_key
-          ssh-keyscan -H "${{ secrets.LIGHTSAIL_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${LIGHTSAIL_HOST}" >> ~/.ssh/known_hosts
 
       - name: Pull latest code, build, and restart app
+        if: steps.deploy-secrets.outputs.configured == 'true'
         shell: bash
         run: |
           ssh -i ~/.ssh/lightsail_deploy_key \
             -o IdentitiesOnly=yes \
-            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}" \
+            "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}" \
             'set -euo pipefail
              cd /var/www/html
              git fetch origin main
              git reset --hard origin/main
-             npm install
+             npm ci
              npm run build
              sudo systemctl restart firststep
              curl -fsS http://127.0.0.1/api/health'
