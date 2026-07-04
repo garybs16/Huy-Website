@@ -3727,8 +3727,17 @@
   border-radius: 999px;
 }
 
-.rg-guide-card-blue { background: linear-gradient(150deg, #174d82, var(--rg-navy)); }
-.rg-guide-card-gold { background: linear-gradient(150deg, #b77413, #70440c); }
+.rg-guide-card-blue {
+  background:
+    linear-gradient(180deg, rgba(7, 31, 65, 0.18) 0%, rgba(7, 31, 65, 0.92) 74%),
+    url("./assets/hero-training-photo-v2.jpg") center / cover;
+}
+
+.rg-guide-card-gold {
+  background:
+    linear-gradient(180deg, rgba(101, 57, 10, 0.08) 0%, rgba(91, 50, 7, 0.94) 74%),
+    url("./assets/programs-support-photo.jpg") center / cover;
+}
 
 .rg-guide-card > span {
   color: #ffe19b;
@@ -5430,6 +5439,8 @@ h6,
 }
 
 .handout-cover {
+  position: relative;
+  overflow: hidden;
   display: grid;
   align-content: end;
   min-height: 24rem;
@@ -5439,16 +5450,30 @@ h6,
   box-shadow: 0 22px 54px rgba(6, 26, 51, 0.16);
 }
 
+.handout-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(6, 26, 51, 0.3) 44%, rgba(6, 26, 51, 0.94) 100%);
+  pointer-events: none;
+}
+
+.handout-cover > * {
+  position: relative;
+  z-index: 1;
+}
+
 .cna-cover {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(7, 31, 65, 0.96)),
-    linear-gradient(135deg, #0c4b8e, #071f41);
+    linear-gradient(180deg, rgba(12, 75, 142, 0.1), rgba(7, 31, 65, 0.72)),
+    url("./assets/hero-training-photo-v2.jpg") center / cover;
 }
 
 .pathway-cover {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(89, 50, 7, 0.94)),
-    linear-gradient(135deg, #c07512, #071f41);
+    linear-gradient(180deg, rgba(192, 117, 18, 0.08), rgba(89, 50, 7, 0.74)),
+    url("./assets/programs-support-photo.jpg") center / cover;
 }
 
 .handout-cover span {
