@@ -31,7 +31,7 @@ jobs:
           git rev-parse HEAD
           node -e "const pkg=require('./package.json'); const lock=require('./package-lock.json'); console.log('verify=', pkg.scripts.verify); console.log('concurrently=', pkg.devDependencies.concurrently); console.log('locked concurrently=', lock.packages['node_modules/concurrently']?.version); console.log('locked shell-quote=', lock.packages['node_modules/shell-quote']?.version);"
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Verify production readiness gates
         run: npm run verify
 
@@ -86,7 +86,7 @@ jobs:
              cd /var/www/html
              git fetch origin main
              git reset --hard origin/main
-             npm ci
+             npm install
              npm run build
              sudo systemctl restart firststep
              curl -fsS http://127.0.0.1/api/health'
