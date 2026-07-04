@@ -33,7 +33,6 @@ export function HomePage({ programs }) {
   const [handoutStatus, setHandoutStatus] = useState({ type: "", text: "" });
   const heroTrustItems = [
     { label: "CDPH approved CNA program" },
-    { label: "Approved schedule details" },
     { label: "Orange, California" },
   ];
   const heroAssuranceItems = [
