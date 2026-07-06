@@ -8,6 +8,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { config, getRuntimeConfigReport } from "./config.js";
 import { EnrollmentDatabase } from "./lib/enrollmentDb.js";
+import { createEmailer } from "./lib/email.js";
 import { createNotifier } from "./lib/notifications.js";
 import { createStripeClient } from "./lib/stripe.js";
 import { createAdminRouter } from "./routes/admin.js";
@@ -84,6 +85,12 @@ export function createApp() {
     webhookUrl: config.notificationWebhookUrl,
     signingSecret: config.notificationWebhookSecret,
   });
+  const emailer = createEmailer({
+    resendApiKey: config.resendApiKey,
+    from: config.emailFrom,
+    replyTo: config.emailReplyTo,
+    adminEmail: config.adminNotificationEmail,
+  });
   const paymentsEnabled = Boolean(stripeClient && configReport.paymentsEnabled);
   const adminAuth = {
     adminKey: config.adminKey,
@@ -121,6 +128,7 @@ export function createApp() {
       webhookSecret: config.stripeWebhookSecret,
       enrollmentDb,
       notifier,
+      emailer,
     })
   );
   app.use(express.json({ limit: "50kb" }));
@@ -153,6 +161,7 @@ export function createApp() {
       stripeClient: paymentsEnabled ? stripeClient : null,
       publicAppUrl: config.publicAppUrl,
       notifier,
+      emailer,
       submissionLimiter,
     })
   );
@@ -167,6 +176,7 @@ export function createApp() {
       adminAuth,
       enrollmentDb,
       notifier,
+      emailer,
     })
   );
   app.use(
@@ -180,6 +190,7 @@ export function createApp() {
       adminAuth,
       enrollmentDb,
       notifier,
+      emailer,
     })
   );
 

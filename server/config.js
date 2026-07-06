@@ -79,6 +79,10 @@ export const config = {
   stripeWebhookSecret: (process.env.STRIPE_WEBHOOK_SECRET ?? "").trim(),
   notificationWebhookUrl: (process.env.NOTIFICATION_WEBHOOK_URL ?? "").trim(),
   notificationWebhookSecret: (process.env.NOTIFICATION_WEBHOOK_SECRET ?? "").trim(),
+  resendApiKey: (process.env.RESEND_API_KEY ?? "").trim(),
+  emailFrom: (process.env.EMAIL_FROM ?? "").trim(),
+  emailReplyTo: (process.env.EMAIL_REPLY_TO ?? "").trim(),
+  adminNotificationEmail: (process.env.ADMIN_NOTIFICATION_EMAIL ?? "").trim(),
   serveStaticApp: parseBoolean(
     process.env.SERVE_STATIC_APP,
     (process.env.NODE_ENV ?? "development") === "production"
@@ -104,6 +108,8 @@ export function getRuntimeConfigReport(currentConfig = config) {
   ].filter(Boolean);
   const sessionAuthPartial = sessionPiecesConfigured.length > 0 && !sessionAuthConfigured;
   const adminProtectionConfigured = Boolean(currentConfig.adminKey || sessionAuthConfigured);
+  const emailConfigured = Boolean(currentConfig.resendApiKey && currentConfig.emailFrom);
+  const emailPartiallyConfigured = Boolean(currentConfig.resendApiKey || currentConfig.emailFrom) && !emailConfigured;
 
   if (sessionAuthPartial) {
     issues.push(
@@ -133,6 +139,18 @@ export function getRuntimeConfigReport(currentConfig = config) {
     warnings.push("Admissions notification webhook is not configured. Staff must monitor the admin dashboard directly.");
   }
 
+  if (emailPartiallyConfigured) {
+    issues.push("RESEND_API_KEY and EMAIL_FROM must be configured together to enable automatic emails.");
+  }
+
+  if (!emailConfigured) {
+    warnings.push("Automatic email confirmations are not configured. Student and admin emails will not be sent.");
+  }
+
+  if (emailConfigured && !currentConfig.adminNotificationEmail) {
+    warnings.push("ADMIN_NOTIFICATION_EMAIL is not configured. Student confirmations will send, but admin email alerts will be skipped.");
+  }
+
   if (!sessionAuthConfigured && currentConfig.adminKey) {
     warnings.push("Session-based admin login is not configured. The admin dashboard falls back to raw API key access.");
   }
@@ -158,6 +176,7 @@ export function getRuntimeConfigReport(currentConfig = config) {
     warnings,
     stripeConfigured,
     notificationsConfigured: Boolean(currentConfig.notificationWebhookUrl),
+    emailConfigured,
     sessionAuthConfigured,
     adminAuthMode,
     paymentsEnabled: stripeConfigured && Boolean(currentConfig.stripeWebhookSecret && currentConfig.publicAppUrl),

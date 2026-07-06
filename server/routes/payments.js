@@ -1,7 +1,8 @@
 import express, { Router } from "express";
+import { sendPaymentCompletedEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
 
-export function createStripePaymentsRouter({ stripeClient, webhookSecret, enrollmentDb, notifier }) {
+export function createStripePaymentsRouter({ stripeClient, webhookSecret, enrollmentDb, notifier, emailer }) {
   const router = Router();
 
   router.post("/", express.raw({ type: "application/json" }), (req, res) => {
@@ -45,10 +46,18 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
       }
 
       const paidEnrollment = enrollmentDb.markPaidByCheckoutSession(session.id);
+      const cohort = enrollmentDb.getCohortById(paidEnrollment.cohortId);
+      const program = cohort ? enrollmentDb.getProgramById(cohort.programId, { includeInactive: true }) : null;
       notifyAdmissions(notifier, {
         type: "payment.completed",
         stripeSessionId: session.id,
         enrollment: paidEnrollment,
+      });
+      sendPaymentCompletedEmails(emailer, {
+        enrollment: paidEnrollment,
+        program,
+        cohort,
+        amountPaidCents: expectedAmount,
       });
     }
 

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
+import { sendEnrollmentEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { enrollmentPaymentSessionSchema, enrollmentSchema, paginationSchema } from "../validation/schemas.js";
@@ -137,7 +138,15 @@ async function createEnrollmentCheckoutSession({
   return stripeClient.checkout.sessions.create(sessionPayload);
 }
 
-export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient, publicAppUrl, notifier, submissionLimiter }) {
+export function createEnrollmentsRouter({
+  enrollmentDb,
+  adminAuth,
+  stripeClient,
+  publicAppUrl,
+  notifier,
+  emailer,
+  submissionLimiter,
+}) {
   const router = Router();
 
   router.get("/:id/status", (req, res) => {
@@ -210,6 +219,12 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
           paymentMode: "manual",
           enrollment: manualEnrollment,
         });
+        sendEnrollmentEmails(emailer, {
+          enrollment: manualEnrollment,
+          program,
+          cohort,
+          paymentRequired: false,
+        });
 
         return res.status(201).json({
           enrollmentId: manualEnrollment.id,
@@ -263,6 +278,13 @@ export function createEnrollmentsRouter({ enrollmentDb, adminAuth, stripeClient,
         type: "enrollment.checkout_created",
         paymentMode: "stripe",
         enrollment: pendingEnrollment,
+      });
+      sendEnrollmentEmails(emailer, {
+        enrollment: pendingEnrollment,
+        program,
+        cohort,
+        paymentRequired: true,
+        checkoutUrl: session.url,
       });
 
       return res.status(201).json({
