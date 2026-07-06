@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import programsSupport from "../assets/programs-support-photo.jpg";
+import { TurnstileWidget, isTurnstileEnabled } from "../components/TurnstileWidget";
 import { submitInquiry } from "../lib/api";
 import {
   careerSupportItems,
@@ -72,6 +73,12 @@ export function RewardsGuidancePage() {
   const [resourcePending, setResourcePending] = useState(false);
   const [status, setStatus] = useState({ type: "", text: "" });
   const [resourceStatus, setResourceStatus] = useState({ type: "", text: "" });
+  const [callbackTurnstileToken, setCallbackTurnstileToken] = useState("");
+  const [resourceTurnstileToken, setResourceTurnstileToken] = useState("");
+  const [turnstileResetSignals, setTurnstileResetSignals] = useState({
+    callback: 0,
+    resource: 0,
+  });
 
   function updateField(event) {
     const { name, value, checked, type } = event.target;
@@ -97,6 +104,12 @@ export function RewardsGuidancePage() {
     setResourceStatus({ type: "", text: "" });
 
     try {
+      if (isTurnstileEnabled() && !resourceTurnstileToken) {
+        setResourceStatus({ type: "error", text: "Complete the security check before submitting." });
+        setResourcePending(false);
+        return;
+      }
+
       await submitInquiry({
         fullName: `${resourceForm.firstName} ${resourceForm.lastName}`.trim(),
         email: resourceForm.email,
@@ -104,13 +117,18 @@ export function RewardsGuidancePage() {
         program: "cna",
         message: "Please send the CNA Career Starter Guide and OC Nursing School Pathway Guide.",
         source: "rewards-free-handouts",
+        turnstileToken: resourceTurnstileToken,
       });
       setResourceForm(initialResourceForm);
+      setResourceTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, resource: current.resource + 1 }));
       setResourceStatus({
         type: "success",
         text: "Request sent. Admissions will send the free handouts shortly.",
       });
     } catch (error) {
+      setResourceTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, resource: current.resource + 1 }));
       setResourceStatus({
         type: "error",
         text: error.message || "We could not send your handout request. Please call admissions for help.",
@@ -135,6 +153,12 @@ export function RewardsGuidancePage() {
     ].join("\n");
 
     try {
+      if (isTurnstileEnabled() && !callbackTurnstileToken) {
+        setStatus({ type: "error", text: "Complete the security check before submitting." });
+        setPending(false);
+        return;
+      }
+
       await submitInquiry({
         fullName: form.fullName,
         email: form.email,
@@ -142,10 +166,15 @@ export function RewardsGuidancePage() {
         program: "cna",
         message,
         source: "rewards-guidance-landing",
+        turnstileToken: callbackTurnstileToken,
       });
       setForm(initialForm);
+      setCallbackTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, callback: current.callback + 1 }));
       setStatus({ type: "success", text: "Your callback request was sent. Admissions will follow up as soon as possible." });
     } catch (error) {
+      setCallbackTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, callback: current.callback + 1 }));
       setStatus({ type: "error", text: error.message || "We could not send your request. Please call admissions for immediate help." });
     } finally {
       setPending(false);
@@ -291,6 +320,12 @@ export function RewardsGuidancePage() {
                   <input name="phone" type="tel" value={resourceForm.phone} onChange={updateResourceField} />
                 </label>
               </div>
+              <TurnstileWidget
+                onToken={setResourceTurnstileToken}
+                onExpire={() => setResourceTurnstileToken("")}
+                onError={() => setResourceTurnstileToken("")}
+                resetSignal={turnstileResetSignals.resource}
+              />
               <button className="btn btn-primary" type="submit" disabled={resourcePending}>
                 {resourcePending ? "Sending..." : "Send Me My Free Handouts"}
               </button>
@@ -499,6 +534,12 @@ export function RewardsGuidancePage() {
             <label className="rg-consent-row"><input type="checkbox" name="consent" checked={form.consent} onChange={updateField} required /><span>By submitting this form, I agree that First Step Healthcare Academy may contact me by phone, text, or email about CNA training. Message and data rates may apply. *</span></label>
             <label className="rg-consent-row"><input type="checkbox" name="updates" checked={form.updates} onChange={updateField} /><span>I would also like program updates, upcoming cohort information, career resources, and admissions reminders. I can opt out at any time.</span></label>
 
+            <TurnstileWidget
+              onToken={setCallbackTurnstileToken}
+              onExpire={() => setCallbackTurnstileToken("")}
+              onError={() => setCallbackTurnstileToken("")}
+              resetSignal={turnstileResetSignals.callback}
+            />
             <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Sending Request…" : "Request a Callback"}</button>
             {status.text ? <p className={`form-status ${status.type === "success" ? "is-success" : "is-error"}`} role="status">{status.text}</p> : null}
           </form>

@@ -11,6 +11,8 @@ import { EnrollmentDatabase } from "./lib/enrollmentDb.js";
 import { createEmailer } from "./lib/email.js";
 import { createNotifier } from "./lib/notifications.js";
 import { createStripeClient } from "./lib/stripe.js";
+import { createTurnstileVerifier } from "./lib/turnstile.js";
+import { verifyTurnstile } from "./middleware/verifyTurnstile.js";
 import { createAdminRouter } from "./routes/admin.js";
 import { createCohortsRouter } from "./routes/cohorts.js";
 import { createEnrollmentsRouter } from "./routes/enrollments.js";
@@ -91,6 +93,11 @@ export function createApp() {
     replyTo: config.emailReplyTo,
     adminEmail: config.adminNotificationEmail,
   });
+  const submissionProtection = verifyTurnstile(
+    createTurnstileVerifier({
+      secretKey: config.turnstileSecretKey,
+    })
+  );
   const paymentsEnabled = Boolean(stripeClient && configReport.paymentsEnabled);
   const adminAuth = {
     adminKey: config.adminKey,
@@ -163,6 +170,7 @@ export function createApp() {
       notifier,
       emailer,
       submissionLimiter,
+      submissionProtection,
     })
   );
   app.use(
@@ -177,6 +185,7 @@ export function createApp() {
       enrollmentDb,
       notifier,
       emailer,
+      submissionProtection,
     })
   );
   app.use(
@@ -191,6 +200,7 @@ export function createApp() {
       enrollmentDb,
       notifier,
       emailer,
+      submissionProtection,
     })
   );
 

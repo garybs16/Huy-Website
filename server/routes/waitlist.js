@@ -6,10 +6,18 @@ import { notifyAdmissions } from "../lib/notifications.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { paginationSchema, waitlistSchema } from "../validation/schemas.js";
 
-export function createWaitlistRouter({ store, submissionLimiter, adminAuth, enrollmentDb, notifier, emailer }) {
+export function createWaitlistRouter({
+  store,
+  submissionLimiter,
+  adminAuth,
+  enrollmentDb,
+  notifier,
+  emailer,
+  submissionProtection = (_req, _res, next) => next(),
+}) {
   const router = Router();
 
-  router.post("/", submissionLimiter, async (req, res, next) => {
+  router.post("/", submissionLimiter, submissionProtection, async (req, res, next) => {
     try {
       const payload = waitlistSchema.parse(req.body);
       const record = {

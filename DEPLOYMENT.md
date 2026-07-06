@@ -53,10 +53,13 @@ RESEND_API_KEY=
 EMAIL_FROM="First Step Healthcare Academy <admissions@firststepha.com>"
 EMAIL_REPLY_TO=huyh@firststepha.org
 ADMIN_NOTIFICATION_EMAIL=huyh@firststepha.org
+TURNSTILE_SECRET_KEY=
+VITE_TURNSTILE_SITE_KEY=
 ```
 
 Stripe is optional. If Stripe variables are empty, enrollment works in manual-payment mode.
 Email is optional. If Resend variables are empty, registrations and inquiries still save, but automatic confirmations are skipped.
+Turnstile is optional. If Turnstile variables are empty, public forms rely on rate limits only. If `TURNSTILE_SECRET_KEY` is set, the frontend build must also have `VITE_TURNSTILE_SITE_KEY`.
 
 ## Standard Node Host
 

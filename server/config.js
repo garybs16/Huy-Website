@@ -83,6 +83,8 @@ export const config = {
   emailFrom: (process.env.EMAIL_FROM ?? "").trim(),
   emailReplyTo: (process.env.EMAIL_REPLY_TO ?? "").trim(),
   adminNotificationEmail: (process.env.ADMIN_NOTIFICATION_EMAIL ?? "").trim(),
+  turnstileSecretKey: (process.env.TURNSTILE_SECRET_KEY ?? "").trim(),
+  turnstileSiteKey: (process.env.VITE_TURNSTILE_SITE_KEY ?? "").trim(),
   serveStaticApp: parseBoolean(
     process.env.SERVE_STATIC_APP,
     (process.env.NODE_ENV ?? "development") === "production"
@@ -110,6 +112,9 @@ export function getRuntimeConfigReport(currentConfig = config) {
   const adminProtectionConfigured = Boolean(currentConfig.adminKey || sessionAuthConfigured);
   const emailConfigured = Boolean(currentConfig.resendApiKey && currentConfig.emailFrom);
   const emailPartiallyConfigured = Boolean(currentConfig.resendApiKey || currentConfig.emailFrom) && !emailConfigured;
+  const turnstileConfigured = Boolean(currentConfig.turnstileSecretKey && currentConfig.turnstileSiteKey);
+  const turnstilePartiallyConfigured =
+    Boolean(currentConfig.turnstileSecretKey || currentConfig.turnstileSiteKey) && !turnstileConfigured;
 
   if (sessionAuthPartial) {
     issues.push(
@@ -151,6 +156,14 @@ export function getRuntimeConfigReport(currentConfig = config) {
     warnings.push("ADMIN_NOTIFICATION_EMAIL is not configured. Student confirmations will send, but admin email alerts will be skipped.");
   }
 
+  if (!turnstileConfigured) {
+    warnings.push("Turnstile bot protection is not configured. Public forms rely on rate limits only.");
+  }
+
+  if (turnstilePartiallyConfigured) {
+    issues.push("TURNSTILE_SECRET_KEY and VITE_TURNSTILE_SITE_KEY must be configured together to enable Turnstile bot protection.");
+  }
+
   if (!sessionAuthConfigured && currentConfig.adminKey) {
     warnings.push("Session-based admin login is not configured. The admin dashboard falls back to raw API key access.");
   }
@@ -177,6 +190,7 @@ export function getRuntimeConfigReport(currentConfig = config) {
     stripeConfigured,
     notificationsConfigured: Boolean(currentConfig.notificationWebhookUrl),
     emailConfigured,
+    turnstileConfigured,
     sessionAuthConfigured,
     adminAuthMode,
     paymentsEnabled: stripeConfigured && Boolean(currentConfig.stripeWebhookSecret && currentConfig.publicAppUrl),

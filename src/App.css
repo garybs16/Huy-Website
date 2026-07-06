@@ -2236,6 +2236,16 @@
   font-size: 0.95rem;
 }
 
+.turnstile-field {
+  min-height: 65px;
+  display: flex;
+  align-items: center;
+}
+
+.turnstile-field > div {
+  max-width: 100%;
+}
+
 .form-grid {
   display: grid;
   gap: 0.9rem;

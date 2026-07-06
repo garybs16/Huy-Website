@@ -146,6 +146,7 @@ export function createEnrollmentsRouter({
   notifier,
   emailer,
   submissionLimiter,
+  submissionProtection = (_req, _res, next) => next(),
 }) {
   const router = Router();
 
@@ -169,7 +170,7 @@ export function createEnrollmentsRouter({
     });
   });
 
-  router.post("/", submissionLimiter, async (req, res, next) => {
+  router.post("/", submissionLimiter, submissionProtection, async (req, res, next) => {
     try {
       const payload = enrollmentSchema.parse(req.body);
       const cohort = enrollmentDb.getCohortById(payload.cohortId);

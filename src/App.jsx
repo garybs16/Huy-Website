@@ -30,6 +30,7 @@ import {
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
 import { SiteCtaBand } from "./components/SiteCtaBand";
+import { isTurnstileEnabled } from "./components/TurnstileWidget";
 import { defaultCohorts, defaultPrograms, navItems } from "./siteData";
 
 const AdminPage = lazy(() => import("./pages/AdminPage").then((module) => ({ default: module.AdminPage })));
@@ -244,6 +245,7 @@ function RegisterRoute({
   onInput,
   onSubmit,
   onRouteSelection,
+  turnstile,
 }) {
   const location = useLocation();
   const routeSelectionRef = useRef(onRouteSelection);
@@ -283,6 +285,7 @@ function RegisterRoute({
       cohortLoadError={cohortLoadError}
       onInput={onInput}
       onSubmit={onSubmit}
+      turnstile={turnstile}
     />
   );
 }
@@ -321,6 +324,14 @@ function App() {
   const [inquiryStatus, setInquiryStatus] = useState({ type: "", text: "" });
   const [waitlistStatus, setWaitlistStatus] = useState({ type: "", text: "" });
   const [enrollmentStatus, setEnrollmentStatus] = useState({ type: "", text: "" });
+  const [inquiryTurnstileToken, setInquiryTurnstileToken] = useState("");
+  const [waitlistTurnstileToken, setWaitlistTurnstileToken] = useState("");
+  const [enrollmentTurnstileToken, setEnrollmentTurnstileToken] = useState("");
+  const [turnstileResetSignals, setTurnstileResetSignals] = useState({
+    inquiry: 0,
+    waitlist: 0,
+    enrollment: 0,
+  });
   const [adminKey, setAdminKey] = useState("");
   const [adminUsername, setAdminUsername] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -456,13 +467,24 @@ function App() {
     setInquiryStatus({ type: "", text: "" });
 
     try {
+      if (isTurnstileEnabled() && !inquiryTurnstileToken) {
+        setInquiryStatus({ type: "error", text: "Complete the security check before submitting." });
+        setInquiryPending(false);
+        return;
+      }
+
       await submitInquiry({
         ...inquiryForm,
         source: "contact-page-form",
+        turnstileToken: inquiryTurnstileToken,
       });
       setInquiryStatus({ type: "success", text: "Inquiry sent. Admissions will contact you shortly." });
       setInquiryForm(initialInquiryState);
+      setInquiryTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, inquiry: current.inquiry + 1 }));
     } catch (error) {
+      setInquiryTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, inquiry: current.inquiry + 1 }));
       setInquiryStatus({ type: "error", text: error.message || "Could not submit your inquiry right now." });
     } finally {
       setInquiryPending(false);
@@ -480,19 +502,30 @@ function App() {
       .join(" | ");
 
     try {
+      if (isTurnstileEnabled() && !waitlistTurnstileToken) {
+        setWaitlistStatus({ type: "error", text: "Complete the security check before submitting." });
+        setWaitlistPending(false);
+        return;
+      }
+
       await joinWaitlist({
         fullName: waitlistForm.fullName,
         email: waitlistForm.email,
         phone: waitlistForm.phone,
         notes: combinedNotes || undefined,
         source: "waitlist-page-form",
+        turnstileToken: waitlistTurnstileToken,
       });
       setWaitlistStatus({
         type: "success",
         text: "You are on the interest list. We will share class dates and milestone updates.",
       });
       setWaitlistForm(initialWaitlistState);
+      setWaitlistTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, waitlist: current.waitlist + 1 }));
     } catch (error) {
+      setWaitlistTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, waitlist: current.waitlist + 1 }));
       setWaitlistStatus({ type: "error", text: error.message || "Could not join the interest list right now." });
     } finally {
       setWaitlistPending(false);
@@ -505,6 +538,12 @@ function App() {
     setEnrollmentStatus({ type: "", text: "" });
 
     try {
+      if (isTurnstileEnabled() && !enrollmentTurnstileToken) {
+        setEnrollmentStatus({ type: "error", text: "Complete the security check before submitting." });
+        setEnrollmentPending(false);
+        return;
+      }
+
       const response = await createEnrollment({
         studentFullName: enrollmentForm.studentFullName,
         email: enrollmentForm.email,
@@ -519,6 +558,7 @@ function App() {
         cohortId: enrollmentForm.cohortId,
         paymentOption: enrollmentForm.paymentOption,
         notes: enrollmentForm.notes,
+        turnstileToken: enrollmentTurnstileToken,
       });
 
       if (response.paymentRequired && response.checkoutUrl) {
@@ -531,7 +571,11 @@ function App() {
         text: response.message || "Registration submitted. Admissions will contact you to complete payment.",
       });
       setEnrollmentForm(initialEnrollmentState);
+      setEnrollmentTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, enrollment: current.enrollment + 1 }));
     } catch (error) {
+      setEnrollmentTurnstileToken("");
+      setTurnstileResetSignals((current) => ({ ...current, enrollment: current.enrollment + 1 }));
       setEnrollmentStatus({ type: "error", text: error.message || "Could not complete registration right now." });
     } finally {
       setEnrollmentPending(false);
@@ -810,6 +854,12 @@ function App() {
                   onInput={handleEnrollmentInput}
                   onSubmit={handleEnrollmentSubmit}
                   onRouteSelection={handleRegisterRouteSelection}
+                  turnstile={{
+                    onToken: setEnrollmentTurnstileToken,
+                    onExpire: () => setEnrollmentTurnstileToken(""),
+                    onError: () => setEnrollmentTurnstileToken(""),
+                    resetSignal: turnstileResetSignals.enrollment,
+                  }}
                 />
               }
             />
@@ -830,6 +880,18 @@ function App() {
                   onWaitlistInput={handleWaitlistInput}
                   onInquirySubmit={handleInquirySubmit}
                   onWaitlistSubmit={handleWaitlistSubmit}
+                  inquiryTurnstile={{
+                    onToken: setInquiryTurnstileToken,
+                    onExpire: () => setInquiryTurnstileToken(""),
+                    onError: () => setInquiryTurnstileToken(""),
+                    resetSignal: turnstileResetSignals.inquiry,
+                  }}
+                  waitlistTurnstile={{
+                    onToken: setWaitlistTurnstileToken,
+                    onExpire: () => setWaitlistTurnstileToken(""),
+                    onError: () => setWaitlistTurnstileToken(""),
+                    resetSignal: turnstileResetSignals.waitlist,
+                  }}
                 />
               }
             />

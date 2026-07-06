@@ -38,6 +38,8 @@ const lines = [
   "EMAIL_FROM=\"First Step Healthcare Academy <admissions@firststepha.com>\"",
   "EMAIL_REPLY_TO=huyh@firststepha.org",
   "ADMIN_NOTIFICATION_EMAIL=huyh@firststepha.org",
+  "TURNSTILE_SECRET_KEY=",
+  "VITE_TURNSTILE_SITE_KEY=",
 ];
 
 console.log(lines.join("\n"));

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import programsSupportPhoto from "../assets/programs-support-photo.jpg";
+import { TurnstileWidget, isTurnstileEnabled } from "../components/TurnstileWidget";
 import { submitInquiry } from "../lib/api";
 import {
   industryGrowthRows,
@@ -30,6 +31,8 @@ export function HomePage({ programs }) {
   const [handoutForm, setHandoutForm] = useState(initialHandoutForm);
   const [handoutPending, setHandoutPending] = useState(false);
   const [handoutStatus, setHandoutStatus] = useState({ type: "", text: "" });
+  const [handoutTurnstileToken, setHandoutTurnstileToken] = useState("");
+  const [handoutTurnstileResetSignal, setHandoutTurnstileResetSignal] = useState(0);
   const heroTrustItems = [
     { label: "CDPH approved CNA program" },
     { label: "Orange, California" },
@@ -75,6 +78,12 @@ export function HomePage({ programs }) {
     setHandoutStatus({ type: "", text: "" });
 
     try {
+      if (isTurnstileEnabled() && !handoutTurnstileToken) {
+        setHandoutStatus({ type: "error", text: "Complete the security check before submitting." });
+        setHandoutPending(false);
+        return;
+      }
+
       await submitInquiry({
         fullName: `${handoutForm.firstName} ${handoutForm.lastName}`.trim(),
         email: handoutForm.email,
@@ -82,13 +91,18 @@ export function HomePage({ programs }) {
         program: "cna",
         message: "Please send the CNA Career Starter Guide and OC Nursing School Pathway Guide.",
         source: "home-free-handouts",
+        turnstileToken: handoutTurnstileToken,
       });
       setHandoutForm(initialHandoutForm);
+      setHandoutTurnstileToken("");
+      setHandoutTurnstileResetSignal((current) => current + 1);
       setHandoutStatus({
         type: "success",
         text: "Request sent. Admissions will send the free handouts shortly.",
       });
     } catch (error) {
+      setHandoutTurnstileToken("");
+      setHandoutTurnstileResetSignal((current) => current + 1);
       setHandoutStatus({
         type: "error",
         text: error.message || "We could not send the request. Please contact admissions directly.",
@@ -400,6 +414,12 @@ export function HomePage({ programs }) {
                   <input name="phone" type="tel" value={handoutForm.phone} onChange={updateHandoutField} />
                 </label>
               </div>
+              <TurnstileWidget
+                onToken={setHandoutTurnstileToken}
+                onExpire={() => setHandoutTurnstileToken("")}
+                onError={() => setHandoutTurnstileToken("")}
+                resetSignal={handoutTurnstileResetSignal}
+              />
               <button className="btn btn-primary" type="submit" disabled={handoutPending}>
                 {handoutPending ? "Sending..." : "Send Me My Free Handouts"}
               </button>

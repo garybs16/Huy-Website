@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
+import { TurnstileWidget } from "../components/TurnstileWidget";
 import { registrationChecklist } from "../siteData";
 
 function formatMoney(cents) {
@@ -20,6 +21,7 @@ export function RegisterPage({
   cohortLoadError,
   onInput,
   onSubmit,
+  turnstile,
 }) {
   const registrationSteps = [
     "Review the CNA program details.",
@@ -290,6 +292,7 @@ export function RegisterPage({
               />
             </label>
 
+            <TurnstileWidget {...turnstile} />
             <button type="submit" className="btn btn-primary" disabled={enrollmentPending || cohorts.length === 0}>
               {enrollmentPending
                 ? "Preparing checkout..."

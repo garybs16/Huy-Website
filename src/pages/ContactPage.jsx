@@ -1,4 +1,5 @@
 import { PageIntro } from "../components/PageIntro";
+import { TurnstileWidget } from "../components/TurnstileWidget";
 import programsSupportPhoto from "../assets/programs-support-photo.jpg";
 import { contactDetails, faqItems } from "../siteData";
 
@@ -14,6 +15,8 @@ export function ContactPage({
   onWaitlistInput,
   onInquirySubmit,
   onWaitlistSubmit,
+  inquiryTurnstile,
+  waitlistTurnstile,
 }) {
   return (
     <section className="section">
@@ -90,6 +93,7 @@ export function ContactPage({
                 <span>Your message</span>
                 <textarea name="message" rows="4" value={inquiryForm.message} onChange={onInquiryInput} required />
               </label>
+              <TurnstileWidget {...inquiryTurnstile} />
               <button type="submit" className="btn btn-primary" disabled={inquiryPending}>
                 {inquiryPending ? "Submitting..." : "Submit Inquiry"}
               </button>
@@ -142,6 +146,7 @@ export function ContactPage({
               <span>Notes</span>
               <textarea name="notes" rows="3" value={waitlistForm.notes} onChange={onWaitlistInput} />
             </label>
+            <TurnstileWidget {...waitlistTurnstile} />
             <button type="submit" className="btn btn-primary" disabled={waitlistPending}>
               {waitlistPending ? "Submitting..." : "Request Updates"}
             </button>
