@@ -34,6 +34,10 @@ const lines = [
   "VITE_STRIPE_PUBLISHABLE_KEY=",
   "NOTIFICATION_WEBHOOK_URL=",
   `NOTIFICATION_WEBHOOK_SECRET=${secret(32)}`,
+  "RESEND_API_KEY=",
+  "EMAIL_FROM=\"First Step Healthcare Academy <admissions@firststepha.com>\"",
+  "EMAIL_REPLY_TO=huyh@firststepha.org",
+  "ADMIN_NOTIFICATION_EMAIL=huyh@firststepha.org",
 ];
 
 console.log(lines.join("\n"));

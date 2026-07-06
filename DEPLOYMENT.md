@@ -49,9 +49,14 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NOTIFICATION_WEBHOOK_URL=
 NOTIFICATION_WEBHOOK_SECRET=
+RESEND_API_KEY=
+EMAIL_FROM="First Step Healthcare Academy <admissions@firststepha.com>"
+EMAIL_REPLY_TO=huyh@firststepha.org
+ADMIN_NOTIFICATION_EMAIL=huyh@firststepha.org
 ```
 
 Stripe is optional. If Stripe variables are empty, enrollment works in manual-payment mode.
+Email is optional. If Resend variables are empty, registrations and inquiries still save, but automatic confirmations are skipped.
 
 ## Standard Node Host
 
@@ -126,6 +131,12 @@ sudo chown -R "$USER":"$USER" /var/data
 ```
 
 Set the generated environment variables in your process manager, then start the app.
+
+Create a manual SQLite backup any time with:
+
+```bash
+node scripts/create-database-backup.mjs --database=/var/data/enrollment.db --directory=/var/data/backups
+```
 
 Nginx proxy:
 
