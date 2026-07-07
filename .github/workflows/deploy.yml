@@ -89,11 +89,16 @@ jobs:
              npm install
              npm run build
              sudo systemctl restart firststep
-             for attempt in {1..30}; do
-               if curl -fsS http://127.0.0.1:4000/api/health; then
-                 exit 0
-               fi
-               sleep 1
-             done
-             sudo systemctl status firststep --no-pager -l
-             exit 1'
+             sudo systemctl status firststep --no-pager -l'
+
+      - name: Verify production health
+        if: steps.deploy-secrets.outputs.configured == 'true'
+        shell: bash
+        run: |
+          for attempt in {1..30}; do
+            if curl -fsS https://firststepha.com/api/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
