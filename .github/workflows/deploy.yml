@@ -89,4 +89,4 @@ jobs:
              npm install
              npm run build
              sudo systemctl restart firststep
-             curl -fsS http://127.0.0.1/api/health'
+             curl -fsS http://127.0.0.1:4000/api/health'
