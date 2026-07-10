@@ -11,6 +11,7 @@
     "dev:client": "vite",
     "dev:server": "nodemon server/index.js",
     "start": "node server/index.js",
+    "test": "node --test",
     "check:harmony": "node scripts/harmony-check.mjs",
     "check:production": "node scripts/production-smoke.mjs",
     "check:content": "node scripts/content-regression.mjs",
@@ -18,7 +19,7 @@
     "check:health": "node scripts/healthcheck.mjs",
     "admin:hash": "node scripts/hash-admin-password.mjs",
     "env:production": "node scripts/generate-production-env.mjs",
-    "verify": "npm run build && npm audit && npm run check:content && npm run check:readiness && npm run check:harmony && npm run check:production",
+    "verify": "npm run build && npm audit && npm test && npm run check:content && npm run check:readiness && npm run check:harmony && npm run check:production",
     "build": "vite build",
     "preview": "vite preview"
   },

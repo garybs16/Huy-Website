@@ -1,4 +1,31 @@
-# Healthcare Academy Website (React + Node API)
+# First Step Healthcare Academy Website
+
+[![Validate Full Stack Site](https://github.com/garybs16/Huy-Website/actions/workflows/deploy.yml/badge.svg)](https://github.com/garybs16/Huy-Website/actions/workflows/deploy.yml)
+
+Live production site: https://firststepha.com/
+
+A full-stack admissions and enrollment website for First Step Healthcare Academy. The app combines a React/Vite frontend with a Node/Express API, database-backed enrollment workflows, protected admin operations, Stripe payment support, and production deployment checks.
+
+## Project highlights
+
+- Production-deployed business website with public program, admissions, schedule, registration, contact, and payment pages
+- Express API for admissions inquiries, waitlist requests, enrollments, cohorts, programs, admin operations, Stripe payments, and health checks
+- SQLite persistence through `better-sqlite3` for cohorts, enrollments, inquiries, waitlist, admin sessions, audit logs, and backups
+- Protected admin dashboard with signed `HttpOnly` sessions, CSRF checks, PBKDF2 password hashing, API-key fallback, and audit logging
+- Stripe Checkout integration for full tuition and deposit-based payment plans
+- Verification scripts covering build output, content regressions, backend contract checks, production serving behavior, database readiness, and backups
+
+Resume/project brief: [docs/RESUME_PROJECT.md](./docs/RESUME_PROJECT.md)
+
+PostgreSQL migration plan: [docs/POSTGRESQL_MIGRATION_PLAN.md](./docs/POSTGRESQL_MIGRATION_PLAN.md)
+
+Operations runbook: [docs/OPERATIONS_RUNBOOK.md](./docs/OPERATIONS_RUNBOOK.md)
+
+## Screenshots
+
+| Home | Registration | Admin |
+| --- | --- | --- |
+| ![Home page](./docs/screenshots/home.png) | ![Registration page](./docs/screenshots/register.png) | ![Admin dashboard login](./docs/screenshots/admin.png) |
 
 This project now includes:
 
@@ -65,13 +92,14 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `npm run dev:server`: run API only (nodemon)
 - `npm run dev:client`: run frontend only (Vite)
 - `npm run start`: run API server in production mode
+- `npm test`: run Node test suite for backend security and database behavior
 - `npm run admin:hash -- "YourPasswordHere"`: generate a secure admin password hash for `.env`
 - `npm run check:harmony`: smoke test API contract compatibility
 - `npm run check:production`: smoke test the built frontend + Express API together in production mode
 - `npm run check:readiness`: verify seat-hold capacity protection, expired hold cleanup, operational export, and SQLite backup creation
 - `npm run check:health`: check a running app's `/api/health` endpoint (`HEALTHCHECK_URL` can override the target)
 - `npm run env:production -- "AdminPassword" "https://your-domain.com"`: generate AWS/production env values without committing secrets
-- `npm run verify`: run build, dependency audit, readiness check, API smoke test, and production smoke test
+- `npm run verify`: run build, dependency audit, tests, content regression, readiness check, API smoke test, and production smoke test
 - `npm run build`: build frontend
 - `npm run preview`: preview frontend build
 

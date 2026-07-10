@@ -9,7 +9,6 @@ import {
   industryGrowthRows,
   miscFeeItems,
   programMeta,
-  rewardsGuidanceItems,
   requirementItems,
   tuitionItems,
   trustProofItems,
@@ -63,6 +62,21 @@ export function HomePage({ programs }) {
     { label: "Schedules", to: "/schedule" },
     { label: "Admissions", to: "/admissions" },
     { label: "Payment", to: "/payment" },
+  ];
+  const quizThemes = ["Purpose", "Stability", "Growth", "Independence"];
+  const homeSupportItems = [
+    {
+      title: "Referral Incentives",
+      detail: "Eligible students can earn a $100 tuition credit through the referral program.",
+    },
+    {
+      title: "Study Toolkit",
+      detail: "Use practical guides, checklists, and exam-review resources throughout training.",
+    },
+    {
+      title: "Career Guidance",
+      detail: "Get support with job readiness and planning your next healthcare step.",
+    },
   ];
   const sectorRows = industryGrowthRows.filter((row) => row.label !== "Total wage and salary employment");
   const maxJobsChange = Math.max(...sectorRows.map((row) => parseJobsChange(row.change)));
@@ -195,6 +209,36 @@ export function HomePage({ programs }) {
         </div>
       </section>
 
+      <section className="section home-quiz-section" aria-labelledby="home-quiz-title">
+        <div className="container home-quiz-card">
+          <div className="home-quiz-copy">
+            <p className="home-quiz-kicker">A quick, personal place to start</p>
+            <h2 id="home-quiz-title">What kind of healthcare future feels right for you?</h2>
+            <p>
+              Take the short career quiz to explore your strengths and see how they may connect
+              with a people-centered career path.
+            </p>
+            <Link to="/career-quiz" className="btn home-quiz-button">
+              Start the career quiz <span aria-hidden="true">→</span>
+            </Link>
+            <small>12 reflective questions · No sign-up required</small>
+          </div>
+
+          <div className="home-quiz-preview" aria-label="Quiz themes">
+            <span className="home-quiz-step">Question 01 / 12</span>
+            <strong>What matters most in the future you are building?</strong>
+            <div className="home-quiz-theme-grid">
+              {quizThemes.map((theme, index) => (
+                <span key={theme}>
+                  <b>{String.fromCharCode(65 + index)}</b>
+                  {theme}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="section workforce-impact-section">
         <div className="container workforce-impact-grid">
           <div className="workforce-impact-copy">
@@ -204,13 +248,8 @@ export function HomePage({ programs }) {
             </h2>
             <p>
               According to the U.S. Bureau of Labor Statistics, healthcare and social assistance is
-              projected to add about 2.0 million jobs from 2024 to 2034, growing 8.4% compared with
-              3.1% for overall wage and salary employment.
-            </p>
-            <p>
-              Since the elderly population is projected to climb from 59.7 million in 2024 to 72.5
-              million in 2034, demand for medical and social services is expected to continue
-              increasing.
+              projected to add about 2.0 million jobs from 2024 to 2034. An aging population is also
+              expected to increase demand for healthcare and long-term care services.
             </p>
 
             <div className="impact-stat-row" aria-label="Healthcare employment statistics">
@@ -284,7 +323,7 @@ export function HomePage({ programs }) {
             <p className="section-kicker">Rewards & Guidance</p>
             <h2>Support that helps students keep moving before, during, and after training.</h2>
             <div className="support-feature-list">
-              {rewardsGuidanceItems.map((item) => (
+              {homeSupportItems.map((item) => (
                 <article key={item.title} className="support-card">
                   <h3>{item.title}</h3>
                   <p>{item.detail}</p>
