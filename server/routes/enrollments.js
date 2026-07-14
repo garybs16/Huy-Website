@@ -129,7 +129,7 @@ async function createEnrollmentCheckoutSession({
   };
 
   if (checkoutMode === "embedded") {
-    sessionPayload.ui_mode = "embedded";
+    sessionPayload.ui_mode = "embedded_page";
     sessionPayload.return_url = `${appBaseUrl}${returnPath}?checkout=complete&enrollment=${enrollment.id}`;
   } else {
     sessionPayload.success_url = `${appBaseUrl}/payment?checkout=success&enrollment=${enrollment.id}`;
