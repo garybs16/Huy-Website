@@ -112,6 +112,13 @@ export function createApp() {
       contentSecurityPolicy: {
         directives: {
           "upgrade-insecure-requests": null,
+          // Stripe Checkout is rendered in a secure cross-origin frame.
+          // Keep the site's default protections while explicitly allowing
+          // the Stripe resources needed for embedded Checkout.
+          "connect-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
+          "frame-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
+          "script-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
+          "img-src": ["'self'", "data:", "https://*.stripe.com"],
         },
       },
     })
