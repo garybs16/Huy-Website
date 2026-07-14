@@ -559,21 +559,13 @@ function App() {
         emergencyContactPhone: enrollmentForm.emergencyContactPhone,
         cohortId: enrollmentForm.cohortId,
         paymentOption: enrollmentForm.paymentOption,
-        checkoutMode: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? "embedded" : "redirect",
+        // Send the student to Stripe's secure, Stripe-hosted checkout immediately.
+        // This is the most reliable checkout surface across browsers and still
+        // keeps payment tied to this exact enrollment and cohort.
+        checkoutMode: "redirect",
         notes: enrollmentForm.notes,
         turnstileToken: enrollmentTurnstileToken,
       });
-
-      if (response.paymentRequired && response.checkoutClientSecret) {
-        setEnrollmentCheckoutClientSecret(response.checkoutClientSecret);
-        setEnrollmentStatus({
-          type: "success",
-          text: `Registration saved. Complete the secure ${response.amountDueNowLabel} payment below to reserve the seat.`,
-        });
-        setEnrollmentTurnstileToken("");
-        setTurnstileResetSignals((current) => ({ ...current, enrollment: current.enrollment + 1 }));
-        return;
-      }
 
       if (response.paymentRequired && response.checkoutUrl) {
         window.location.assign(response.checkoutUrl);
