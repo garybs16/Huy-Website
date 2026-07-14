@@ -260,7 +260,13 @@ export function createEnrollmentsRouter({
           checkoutMode: payload.checkoutMode,
           returnPath: "/register",
         });
-      } catch {
+      } catch (error) {
+        console.error("Stripe checkout session creation failed", {
+          message: error instanceof Error ? error.message : String(error),
+          type: error?.type,
+          code: error?.code,
+          param: error?.param,
+        });
         enrollmentDb.markPaymentSetupFailed(
           enrollment.id,
           "Stripe checkout session creation failed before payment could start."
