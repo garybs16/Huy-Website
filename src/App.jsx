@@ -324,6 +324,7 @@ function App() {
   const [inquiryStatus, setInquiryStatus] = useState({ type: "", text: "" });
   const [waitlistStatus, setWaitlistStatus] = useState({ type: "", text: "" });
   const [enrollmentStatus, setEnrollmentStatus] = useState({ type: "", text: "" });
+  const [enrollmentCheckoutClientSecret, setEnrollmentCheckoutClientSecret] = useState("");
   const [inquiryTurnstileToken, setInquiryTurnstileToken] = useState("");
   const [waitlistTurnstileToken, setWaitlistTurnstileToken] = useState("");
   const [enrollmentTurnstileToken, setEnrollmentTurnstileToken] = useState("");
@@ -536,6 +537,7 @@ function App() {
     event.preventDefault();
     setEnrollmentPending(true);
     setEnrollmentStatus({ type: "", text: "" });
+    setEnrollmentCheckoutClientSecret("");
 
     try {
       if (isTurnstileEnabled() && !enrollmentTurnstileToken) {
@@ -557,9 +559,21 @@ function App() {
         emergencyContactPhone: enrollmentForm.emergencyContactPhone,
         cohortId: enrollmentForm.cohortId,
         paymentOption: enrollmentForm.paymentOption,
+        checkoutMode: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? "embedded" : "redirect",
         notes: enrollmentForm.notes,
         turnstileToken: enrollmentTurnstileToken,
       });
+
+      if (response.paymentRequired && response.checkoutClientSecret) {
+        setEnrollmentCheckoutClientSecret(response.checkoutClientSecret);
+        setEnrollmentStatus({
+          type: "success",
+          text: `Registration saved. Complete the secure ${response.amountDueNowLabel} payment below to reserve the seat.`,
+        });
+        setEnrollmentTurnstileToken("");
+        setTurnstileResetSignals((current) => ({ ...current, enrollment: current.enrollment + 1 }));
+        return;
+      }
 
       if (response.paymentRequired && response.checkoutUrl) {
         window.location.assign(response.checkoutUrl);
@@ -850,6 +864,7 @@ function App() {
                   enrollmentForm={enrollmentForm}
                   enrollmentPending={enrollmentPending}
                   enrollmentStatus={enrollmentStatus}
+                  checkoutClientSecret={enrollmentCheckoutClientSecret}
                   cohortLoadError={cohortLoadError}
                   onInput={handleEnrollmentInput}
                   onSubmit={handleEnrollmentSubmit}

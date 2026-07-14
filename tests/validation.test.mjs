@@ -43,10 +43,12 @@ test("enrollment schema normalizes state and validates required student details"
     emergencyContactPhone: "949-555-0103",
     cohortId: "cna-weekday",
     paymentOption: "deposit",
+    checkoutMode: "embedded",
   });
 
   assert.equal(enrollment.state, "CA");
   assert.equal(enrollment.paymentOption, "deposit");
+  assert.equal(enrollment.checkoutMode, "embedded");
   assert.throws(
     () =>
       enrollmentSchema.parse({

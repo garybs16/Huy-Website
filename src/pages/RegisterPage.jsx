@@ -1,3 +1,6 @@
+import { useEffect, useMemo, useRef } from "react";
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
 import { TurnstileWidget } from "../components/TurnstileWidget";
@@ -18,11 +21,24 @@ export function RegisterPage({
   enrollmentForm,
   enrollmentPending,
   enrollmentStatus,
+  checkoutClientSecret,
   cohortLoadError,
   onInput,
   onSubmit,
   turnstile,
 }) {
+  const checkoutPanelRef = useRef(null);
+  const stripePromise = useMemo(() => {
+    const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "";
+    return publishableKey ? loadStripe(publishableKey) : null;
+  }, []);
+
+  useEffect(() => {
+    if (checkoutClientSecret) {
+      checkoutPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [checkoutClientSecret]);
+
   const registrationSteps = [
     "Review the CNA program details.",
     "Select the CNA cohort with the best timing and available seats.",
@@ -306,6 +322,13 @@ export function RegisterPage({
             <p className={`form-status ${enrollmentStatus.type === "success" ? "is-success" : "is-error"}`}>
               {enrollmentStatus.text}
             </p>
+          ) : null}
+          {checkoutClientSecret && stripePromise ? (
+            <div className="embedded-checkout-panel" ref={checkoutPanelRef}>
+              <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret: checkoutClientSecret }}>
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            </div>
           ) : null}
         </article>
       </div>

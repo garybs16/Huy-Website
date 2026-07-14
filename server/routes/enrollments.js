@@ -88,6 +88,7 @@ async function createEnrollmentCheckoutSession({
   pricing,
   purpose,
   checkoutMode = "redirect",
+  returnPath = "/payment",
 }) {
   const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
   const checkoutDetails = buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose });
@@ -129,7 +130,7 @@ async function createEnrollmentCheckoutSession({
 
   if (checkoutMode === "embedded") {
     sessionPayload.ui_mode = "embedded";
-    sessionPayload.return_url = `${appBaseUrl}/payment?checkout=complete&enrollment=${enrollment.id}`;
+    sessionPayload.return_url = `${appBaseUrl}${returnPath}?checkout=complete&enrollment=${enrollment.id}`;
   } else {
     sessionPayload.success_url = `${appBaseUrl}/payment?checkout=success&enrollment=${enrollment.id}`;
     sessionPayload.cancel_url = `${appBaseUrl}/payment?checkout=cancelled&enrollment=${enrollment.id}`;
@@ -256,6 +257,8 @@ export function createEnrollmentsRouter({
           cohort,
           pricing,
           purpose: getCheckoutPurpose(pricing),
+          checkoutMode: payload.checkoutMode,
+          returnPath: "/register",
         });
       } catch {
         enrollmentDb.markPaymentSetupFailed(
@@ -297,7 +300,9 @@ export function createEnrollmentsRouter({
         amountDueNowLabel: formatMoney(pendingEnrollment.paymentAmountCents),
         balanceDueCents: pendingEnrollment.balanceDueCents,
         balanceDueLabel: formatMoney(pendingEnrollment.balanceDueCents),
+        checkoutMode: payload.checkoutMode,
         checkoutUrl: session.url,
+        checkoutClientSecret: session.client_secret,
         checkoutExpiresAt: pendingEnrollment.seatHoldExpiresAt,
       });
     } catch (error) {

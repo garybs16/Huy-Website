@@ -96,6 +96,7 @@ export const enrollmentSchema = z.object({
   ),
   cohortId: requiredString("cohortId", 2, 100),
   paymentOption: z.enum(["full", "deposit"]).default("full"),
+  checkoutMode: z.enum(["redirect", "embedded"]).default("redirect"),
   notes: optionalString(600),
 });
 
