@@ -463,7 +463,10 @@ export function HomePage({ programs }) {
                 {handoutPending ? "Sending..." : "Send Me My Free Handouts"}
               </button>
               {handoutStatus.text ? (
-                <p className={`form-status ${handoutStatus.type === "success" ? "is-success" : "is-error"}`}>
+                <p
+                  className={`form-status ${handoutStatus.type === "success" ? "is-success" : "is-error"}`}
+                  role={handoutStatus.type === "success" ? "status" : "alert"}
+                >
                   {handoutStatus.text}
                 </p>
               ) : null}

@@ -319,7 +319,10 @@ export function RegisterPage({
           </form>
 
           {enrollmentStatus.text ? (
-            <p className={`form-status ${enrollmentStatus.type === "success" ? "is-success" : "is-error"}`}>
+            <p
+              className={`form-status ${enrollmentStatus.type === "success" ? "is-success" : "is-error"}`}
+              role={enrollmentStatus.type === "success" ? "status" : "alert"}
+            >
               {enrollmentStatus.text}
             </p>
           ) : null}

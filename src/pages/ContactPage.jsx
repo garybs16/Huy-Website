@@ -99,7 +99,10 @@ export function ContactPage({
               </button>
             </form>
             {inquiryStatus.text ? (
-              <p className={`form-status ${inquiryStatus.type === "success" ? "is-success" : "is-error"}`}>
+              <p
+                className={`form-status ${inquiryStatus.type === "success" ? "is-success" : "is-error"}`}
+                role={inquiryStatus.type === "success" ? "status" : "alert"}
+              >
                 {inquiryStatus.text}
               </p>
             ) : null}
@@ -152,7 +155,10 @@ export function ContactPage({
             </button>
           </form>
           {waitlistStatus.text ? (
-            <p className={`form-status ${waitlistStatus.type === "success" ? "is-success" : "is-error"}`}>
+            <p
+              className={`form-status ${waitlistStatus.type === "success" ? "is-success" : "is-error"}`}
+              role={waitlistStatus.type === "success" ? "status" : "alert"}
+            >
               {waitlistStatus.text}
             </p>
           ) : null}

@@ -124,6 +124,7 @@ function AppEffects({ setEnrollmentStatus }) {
 
   useEffect(() => {
     document.title = pageTitles[location.pathname] ?? pageTitles["/"];
+    document.getElementById("main-content")?.focus({ preventScroll: true });
     const description = document.querySelector('meta[name="description"]');
     if (description) {
       description.setAttribute(
@@ -301,7 +302,7 @@ function AppShell({ children }) {
       </a>
       <SiteHeader navItems={navItems} />
 
-      <main id="main-content">{children}</main>
+      <main id="main-content" tabIndex={-1}>{children}</main>
 
       {showCtaBand ? <SiteCtaBand /> : null}
 

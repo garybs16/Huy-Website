@@ -330,7 +330,10 @@ export function RewardsGuidancePage() {
                 {resourcePending ? "Sending..." : "Send Me My Free Handouts"}
               </button>
               {resourceStatus.text ? (
-                <p className={`form-status ${resourceStatus.type === "success" ? "is-success" : "is-error"}`}>
+                <p
+                  className={`form-status ${resourceStatus.type === "success" ? "is-success" : "is-error"}`}
+                  role={resourceStatus.type === "success" ? "status" : "alert"}
+                >
                   {resourceStatus.text}
                 </p>
               ) : null}

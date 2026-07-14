@@ -102,7 +102,7 @@ export function CareerQuizPage() {
           </button>
 
           {result ? (
-            <div className="quiz-result-card">
+            <div className="quiz-result-card" role="status" aria-live="polite">
               <span>Primary Result</span>
               <h3>{result.primary.title}</h3>
               <strong>{result.primary.core}</strong>

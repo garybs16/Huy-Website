@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import academyLogo from "../assets/new-logo.jpg";
+import academyLogo from "../assets/first-step-logo.svg";
 import { contactDetails } from "../siteData";
 
 export function SiteHeader({ navItems }) {
@@ -10,6 +10,21 @@ export function SiteHeader({ navItems }) {
   useEffect(() => {
     setNavOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!navOpen) {
+      return undefined;
+    }
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setNavOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [navOpen]);
 
   return (
     <header className="site-header">

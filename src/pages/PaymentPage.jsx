@@ -177,7 +177,10 @@ export function PaymentPage() {
             </button>
           </form>
           {paymentStatus.text ? (
-            <p className={`form-status ${paymentStatus.type === "success" ? "is-success" : "is-error"}`}>
+            <p
+              className={`form-status ${paymentStatus.type === "success" ? "is-success" : "is-error"}`}
+              role={paymentStatus.type === "success" ? "status" : "alert"}
+            >
               {paymentStatus.text}
             </p>
           ) : null}

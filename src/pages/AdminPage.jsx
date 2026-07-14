@@ -305,8 +305,8 @@ export function AdminPage({
           ) : null}
         </div>
 
-        {adminError ? <p className="form-status is-error">{adminError}</p> : null}
-        {adminNotice ? <p className="form-status is-success">{adminNotice}</p> : null}
+        {adminError ? <p className="form-status is-error" role="alert">{adminError}</p> : null}
+        {adminNotice ? <p className="form-status is-success" role="status">{adminNotice}</p> : null}
 
         {adminOverview ? (
           <>
