@@ -1,0 +1,107 @@
+name: Encrypted Production Database Backup
+
+on:
+  schedule:
+    - cron: "30 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: encrypted-production-database-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      artifact_name: ${{ steps.artifact.outputs.name }}
+    env:
+      BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+      BACKUP_FILENAME: firststep-enrollment-${{ github.run_id }}-${{ github.run_attempt }}.fshabk
+      LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+      LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+      LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "24"
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check backup secrets
+        shell: bash
+        run: |
+          test -n "${BACKUP_ENCRYPTION_KEY}" || { echo "::error::BACKUP_ENCRYPTION_KEY is not configured"; exit 1; }
+          test -n "${LIGHTSAIL_HOST}" || { echo "::error::LIGHTSAIL_HOST is not configured"; exit 1; }
+          test -n "${LIGHTSAIL_SSH_KEY}" || { echo "::error::LIGHTSAIL_SSH_KEY is not configured"; exit 1; }
+          test -n "${LIGHTSAIL_USER}" || { echo "::error::LIGHTSAIL_USER is not configured"; exit 1; }
+      - name: Install SSH key
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${LIGHTSAIL_SSH_KEY}" > ~/.ssh/lightsail_backup_key
+          chmod 600 ~/.ssh/lightsail_backup_key
+          ssh-keyscan -H "${LIGHTSAIL_HOST}" >> ~/.ssh/known_hosts
+      - name: Create and retrieve encrypted backup
+        shell: bash
+        run: |
+          mkdir -p backups
+          cleanup_remote() {
+            ssh -i ~/.ssh/lightsail_backup_key -o IdentitiesOnly=yes \
+              "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}" \
+              "rm -f -- /tmp/${BACKUP_FILENAME}" || true
+          }
+          trap cleanup_remote EXIT
+          printf '%s\n' "${BACKUP_ENCRYPTION_KEY}" | \
+            ssh -i ~/.ssh/lightsail_backup_key -o IdentitiesOnly=yes \
+              "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}" \
+              "read -r BACKUP_ENCRYPTION_KEY; export BACKUP_ENCRYPTION_KEY; cd /var/www/html; node scripts/encrypted-database-backup.mjs create --database=/var/data/enrollment.db --output=/tmp/${BACKUP_FILENAME}"
+          scp -i ~/.ssh/lightsail_backup_key -o IdentitiesOnly=yes \
+            "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}:/tmp/${BACKUP_FILENAME}" \
+            "backups/${BACKUP_FILENAME}"
+      - name: Verify encrypted backup before upload
+        run: node scripts/encrypted-database-backup.mjs verify --input="backups/${BACKUP_FILENAME}"
+      - name: Define artifact name
+        id: artifact
+        shell: bash
+        run: echo "name=encrypted-production-db-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - name: Upload encrypted off-site backup
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: backups/*.fshabk
+          if-no-files-found: error
+          retention-days: 90
+
+  recovery-test:
+    needs: backup
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "24"
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Download off-site backup artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ needs.backup.outputs.artifact_name }}
+          path: recovered-backup
+      - name: Perform clean-run recovery verification
+        shell: bash
+        run: |
+          backup_file="$(find recovered-backup -type f -name '*.fshabk' -print -quit)"
+          test -n "${backup_file}" || { echo "::error::Downloaded backup artifact is empty"; exit 1; }
+          node scripts/encrypted-database-backup.mjs verify --input="${backup_file}"

@@ -40,12 +40,35 @@ Recommended cadence:
 
 ## Backup Checks
 
-SQLite production deployments must use persistent storage. Before major changes:
+The production SQLite database is encrypted and copied off the server every day by the `Encrypted Production Database Backup` GitHub Actions workflow. Each backup:
+
+- uses AES-256-GCM authenticated encryption with a repository-independent secret;
+- is retained as a GitHub Actions artifact for 90 days;
+- is downloaded onto a clean runner after upload;
+- must decrypt successfully, pass `PRAGMA integrity_check`, and contain the required application tables.
+
+Review the scheduled workflow regularly and investigate any failed run immediately. Before major changes:
 
 1. Open the admin dashboard.
 2. Create a database backup from the admin backup action.
-3. Download or copy the backup off the server.
-4. Confirm the backup file is not empty.
+3. Run the encrypted backup workflow manually.
+4. Confirm both the backup job and clean-run recovery test pass.
+
+To verify a downloaded encrypted backup without restoring production:
+
+```bash
+BACKUP_ENCRYPTION_KEY="..." npm run backup:encrypted -- verify --input=/safe/path/backup.fshabk
+```
+
+To decrypt into a new file for an authorized recovery operation:
+
+```bash
+BACKUP_ENCRYPTION_KEY="..." npm run backup:encrypted -- restore \
+  --input=/safe/path/backup.fshabk \
+  --output=/safe/new/path/restored-enrollment.db
+```
+
+The restore command refuses to overwrite an existing file. Validate the restored database before scheduling a controlled production replacement.
 
 For PostgreSQL, use managed provider backups plus a periodic app-level export from `/api/admin/export`.
 
