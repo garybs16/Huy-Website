@@ -13,6 +13,7 @@ import { createNotifier } from "./lib/notifications.js";
 import { createStripeClient } from "./lib/stripe.js";
 import { createTurnstileVerifier } from "./lib/turnstile.js";
 import { verifyTurnstile } from "./middleware/verifyTurnstile.js";
+import { requireJsonRequestBody, setPermissionsPolicy } from "./middleware/securityHeaders.js";
 import { createAdminRouter } from "./routes/admin.js";
 import { createCohortsRouter } from "./routes/cohorts.js";
 import { createEnrollmentsRouter } from "./routes/enrollments.js";
@@ -49,6 +50,7 @@ function isHiddenFileProbe(requestPath) {
 }
 
 export function createApp() {
+  process.umask(0o077);
   const configReport = getRuntimeConfigReport(config);
 
   if (configReport.issues.length > 0) {
@@ -69,17 +71,25 @@ export function createApp() {
   });
   const submissionLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 15,
+    max: 10,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Too many submissions. Please try again in a few minutes." },
   });
   const adminLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 5,
     standardHeaders: true,
     legacyHeaders: false,
+    skipSuccessfulRequests: true,
     message: { error: "Too many admin login attempts. Please try again in a few minutes." },
+  });
+  const webhookLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many webhook requests." },
   });
   const enrollmentDb = new EnrollmentDatabase(config.databasePath);
   const stripeClient = createStripeClient(config.stripeSecretKey);
@@ -117,12 +127,14 @@ export function createApp() {
           // the Stripe resources needed for embedded Checkout.
           "connect-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
           "frame-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
+          "frame-ancestors": ["'none'"],
           "script-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
           "img-src": ["'self'", "data:", "https://*.stripe.com"],
         },
       },
     })
   );
+  app.use(setPermissionsPolicy);
   app.use(
     cors((req, callback) => {
       const origin = req.header("Origin");
@@ -137,6 +149,7 @@ export function createApp() {
   );
   app.use(
     "/api/payments/stripe/webhook",
+    webhookLimiter,
     createStripePaymentsRouter({
       stripeClient,
       webhookSecret: config.stripeWebhookSecret,
@@ -146,6 +159,7 @@ export function createApp() {
     })
   );
   app.use(express.json({ limit: "50kb" }));
+  app.use("/api", requireJsonRequestBody);
   app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
   app.use("/api", generalLimiter);
   app.use("/api/health", createHealthRouter({ enrollmentDb, configReport }));
@@ -245,6 +259,14 @@ export function createApp() {
 
     if (error instanceof URIError) {
       return res.status(400).json({ error: "Bad request" });
+    }
+
+    if (error?.type === "entity.parse.failed") {
+      return res.status(400).json({ error: "Malformed JSON request body." });
+    }
+
+    if (error?.type === "entity.too.large") {
+      return res.status(413).json({ error: "Request body is too large." });
     }
 
     console.error(error);

@@ -1,10 +1,26 @@
-import { createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from "node:crypto";
 
 const SESSION_COOKIE_NAME = "admin_session";
 const PASSWORD_HASH_PREFIX = "pbkdf2_sha256";
 const PASSWORD_HASH_DIGEST = "sha256";
 const PASSWORD_HASH_KEY_LENGTH = 32;
 const DEFAULT_PASSWORD_ITERATIONS = 210_000;
+const MAX_PASSWORD_ITERATIONS = 1_000_000;
+
+export function constantTimeEqual(left, right) {
+  if (typeof left !== "string" || typeof right !== "string") {
+    return false;
+  }
+
+  const leftDigest = createHash("sha256").update(left, "utf8").digest();
+  const rightDigest = createHash("sha256").update(right, "utf8").digest();
+
+  return timingSafeEqual(leftDigest, rightDigest);
+}
+
+export function adminSessionMatchesUserAgent(session, userAgent) {
+  return Boolean(session && constantTimeEqual(session.userAgent ?? "", userAgent ?? ""));
+}
 
 function parseCookies(headerValue) {
   if (!headerValue) {
@@ -92,7 +108,11 @@ export function verifyPassword(password, storedHash) {
 
   const iterations = Number(iterationText);
 
-  if (!Number.isInteger(iterations) || iterations <= 0) {
+  if (!Number.isInteger(iterations) || iterations <= 0 || iterations > MAX_PASSWORD_ITERATIONS) {
+    return false;
+  }
+
+  if (!/^[a-f0-9]{64}$/i.test(hashHex)) {
     return false;
   }
 

@@ -39,8 +39,25 @@ function enrollmentProgramDetails(enrollmentDb, enrollment) {
 }
 
 function validateEnrollmentMetadata(enrollment, metadata) {
-  if (!enrollment || metadata?.cohortId !== enrollment.cohortId) {
+  if (
+    !enrollment ||
+    metadata?.enrollmentId !== enrollment.id ||
+    metadata?.cohortId !== enrollment.cohortId ||
+    metadata?.programId !== enrollment.programId ||
+    metadata?.paymentOption !== enrollment.paymentOption
+  ) {
     throw new Error("Stripe payment metadata did not match an active enrollment.");
+  }
+
+  if (
+    metadata?.checkoutPurpose === "payment_plan" &&
+    (
+      enrollment.paymentOption !== "deposit" ||
+      Number(metadata?.installmentsTotal ?? 0) !== Number(enrollment.paymentInstallmentsTotal ?? 0) ||
+      metadata?.paymentInterval !== "week"
+    )
+  ) {
+    throw new Error("Stripe weekly payment metadata did not match the enrollment schedule.");
   }
 }
 
@@ -245,8 +262,8 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
 
     try {
       event = stripeClient.webhooks.constructEvent(req.body, signature, webhookSecret);
-    } catch (error) {
-      return res.status(400).json({ error: `Webhook signature verification failed: ${error.message}` });
+    } catch {
+      return res.status(400).json({ error: "Webhook signature verification failed." });
     }
 
     try {
@@ -259,10 +276,13 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
           enrollment.stripeCheckoutSessionId !== session.id ||
           session.payment_status !== "paid" ||
           session.currency !== "usd" ||
-          session.metadata?.cohortId !== enrollment.cohortId
+          session.metadata?.cohortId !== enrollment.cohortId ||
+          session.metadata?.checkoutPurpose !== enrollment.stripeCheckoutPurpose
         ) {
           return res.status(400).json({ error: "Stripe checkout session did not match an active enrollment." });
         }
+
+        validateEnrollmentMetadata(enrollment, session.metadata);
 
         if (session.metadata?.checkoutPurpose === "payment_plan") {
           await handleWeeklyCheckoutCompleted({

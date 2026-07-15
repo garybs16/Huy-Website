@@ -13,10 +13,10 @@ async function run() {
   const tempDataDir = await mkdtemp(path.join(os.tmpdir(), "pcahi-harmony-"));
   process.env.DATA_DIR = tempDataDir;
   process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
-  process.env.API_ADMIN_KEY = "harmony-admin-key";
+  process.env.API_ADMIN_KEY = "harmony-admin-key-for-automated-checks";
   process.env.ADMIN_USERNAME = "harmony-admin";
   process.env.ADMIN_PASSWORD_HASH = createPasswordHash("HarmonyPassword123!");
-  process.env.ADMIN_SESSION_SECRET = "harmony-session-secret";
+  process.env.ADMIN_SESSION_SECRET = "harmony-session-secret-for-automated-checks";
   const { startServer } = await import("../server/index.js");
   const port = 4020;
   const { server } = startServer(port);
@@ -121,7 +121,7 @@ async function run() {
     assert(paymentPortalBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Payment portal amount mismatch");
 
     const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
-      headers: { "x-api-key": "harmony-admin-key" },
+      headers: { "x-api-key": "harmony-admin-key-for-automated-checks" },
     });
     assert(adminOverviewRes.ok, "Admin overview endpoint failed");
     const adminOverviewBody = await adminOverviewRes.json();
@@ -189,7 +189,7 @@ async function run() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "harmony-admin-key",
+        "x-api-key": "harmony-admin-key-for-automated-checks",
       },
       body: JSON.stringify({
         id: "harmony-cohort",

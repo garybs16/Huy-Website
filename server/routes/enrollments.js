@@ -8,6 +8,7 @@ import {
   WEEKLY_PAYMENT_PLAN_INTERVAL,
 } from "../lib/stripe.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
+import { preventSensitiveCaching } from "../middleware/securityHeaders.js";
 import { enrollmentPaymentSessionSchema, enrollmentSchema, paginationSchema } from "../validation/schemas.js";
 
 function formatMoney(cents) {
@@ -190,6 +191,8 @@ export function createEnrollmentsRouter({
   submissionProtection = (_req, _res, next) => next(),
 }) {
   const router = Router();
+
+  router.use(preventSensitiveCaching);
 
   router.get("/:id/status", (req, res) => {
     const enrollment = enrollmentDb.getEnrollmentById(req.params.id);

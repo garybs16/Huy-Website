@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { ZodError } from "zod";
 import {
+  adminSessionMatchesUserAgent,
   clearAdminSessionCookie,
+  constantTimeEqual,
   createAdminCsrfToken,
   createAdminSessionCookie,
   getAdminSessionIdFromRequest,
@@ -10,6 +12,7 @@ import {
   verifyPassword,
 } from "../lib/adminSecurity.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
+import { preventSensitiveCaching } from "../middleware/securityHeaders.js";
 import { adminCohortSchema, adminLoginSchema, adminProgramSchema } from "../validation/schemas.js";
 
 function buildSessionPayload({ req, session, adminSessionSecret, sessionAuthConfigured, apiKeySupported, adminAuthMode }) {
@@ -63,9 +66,16 @@ export function createAdminRouter({
 }) {
   const router = Router();
 
+  router.use(preventSensitiveCaching);
+
   router.get("/session", (req, res) => {
     const sessionId = getAdminSessionIdFromRequest(req, adminSessionSecret);
-    const session = sessionId ? enrollmentDb.getAdminSessionById(sessionId) : null;
+    let session = sessionId ? enrollmentDb.getAdminSessionById(sessionId) : null;
+
+    if (session && !adminSessionMatchesUserAgent(session, req.get("user-agent"))) {
+      enrollmentDb.deleteAdminSession(sessionId);
+      session = null;
+    }
 
     if (session?.id) {
       enrollmentDb.touchAdminSession(session.id);
@@ -103,8 +113,9 @@ export function createAdminRouter({
       }
 
       const payload = adminLoginSchema.parse(req.body);
-      const credentialsValid =
-        payload.username === adminUsername && verifyPassword(payload.password, adminPasswordHash);
+      const passwordValid = verifyPassword(payload.password, adminPasswordHash);
+      const usernameValid = constantTimeEqual(payload.username, adminUsername);
+      const credentialsValid = usernameValid && passwordValid;
 
       if (!credentialsValid) {
         enrollmentDb.insertAdminAuditEvent({
@@ -166,13 +177,14 @@ export function createAdminRouter({
 
   router.post("/logout", (req, res) => {
     const sessionId = getAdminSessionIdFromRequest(req, adminSessionSecret);
-    const session = sessionId ? enrollmentDb.getAdminSessionById(sessionId) : null;
+    const storedSession = sessionId ? enrollmentDb.getAdminSessionById(sessionId) : null;
+    const session = adminSessionMatchesUserAgent(storedSession, req.get("user-agent")) ? storedSession : null;
 
     if (session && !verifyAdminCsrfToken(sessionId, req.get("x-csrf-token"), adminSessionSecret)) {
       return res.status(403).json({ error: "Invalid or missing CSRF token." });
     }
 
-    if (sessionId) {
+    if (session) {
       enrollmentDb.deleteAdminSession(sessionId);
     }
 
@@ -195,6 +207,7 @@ export function createAdminRouter({
         adminSessionTtlHours,
       }))
     );
+    res.setHeader("Clear-Site-Data", '"cache", "cookies", "storage"');
     res.status(204).end();
   });
 

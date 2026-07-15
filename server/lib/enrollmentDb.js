@@ -40,6 +40,16 @@ function addColumnIfMissing(db, tableName, columnName, definition) {
   }
 }
 
+function securePathPermissions(targetPath, mode) {
+  try {
+    fs.chmodSync(targetPath, mode);
+  } catch (error) {
+    if (process.platform !== "win32") {
+      throw error;
+    }
+  }
+}
+
 function mapCohortRecord(row) {
   if (!row) {
     return null;
@@ -70,7 +80,8 @@ function mapCohortRecord(row) {
 export class EnrollmentDatabase {
   constructor(filePath) {
     this.filePath = filePath;
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 });
+    securePathPermissions(path.dirname(filePath), 0o700);
     this.db = new Database(filePath);
     this.db.pragma("journal_mode = WAL");
     this.db.pragma("foreign_keys = ON");
@@ -78,6 +89,15 @@ export class EnrollmentDatabase {
     this.migrate();
     this.seedPrograms();
     this.seedCohorts();
+    securePathPermissions(filePath, 0o600);
+
+    for (const suffix of ["-wal", "-shm"]) {
+      const auxiliaryPath = `${filePath}${suffix}`;
+
+      if (fs.existsSync(auxiliaryPath)) {
+        securePathPermissions(auxiliaryPath, 0o600);
+      }
+    }
   }
 
   migrate() {
@@ -526,7 +546,7 @@ export class EnrollmentDatabase {
         id,
         username,
         ipAddress: ipAddress ?? null,
-        userAgent: userAgent ?? null,
+        userAgent: userAgent ? String(userAgent).slice(0, 512) : null,
         expiresAt,
         createdAt: timestamp,
         lastSeenAt: timestamp,
@@ -718,12 +738,14 @@ export class EnrollmentDatabase {
 
   async createBackup({ directory } = {}) {
     const backupDirectory = directory ?? path.join(path.dirname(this.filePath), "backups");
-    fs.mkdirSync(backupDirectory, { recursive: true });
+    fs.mkdirSync(backupDirectory, { recursive: true, mode: 0o700 });
+    securePathPermissions(backupDirectory, 0o700);
 
     const filename = `enrollment-${backupTimestamp()}.db`;
     const backupPath = path.join(backupDirectory, filename);
 
     await this.db.backup(backupPath);
+    securePathPermissions(backupPath, 0o600);
 
     return {
       filename,

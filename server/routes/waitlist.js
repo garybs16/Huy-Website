@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import { sendWaitlistEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
+import { preventSensitiveCaching } from "../middleware/securityHeaders.js";
 import { paginationSchema, waitlistSchema } from "../validation/schemas.js";
 
 export function createWaitlistRouter({
@@ -16,6 +17,8 @@ export function createWaitlistRouter({
   submissionProtection = (_req, _res, next) => next(),
 }) {
   const router = Router();
+
+  router.use(preventSensitiveCaching);
 
   router.post("/", submissionLimiter, submissionProtection, async (req, res, next) => {
     try {

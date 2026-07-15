@@ -21,17 +21,17 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: "24"
       - name: Confirm checked-out dependency graph
         run: |
           git rev-parse HEAD
           node -e "const pkg=require('./package.json'); const lock=require('./package-lock.json'); console.log('verify=', pkg.scripts.verify); console.log('concurrently=', pkg.devDependencies.concurrently); console.log('locked concurrently=', lock.packages['node_modules/concurrently']?.version); console.log('locked shell-quote=', lock.packages['node_modules/shell-quote']?.version);"
-      - name: Install dependencies
-        run: npm install
+      - name: Install locked dependencies
+        run: npm ci
       - name: Verify production readiness gates
         run: npm run verify
 
@@ -86,8 +86,15 @@ jobs:
              cd /var/www/html
              git fetch origin main
              git reset --hard origin/main
-             npm install
+             npm ci
              npm run build
+             sudo install -m 0644 deploy/firststep.service /etc/systemd/system/firststep.service
+             sudo install -m 0644 deploy/nginx-security.conf /etc/nginx/conf.d/firststep-security.conf
+             sudo chown -R admin:admin /var/data
+             sudo chmod 0700 /var/data
+             sudo nginx -t
+             sudo systemctl daemon-reload
+             sudo systemctl reload nginx
              sudo systemctl restart firststep
              sudo systemctl status firststep --no-pager -l'
 

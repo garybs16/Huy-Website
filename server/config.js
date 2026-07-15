@@ -51,6 +51,14 @@ function parsePositiveInteger(value, fallback) {
   return parsed;
 }
 
+function parseUrl(value) {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
+  }
+}
+
 const dataDir = path.resolve(process.cwd(), process.env.DATA_DIR ?? "server/data");
 const staticDir = path.resolve(process.cwd(), process.env.STATIC_DIR ?? "dist");
 const databasePath = path.resolve(process.cwd(), process.env.DATABASE_URL ?? "server/data/enrollment.db");
@@ -77,6 +85,7 @@ export const config = {
   publicAppUrl: (process.env.PUBLIC_APP_URL ?? "").trim().replace(/\/+$/, ""),
   stripeSecretKey: (process.env.STRIPE_SECRET_KEY ?? "").trim(),
   stripeWebhookSecret: (process.env.STRIPE_WEBHOOK_SECRET ?? "").trim(),
+  stripePublishableKey: (process.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "").trim(),
   notificationWebhookUrl: (process.env.NOTIFICATION_WEBHOOK_URL ?? "").trim(),
   notificationWebhookSecret: (process.env.NOTIFICATION_WEBHOOK_SECRET ?? "").trim(),
   resendApiKey: (process.env.RESEND_API_KEY ?? "").trim(),
@@ -128,12 +137,77 @@ export function getRuntimeConfigReport(currentConfig = config) {
     );
   }
 
+  if (
+    currentConfig.nodeEnv === "production" &&
+    sessionAuthConfigured &&
+    currentConfig.adminSessionSecret.length < 32
+  ) {
+    issues.push("ADMIN_SESSION_SECRET must be at least 32 characters in production.");
+  }
+
+  if (currentConfig.adminKey && currentConfig.adminKey.length < 32) {
+    issues.push("API_ADMIN_KEY must be at least 32 characters when configured.");
+  }
+
+  if (currentConfig.nodeEnv === "production" && currentConfig.adminSessionCookieSameSite === "none") {
+    issues.push("ADMIN_SESSION_COOKIE_SAME_SITE must be lax or strict in production.");
+  }
+
   if (stripeConfigured && !currentConfig.publicAppUrl) {
     issues.push("PUBLIC_APP_URL is required when Stripe Checkout is enabled.");
   }
 
+  if (stripeConfigured && !currentConfig.stripePublishableKey) {
+    issues.push("VITE_STRIPE_PUBLISHABLE_KEY is required when Stripe Checkout is enabled.");
+  }
+
+  const publicAppUrl = currentConfig.publicAppUrl ? parseUrl(currentConfig.publicAppUrl) : null;
+
+  if (currentConfig.publicAppUrl && !publicAppUrl) {
+    issues.push("PUBLIC_APP_URL must be a valid absolute URL.");
+  }
+
+  if (
+    currentConfig.nodeEnv === "production" &&
+    publicAppUrl &&
+    publicAppUrl.protocol !== "https:"
+  ) {
+    issues.push("PUBLIC_APP_URL must use HTTPS in production.");
+  }
+
+  for (const origin of currentConfig.corsOrigins ?? []) {
+    const parsedOrigin = parseUrl(origin);
+
+    if (!parsedOrigin || !["http:", "https:"].includes(parsedOrigin.protocol) || parsedOrigin.origin !== origin) {
+      issues.push(`CORS_ORIGINS contains an invalid origin: ${origin}`);
+    }
+  }
+
+  if (
+    currentConfig.nodeEnv === "production" &&
+    stripeConfigured &&
+    !currentConfig.stripeSecretKey.startsWith("sk_live_")
+  ) {
+    issues.push("STRIPE_SECRET_KEY must be a live secret key in production.");
+  }
+
+  if (
+    currentConfig.nodeEnv === "production" &&
+    currentConfig.stripePublishableKey &&
+    !currentConfig.stripePublishableKey.startsWith("pk_live_")
+  ) {
+    issues.push("VITE_STRIPE_PUBLISHABLE_KEY must be a live publishable key in production.");
+  }
+
   if (stripeConfigured && !currentConfig.stripeWebhookSecret) {
     issues.push("STRIPE_WEBHOOK_SECRET is required when Stripe Checkout is enabled.");
+  }
+
+  if (
+    currentConfig.stripeWebhookSecret &&
+    (!currentConfig.stripeWebhookSecret.startsWith("whsec_") || currentConfig.stripeWebhookSecret.length < 20)
+  ) {
+    issues.push("STRIPE_WEBHOOK_SECRET format is invalid.");
   }
 
   if (!stripeConfigured) {
@@ -193,6 +267,10 @@ export function getRuntimeConfigReport(currentConfig = config) {
     turnstileConfigured,
     sessionAuthConfigured,
     adminAuthMode,
-    paymentsEnabled: stripeConfigured && Boolean(currentConfig.stripeWebhookSecret && currentConfig.publicAppUrl),
+    paymentsEnabled: stripeConfigured && Boolean(
+      currentConfig.stripeWebhookSecret &&
+      currentConfig.stripePublishableKey &&
+      currentConfig.publicAppUrl
+    ),
   };
 }

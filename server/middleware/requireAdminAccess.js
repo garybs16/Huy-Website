@@ -1,4 +1,9 @@
-import { getAdminSessionIdFromRequest, verifyAdminCsrfToken } from "../lib/adminSecurity.js";
+import {
+  adminSessionMatchesUserAgent,
+  constantTimeEqual,
+  getAdminSessionIdFromRequest,
+  verifyAdminCsrfToken,
+} from "../lib/adminSecurity.js";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -12,7 +17,7 @@ export function requireAdminAccess({ adminKey, adminSessionSecret, enrollmentDb 
 
     const providedApiKey = req.get("x-api-key");
 
-    if (adminKey && providedApiKey && providedApiKey === adminKey) {
+    if (adminKey && providedApiKey && constantTimeEqual(providedApiKey, adminKey)) {
       req.adminAuth = {
         method: "api-key",
         actor: "api-key",
@@ -26,6 +31,11 @@ export function requireAdminAccess({ adminKey, adminSessionSecret, enrollmentDb 
       const session = enrollmentDb.getAdminSessionById(sessionId);
 
       if (session) {
+        if (!adminSessionMatchesUserAgent(session, req.get("user-agent"))) {
+          enrollmentDb.deleteAdminSession(sessionId);
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
         if (!SAFE_METHODS.has(req.method)) {
           const csrfToken = req.get("x-csrf-token");
 

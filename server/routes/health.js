@@ -15,22 +15,28 @@ export function createHealthRouter({ enrollmentDb, configReport }) {
 
     const status = database === "ok" && (configReport?.issues.length ?? 0) === 0 ? "ok" : "degraded";
 
-    res.json({
+    const response = {
       status,
       timestamp: new Date().toISOString(),
-      environment: config.nodeEnv,
-      staticApp: config.serveStaticApp,
-      uptimeSeconds: Math.round(process.uptime()),
-      services: {
+    };
+
+    if (config.nodeEnv !== "production") {
+      response.environment = config.nodeEnv;
+      response.staticApp = config.serveStaticApp;
+      response.uptimeSeconds = Math.round(process.uptime());
+      response.services = {
         database,
         payments: configReport?.paymentsEnabled ? "configured" : "manual",
         notifications: configReport?.notificationsConfigured ? "configured" : "manual",
         email: configReport?.emailConfigured ? "configured" : "manual",
         botProtection: configReport?.turnstileConfigured ? "configured" : "rate-limited",
         admin: configReport?.adminAuthMode ?? (config.adminKey ? "api-key" : "disabled"),
-      },
-      warnings: configReport?.warnings ?? [],
-    });
+      };
+      response.warnings = configReport?.warnings ?? [];
+    }
+
+    res.set("Cache-Control", "no-store");
+    res.json(response);
   });
 
   return router;

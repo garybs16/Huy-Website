@@ -14,10 +14,11 @@ async function run() {
   process.env.NODE_ENV = "production";
   process.env.DATA_DIR = tempDataDir;
   process.env.DATABASE_URL = path.join(tempDataDir, "enrollment.db");
-  process.env.API_ADMIN_KEY = "production-admin-key";
+  process.env.API_ADMIN_KEY = "production-admin-key-for-automated-checks";
   process.env.ADMIN_USERNAME = "production-admin";
   process.env.ADMIN_PASSWORD_HASH = createPasswordHash("ProductionPassword123!");
-  process.env.ADMIN_SESSION_SECRET = "production-session-secret";
+  process.env.ADMIN_SESSION_SECRET = "production-session-secret-for-automated-checks";
+  process.env.ADMIN_SESSION_COOKIE_SAME_SITE = "strict";
   process.env.SERVE_STATIC_APP = "true";
 
   const { startServer } = await import("../server/index.js");
@@ -28,13 +29,22 @@ async function run() {
     const healthRes = await fetch(`http://localhost:${port}/api/health`);
     assert(healthRes.ok, "Production health endpoint failed");
     const healthBody = await healthRes.json();
-    assert(healthBody.services?.database === "ok", "Production health endpoint did not confirm database readiness");
+    assert(healthBody.status === "ok", "Production health endpoint did not report readiness");
+    assert(!("services" in healthBody), "Production health endpoint must not expose service configuration");
 
     const homeRes = await fetch(`http://localhost:${port}/`);
     assert(homeRes.ok, "Production server did not serve the frontend root");
     assert(
       homeRes.headers.get("content-type")?.includes("text/html"),
       "Frontend root must return HTML in production mode"
+    );
+    assert(
+      homeRes.headers.get("content-security-policy")?.includes("frame-ancestors 'none'"),
+      "Production CSP must prevent clickjacking"
+    );
+    assert(
+      homeRes.headers.get("permissions-policy")?.includes("camera=()"),
+      "Production responses must restrict sensitive browser capabilities"
     );
 
     const spaRouteRes = await fetch(`http://localhost:${port}/schedule`);
@@ -152,9 +162,13 @@ async function run() {
     assert(paymentPortalBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Production payment portal amount mismatch");
 
     const adminOverviewRes = await fetch(`http://localhost:${port}/api/admin/overview`, {
-      headers: { "x-api-key": "production-admin-key" },
+      headers: { "x-api-key": "production-admin-key-for-automated-checks" },
     });
     assert(adminOverviewRes.ok, "Production admin overview endpoint failed");
+    assert(
+      adminOverviewRes.headers.get("cache-control")?.includes("no-store"),
+      "Admin responses must not be cached"
+    );
 
     const adminLoginRes = await fetch(`http://localhost:${port}/api/admin/login`, {
       method: "POST",

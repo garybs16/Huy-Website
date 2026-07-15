@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  adminSessionMatchesUserAgent,
+  constantTimeEqual,
   createAdminCsrfToken,
   createAdminSessionCookie,
   createPasswordHash,
@@ -18,6 +20,22 @@ test("admin password hashing verifies only the correct password", () => {
   assert.equal(verifyPassword("StrongPassword123!", hash), true);
   assert.equal(verifyPassword("WrongPassword123!", hash), false);
   assert.equal(verifyPassword("StrongPassword123!", "invalid-format"), false);
+  assert.equal(verifyPassword("StrongPassword123!", "pbkdf2_sha256$1000001$salt$" + "a".repeat(64)), false);
+  assert.equal(verifyPassword("StrongPassword123!", "pbkdf2_sha256$10000$salt$not-hex"), false);
+});
+
+test("constant-time secret comparison accepts only identical strings", () => {
+  assert.equal(constantTimeEqual("a-secure-admin-key", "a-secure-admin-key"), true);
+  assert.equal(constantTimeEqual("a-secure-admin-key", "a-different-admin-key"), false);
+  assert.equal(constantTimeEqual("short", "a-much-longer-value"), false);
+  assert.equal(constantTimeEqual(null, "a-secure-admin-key"), false);
+});
+
+test("admin sessions are bound to the browser user agent", () => {
+  const session = { userAgent: "Security Test Browser/1.0" };
+  assert.equal(adminSessionMatchesUserAgent(session, "Security Test Browser/1.0"), true);
+  assert.equal(adminSessionMatchesUserAgent(session, "Stolen Cookie Client/1.0"), false);
+  assert.equal(adminSessionMatchesUserAgent(null, "Security Test Browser/1.0"), false);
 });
 
 test("signed admin cookies and CSRF tokens reject tampering", () => {

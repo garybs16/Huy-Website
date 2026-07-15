@@ -10,13 +10,12 @@ This runbook documents the minimum production monitoring and response process fo
 
 ## Health Check
 
-The app exposes `GET /api/health` for uptime checks. A healthy response includes:
+The app exposes `GET /api/health` for uptime checks. A healthy production response intentionally contains only:
 
 - `status: "ok"`
-- `services.database: "ok"`
-- `services.admin` set to `session`, `api-key`, or `hybrid`
-- `services.payments` set to `configured` when Stripe is fully enabled, or `manual` when admissions follow-up is required
-- `services.notifications` set to `configured` when the admissions webhook is configured
+- `timestamp` with the server check time
+
+Detailed service configuration stays out of the public response. Review startup logs and the protected admin dashboard for operational details.
 
 Run a manual check:
 
@@ -32,9 +31,6 @@ Recommended alert rules:
 
 - Page if `GET /api/health` is not HTTP 200 for 2 consecutive checks.
 - Page if `status` is not `ok`.
-- Page if `services.database` is not `ok`.
-- Notify, but do not page, if `services.payments` changes from `configured` to `manual`.
-- Notify, but do not page, if `services.notifications` changes from `configured` to `manual`.
 
 Recommended cadence:
 
