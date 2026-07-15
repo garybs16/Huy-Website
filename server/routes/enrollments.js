@@ -96,7 +96,7 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
   };
 }
 
-async function createEnrollmentCheckoutSession({
+export async function createEnrollmentCheckoutSession({
   req,
   stripeClient,
   publicAppUrl,
@@ -151,7 +151,6 @@ async function createEnrollmentCheckoutSession({
 
   if (isWeeklyPlan) {
     sessionPayload.payment_method_types = ["card"];
-    sessionPayload.submit_type = "pay";
     sessionPayload.subscription_data = {
       description: `${program.title} tuition plan: eight weekly payments of ${checkoutDetails.amountLabel}`,
       metadata,

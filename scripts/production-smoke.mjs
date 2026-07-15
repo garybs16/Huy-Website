@@ -20,6 +20,10 @@ async function run() {
   process.env.ADMIN_SESSION_SECRET = "production-session-secret-for-automated-checks";
   process.env.ADMIN_SESSION_COOKIE_SAME_SITE = "strict";
   process.env.SERVE_STATIC_APP = "true";
+  // Production-mode smoke tests must not inherit real payment credentials.
+  process.env.STRIPE_SECRET_KEY = "";
+  process.env.STRIPE_PUBLISHABLE_KEY = "";
+  process.env.STRIPE_WEBHOOK_SECRET = "";
 
   const { startServer } = await import("../server/index.js");
   const port = 4030;

@@ -17,6 +17,11 @@ async function run() {
   process.env.ADMIN_USERNAME = "harmony-admin";
   process.env.ADMIN_PASSWORD_HASH = createPasswordHash("HarmonyPassword123!");
   process.env.ADMIN_SESSION_SECRET = "harmony-session-secret-for-automated-checks";
+  // Keep this contract test offline and deterministic even when a developer's
+  // local .env contains live payment credentials.
+  process.env.STRIPE_SECRET_KEY = "";
+  process.env.STRIPE_PUBLISHABLE_KEY = "";
+  process.env.STRIPE_WEBHOOK_SECRET = "";
   const { startServer } = await import("../server/index.js");
   const port = 4020;
   const { server } = startServer(port);
