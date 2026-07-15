@@ -199,7 +199,7 @@ async function run() {
         endDate: "2026-06-20",
         scheduleLabel: "Weekend",
         meetingPattern: "Saturday and Sunday | 9:00 AM to 2:00 PM",
-        tuitionCents: 150000,
+        tuitionCents: 400000,
         allowPaymentPlan: true,
         paymentPlanDepositCents: 50000,
         capacity: 10,

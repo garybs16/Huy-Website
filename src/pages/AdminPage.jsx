@@ -562,10 +562,10 @@ export function AdminPage({
                       checked={cohortForm.allowPaymentPlan}
                       onChange={handleCohortInput}
                     />
-                    <span>Offer a deposit-based payment plan for this cohort</span>
+                    <span>Offer an eight-payment weekly plan for this cohort</span>
                   </label>
                   <label>
-                    <span>Deposit cents</span>
+                    <span>Weekly installment cents (tuition must equal 8 installments)</span>
                     <input
                       name="paymentPlanDepositCents"
                       type="number"
@@ -604,7 +604,7 @@ export function AdminPage({
                         <p>{item.remainingSeats} seats left | {item.tuitionLabel}</p>
                         <p>
                           {item.allowPaymentPlan
-                            ? `Plan enabled | ${item.paymentPlanDepositLabel} deposit`
+                            ? `Plan enabled | 8 weekly payments of ${item.paymentPlanDepositLabel}`
                             : "Full payment only"}
                         </p>
                       </div>
@@ -649,11 +649,18 @@ export function AdminPage({
                       </div>
                       <div>
                         <p>{item.cohortTitle}</p>
-                        <p>{item.paymentOption === "deposit" ? "Deposit plan" : "Paid in full"}</p>
+                        <p>{item.paymentOption === "deposit" ? "Weekly payment plan" : "Paid in full"}</p>
                         <span>
                           {item.paymentStatus}
                           {item.paymentOption === "deposit" && item.balanceDueLabel ? ` | ${item.balanceDueLabel} left` : ""}
                         </span>
+                        {item.paymentOption === "deposit" ? (
+                          <>
+                            <span>{item.paymentInstallmentsPaid} of {item.paymentInstallmentsTotal} weekly payments</span>
+                            <span>{item.amountPaidLabel} paid</span>
+                            {item.nextPaymentDueAt ? <span>Next: {formatDateLabel(item.nextPaymentDueAt)}</span> : null}
+                          </>
+                        ) : null}
                       </div>
                     </div>
                   ))}

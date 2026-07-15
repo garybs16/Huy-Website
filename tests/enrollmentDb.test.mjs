@@ -79,9 +79,81 @@ test("EnrollmentDatabase stores enrollment records and protects cohort capacity"
   );
 
   db.markPaymentSetupFailed(enrollment.id, "Release hold for test.");
-  const replacement = db.createEnrollment(enrollmentInput({ id: crypto.randomUUID() }));
+  const replacement = db.createEnrollment(
+    enrollmentInput({
+      id: crypto.randomUUID(),
+      paymentInstallmentsTotal: 4,
+      paymentInterval: "week",
+    })
+  );
 
   assert.equal(replacement.paymentStatus, "payment_setup");
+
+  db.attachStripeSubscription({
+    enrollmentId: replacement.id,
+    customerId: "cus_weekly_test",
+    subscriptionId: "sub_weekly_test",
+    scheduleId: "sub_sched_weekly_test",
+    nextPaymentDueAt: "2026-08-08T12:00:00.000Z",
+    installmentsTotal: 4,
+    interval: "week",
+  });
+
+  const firstPayment = db.recordSubscriptionPayment({
+    enrollmentId: replacement.id,
+    invoiceId: "in_weekly_1",
+    subscriptionId: "sub_weekly_test",
+    amountCents: 25_000,
+    paidAt: "2026-08-01T12:00:00.000Z",
+    nextPaymentDueAt: "2026-08-08T12:00:00.000Z",
+  });
+  assert.equal(firstPayment.applied, true);
+  assert.equal(firstPayment.enrollment.paymentStatus, "payment_plan_active");
+  assert.equal(firstPayment.enrollment.amountPaidCents, 25_000);
+  assert.equal(firstPayment.enrollment.balanceDueCents, 75_000);
+  assert.equal(firstPayment.enrollment.paymentInstallmentsPaid, 1);
+
+  const replayedPayment = db.recordSubscriptionPayment({
+    enrollmentId: replacement.id,
+    invoiceId: "in_weekly_1",
+    subscriptionId: "sub_weekly_test",
+    amountCents: 25_000,
+  });
+  assert.equal(replayedPayment.applied, false);
+  assert.equal(replayedPayment.enrollment.amountPaidCents, 25_000);
+
+  const failedPayment = db.recordSubscriptionPaymentFailed({
+    enrollmentId: replacement.id,
+    invoiceId: "in_weekly_2",
+    subscriptionId: "sub_weekly_test",
+    amountCents: 25_000,
+    attemptCount: 1,
+    failedAt: "2026-08-08T12:00:00.000Z",
+  });
+  assert.equal(failedPayment.enrollment.paymentStatus, "installment_failed");
+  assert.equal(failedPayment.enrollment.amountPaidCents, 25_000);
+
+  for (const [invoiceId, paidAt] of [
+    ["in_weekly_2", "2026-08-09T12:00:00.000Z"],
+    ["in_weekly_3", "2026-08-15T12:00:00.000Z"],
+    ["in_weekly_4", "2026-08-22T12:00:00.000Z"],
+  ]) {
+    db.recordSubscriptionPayment({
+      enrollmentId: replacement.id,
+      invoiceId,
+      subscriptionId: "sub_weekly_test",
+      amountCents: 25_000,
+      paidAt,
+      nextPaymentDueAt: "2026-08-29T12:00:00.000Z",
+    });
+  }
+
+  const completedPlan = db.getEnrollmentById(replacement.id);
+  assert.equal(completedPlan.paymentStatus, "paid");
+  assert.equal(completedPlan.amountPaidCents, 100_000);
+  assert.equal(completedPlan.balanceDueCents, 0);
+  assert.equal(completedPlan.paymentInstallmentsPaid, 4);
+  assert.equal(db.listEnrollmentPayments(replacement.id).length, 4);
 
   const exportData = db.exportOperationalData();
   assert.equal(exportData.enrollments.length, 2);

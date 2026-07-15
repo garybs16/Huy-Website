@@ -266,7 +266,7 @@ export const miscFeeItems = [
   "Published CNA tuition and fees are reviewed before enrollment and may change for future cohorts",
   "Eligible veterans may receive an additional $100 discount when approved before enrollment",
   "$250 registration fee is non-refundable and may be used as the payment-plan deposit",
-  "Payment plan example: $250 registration fee deposit, then $1,750 remaining balance through scheduled installments",
+  "Payment plan: eight automatic weekly payments of $250, beginning at checkout, for the $2,000 program total",
   "Additional possible costs may include uniform or dress code items, textbooks or learning materials, health clearance documents, TB testing, required health and safety certifications, Live Scan, and state testing fees",
   "Payment deadlines are provided before enrollment and must stay current for continued participation",
 ];

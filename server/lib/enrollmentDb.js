@@ -133,9 +133,19 @@ export class EnrollmentDatabase {
         payment_amount_cents INTEGER NOT NULL,
         tuition_total_cents INTEGER NOT NULL DEFAULT 0,
         balance_due_cents INTEGER NOT NULL DEFAULT 0,
+        amount_paid_cents INTEGER NOT NULL DEFAULT 0,
+        payment_installments_total INTEGER NOT NULL DEFAULT 1,
+        payment_installments_paid INTEGER NOT NULL DEFAULT 0,
+        payment_interval TEXT,
         stripe_checkout_session_id TEXT,
         stripe_checkout_purpose TEXT,
+        stripe_customer_id TEXT,
+        stripe_subscription_id TEXT,
+        stripe_subscription_schedule_id TEXT,
         seat_hold_expires_at TEXT,
+        next_payment_due_at TEXT,
+        last_payment_at TEXT,
+        last_payment_failure_at TEXT,
         paid_at TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
@@ -182,12 +192,29 @@ export class EnrollmentDatabase {
         created_at TEXT NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS enrollment_payments (
+        stripe_invoice_id TEXT PRIMARY KEY,
+        enrollment_id TEXT NOT NULL,
+        stripe_subscription_id TEXT,
+        amount_cents INTEGER NOT NULL DEFAULT 0,
+        currency TEXT NOT NULL DEFAULT 'usd',
+        status TEXT NOT NULL,
+        attempt_count INTEGER NOT NULL DEFAULT 0,
+        paid_at TEXT,
+        failed_at TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (enrollment_id) REFERENCES enrollments(id)
+      );
+
       CREATE INDEX IF NOT EXISTS idx_enrollments_cohort_id ON enrollments(cohort_id);
       CREATE INDEX IF NOT EXISTS idx_enrollments_email ON enrollments(email);
       CREATE INDEX IF NOT EXISTS idx_enrollments_payment_status ON enrollments(payment_status);
       CREATE UNIQUE INDEX IF NOT EXISTS idx_enrollments_checkout_session_id
         ON enrollments(stripe_checkout_session_id)
         WHERE stripe_checkout_session_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_enrollment_payments_enrollment_id
+        ON enrollment_payments(enrollment_id);
       CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at);
       CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at);
       CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires_at ON admin_sessions(expires_at);
@@ -200,6 +227,22 @@ export class EnrollmentDatabase {
     addColumnIfMissing(this.db, "enrollments", "tuition_total_cents", "INTEGER NOT NULL DEFAULT 0");
     addColumnIfMissing(this.db, "enrollments", "balance_due_cents", "INTEGER NOT NULL DEFAULT 0");
     addColumnIfMissing(this.db, "enrollments", "stripe_checkout_purpose", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "amount_paid_cents", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing(this.db, "enrollments", "payment_installments_total", "INTEGER NOT NULL DEFAULT 1");
+    addColumnIfMissing(this.db, "enrollments", "payment_installments_paid", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing(this.db, "enrollments", "payment_interval", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "stripe_customer_id", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "stripe_subscription_id", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "stripe_subscription_schedule_id", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "next_payment_due_at", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "last_payment_at", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "last_payment_failure_at", "TEXT");
+
+    this.db.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_enrollments_subscription_id
+        ON enrollments(stripe_subscription_id)
+        WHERE stripe_subscription_id IS NOT NULL;
+    `);
 
     this.db.exec(`
       UPDATE cohorts
@@ -217,6 +260,29 @@ export class EnrollmentDatabase {
       UPDATE enrollments
       SET balance_due_cents = 0
       WHERE balance_due_cents IS NULL;
+
+      UPDATE enrollments
+      SET amount_paid_cents = CASE
+        WHEN payment_status = 'paid' THEN tuition_total_cents
+        WHEN payment_status = 'deposit_paid' THEN payment_amount_cents
+        ELSE 0
+      END
+      WHERE amount_paid_cents IS NULL OR amount_paid_cents = 0;
+
+      UPDATE enrollments
+      SET payment_installments_paid = CASE
+        WHEN payment_status IN ('paid', 'deposit_paid') THEN 1
+        ELSE 0
+      END
+      WHERE payment_installments_paid IS NULL OR payment_installments_paid = 0;
+
+      UPDATE enrollments
+      SET
+        payment_installments_total = 8,
+        payment_interval = 'week'
+      WHERE payment_option = 'deposit'
+        AND payment_status NOT IN ('paid', 'deposit_paid')
+        AND (payment_installments_total IS NULL OR payment_installments_total <= 1);
 
       UPDATE cohorts
       SET
@@ -579,13 +645,41 @@ export class EnrollmentDatabase {
             payment_amount_cents AS paymentAmountCents,
             tuition_total_cents AS tuitionTotalCents,
             balance_due_cents AS balanceDueCents,
+            amount_paid_cents AS amountPaidCents,
+            payment_installments_total AS paymentInstallmentsTotal,
+            payment_installments_paid AS paymentInstallmentsPaid,
+            payment_interval AS paymentInterval,
             stripe_checkout_session_id AS stripeCheckoutSessionId,
             stripe_checkout_purpose AS stripeCheckoutPurpose,
+            stripe_customer_id AS stripeCustomerId,
+            stripe_subscription_id AS stripeSubscriptionId,
+            stripe_subscription_schedule_id AS stripeSubscriptionScheduleId,
             seat_hold_expires_at AS seatHoldExpiresAt,
+            next_payment_due_at AS nextPaymentDueAt,
+            last_payment_at AS lastPaymentAt,
+            last_payment_failure_at AS lastPaymentFailureAt,
             paid_at AS paidAt,
             created_at AS createdAt,
             updated_at AS updatedAt
           FROM enrollments
+          ORDER BY created_at DESC
+        `)
+        .all(),
+      payments: this.db
+        .prepare(`
+          SELECT
+            stripe_invoice_id AS stripeInvoiceId,
+            enrollment_id AS enrollmentId,
+            stripe_subscription_id AS stripeSubscriptionId,
+            amount_cents AS amountCents,
+            currency,
+            status,
+            attempt_count AS attemptCount,
+            paid_at AS paidAt,
+            failed_at AS failedAt,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+          FROM enrollment_payments
           ORDER BY created_at DESC
         `)
         .all(),
@@ -663,6 +757,8 @@ export class EnrollmentDatabase {
             CASE
               WHEN e.payment_status = 'paid' THEN 1
               WHEN e.payment_status = 'deposit_paid' THEN 1
+              WHEN e.payment_status = 'payment_plan_active' THEN 1
+              WHEN e.payment_status = 'installment_failed' THEN 1
               WHEN e.payment_status = 'manual_pending' THEN 1
               WHEN e.payment_status = 'payment_setup' AND e.seat_hold_expires_at > @now THEN 1
               WHEN e.payment_status = 'checkout_pending' AND e.seat_hold_expires_at > @now THEN 1
@@ -990,6 +1086,8 @@ export class EnrollmentDatabase {
             AND (
               payment_status = 'paid'
               OR payment_status = 'deposit_paid'
+              OR payment_status = 'payment_plan_active'
+              OR payment_status = 'installment_failed'
               OR payment_status = 'manual_pending'
               OR (payment_status = 'payment_setup' AND seat_hold_expires_at > @now)
               OR (payment_status = 'checkout_pending' AND seat_hold_expires_at > @now)
@@ -1026,9 +1124,19 @@ export class EnrollmentDatabase {
             payment_amount_cents,
             tuition_total_cents,
             balance_due_cents,
+            amount_paid_cents,
+            payment_installments_total,
+            payment_installments_paid,
+            payment_interval,
             stripe_checkout_session_id,
             stripe_checkout_purpose,
+            stripe_customer_id,
+            stripe_subscription_id,
+            stripe_subscription_schedule_id,
             seat_hold_expires_at,
+            next_payment_due_at,
+            last_payment_at,
+            last_payment_failure_at,
             paid_at,
             created_at,
             updated_at
@@ -1053,9 +1161,19 @@ export class EnrollmentDatabase {
             @paymentAmountCents,
             @tuitionTotalCents,
             @balanceDueCents,
+            @amountPaidCents,
+            @paymentInstallmentsTotal,
+            @paymentInstallmentsPaid,
+            @paymentInterval,
+            NULL,
+            NULL,
+            NULL,
             NULL,
             NULL,
             @seatHoldExpiresAt,
+            NULL,
+            NULL,
+            NULL,
             NULL,
             @createdAt,
             @updatedAt
@@ -1063,6 +1181,10 @@ export class EnrollmentDatabase {
         `)
         .run({
           ...enrollmentInput,
+          amountPaidCents: enrollmentInput.amountPaidCents ?? 0,
+          paymentInstallmentsTotal: enrollmentInput.paymentInstallmentsTotal ?? 1,
+          paymentInstallmentsPaid: enrollmentInput.paymentInstallmentsPaid ?? 0,
+          paymentInterval: enrollmentInput.paymentInterval ?? null,
           seatHoldExpiresAt: enrollmentInput.seatHoldExpiresAt ?? null,
           createdAt: timestamp,
           updatedAt: timestamp,
@@ -1099,9 +1221,19 @@ export class EnrollmentDatabase {
           payment_amount_cents AS paymentAmountCents,
           tuition_total_cents AS tuitionTotalCents,
           balance_due_cents AS balanceDueCents,
+          amount_paid_cents AS amountPaidCents,
+          payment_installments_total AS paymentInstallmentsTotal,
+          payment_installments_paid AS paymentInstallmentsPaid,
+          payment_interval AS paymentInterval,
           stripe_checkout_session_id AS stripeCheckoutSessionId,
           stripe_checkout_purpose AS stripeCheckoutPurpose,
+          stripe_customer_id AS stripeCustomerId,
+          stripe_subscription_id AS stripeSubscriptionId,
+          stripe_subscription_schedule_id AS stripeSubscriptionScheduleId,
           seat_hold_expires_at AS seatHoldExpiresAt,
+          next_payment_due_at AS nextPaymentDueAt,
+          last_payment_at AS lastPaymentAt,
+          last_payment_failure_at AS lastPaymentFailureAt,
           paid_at AS paidAt,
           created_at AS createdAt,
           updated_at AS updatedAt
@@ -1160,6 +1292,365 @@ export class EnrollmentDatabase {
     return this.getEnrollmentById(enrollmentId);
   }
 
+  attachStripeSubscription({
+    enrollmentId,
+    customerId,
+    subscriptionId,
+    scheduleId,
+    nextPaymentDueAt,
+    installmentsTotal = 8,
+    interval = "week",
+  }) {
+    this.db
+      .prepare(`
+        UPDATE enrollments
+        SET
+          stripe_customer_id = @customerId,
+          stripe_subscription_id = @subscriptionId,
+          stripe_subscription_schedule_id = @scheduleId,
+          payment_installments_total = @installmentsTotal,
+          payment_interval = @interval,
+          next_payment_due_at = @nextPaymentDueAt,
+          updated_at = @updatedAt
+        WHERE id = @enrollmentId
+      `)
+      .run({
+        enrollmentId,
+        customerId: customerId ?? null,
+        subscriptionId,
+        scheduleId,
+        installmentsTotal,
+        interval,
+        nextPaymentDueAt: toIsoOrNull(nextPaymentDueAt),
+        updatedAt: nowIso(),
+      });
+
+    return this.getEnrollmentById(enrollmentId);
+  }
+
+  getEnrollmentByStripeSubscriptionId(subscriptionId) {
+    const record = this.db
+      .prepare(`SELECT id FROM enrollments WHERE stripe_subscription_id = ?`)
+      .get(subscriptionId);
+
+    return record ? this.getEnrollmentById(record.id) : null;
+  }
+
+  recordSubscriptionPayment({
+    enrollmentId,
+    invoiceId,
+    subscriptionId,
+    amountCents,
+    currency = "usd",
+    paidAt,
+    nextPaymentDueAt,
+  }) {
+    const applyPayment = this.db.transaction((input) => {
+      const enrollment = this.db
+        .prepare(`
+          SELECT
+            id,
+            tuition_total_cents AS tuitionTotalCents,
+            amount_paid_cents AS amountPaidCents,
+            stripe_subscription_id AS stripeSubscriptionId
+          FROM enrollments
+          WHERE id = @enrollmentId
+        `)
+        .get({ enrollmentId: input.enrollmentId });
+
+      if (!enrollment) {
+        throw new Error("Enrollment not found for Stripe invoice.");
+      }
+
+      if (enrollment.stripeSubscriptionId && enrollment.stripeSubscriptionId !== input.subscriptionId) {
+        throw new Error("Stripe invoice subscription did not match enrollment.");
+      }
+
+      const normalizedCurrency = String(input.currency ?? "").toLowerCase();
+      const normalizedAmount = Number(input.amountCents ?? 0);
+
+      if (normalizedCurrency !== "usd" || !Number.isInteger(normalizedAmount) || normalizedAmount <= 0) {
+        throw new Error("Stripe invoice payment amount or currency was invalid.");
+      }
+
+      const existingPayment = this.db
+        .prepare(`SELECT status FROM enrollment_payments WHERE stripe_invoice_id = ?`)
+        .get(input.invoiceId);
+
+      if (existingPayment?.status === "paid") {
+        return { applied: false, enrollmentId: enrollment.id };
+      }
+
+      const currentAmountPaid = Number(enrollment.amountPaidCents ?? 0);
+      const tuitionTotalCents = Number(enrollment.tuitionTotalCents ?? 0);
+
+      if (currentAmountPaid + normalizedAmount > tuitionTotalCents) {
+        throw new Error("Stripe invoice payment exceeded the enrollment tuition total.");
+      }
+
+      const timestamp = toIsoOrNull(input.paidAt) ?? nowIso();
+      this.db
+        .prepare(`
+          INSERT INTO enrollment_payments (
+            stripe_invoice_id,
+            enrollment_id,
+            stripe_subscription_id,
+            amount_cents,
+            currency,
+            status,
+            attempt_count,
+            paid_at,
+            failed_at,
+            created_at,
+            updated_at
+          ) VALUES (
+            @invoiceId,
+            @enrollmentId,
+            @subscriptionId,
+            @amountCents,
+            @currency,
+            'paid',
+            1,
+            @paidAt,
+            NULL,
+            @createdAt,
+            @updatedAt
+          )
+          ON CONFLICT(stripe_invoice_id) DO UPDATE SET
+            stripe_subscription_id = excluded.stripe_subscription_id,
+            amount_cents = excluded.amount_cents,
+            currency = excluded.currency,
+            status = 'paid',
+            paid_at = excluded.paid_at,
+            updated_at = excluded.updated_at
+        `)
+        .run({
+          invoiceId: input.invoiceId,
+          enrollmentId: input.enrollmentId,
+          subscriptionId: input.subscriptionId,
+          amountCents: normalizedAmount,
+          currency: normalizedCurrency,
+          paidAt: timestamp,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+
+      const paymentSummary = this.db
+        .prepare(`
+          SELECT
+            COUNT(*) AS installmentsPaid,
+            COALESCE(SUM(amount_cents), 0) AS amountPaidCents
+          FROM enrollment_payments
+          WHERE enrollment_id = @enrollmentId
+            AND status = 'paid'
+        `)
+        .get({ enrollmentId: input.enrollmentId });
+      const amountPaidCents = Number(paymentSummary.amountPaidCents ?? 0);
+      const installmentsPaid = Number(paymentSummary.installmentsPaid ?? 0);
+      const balanceDueCents = Math.max(tuitionTotalCents - amountPaidCents, 0);
+      const paidInFull = balanceDueCents === 0;
+
+      this.db
+        .prepare(`
+          UPDATE enrollments
+          SET
+            status = @status,
+            payment_status = @paymentStatus,
+            amount_paid_cents = @amountPaidCents,
+            balance_due_cents = @balanceDueCents,
+            payment_installments_paid = @installmentsPaid,
+            stripe_subscription_id = COALESCE(stripe_subscription_id, @subscriptionId),
+            seat_hold_expires_at = NULL,
+            next_payment_due_at = @nextPaymentDueAt,
+            last_payment_at = @lastPaymentAt,
+            last_payment_failure_at = NULL,
+            paid_at = CASE WHEN @paidInFull = 1 THEN @lastPaymentAt ELSE paid_at END,
+            updated_at = @updatedAt
+          WHERE id = @enrollmentId
+        `)
+        .run({
+          enrollmentId: input.enrollmentId,
+          subscriptionId: input.subscriptionId,
+          status: paidInFull ? "registered" : "payment_plan_active",
+          paymentStatus: paidInFull ? "paid" : "payment_plan_active",
+          amountPaidCents,
+          balanceDueCents,
+          installmentsPaid,
+          paidInFull: paidInFull ? 1 : 0,
+          nextPaymentDueAt: paidInFull ? null : toIsoOrNull(input.nextPaymentDueAt),
+          lastPaymentAt: timestamp,
+          updatedAt: timestamp,
+        });
+
+      return { applied: true, enrollmentId: enrollment.id };
+    });
+
+    const result = applyPayment.immediate({
+      enrollmentId,
+      invoiceId,
+      subscriptionId,
+      amountCents,
+      currency,
+      paidAt,
+      nextPaymentDueAt,
+    });
+
+    return {
+      applied: result.applied,
+      enrollment: this.getEnrollmentById(result.enrollmentId),
+    };
+  }
+
+  recordSubscriptionPaymentFailed({
+    enrollmentId,
+    invoiceId,
+    subscriptionId,
+    amountCents = 0,
+    currency = "usd",
+    attemptCount = 1,
+    failedAt,
+  }) {
+    const applyFailure = this.db.transaction((input) => {
+      const enrollment = this.db
+        .prepare(`
+          SELECT
+            id,
+            stripe_subscription_id AS stripeSubscriptionId,
+            payment_installments_paid AS paymentInstallmentsPaid
+          FROM enrollments
+          WHERE id = @enrollmentId
+        `)
+        .get({ enrollmentId: input.enrollmentId });
+
+      if (!enrollment) {
+        throw new Error("Enrollment not found for failed Stripe invoice.");
+      }
+
+      if (enrollment.stripeSubscriptionId && enrollment.stripeSubscriptionId !== input.subscriptionId) {
+        throw new Error("Failed Stripe invoice subscription did not match enrollment.");
+      }
+
+      const existingPayment = this.db
+        .prepare(`SELECT status FROM enrollment_payments WHERE stripe_invoice_id = ?`)
+        .get(input.invoiceId);
+
+      if (existingPayment?.status === "paid") {
+        return { applied: false, enrollmentId: enrollment.id };
+      }
+
+      const timestamp = toIsoOrNull(input.failedAt) ?? nowIso();
+      this.db
+        .prepare(`
+          INSERT INTO enrollment_payments (
+            stripe_invoice_id,
+            enrollment_id,
+            stripe_subscription_id,
+            amount_cents,
+            currency,
+            status,
+            attempt_count,
+            paid_at,
+            failed_at,
+            created_at,
+            updated_at
+          ) VALUES (
+            @invoiceId,
+            @enrollmentId,
+            @subscriptionId,
+            @amountCents,
+            @currency,
+            'failed',
+            @attemptCount,
+            NULL,
+            @failedAt,
+            @createdAt,
+            @updatedAt
+          )
+          ON CONFLICT(stripe_invoice_id) DO UPDATE SET
+            status = 'failed',
+            attempt_count = excluded.attempt_count,
+            failed_at = excluded.failed_at,
+            updated_at = excluded.updated_at
+        `)
+        .run({
+          invoiceId: input.invoiceId,
+          enrollmentId: input.enrollmentId,
+          subscriptionId: input.subscriptionId,
+          amountCents: Number(input.amountCents ?? 0),
+          currency: String(input.currency ?? "usd").toLowerCase(),
+          attemptCount: Number(input.attemptCount ?? 1),
+          failedAt: timestamp,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+
+      this.db
+        .prepare(`
+          UPDATE enrollments
+          SET
+            status = @status,
+            payment_status = @paymentStatus,
+            stripe_subscription_id = COALESCE(stripe_subscription_id, @subscriptionId),
+            seat_hold_expires_at = @seatHoldExpiresAt,
+            last_payment_failure_at = @failedAt,
+            updated_at = @updatedAt
+          WHERE id = @enrollmentId
+            AND balance_due_cents > 0
+        `)
+        .run({
+          enrollmentId: input.enrollmentId,
+          subscriptionId: input.subscriptionId,
+          status: Number(enrollment.paymentInstallmentsPaid ?? 0) > 0
+            ? "payment_plan_attention"
+            : "payment_setup_failed",
+          paymentStatus: Number(enrollment.paymentInstallmentsPaid ?? 0) > 0
+            ? "installment_failed"
+            : "payment_failed",
+          seatHoldExpiresAt: null,
+          failedAt: timestamp,
+          updatedAt: timestamp,
+        });
+
+      return { applied: true, enrollmentId: enrollment.id };
+    });
+
+    const result = applyFailure.immediate({
+      enrollmentId,
+      invoiceId,
+      subscriptionId,
+      amountCents,
+      currency,
+      attemptCount,
+      failedAt,
+    });
+
+    return {
+      applied: result.applied,
+      enrollment: this.getEnrollmentById(result.enrollmentId),
+    };
+  }
+
+  listEnrollmentPayments(enrollmentId) {
+    return this.db
+      .prepare(`
+        SELECT
+          stripe_invoice_id AS stripeInvoiceId,
+          stripe_subscription_id AS stripeSubscriptionId,
+          amount_cents AS amountCents,
+          currency,
+          status,
+          attempt_count AS attemptCount,
+          paid_at AS paidAt,
+          failed_at AS failedAt,
+          created_at AS createdAt,
+          updated_at AS updatedAt
+        FROM enrollment_payments
+        WHERE enrollment_id = ?
+        ORDER BY created_at ASC
+      `)
+      .all(enrollmentId);
+  }
+
   markManualPending(enrollmentId) {
     this.db
       .prepare(`
@@ -1187,6 +1678,8 @@ export class EnrollmentDatabase {
         SELECT
           id,
           payment_option AS paymentOption,
+          payment_amount_cents AS paymentAmountCents,
+          tuition_total_cents AS tuitionTotalCents,
           balance_due_cents AS balanceDueCents,
           stripe_checkout_purpose AS stripeCheckoutPurpose
         FROM enrollments
@@ -1211,7 +1704,10 @@ export class EnrollmentDatabase {
           status = @status,
           payment_status = @paymentStatus,
           balance_due_cents = @balanceDueCents,
+          amount_paid_cents = @amountPaidCents,
+          payment_installments_paid = 1,
           seat_hold_expires_at = NULL,
+          last_payment_at = @paidAt,
           paid_at = @paidAt,
           updated_at = @updatedAt
         WHERE stripe_checkout_session_id = @sessionId
@@ -1221,6 +1717,9 @@ export class EnrollmentDatabase {
         status: isDepositPayment ? "payment_plan_active" : "registered",
         paymentStatus: isDepositPayment ? "deposit_paid" : "paid",
         balanceDueCents: isDepositPayment ? Number(record.balanceDueCents ?? 0) : 0,
+        amountPaidCents: isDepositPayment
+          ? Number(record.paymentAmountCents ?? 0)
+          : Number(record.tuitionTotalCents ?? 0),
         paidAt,
         updatedAt: paidAt,
       });
@@ -1264,6 +1763,13 @@ export class EnrollmentDatabase {
           e.payment_amount_cents AS paymentAmountCents,
           e.tuition_total_cents AS tuitionTotalCents,
           e.balance_due_cents AS balanceDueCents,
+          e.amount_paid_cents AS amountPaidCents,
+          e.payment_installments_total AS paymentInstallmentsTotal,
+          e.payment_installments_paid AS paymentInstallmentsPaid,
+          e.payment_interval AS paymentInterval,
+          e.next_payment_due_at AS nextPaymentDueAt,
+          e.last_payment_at AS lastPaymentAt,
+          e.last_payment_failure_at AS lastPaymentFailureAt,
           e.created_at AS createdAt,
           c.title AS cohortTitle,
           c.start_date AS startDate,
@@ -1282,6 +1788,7 @@ export class EnrollmentDatabase {
         paymentAmountLabel: formatMoney(item.paymentAmountCents),
         tuitionTotalLabel: formatMoney(item.tuitionTotalCents),
         balanceDueLabel: formatMoney(item.balanceDueCents),
+        amountPaidLabel: formatMoney(item.amountPaidCents),
       })),
       page,
       pageSize,
@@ -1410,7 +1917,11 @@ export class EnrollmentDatabase {
           (SELECT COUNT(*) FROM cohorts WHERE is_active = 1) AS activeCohorts,
           (SELECT COUNT(*) FROM enrollments) AS enrollments,
           (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'paid') AS paidEnrollments,
-          (SELECT COUNT(*) FROM enrollments WHERE payment_status = 'deposit_paid') AS activePaymentPlans,
+          (
+            SELECT COUNT(*)
+            FROM enrollments
+            WHERE payment_status IN ('deposit_paid', 'payment_plan_active', 'installment_failed')
+          ) AS activePaymentPlans,
           (SELECT COUNT(*) FROM admin_sessions WHERE expires_at > @now) AS activeAdminSessions,
           (
             SELECT COUNT(*)
@@ -1433,6 +1944,10 @@ export class EnrollmentDatabase {
           e.payment_status AS paymentStatus,
           e.payment_option AS paymentOption,
           e.balance_due_cents AS balanceDueCents,
+          e.amount_paid_cents AS amountPaidCents,
+          e.payment_installments_total AS paymentInstallmentsTotal,
+          e.payment_installments_paid AS paymentInstallmentsPaid,
+          e.next_payment_due_at AS nextPaymentDueAt,
           e.created_at AS createdAt,
           c.title AS cohortTitle
         FROM enrollments e

@@ -91,4 +91,12 @@ test("admin cohort schema enforces date and payment-plan rules", () => {
       }),
     /paymentPlanDepositCents must be less than tuitionCents/
   );
+  assert.throws(
+    () =>
+      adminCohortSchema.parse({
+        ...valid,
+        paymentPlanDepositCents: 20_000,
+      }),
+    /8 equal installments/
+  );
 });

@@ -230,7 +230,7 @@ export function sendWaitlistEmails(emailer, { record }) {
   });
 }
 
-export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohort, amountPaidCents }) {
+export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohort, amountPaidCents, invoiceUrl }) {
   const amountPaid = formatMoney(
     amountPaidCents ?? (
       enrollment.stripeCheckoutPurpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents
@@ -246,6 +246,12 @@ export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohor
     `Program: ${programTitle}`,
     `Cohort: ${cohortTitle}`,
     `Payment received: ${amountPaid}`,
+    enrollment.paymentInstallmentsTotal > 1
+      ? `Payment ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} is complete.`
+      : "",
+    enrollment.balanceDueCents > 0 ? `Remaining tuition balance: ${formatMoney(enrollment.balanceDueCents)}.` : "Paid in full.",
+    enrollment.nextPaymentDueAt ? `Next automatic payment: ${new Date(enrollment.nextPaymentDueAt).toLocaleDateString("en-US")}.` : "",
+    invoiceUrl ? `Stripe invoice and receipt: ${invoiceUrl}` : "",
     "Admissions will follow up with any remaining class readiness steps.",
   ];
 
@@ -264,6 +270,11 @@ export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohor
     `Program: ${programTitle}`,
     `Cohort: ${cohortTitle}`,
     `Payment status: ${enrollment.paymentStatus}`,
+    `Payment received: ${amountPaid}`,
+    enrollment.paymentInstallmentsTotal > 1
+      ? `Installments: ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal}`
+      : "",
+    `Remaining balance: ${formatMoney(enrollment.balanceDueCents)}`,
     `Paid at: ${enrollment.paidAt || "Recorded by Stripe webhook"}`,
   ];
 
@@ -272,5 +283,46 @@ export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohor
     subject: `Payment received: ${enrollment.studentFullName}`,
     text: adminLines.join("\n"),
     html: buildEmailHtml("Payment received", adminLines),
+  });
+}
+
+export function sendPaymentFailedEmails(emailer, { enrollment, program, cohort, amountDueCents, invoiceUrl }) {
+  const amountDue = formatMoney(amountDueCents ?? enrollment.paymentAmountCents);
+  const programTitle = program?.title ?? enrollment.programId ?? "CNA program";
+  const cohortTitle = cohort?.title ?? enrollment.cohortId ?? "selected cohort";
+  const studentLines = [
+    `Hi ${enrollment.studentFullName},`,
+    `Stripe could not collect your scheduled ${amountDue} weekly payment.`,
+    `Enrollment ID: ${enrollment.id}`,
+    `Program: ${programTitle}`,
+    `Cohort: ${cohortTitle}`,
+    `Remaining tuition balance: ${formatMoney(enrollment.balanceDueCents)}.`,
+    invoiceUrl ? `Review or pay the Stripe invoice: ${invoiceUrl}` : "",
+    "Please update your payment method in Stripe or contact admissions for help.",
+  ];
+
+  safeSend(emailer, {
+    to: enrollment.email,
+    subject: "Weekly payment needs attention - First Step Healthcare Academy",
+    text: studentLines.filter(Boolean).join("\n"),
+    html: buildEmailHtml("Weekly payment needs attention", studentLines),
+  });
+
+  const adminLines = [
+    "A scheduled tuition payment failed.",
+    `Student: ${enrollment.studentFullName}`,
+    `Email: ${enrollment.email}`,
+    `Enrollment ID: ${enrollment.id}`,
+    `Program: ${programTitle}`,
+    `Cohort: ${cohortTitle}`,
+    `Attempted amount: ${amountDue}`,
+    `Remaining balance: ${formatMoney(enrollment.balanceDueCents)}`,
+  ];
+
+  safeSend(emailer, {
+    to: emailer?.adminEmail,
+    subject: `Payment failed: ${enrollment.studentFullName}`,
+    text: adminLines.join("\n"),
+    html: buildEmailHtml("Scheduled payment failed", adminLines),
   });
 }

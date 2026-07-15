@@ -221,7 +221,7 @@ async function run() {
         endDate: "2026-07-18",
         scheduleLabel: "Evening",
         meetingPattern: "Monday to Thursday | 5:30 PM to 8:30 PM",
-        tuitionCents: 175000,
+        tuitionCents: 480000,
         allowPaymentPlan: true,
         paymentPlanDepositCents: 60000,
         capacity: 12,

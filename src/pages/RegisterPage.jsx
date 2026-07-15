@@ -42,7 +42,7 @@ export function RegisterPage({
   const registrationSteps = [
     "Review the CNA program details.",
     "Select the CNA cohort with the best timing and available seats.",
-    "Choose full tuition or a published deposit plan before checkout or admissions follow-up.",
+    "Choose full tuition or the eight-payment weekly plan before checkout.",
   ];
   const dueTodayCents =
     selectedCohort && enrollmentForm.paymentOption === "deposit" && selectedCohort.allowPaymentPlan
@@ -103,8 +103,7 @@ export function RegisterPage({
                 <li>Remaining seats: {selectedCohort.remainingSeats}</li>
                 {selectedCohort.allowPaymentPlan ? (
                   <li>
-                    Payment plan: {selectedCohort.paymentPlanDepositLabel} deposit, then{" "}
-                    {selectedCohort.paymentPlanRemainingLabel} remaining
+                    Payment plan: eight automatic weekly payments of {selectedCohort.paymentPlanDepositLabel}
                   </li>
                 ) : null}
               </ul>
@@ -234,8 +233,8 @@ export function RegisterPage({
                   <span className="section-kicker">Payment setup</span>
                   <h3>Choose how this seat should be reserved.</h3>
                   <p>
-                    The amount due today changes immediately. If you choose a deposit, admissions will collect the
-                    remaining balance before class start.
+                    The amount due today changes immediately. The weekly plan charges $250 today, then automatically
+                    charges seven more $250 payments once per week.
                   </p>
                 </div>
 
@@ -266,7 +265,7 @@ export function RegisterPage({
                       onChange={onInput}
                       disabled={!selectedCohort.allowPaymentPlan}
                     />
-                    <span>Pay deposit</span>
+                    <span>Weekly payment plan</span>
                     <strong>
                       {selectedCohort.allowPaymentPlan
                         ? selectedCohort.paymentPlanDepositLabel
@@ -274,7 +273,7 @@ export function RegisterPage({
                     </strong>
                     <small>
                       {selectedCohort.allowPaymentPlan
-                        ? `${selectedCohort.paymentPlanRemainingLabel} stays due later through admissions.`
+                        ? `${selectedCohort.paymentPlanDepositLabel} today, then seven automatic weekly payments. Total: ${selectedCohort.tuitionLabel}.`
                         : "This cohort requires full tuition at checkout."}
                     </small>
                   </label>
@@ -291,7 +290,7 @@ export function RegisterPage({
                   </div>
                   <div>
                     <span>Payment path</span>
-                    <strong>{selectedCohort.allowPaymentPlan && enrollmentForm.paymentOption === "deposit" ? "Deposit plan" : "Paid in full"}</strong>
+                    <strong>{selectedCohort.allowPaymentPlan && enrollmentForm.paymentOption === "deposit" ? "8 weekly payments" : "Paid in full"}</strong>
                   </div>
                 </div>
               </section>
@@ -313,7 +312,7 @@ export function RegisterPage({
               {enrollmentPending
                 ? "Preparing checkout..."
                 : enrollmentForm.paymentOption === "deposit"
-                  ? "Start Deposit Checkout"
+                  ? "Start Weekly Payment Plan"
                   : "Start Enrollment"}
             </button>
           </form>

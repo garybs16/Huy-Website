@@ -18,9 +18,29 @@ function formatMoney(cents) {
   }).format((cents ?? 0) / 100);
 }
 
+function formatDate(value) {
+  if (!value) {
+    return "to be confirmed";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 function buildCheckoutMessage(enrollment) {
   if (enrollment.paymentStatus === "paid") {
     return `Payment received. Enrollment ${enrollment.enrollmentId} is paid in full.`;
+  }
+
+  if (enrollment.paymentStatus === "payment_plan_active") {
+    return `Weekly plan active: ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} payments complete. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}. Next automatic payment: ${formatDate(enrollment.nextPaymentDueAt)}.`;
+  }
+
+  if (enrollment.paymentStatus === "installment_failed") {
+    return `The latest weekly payment needs attention. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}. Please update the payment method in Stripe or contact admissions.`;
   }
 
   if (enrollment.paymentStatus === "deposit_paid") {
@@ -64,7 +84,7 @@ export function PaymentPage() {
         }
 
         setPaymentStatus({
-          type: enrollment.paymentStatus === "paid" || enrollment.paymentStatus === "deposit_paid" ? "success" : "error",
+          type: ["paid", "deposit_paid", "payment_plan_active"].includes(enrollment.paymentStatus) ? "success" : "error",
           text: checkoutStatus === "cancelled" ? "Checkout was cancelled before payment completed." : buildCheckoutMessage(enrollment),
         });
         setPaymentForm((current) => ({ ...current, enrollmentId }));
@@ -117,7 +137,7 @@ export function PaymentPage() {
       }
 
       setPaymentStatus({
-        type: response.paymentStatus === "paid" ? "success" : "error",
+        type: ["paid", "deposit_paid", "payment_plan_active"].includes(response.paymentStatus) ? "success" : "error",
         text: response.message || "Admissions will contact you about payment.",
       });
     } catch (error) {
@@ -131,8 +151,8 @@ export function PaymentPage() {
     <section className="section section-soft">
       <PageIntro
         kicker="Payment Portal"
-        title="Pay tuition, deposits, or remaining balances from one secure portal."
-        description="Enter the enrollment ID and email used during registration to open the correct payment checkout."
+        title="Pay tuition or review an active weekly payment plan from one secure portal."
+        description="Enter the enrollment ID and email used during registration to view payment progress or open the correct Stripe checkout."
         accent="Secure enrollment payment"
         note="Payment links are verified against the student email before checkout starts."
       />
@@ -143,7 +163,7 @@ export function PaymentPage() {
           <h2>Enter your card number in the secure Stripe checkout panel.</h2>
           <p>
             The portal checks the enrollment record before creating checkout, then loads the
-            correct card payment amount for the deposit, tuition, or remaining balance.
+            correct tuition payment or shows weekly-plan progress and the next scheduled charge.
           </p>
           <ul className="detail-list">
             <li>Enrollment ID from your registration confirmation</li>
@@ -155,7 +175,7 @@ export function PaymentPage() {
         <article className="form-card">
           <h2>Pay by Card</h2>
           <p className="form-helper">
-            Verify the enrollment first. The card fields appear after the payment amount is loaded.
+            Verify the enrollment first. Active weekly plans show completed payments, remaining balance, and next charge.
           </p>
           <form className="form-stack" onSubmit={handleSubmit}>
             <label>
@@ -173,7 +193,7 @@ export function PaymentPage() {
               <input name="email" type="email" value={paymentForm.email} onChange={handleInput} required />
             </label>
             <button type="submit" className="btn btn-primary" disabled={paymentPending}>
-              {paymentPending ? "Preparing card checkout..." : "Load Secure Card Form"}
+              {paymentPending ? "Checking payment status..." : "Check Payment or Open Checkout"}
             </button>
           </form>
           {paymentStatus.text ? (

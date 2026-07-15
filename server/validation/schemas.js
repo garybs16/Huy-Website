@@ -184,4 +184,15 @@ export const adminCohortSchema = z
         message: "paymentPlanDepositCents must be less than tuitionCents",
       });
     }
+
+    if (
+      value.paymentPlanDepositCents !== null &&
+      value.paymentPlanDepositCents * 8 !== value.tuitionCents
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["paymentPlanDepositCents"],
+        message: "Weekly payment plans must use 8 equal installments that total tuitionCents",
+      });
+    }
   });

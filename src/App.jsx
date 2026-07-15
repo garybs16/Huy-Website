@@ -192,10 +192,15 @@ function AppEffects({ setEnrollmentStatus }) {
             type: "success",
             text: `Payment received. Enrollment ${enrollment.enrollmentId} is confirmed and admissions will follow up with next steps.`,
           });
-        } else if (enrollment.paymentStatus === "deposit_paid") {
+        } else if (["deposit_paid", "payment_plan_active"].includes(enrollment.paymentStatus)) {
           setEnrollmentStatus({
             type: "success",
-            text: `Deposit received. Enrollment ${enrollment.enrollmentId} now holds the seat, and the remaining balance will be coordinated by admissions before class start.`,
+            text: `Weekly payment plan active. Payment ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} is complete for enrollment ${enrollment.enrollmentId}. Stripe will automatically collect the remaining weekly payments.`,
+          });
+        } else if (enrollment.paymentStatus === "installment_failed") {
+          setEnrollmentStatus({
+            type: "error",
+            text: "The latest weekly payment could not be collected. Please update the payment method in Stripe or contact admissions.",
           });
         } else if (checkoutStatus === "cancelled" || enrollment.paymentStatus === "checkout_expired") {
           setEnrollmentStatus({

@@ -3,6 +3,10 @@ import { Router } from "express";
 import { ZodError } from "zod";
 import { sendEnrollmentEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
+import {
+  WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
+  WEEKLY_PAYMENT_PLAN_INTERVAL,
+} from "../lib/stripe.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { enrollmentPaymentSessionSchema, enrollmentSchema, paginationSchema } from "../validation/schemas.js";
 
@@ -33,12 +37,23 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
       throw new Error("This cohort does not offer a payment plan.");
     }
 
+    if (
+      Number(cohort.paymentPlanDepositCents) * WEEKLY_PAYMENT_PLAN_INSTALLMENTS !==
+      Number(cohort.tuitionCents)
+    ) {
+      throw new Error(
+        `This cohort's weekly plan must equal ${WEEKLY_PAYMENT_PLAN_INSTALLMENTS} equal payments totaling the tuition.`
+      );
+    }
+
     return {
       paymentOption: "deposit",
       paymentAmountCents: cohort.paymentPlanDepositCents,
       tuitionTotalCents: cohort.tuitionCents,
       balanceDueCents: Math.max(cohort.tuitionCents - cohort.paymentPlanDepositCents, 0),
-      checkoutLabel: "Registration fee deposit",
+      paymentInstallmentsTotal: WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
+      paymentInterval: WEEKLY_PAYMENT_PLAN_INTERVAL,
+      checkoutLabel: "Weekly tuition payment plan",
     };
   }
 
@@ -47,13 +62,15 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
     paymentAmountCents: cohort.tuitionCents,
     tuitionTotalCents: cohort.tuitionCents,
     balanceDueCents: 0,
+    paymentInstallmentsTotal: 1,
+    paymentInterval: null,
     checkoutLabel: "Program payment",
   };
 }
 
 function getCheckoutPurpose(pricing) {
   if (pricing.paymentOption === "deposit" && pricing.balanceDueCents > 0) {
-    return "deposit";
+    return "payment_plan";
   }
 
   return "tuition";
@@ -73,7 +90,7 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
     productDescription: isBalancePayment
       ? `${cohort.meetingPattern} | Remaining balance for enrollment ${enrollment.id}`
       : pricing.paymentOption === "deposit"
-        ? `${cohort.meetingPattern} | Deposit now, ${formatMoney(pricing.balanceDueCents)} due before class start`
+        ? `${cohort.meetingPattern} | ${formatMoney(pricing.paymentAmountCents)} today and seven automatic weekly payments`
         : `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
   };
 }
@@ -92,9 +109,19 @@ async function createEnrollmentCheckoutSession({
 }) {
   const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
   const checkoutDetails = buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose });
+  const isWeeklyPlan = pricing.paymentOption === "deposit" && purpose === "payment_plan";
+  const metadata = {
+    enrollmentId: enrollment.id,
+    cohortId: cohort.id,
+    programId: cohort.programId,
+    paymentOption: pricing.paymentOption,
+    checkoutPurpose: checkoutDetails.purpose,
+    installmentsTotal: String(pricing.paymentInstallmentsTotal ?? 1),
+    paymentInterval: pricing.paymentInterval ?? "one_time",
+  };
 
   const sessionPayload = {
-    mode: "payment",
+    mode: isWeeklyPlan ? "subscription" : "payment",
     customer_email: enrollment.email,
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     line_items: [
@@ -102,6 +129,14 @@ async function createEnrollmentCheckoutSession({
         price_data: {
           currency: "usd",
           unit_amount: checkoutDetails.amountCents,
+          ...(isWeeklyPlan
+            ? {
+                recurring: {
+                  interval: WEEKLY_PAYMENT_PLAN_INTERVAL,
+                  interval_count: 1,
+                },
+              }
+            : {}),
           product_data: {
             name: checkoutDetails.productName,
             description: checkoutDetails.productDescription,
@@ -110,23 +145,28 @@ async function createEnrollmentCheckoutSession({
         quantity: 1,
       },
     ],
-    metadata: {
-      enrollmentId: enrollment.id,
-      cohortId: cohort.id,
-      programId: cohort.programId,
-      paymentOption: pricing.paymentOption,
-      checkoutPurpose: checkoutDetails.purpose,
-    },
-    payment_intent_data: {
-      metadata: {
-        enrollmentId: enrollment.id,
-        cohortId: cohort.id,
-        programId: cohort.programId,
-        paymentOption: pricing.paymentOption,
-        checkoutPurpose: checkoutDetails.purpose,
-      },
-    },
+    metadata,
   };
+
+  if (isWeeklyPlan) {
+    sessionPayload.payment_method_types = ["card"];
+    sessionPayload.submit_type = "pay";
+    sessionPayload.subscription_data = {
+      description: `${program.title} tuition plan: eight weekly payments of ${checkoutDetails.amountLabel}`,
+      metadata,
+    };
+    sessionPayload.custom_text = {
+      submit: {
+        message: `By continuing, you authorize ${checkoutDetails.amountLabel} today and seven additional automatic weekly payments, for ${formatMoney(pricing.tuitionTotalCents)} total.`,
+      },
+    };
+  } else {
+    sessionPayload.payment_intent_data = {
+      description: checkoutDetails.productName,
+      receipt_email: enrollment.email,
+      metadata,
+    };
+  }
 
   if (checkoutMode === "embedded") {
     sessionPayload.ui_mode = "embedded_page";
@@ -166,6 +206,13 @@ export function createEnrollmentsRouter({
       paymentAmountCents: enrollment.paymentAmountCents,
       tuitionTotalCents: enrollment.tuitionTotalCents,
       balanceDueCents: enrollment.balanceDueCents,
+      amountPaidCents: enrollment.amountPaidCents,
+      paymentInstallmentsTotal: enrollment.paymentInstallmentsTotal,
+      paymentInstallmentsPaid: enrollment.paymentInstallmentsPaid,
+      paymentInterval: enrollment.paymentInterval,
+      nextPaymentDueAt: enrollment.nextPaymentDueAt,
+      lastPaymentAt: enrollment.lastPaymentAt,
+      lastPaymentFailureAt: enrollment.lastPaymentFailureAt,
       paidAt: enrollment.paidAt,
       seatHoldExpiresAt: enrollment.seatHoldExpiresAt,
     });
@@ -209,6 +256,10 @@ export function createEnrollmentsRouter({
         paymentAmountCents: pricing.paymentAmountCents,
         tuitionTotalCents: pricing.tuitionTotalCents,
         balanceDueCents: pricing.balanceDueCents,
+        amountPaidCents: 0,
+        paymentInstallmentsTotal: pricing.paymentInstallmentsTotal,
+        paymentInstallmentsPaid: 0,
+        paymentInterval: pricing.paymentInterval,
         seatHoldExpiresAt: initialSeatHoldExpiresAt,
       });
 
@@ -238,6 +289,10 @@ export function createEnrollmentsRouter({
           amountDueNowLabel,
           balanceDueCents: manualEnrollment.balanceDueCents,
           balanceDueLabel,
+          amountPaidCents: manualEnrollment.amountPaidCents,
+          paymentInstallmentsTotal: manualEnrollment.paymentInstallmentsTotal,
+          paymentInstallmentsPaid: manualEnrollment.paymentInstallmentsPaid,
+          paymentInterval: manualEnrollment.paymentInterval,
           message:
             manualEnrollment.paymentOption === "deposit"
               ? `Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the ${amountDueNowLabel} deposit and confirm the remaining ${balanceDueLabel} balance plan.`
@@ -306,6 +361,10 @@ export function createEnrollmentsRouter({
         amountDueNowLabel: formatMoney(pendingEnrollment.paymentAmountCents),
         balanceDueCents: pendingEnrollment.balanceDueCents,
         balanceDueLabel: formatMoney(pendingEnrollment.balanceDueCents),
+        amountPaidCents: pendingEnrollment.amountPaidCents,
+        paymentInstallmentsTotal: pendingEnrollment.paymentInstallmentsTotal,
+        paymentInstallmentsPaid: pendingEnrollment.paymentInstallmentsPaid,
+        paymentInterval: pendingEnrollment.paymentInterval,
         checkoutMode: payload.checkoutMode,
         checkoutUrl: session.url,
         checkoutClientSecret: session.client_secret,
@@ -316,7 +375,10 @@ export function createEnrollmentsRouter({
         return res.status(409).json({ error: error.message });
       }
 
-      if (error.message === "This cohort does not offer a payment plan.") {
+      if (
+        error.message === "This cohort does not offer a payment plan." ||
+        error.message.includes("weekly plan must equal")
+      ) {
         return res.status(400).json({ error: error.message });
       }
 
@@ -353,6 +415,28 @@ export function createEnrollmentsRouter({
         });
       }
 
+      if (enrollment.stripeSubscriptionId && enrollment.balanceDueCents > 0) {
+        const planNeedsAttention = enrollment.paymentStatus === "installment_failed";
+
+        return res.json({
+          enrollmentId: enrollment.id,
+          paymentRequired: false,
+          status: enrollment.status,
+          paymentStatus: enrollment.paymentStatus,
+          paymentOption: enrollment.paymentOption,
+          amountPaidCents: enrollment.amountPaidCents,
+          balanceDueCents: enrollment.balanceDueCents,
+          balanceDueLabel: formatMoney(enrollment.balanceDueCents),
+          paymentInstallmentsTotal: enrollment.paymentInstallmentsTotal,
+          paymentInstallmentsPaid: enrollment.paymentInstallmentsPaid,
+          paymentInterval: enrollment.paymentInterval,
+          nextPaymentDueAt: enrollment.nextPaymentDueAt,
+          message: planNeedsAttention
+            ? "The weekly payment plan needs attention because Stripe could not collect the latest installment. Please update the payment method in Stripe or contact admissions."
+            : `The weekly payment plan is active. ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} payments are complete, with ${formatMoney(enrollment.balanceDueCents)} remaining.`,
+        });
+      }
+
       const cohort = enrollmentDb.getCohortById(enrollment.cohortId);
       const program = cohort ? enrollmentDb.getProgramById(cohort.programId, { includeInactive: true }) : null;
 
@@ -363,14 +447,27 @@ export function createEnrollmentsRouter({
       const purpose = enrollment.paymentStatus === "deposit_paid" && enrollment.balanceDueCents > 0
         ? "balance"
         : enrollment.paymentOption === "deposit"
-          ? "deposit"
+          ? "payment_plan"
           : "tuition";
+
+      if (
+        purpose === "payment_plan" &&
+        Number(enrollment.paymentAmountCents) * WEEKLY_PAYMENT_PLAN_INSTALLMENTS !==
+          Number(enrollment.tuitionTotalCents)
+      ) {
+        return res.status(409).json({
+          error: "This enrollment's weekly plan is not configured as eight equal payments. Please contact admissions.",
+        });
+      }
+
       const pricing = {
         paymentOption: enrollment.paymentOption,
         paymentAmountCents: enrollment.paymentAmountCents,
         tuitionTotalCents: enrollment.tuitionTotalCents,
         balanceDueCents: enrollment.balanceDueCents,
-        checkoutLabel: purpose === "deposit" ? "Registration fee deposit" : "Program payment",
+        paymentInstallmentsTotal: enrollment.paymentInstallmentsTotal || WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
+        paymentInterval: enrollment.paymentInterval || WEEKLY_PAYMENT_PLAN_INTERVAL,
+        checkoutLabel: purpose === "payment_plan" ? "Weekly tuition payment plan" : "Program payment",
       };
       const amountDueCents = purpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents;
       const amountDueLabel = formatMoney(amountDueCents);
@@ -386,6 +483,11 @@ export function createEnrollmentsRouter({
           amountDueNowLabel: amountDueLabel,
           balanceDueCents: enrollment.balanceDueCents,
           balanceDueLabel: formatMoney(enrollment.balanceDueCents),
+          amountPaidCents: enrollment.amountPaidCents,
+          paymentInstallmentsTotal: enrollment.paymentInstallmentsTotal,
+          paymentInstallmentsPaid: enrollment.paymentInstallmentsPaid,
+          paymentInterval: enrollment.paymentInterval,
+          nextPaymentDueAt: enrollment.nextPaymentDueAt,
           message: `Online payment is not configured yet. Admissions will contact you to collect ${amountDueLabel}.`,
         });
       }
@@ -435,6 +537,11 @@ export function createEnrollmentsRouter({
         amountDueNowLabel: amountDueLabel,
         balanceDueCents: pendingEnrollment.balanceDueCents,
         balanceDueLabel: formatMoney(pendingEnrollment.balanceDueCents),
+        amountPaidCents: pendingEnrollment.amountPaidCents,
+        paymentInstallmentsTotal: pendingEnrollment.paymentInstallmentsTotal,
+        paymentInstallmentsPaid: pendingEnrollment.paymentInstallmentsPaid,
+        paymentInterval: pendingEnrollment.paymentInterval,
+        nextPaymentDueAt: pendingEnrollment.nextPaymentDueAt,
         checkoutUrl: session.url,
         checkoutClientSecret: session.client_secret,
         checkoutExpiresAt: pendingEnrollment.seatHoldExpiresAt,
