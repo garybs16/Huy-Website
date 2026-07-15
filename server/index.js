@@ -220,6 +220,9 @@ export function createApp() {
 
       next();
     });
+    app.get("/favicon.ico", (_req, res) => {
+      res.redirect(308, "/favicon.svg");
+    });
     app.use(express.static(config.staticDir, { dotfiles: "deny" }));
     app.get("/{*splat}", (req, res, next) => {
       if (req.path.startsWith("/api")) {

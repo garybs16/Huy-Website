@@ -49,6 +49,27 @@ async function run() {
     const paymentRouteRes = await fetch(`http://localhost:${port}/payment`);
     assert(paymentRouteRes.ok, "Payment portal route did not resolve in production mode");
 
+    const faviconRes = await fetch(`http://localhost:${port}/favicon.ico`);
+    assert(faviconRes.ok, "Production favicon did not resolve");
+    assert(
+      faviconRes.headers.get("content-type")?.includes("image/svg+xml"),
+      "Production favicon must return an SVG image"
+    );
+
+    const robotsRes = await fetch(`http://localhost:${port}/robots.txt`);
+    assert(robotsRes.ok, "Production robots.txt did not resolve");
+    assert(robotsRes.headers.get("content-type")?.includes("text/plain"), "robots.txt must return plain text");
+    assert((await robotsRes.text()).includes("Sitemap: https://firststepha.com/sitemap.xml"), "robots.txt must identify the sitemap");
+
+    const sitemapRes = await fetch(`http://localhost:${port}/sitemap.xml`);
+    assert(sitemapRes.ok, "Production sitemap did not resolve");
+    assert(
+      sitemapRes.headers.get("content-type")?.includes("application/xml") ||
+        sitemapRes.headers.get("content-type")?.includes("text/xml"),
+      "sitemap.xml must return XML"
+    );
+    assert((await sitemapRes.text()).includes("https://firststepha.com/register"), "Sitemap must include registration");
+
     const programsRes = await fetch(`http://localhost:${port}/api/programs`);
     assert(programsRes.ok, "Production API failed to serve programs");
     const programsBody = await programsRes.json();

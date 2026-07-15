@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="First Step Healthcare Academy">
+  <defs>
+    <linearGradient id="background" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0d4e7a"/>
+      <stop offset="1" stop-color="#041d2d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="39" y1="9" x2="54" y2="31" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7c851"/>
+      <stop offset="1" stop-color="#d98b00"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#background)"/>
+  <path d="M14 18h9v-9h10v9h9v10h-9v9H23v-9h-9z" fill="#fff"/>
+  <path d="M37 45h9v-7h7v14H37z" fill="#fff"/>
+  <path d="M47 32h6v6h-6z" fill="#8ed8e8"/>
+  <path d="M45 7l2.2 4.4 4.8.7-3.5 3.4.8 4.8-4.3-2.2-4.3 2.2.8-4.8-3.5-3.4 4.8-.7z" fill="url(#gold)"/>
+</svg>
