@@ -126,9 +126,19 @@ export function createApp() {
           // Keep the site's default protections while explicitly allowing
           // the Stripe resources needed for embedded Checkout.
           "connect-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
-          "frame-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
+          "frame-src": [
+            "'self'",
+            "https://js.stripe.com",
+            "https://checkout.stripe.com",
+            "https://challenges.cloudflare.com",
+          ],
           "frame-ancestors": ["'none'"],
-          "script-src": ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
+          "script-src": [
+            "'self'",
+            "https://js.stripe.com",
+            "https://checkout.stripe.com",
+            "https://challenges.cloudflare.com",
+          ],
           "img-src": ["'self'", "data:", "https://*.stripe.com"],
         },
       },

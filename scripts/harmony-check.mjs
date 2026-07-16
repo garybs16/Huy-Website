@@ -22,6 +22,11 @@ async function run() {
   process.env.STRIPE_SECRET_KEY = "";
   process.env.STRIPE_PUBLISHABLE_KEY = "";
   process.env.STRIPE_WEBHOOK_SECRET = "";
+  // The smoke test submits deterministic fixture data without a browser
+  // challenge. Keep Turnstile disabled only in this isolated test server;
+  // production remains protected when its environment keys are present.
+  process.env.TURNSTILE_SECRET_KEY = "";
+  process.env.VITE_TURNSTILE_SITE_KEY = "";
   const { startServer } = await import("../server/index.js");
   const port = 4020;
   const { server } = startServer(port);

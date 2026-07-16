@@ -24,6 +24,10 @@ async function run() {
   process.env.STRIPE_SECRET_KEY = "";
   process.env.STRIPE_PUBLISHABLE_KEY = "";
   process.env.STRIPE_WEBHOOK_SECRET = "";
+  // Browser challenges are intentionally excluded from deterministic smoke
+  // fixtures. The live server enables Turnstile through its private keys.
+  process.env.TURNSTILE_SECRET_KEY = "";
+  process.env.VITE_TURNSTILE_SITE_KEY = "";
 
   const { startServer } = await import("../server/index.js");
   const port = 4030;
