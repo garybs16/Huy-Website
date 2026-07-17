@@ -7931,3 +7931,303 @@ textarea:focus-visible,
     -webkit-text-fill-color: CanvasText;
   }
 }
+
+/* Figma-inspired clinical education refresh: presentation only.
+   Existing copy, page structure, and image assets intentionally stay intact. */
+:root {
+  --fig-ink: #10213f;
+  --fig-blue: #3468f5;
+  --fig-blue-deep: #244fcb;
+  --fig-sky: #32b7e8;
+  --fig-mint: #8ce4cb;
+  --fig-coral: #ff9d70;
+  --fig-canvas: #f7f8ff;
+  --fig-lilac: #eceeff;
+  --fig-blue-wash: #eef4ff;
+  --fig-line: rgba(16, 33, 63, 0.1);
+  --fig-shadow: 0 20px 55px rgba(34, 68, 145, 0.12);
+  --fig-shadow-hover: 0 28px 70px rgba(34, 68, 145, 0.18);
+  --brand: var(--fig-blue);
+  --brand-strong: var(--fig-blue-deep);
+  --brand-deep: var(--fig-ink);
+  --accent: var(--fig-coral);
+  --accent-strong: #e86d43;
+  --accent-soft: #fff0e9;
+  --gold: var(--fig-coral);
+  --gold-soft: #fff0e9;
+  --ink: #344461;
+  --ink-strong: var(--fig-ink);
+  --muted: #63718a;
+  --surface-soft: var(--fig-blue-wash);
+  --surface-accent: var(--fig-lilac);
+  --line: var(--fig-line);
+  --line-strong: rgba(52, 104, 245, 0.25);
+  --ui-navy-950: var(--fig-ink);
+  --ui-navy-900: #18325d;
+  --ui-navy-800: #254575;
+  --ui-teal-700: var(--fig-blue);
+  --ui-teal-600: #4782ff;
+  --ui-teal-100: #dfe9ff;
+  --ui-teal-50: #f3f6ff;
+  --ui-gold-600: #e86d43;
+  --ui-gold-500: var(--fig-coral);
+  --ui-gold-100: #fff0e9;
+  --ui-ink: #344461;
+  --ui-muted: #63718a;
+  --ui-canvas: var(--fig-canvas);
+  --ui-line: var(--fig-line);
+  --ui-line-strong: rgba(52, 104, 245, 0.2);
+}
+
+body {
+  background:
+    radial-gradient(circle at 91% 4%, rgba(140, 228, 203, 0.26), transparent 27rem),
+    radial-gradient(circle at 5% 36%, rgba(52, 104, 245, 0.1), transparent 31rem),
+    var(--fig-canvas);
+}
+
+.site-shell::before {
+  height: 52rem;
+  background:
+    linear-gradient(90deg, rgba(52, 104, 245, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(52, 104, 245, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 80% 11%, rgba(140, 228, 203, 0.32), transparent 26rem);
+  background-size: 48px 48px, 48px 48px, auto;
+}
+
+.top-strip {
+  background: linear-gradient(100deg, #10213f 0%, #19366a 58%, #2858ca 100%);
+}
+
+.top-strip::after {
+  background: linear-gradient(90deg, transparent, var(--fig-mint), var(--fig-coral), transparent);
+}
+
+.site-header {
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom-color: rgba(16, 33, 63, 0.08);
+  box-shadow: 0 10px 35px rgba(16, 33, 63, 0.08);
+}
+
+.brand-icon-image {
+  border-radius: 1.25rem;
+  border-color: rgba(52, 104, 245, 0.14);
+  box-shadow: 0 12px 26px rgba(52, 104, 245, 0.11);
+}
+
+.brand-subtitle,
+.section-kicker,
+.eyebrow,
+.footer-kicker,
+.page-intro-note-label {
+  color: var(--fig-blue);
+}
+
+.nav-link:hover,
+.nav-link.is-active {
+  background: rgba(52, 104, 245, 0.09);
+  color: var(--fig-blue-deep);
+}
+
+.nav-link::after {
+  background: linear-gradient(90deg, var(--fig-blue), var(--fig-coral));
+}
+
+.btn-primary {
+  background: linear-gradient(125deg, var(--fig-blue-deep), var(--fig-blue) 60%, #5f96ff);
+  box-shadow: 0 16px 30px rgba(52, 104, 245, 0.28);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 22px 42px rgba(52, 104, 245, 0.34);
+}
+
+.btn-secondary,
+.footer-contact-link {
+  border-color: rgba(232, 109, 67, 0.34);
+  background: linear-gradient(135deg, #ffc39f, var(--fig-coral));
+  color: var(--fig-ink);
+}
+
+.btn-ghost,
+.card-action-link,
+.text-link {
+  border-color: rgba(52, 104, 245, 0.18);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--fig-blue-deep);
+}
+
+.card-action-link:hover,
+.text-link:hover,
+.btn-ghost:hover {
+  border-color: rgba(52, 104, 245, 0.35);
+  background: var(--fig-blue-wash);
+  color: var(--fig-blue-deep);
+}
+
+.hero-panel {
+  background:
+    radial-gradient(circle at 88% 7%, rgba(140, 228, 203, 0.48), transparent 24rem),
+    radial-gradient(circle at 61% 83%, rgba(52, 104, 245, 0.12), transparent 30rem),
+    linear-gradient(135deg, #ffffff 0%, #f8f9ff 52%, #eff8ff 100%);
+}
+
+.hero-panel::after,
+.training-phase-card::after,
+.program-step-card::after {
+  background: linear-gradient(90deg, var(--fig-blue), var(--fig-mint), var(--fig-coral));
+}
+
+.hero-title span:last-child {
+  background: linear-gradient(100deg, var(--fig-blue), #4a8fff 52%, var(--fig-coral));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.hero-trust-item,
+.hero-quick-links a,
+.hero-assurance-panel,
+.hero-assurance-panel div,
+.hero-decision-strip div,
+.training-phase-card {
+  border-color: rgba(52, 104, 245, 0.13);
+}
+
+.hero-visual::before {
+  border-color: rgba(52, 104, 245, 0.22);
+  background: linear-gradient(135deg, rgba(52, 104, 245, 0.11), rgba(140, 228, 203, 0.22));
+}
+
+.hero-status-chip {
+  color: var(--fig-blue-deep);
+}
+
+.hero-photo-badge,
+.site-cta-panel,
+.dark-card,
+.rg-approval-band,
+.rg-ready-panel {
+  background:
+    radial-gradient(circle at 94% 0%, rgba(140, 228, 203, 0.22), transparent 17rem),
+    linear-gradient(125deg, #10213f, #18376c 56%, #2858ca);
+}
+
+.page-intro-main {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(140, 228, 203, 0.28), transparent 17rem),
+    linear-gradient(125deg, #10213f, #19376c);
+}
+
+.page-intro-main .section-kicker,
+.site-cta-copy .section-kicker,
+.dark-card .section-kicker {
+  color: #b4f2df;
+}
+
+.page-intro-aside,
+.program-certification-frame,
+.home-quiz-preview,
+.workforce-chart-card,
+.schedule-card,
+.form-card,
+.handout-form,
+.modern-trust-card,
+.modern-leader-card,
+.registration-policy-callout,
+.policy-card,
+.module-card,
+.quiz-question-card,
+.quiz-result-card {
+  border-color: rgba(52, 104, 245, 0.12);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(140, 228, 203, 0.16), transparent 15rem),
+    linear-gradient(155deg, #ffffff, #f5f7ff);
+}
+
+.quick-card,
+.info-card,
+.program-card,
+.schedule-card,
+.support-card,
+.form-card,
+.register-summary,
+.admin-row,
+.modern-trust-card,
+.modern-leader-card,
+.program-step-card,
+.payment-choice-block,
+.payment-choice-card,
+.checkpoint-item {
+  border-color: rgba(52, 104, 245, 0.12);
+}
+
+.quick-card:hover,
+.program-card:hover,
+.schedule-card:hover,
+.info-card:hover,
+.support-card:hover,
+.admin-row:hover,
+.modern-trust-card:hover,
+.modern-leader-card:hover {
+  border-color: rgba(52, 104, 245, 0.3);
+  box-shadow: var(--fig-shadow-hover);
+}
+
+.impact-stat-row article,
+.payment-choice-card.is-selected,
+.payment-choice-card:focus-within,
+.payment-choice-card:has(input:checked),
+.quiz-option-card.is-selected,
+.quiz-option-card:has(input:checked) {
+  border-color: rgba(52, 104, 245, 0.3);
+  background: var(--fig-blue-wash);
+  box-shadow: 0 0 0 3px rgba(52, 104, 245, 0.1);
+}
+
+.growth-bar-track span,
+.checkpoint-number {
+  background: linear-gradient(90deg, var(--fig-blue), var(--fig-sky), var(--fig-mint));
+}
+
+.form-stack input:focus,
+.form-stack select:focus,
+.form-stack textarea:focus,
+.admin-access input:focus {
+  border-color: var(--fig-blue);
+  box-shadow: 0 0 0 4px rgba(52, 104, 245, 0.14), 0 10px 24px rgba(16, 33, 63, 0.06);
+}
+
+.form-status.is-success {
+  border-color: rgba(52, 104, 245, 0.22);
+  background: var(--fig-blue-wash);
+  color: var(--fig-blue-deep);
+}
+
+.site-footer {
+  border-top-color: var(--fig-coral);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(52, 104, 245, 0.38), transparent 25rem),
+    linear-gradient(160deg, #0c1a34, #10213f);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline-color: rgba(255, 157, 112, 0.9);
+}
+
+@media (max-width: 760px) {
+  .hero-panel {
+    background:
+      radial-gradient(circle at 100% 0%, rgba(140, 228, 203, 0.36), transparent 17rem),
+      linear-gradient(150deg, #ffffff, #f1f5ff);
+  }
+
+  .page-intro-main,
+  .site-cta-panel {
+    background: linear-gradient(145deg, #10213f, #214a98);
+  }
+}
