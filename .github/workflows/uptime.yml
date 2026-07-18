@@ -1,0 +1,37 @@
+name: Monitor Production Uptime
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-uptime-monitor
+  cancel-in-progress: false
+
+jobs:
+  healthcheck:
+    name: Check firststepha.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      HEALTHCHECK_URL: https://firststepha.com/api/health
+    steps:
+      - name: Checkout health-check script
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "24"
+      - name: Verify HTTPS endpoint health
+        run: npm run check:health
+      - name: Verify response security headers
+        shell: bash
+        run: |
+          headers="$(curl --fail --silent --show-error --head --proto '=https' --tlsv1.2 https://firststepha.com/)"
+          grep -qi '^strict-transport-security:' <<< "$headers"
+          grep -qi '^content-security-policy:' <<< "$headers"
+          grep -qi '^x-content-type-options:.*nosniff' <<< "$headers"

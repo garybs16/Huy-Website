@@ -22,6 +22,12 @@ async function run() {
   process.env.STRIPE_SECRET_KEY = "";
   process.env.STRIPE_PUBLISHABLE_KEY = "";
   process.env.STRIPE_WEBHOOK_SECRET = "";
+  // Never let local or CI verification fixture data trigger real email sends.
+  // Production keeps its Resend configuration in the server environment.
+  process.env.RESEND_API_KEY = "";
+  process.env.EMAIL_FROM = "";
+  process.env.EMAIL_REPLY_TO = "";
+  process.env.ADMIN_NOTIFICATION_EMAIL = "";
   // The smoke test submits deterministic fixture data without a browser
   // challenge. Keep Turnstile disabled only in this isolated test server;
   // production remains protected when its environment keys are present.

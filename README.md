@@ -1,6 +1,7 @@
 # First Step Healthcare Academy Website
 
 [![Validate Full Stack Site](https://github.com/garybs16/Huy-Website/actions/workflows/deploy.yml/badge.svg)](https://github.com/garybs16/Huy-Website/actions/workflows/deploy.yml)
+[![Monitor Production Uptime](https://github.com/garybs16/Huy-Website/actions/workflows/uptime.yml/badge.svg)](https://github.com/garybs16/Huy-Website/actions/workflows/uptime.yml)
 
 Live production site: https://firststepha.com/
 
@@ -20,6 +21,8 @@ Resume/project brief: [docs/RESUME_PROJECT.md](./docs/RESUME_PROJECT.md)
 PostgreSQL migration plan: [docs/POSTGRESQL_MIGRATION_PLAN.md](./docs/POSTGRESQL_MIGRATION_PLAN.md)
 
 Operations runbook: [docs/OPERATIONS_RUNBOOK.md](./docs/OPERATIONS_RUNBOOK.md)
+
+Uptime monitoring: [docs/UPTIME_MONITORING.md](./docs/UPTIME_MONITORING.md)
 
 ## Screenshots
 

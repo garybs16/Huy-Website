@@ -24,6 +24,12 @@ async function run() {
   process.env.STRIPE_SECRET_KEY = "";
   process.env.STRIPE_PUBLISHABLE_KEY = "";
   process.env.STRIPE_WEBHOOK_SECRET = "";
+  // Keep fixtures completely offline even when the local machine has
+  // production Resend credentials configured.
+  process.env.RESEND_API_KEY = "";
+  process.env.EMAIL_FROM = "";
+  process.env.EMAIL_REPLY_TO = "";
+  process.env.ADMIN_NOTIFICATION_EMAIL = "";
   // Browser challenges are intentionally excluded from deterministic smoke
   // fixtures. The live server enables Turnstile through its private keys.
   process.env.TURNSTILE_SECRET_KEY = "";
