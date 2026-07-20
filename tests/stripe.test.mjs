@@ -3,10 +3,38 @@ import test from "node:test";
 import {
   WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
   ensureFiniteWeeklySchedule,
+  getPaymentPlanTerms,
   getSubscriptionNextPaymentAt,
 } from "../server/lib/stripe.js";
 
-test("weekly Stripe schedules charge eight installments and then cancel", async () => {
+test("published weekly and biweekly terms divide the tuition balance exactly", () => {
+  assert.deepEqual(getPaymentPlanTerms("weekly", 190_000, 25_000), {
+    paymentOption: "weekly",
+    installmentsTotal: 12,
+    interval: "week",
+    intervalCount: 1,
+    trialDays: 7,
+    registrationFeeCents: 25_000,
+    tuitionBalanceCents: 165_000,
+    installmentAmountCents: 13_750,
+    paymentInterval: "week",
+    scheduleDurationWeeks: 13,
+  });
+  assert.deepEqual(getPaymentPlanTerms("biweekly", 190_000, 25_000), {
+    paymentOption: "biweekly",
+    installmentsTotal: 6,
+    interval: "week",
+    intervalCount: 2,
+    trialDays: 14,
+    registrationFeeCents: 25_000,
+    tuitionBalanceCents: 165_000,
+    installmentAmountCents: 27_500,
+    paymentInterval: "2_weeks",
+    scheduleDurationWeeks: 14,
+  });
+});
+
+test("weekly Stripe schedules charge twelve tuition installments after registration and then cancel", async () => {
   const calls = { create: [], update: [] };
   const subscription = {
     id: "sub_weekly_test",
@@ -71,7 +99,7 @@ test("weekly Stripe schedules charge eight installments and then cancel", async 
   assert.equal(calls.update[0].payload.end_behavior, "cancel");
   assert.deepEqual(calls.update[0].payload.phases[0].duration, {
     interval: "week",
-    interval_count: WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
+    interval_count: 13,
   });
   assert.deepEqual(calls.update[0].payload.phases[0].items, [
     { price: "price_weekly_test", quantity: 1 },

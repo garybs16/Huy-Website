@@ -13,7 +13,7 @@ export function createCohortsRouter({ enrollmentDb }) {
         .filter(
           (cohort) =>
             cohort.programId === PUBLIC_PROGRAM_ID &&
-            cohort.scheduleLabel?.toLowerCase() !== "weekend"
+            !["weekend", "evening"].includes(cohort.scheduleLabel?.toLowerCase())
         ),
     });
   });

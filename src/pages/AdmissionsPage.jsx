@@ -5,7 +5,6 @@ import { RefundPolicy } from "../components/RefundPolicy";
 import {
   admissionsSteps,
   faqItems,
-  locationDetails,
   miscFeeItems,
   requirementItems,
   tuitionItems,
@@ -26,7 +25,6 @@ export function AdmissionsPage() {
         <a href="#admissions-requirements">Requirements</a>
         <a href="#tuition-fees">Tuition & Fees</a>
         <a href="#refund-policy">Refund Policy</a>
-        <a href="#locations">Locations</a>
         <a href="#questions">Questions</a>
       </div>
 
@@ -89,17 +87,10 @@ export function AdmissionsPage() {
           </ul>
         </article>
 
-        <article id="locations" className="info-card">
-          <p className="section-kicker">Location details</p>
-          <h3>Classroom and clinical placement details</h3>
-          <p>{locationDetails.classroom}</p>
-          <h3>Clinical locations</h3>
-          <ul className="detail-list compact-list">
-            {locationDetails.clinicalCities.map((city) => (
-              <li key={city}>{city}</li>
-            ))}
-          </ul>
-          <p>{locationDetails.note}</p>
+        <article className="info-card">
+          <p className="section-kicker">Clinical placement</p>
+          <h3>Clinical assignments are confirmed during enrollment.</h3>
+          <p>Placement depends on the approved cohort schedule, facility availability, student readiness, and program requirements. Students are responsible for transportation.</p>
         </article>
       </div>
 

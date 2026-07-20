@@ -53,7 +53,7 @@ export function CareerQuizPage() {
     <section className="section section-soft">
       <PageIntro
         kicker="Career Quiz Assessment"
-        title="Explore the kind of future that feels most like you."
+        title={<>Explore the future that <span className="quiz-title-emphasis">feels most like you.</span></>}
         description="This short reflection is built to feel more like future-self exploration than a traditional test. Choose the answer that feels closest, even if more than one could fit."
         accent={`${answeredCount} of ${quizQuestions.length} answered`}
         note="Results are reflective, not diagnostic, and are meant to gently connect your strengths to people-centered career paths."

@@ -39,19 +39,21 @@ export function RegisterPage({
     }
   }, [checkoutClientSecret]);
 
-  const registrationSteps = [
-    "Review the CNA program details.",
-    "Select the CNA cohort with the best timing and available seats.",
-    "Choose full tuition or the eight-payment weekly plan before checkout.",
-  ];
+  const registrationSteps = ["Student details", "Training plan", "Eligibility & policy", "Confirmation", "Payment"];
+  const isPaymentPlan = ["weekly", "biweekly"].includes(enrollmentForm.paymentOption);
   const dueTodayCents =
-    selectedCohort && enrollmentForm.paymentOption === "deposit" && selectedCohort.allowPaymentPlan
+    selectedCohort && isPaymentPlan && selectedCohort.allowPaymentPlan
       ? selectedCohort.paymentPlanDepositCents ?? 0
       : selectedCohort?.tuitionCents ?? 0;
   const remainingBalanceCents =
-    selectedCohort && enrollmentForm.paymentOption === "deposit" && selectedCohort.allowPaymentPlan
+    selectedCohort && isPaymentPlan && selectedCohort.allowPaymentPlan
       ? selectedCohort.paymentPlanRemainingCents ?? 0
       : 0;
+  const paymentPath = enrollmentForm.paymentOption === "weekly"
+    ? "12 weekly tuition payments"
+    : enrollmentForm.paymentOption === "biweekly"
+      ? "6 biweekly tuition payments"
+      : "Paid in full";
 
   return (
     <section className="section">
@@ -82,7 +84,7 @@ export function RegisterPage({
               View refund policy
             </Link>
           </div>
-          <div className="register-checkpoints">
+            <div className="register-checkpoints enrollment-process-steps" aria-label="Enrollment process">
             {registrationSteps.map((item, index) => (
               <div key={item} className="checkpoint-item">
                 <span className="checkpoint-number">{index + 1}</span>
@@ -103,7 +105,7 @@ export function RegisterPage({
                 <li>Remaining seats: {selectedCohort.remainingSeats}</li>
                 {selectedCohort.allowPaymentPlan ? (
                   <li>
-                    Payment plan: eight automatic weekly payments of {selectedCohort.paymentPlanDepositLabel}
+                    Payment plans: {selectedCohort.paymentPlanDepositLabel} registration fee, then 12 weekly payments of $137.50 or 6 biweekly payments of $275
                   </li>
                 ) : null}
               </ul>
@@ -123,10 +125,12 @@ export function RegisterPage({
 
         <article className="form-card register-form-card">
           <h2>Start Enrollment</h2>
-          <p className="form-helper">Choose the CNA program and cohort, then submit student details for the next step.</p>
+          <p className="form-helper">Complete each section, review the required policies, and confirm the payment schedule before checkout.</p>
           {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}
 
           <form className="form-stack" onSubmit={onSubmit}>
+            <fieldset className="enrollment-form-section">
+              <legend><span>1</span> Student details</legend>
             <div className="form-grid two-up">
               <label>
                 <span>Student full name</span>
@@ -145,7 +149,7 @@ export function RegisterPage({
               </label>
               <label>
                 <span>Phone</span>
-                <input name="phone" type="tel" value={enrollmentForm.phone} onChange={onInput} />
+                <input name="phone" type="tel" value={enrollmentForm.phone} onChange={onInput} required />
               </label>
             </div>
 
@@ -190,7 +194,10 @@ export function RegisterPage({
                 />
               </label>
             </div>
+            </fieldset>
 
+            <fieldset className="enrollment-form-section">
+              <legend><span>2</span> Training plan</legend>
             <div className="form-grid two-up">
               <label>
                 <span>CNA program</span>
@@ -226,6 +233,7 @@ export function RegisterPage({
                 </select>
               </label>
             </div>
+            </fieldset>
 
             {selectedCohort ? (
               <section className="payment-choice-block">
@@ -233,8 +241,8 @@ export function RegisterPage({
                   <span className="section-kicker">Payment setup</span>
                   <h3>Choose how this seat should be reserved.</h3>
                   <p>
-                    The amount due today changes immediately. The weekly plan charges $250 today, then automatically
-                    charges seven more $250 payments once per week.
+                    Deferred plans collect the $250 non-refundable registration fee today. Tuition begins after checkout
+                    as either 12 weekly payments of $137.50 or 6 biweekly payments of $275.
                   </p>
                 </div>
 
@@ -252,30 +260,29 @@ export function RegisterPage({
                     <small>Complete the full program total now and confirm the seat after payment clears.</small>
                   </label>
 
-                  <label
-                    className={`payment-choice-card ${
-                      enrollmentForm.paymentOption === "deposit" ? "is-selected" : ""
-                    } ${selectedCohort.allowPaymentPlan ? "" : "is-disabled"}`}
-                  >
+                  <label className={`payment-choice-card ${enrollmentForm.paymentOption === "weekly" ? "is-selected" : ""} ${selectedCohort.allowPaymentPlan ? "" : "is-disabled"}`}>
                     <input
                       type="radio"
                       name="paymentOption"
-                      value="deposit"
-                      checked={enrollmentForm.paymentOption === "deposit"}
+                      value="weekly"
+                      checked={enrollmentForm.paymentOption === "weekly"}
                       onChange={onInput}
                       disabled={!selectedCohort.allowPaymentPlan}
                     />
-                    <span>Weekly payment plan</span>
-                    <strong>
-                      {selectedCohort.allowPaymentPlan
-                        ? selectedCohort.paymentPlanDepositLabel
-                        : "Not available"}
-                    </strong>
+                    <span>12 weekly payments</span>
+                    <strong>{selectedCohort.allowPaymentPlan ? "$137.50 / week" : "Not available"}</strong>
                     <small>
                       {selectedCohort.allowPaymentPlan
-                        ? `${selectedCohort.paymentPlanDepositLabel} today, then seven automatic weekly payments. Total: ${selectedCohort.tuitionLabel}.`
+                        ? `${selectedCohort.paymentPlanDepositLabel} registration today, then 12 automatic weekly tuition payments beginning in 7 days. Total: ${selectedCohort.tuitionLabel}.`
                         : "This cohort requires full tuition at checkout."}
                     </small>
+                  </label>
+
+                  <label className={`payment-choice-card ${enrollmentForm.paymentOption === "biweekly" ? "is-selected" : ""} ${selectedCohort.allowPaymentPlan ? "" : "is-disabled"}`}>
+                    <input type="radio" name="paymentOption" value="biweekly" checked={enrollmentForm.paymentOption === "biweekly"} onChange={onInput} disabled={!selectedCohort.allowPaymentPlan} />
+                    <span>6 biweekly payments</span>
+                    <strong>{selectedCohort.allowPaymentPlan ? "$275 / 2 weeks" : "Not available"}</strong>
+                    <small>{selectedCohort.allowPaymentPlan ? `${selectedCohort.paymentPlanDepositLabel} registration today, then 6 automatic biweekly tuition payments beginning in 14 days. Total: ${selectedCohort.tuitionLabel}.` : "This cohort requires full tuition at checkout."}</small>
                   </label>
                 </div>
 
@@ -290,7 +297,7 @@ export function RegisterPage({
                   </div>
                   <div>
                     <span>Payment path</span>
-                    <strong>{selectedCohort.allowPaymentPlan && enrollmentForm.paymentOption === "deposit" ? "8 weekly payments" : "Paid in full"}</strong>
+                    <strong>{paymentPath}</strong>
                   </div>
                 </div>
               </section>
@@ -307,12 +314,36 @@ export function RegisterPage({
               />
             </label>
 
+            <fieldset className="enrollment-form-section policy-acknowledgment-section">
+              <legend><span>3</span> Eligibility and policy review</legend>
+              <details>
+                <summary>Review Terms of Service and student responsibilities</summary>
+                <p>Students must provide accurate information, meet admissions and clinical-clearance requirements, attend all required instruction, complete required theory and clinical hours, follow the Student Handbook and clinical-facility policies, and remain current on the selected payment schedule.</p>
+                <p>Program completion, state-exam passage, certification, employment, wages, clinical placement, and admission to another nursing program are not guaranteed.</p>
+              </details>
+              <details>
+                <summary>Review Privacy and Refund policies</summary>
+                <p>Student information may be used to process enrollment, maintain records, collect payments, provide instruction, coordinate clinical training, communicate required updates, and satisfy regulatory obligations. Payments are processed securely through Stripe.</p>
+                <Link to="/admissions#refund-policy" className="card-action-link">Open the full Refund and Cancellation Policy</Link>
+              </details>
+              <label className="policy-checkbox-row">
+                <input type="checkbox" name="policyAcknowledged" checked={enrollmentForm.policyAcknowledged} onChange={onInput} required />
+                <span>I acknowledge that I have reviewed and agree to First Step Healthcare Academy’s Terms of Service, Privacy Policy, Refund and Cancellation Policy, and applicable Payment-Plan Terms. I understand that payment alone does not guarantee clinical placement, certification, or employment. *</span>
+              </label>
+              {isPaymentPlan ? (
+                <label className="policy-checkbox-row">
+                  <input type="checkbox" name="automaticPaymentAuthorized" checked={enrollmentForm.automaticPaymentAuthorized} onChange={onInput} required />
+                  <span>I authorize First Step Healthcare Academy and Stripe to charge my selected payment method according to the payment schedule presented to me. *</span>
+                </label>
+              ) : null}
+            </fieldset>
+
             <TurnstileWidget {...turnstile} />
             <button type="submit" className="btn btn-primary" disabled={enrollmentPending || cohorts.length === 0}>
               {enrollmentPending
                 ? "Preparing checkout..."
-                : enrollmentForm.paymentOption === "deposit"
-                  ? "Start Weekly Payment Plan"
+                : isPaymentPlan
+                  ? "Continue to Secure Payment"
                   : "Start Enrollment"}
             </button>
           </form>

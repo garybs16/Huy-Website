@@ -2,9 +2,10 @@ import express, { Router } from "express";
 import { sendPaymentCompletedEmails, sendPaymentFailedEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
 import {
-  WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
-  ensureFiniteWeeklySchedule,
+  ensureFinitePaymentSchedule,
+  getPaymentPlanTerms,
   getStripeResourceId,
+  isPaymentPlanOption,
 } from "../lib/stripe.js";
 
 function eventTimestamp(value) {
@@ -52,22 +53,29 @@ function validateEnrollmentMetadata(enrollment, metadata) {
   if (
     metadata?.checkoutPurpose === "payment_plan" &&
     (
-      enrollment.paymentOption !== "deposit" ||
+      !isPaymentPlanOption(enrollment.paymentOption) ||
       Number(metadata?.installmentsTotal ?? 0) !== Number(enrollment.paymentInstallmentsTotal ?? 0) ||
-      metadata?.paymentInterval !== "week"
+      metadata?.paymentInterval !== enrollment.paymentInterval
     )
   ) {
-    throw new Error("Stripe weekly payment metadata did not match the enrollment schedule.");
+    throw new Error("Stripe payment-plan metadata did not match the enrollment schedule.");
   }
 }
 
-async function attachWeeklySchedule({ stripeClient, enrollmentDb, enrollment, subscriptionId }) {
-  const scheduleDetails = await ensureFiniteWeeklySchedule(stripeClient, {
+async function attachPaymentPlanSchedule({ stripeClient, enrollmentDb, enrollment, subscriptionId }) {
+  const terms = getPaymentPlanTerms(
+    enrollment.paymentOption,
+    enrollment.tuitionTotalCents,
+    enrollment.paymentAmountCents
+  );
+  const scheduleDetails = await ensureFinitePaymentSchedule(stripeClient, {
     subscriptionId,
     enrollmentId: enrollment.id,
     cohortId: enrollment.cohortId,
     programId: enrollment.programId,
-    installmentsTotal: enrollment.paymentInstallmentsTotal || WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
+    paymentOption: enrollment.paymentOption,
+    tuitionTotalCents: enrollment.tuitionTotalCents,
+    registrationFeeCents: enrollment.paymentAmountCents,
   });
 
   const attachedEnrollment = enrollmentDb.attachStripeSubscription({
@@ -76,8 +84,8 @@ async function attachWeeklySchedule({ stripeClient, enrollmentDb, enrollment, su
     subscriptionId,
     scheduleId: scheduleDetails.scheduleId,
     nextPaymentDueAt: scheduleDetails.nextPaymentDueAt,
-    installmentsTotal: enrollment.paymentInstallmentsTotal || WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
-    interval: "week",
+    installmentsTotal: enrollment.paymentInstallmentsTotal || terms.installmentsTotal,
+    interval: enrollment.paymentInterval || terms.paymentInterval,
   });
 
   return { enrollment: attachedEnrollment, scheduleDetails };
@@ -103,7 +111,7 @@ function announceCompletedPayment({ enrollmentDb, notifier, emailer, paymentResu
   });
 }
 
-async function handleWeeklyCheckoutCompleted({
+async function handlePaymentPlanCheckoutCompleted({
   event,
   session,
   stripeClient,
@@ -115,33 +123,24 @@ async function handleWeeklyCheckoutCompleted({
   const subscriptionId = getStripeResourceId(session.subscription);
 
   if (session.mode !== "subscription" || !subscriptionId) {
-    throw new Error("Weekly payment checkout did not create a Stripe subscription.");
+    throw new Error("Payment-plan checkout did not create a Stripe subscription.");
   }
 
   const expectedAmount = Number(enrollment.paymentAmountCents ?? 0);
 
   if (Number(session.amount_total ?? 0) !== expectedAmount) {
-    throw new Error("Stripe weekly payment amount did not match the enrollment installment.");
+    throw new Error("Stripe checkout amount did not match the registration fee.");
   }
 
-  const { enrollment: attachedEnrollment, scheduleDetails } = await attachWeeklySchedule({
+  const { enrollment: attachedEnrollment, scheduleDetails } = await attachPaymentPlanSchedule({
     stripeClient,
     enrollmentDb,
     enrollment,
     subscriptionId,
   });
-  const invoiceId = getStripeResourceId(session.invoice) ?? scheduleDetails.latestInvoiceId;
-
-  if (!invoiceId) {
-    throw new Error("Stripe weekly checkout did not identify its first invoice.");
-  }
-
-  const paymentResult = enrollmentDb.recordSubscriptionPayment({
+  const startedEnrollment = enrollmentDb.markPaymentPlanRegistrationPaid({
     enrollmentId: attachedEnrollment.id,
-    invoiceId,
     subscriptionId,
-    amountCents: expectedAmount,
-    currency: session.currency,
     paidAt: eventTimestamp(event.created),
     nextPaymentDueAt: scheduleDetails.nextPaymentDueAt,
   });
@@ -150,7 +149,7 @@ async function handleWeeklyCheckoutCompleted({
     enrollmentDb,
     notifier,
     emailer,
-    paymentResult,
+    paymentResult: { applied: true, enrollment: startedEnrollment },
     amountPaidCents: expectedAmount,
   });
 }
@@ -164,21 +163,36 @@ async function handleInvoicePaid({ event, invoice, stripeClient, enrollmentDb, n
       ? enrollmentDb.getEnrollmentByStripeSubscriptionId(subscriptionId)
       : null;
 
-  if (!enrollment || enrollment.paymentOption !== "deposit" || !subscriptionId) {
+  if (!enrollment || !isPaymentPlanOption(enrollment.paymentOption) || !subscriptionId) {
     return;
   }
 
   validateEnrollmentMetadata(enrollment, metadata);
-  const { enrollment: attachedEnrollment } = await attachWeeklySchedule({
+  const { enrollment: attachedEnrollment } = await attachPaymentPlanSchedule({
     stripeClient,
     enrollmentDb,
     enrollment,
     subscriptionId,
   });
   const amountPaidCents = Number(invoice.amount_paid ?? 0);
+  const terms = getPaymentPlanTerms(
+    attachedEnrollment.paymentOption,
+    attachedEnrollment.tuitionTotalCents,
+    attachedEnrollment.paymentAmountCents
+  );
 
-  if (invoice.currency !== "usd" || amountPaidCents !== Number(attachedEnrollment.paymentAmountCents ?? 0)) {
-    throw new Error("Stripe invoice amount did not match the weekly enrollment installment.");
+  if (amountPaidCents === Number(attachedEnrollment.paymentAmountCents) && attachedEnrollment.paymentInstallmentsPaid === 0) {
+    enrollmentDb.markPaymentPlanRegistrationPaid({
+      enrollmentId: attachedEnrollment.id,
+      subscriptionId,
+      paidAt: eventTimestamp(invoice.status_transitions?.paid_at ?? event.created),
+      nextPaymentDueAt: invoiceNextPaymentAt(invoice),
+    });
+    return;
+  }
+
+  if (invoice.currency !== "usd" || amountPaidCents !== terms.installmentAmountCents) {
+    throw new Error("Stripe invoice amount did not match the selected tuition installment.");
   }
 
   const paymentResult = enrollmentDb.recordSubscriptionPayment({
@@ -210,7 +224,7 @@ function handleInvoicePaymentFailed({ event, invoice, enrollmentDb, notifier, em
       ? enrollmentDb.getEnrollmentByStripeSubscriptionId(subscriptionId)
       : null;
 
-  if (!enrollment || enrollment.paymentOption !== "deposit" || !subscriptionId) {
+  if (!enrollment || !isPaymentPlanOption(enrollment.paymentOption) || !subscriptionId) {
     return;
   }
 
@@ -285,7 +299,7 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
         validateEnrollmentMetadata(enrollment, session.metadata);
 
         if (session.metadata?.checkoutPurpose === "payment_plan") {
-          await handleWeeklyCheckoutCompleted({
+          await handlePaymentPlanCheckoutCompleted({
             event,
             session,
             stripeClient,

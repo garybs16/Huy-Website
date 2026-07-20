@@ -38,23 +38,29 @@ test("weekly checkout uses a Stripe-compatible subscription payload", async () =
       meetingPattern: "Monday through Friday",
     },
     pricing: {
-      paymentOption: "deposit",
+      paymentOption: "weekly",
       paymentAmountCents: 25_000,
-      tuitionTotalCents: 200_000,
-      balanceDueCents: 175_000,
-      paymentInstallmentsTotal: 8,
+      installmentAmountCents: 13_750,
+      tuitionTotalCents: 190_000,
+      balanceDueCents: 165_000,
+      paymentInstallmentsTotal: 12,
       paymentInterval: "week",
-      checkoutLabel: "Weekly tuition payment plan",
+      interval: "week",
+      intervalCount: 1,
+      trialDays: 7,
+      checkoutLabel: "12-payment weekly tuition plan",
     },
     purpose: "payment_plan",
   });
 
   assert.equal(capturedPayload.mode, "subscription");
   assert.equal(capturedPayload.submit_type, undefined);
-  assert.deepEqual(capturedPayload.line_items[0].price_data.recurring, {
+  assert.equal(capturedPayload.line_items[0].price_data.recurring, undefined);
+  assert.deepEqual(capturedPayload.line_items[1].price_data.recurring, {
     interval: "week",
     interval_count: 1,
   });
-  assert.equal(capturedPayload.metadata.installmentsTotal, "8");
+  assert.equal(capturedPayload.metadata.installmentsTotal, "12");
   assert.equal(capturedPayload.subscription_data.metadata.paymentInterval, "week");
+  assert.equal(capturedPayload.subscription_data.trial_period_days, 7);
 });

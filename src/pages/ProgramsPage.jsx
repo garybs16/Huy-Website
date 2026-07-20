@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
+import { RefundPolicy } from "../components/RefundPolicy";
 import {
   miscFeeItems,
   programRequirementSections,
   requirementItems,
   tuitionItems,
+  thirdPartyFeeItems,
+  thirdPartyFeeNotice,
 } from "../siteData";
 
 const certificationSteps = [
@@ -18,7 +21,7 @@ const certificationSteps = [
   {
     step: "Step 2",
     title: "On-Site Clinical Training",
-    time: "103 hours",
+    time: "100 hours",
     detail:
       "Strengthen your skills with hands-on clinical experience at approved California locations. Additional lab hours may be required during clinicals.",
   },
@@ -181,6 +184,26 @@ export function ProgramsPage({ programLoadError }) {
             ))}
           </ul>
         </article>
+      </div>
+
+      <div className="container program-frame">
+        <article className="info-card third-party-fees-card">
+          <p className="section-kicker">Required cost disclosure</p>
+          <h2>Third-Party Miscellaneous Fees</h2>
+          <div className="third-party-fee-grid">
+            {thirdPartyFeeItems.map((item) => (
+              <div key={item.title} className="third-party-fee-item">
+                <div><strong>{item.title}</strong><p>{item.detail}</p></div>
+                <span>{item.amount}</span>
+              </div>
+            ))}
+          </div>
+          <p className="card-note"><strong>{thirdPartyFeeNotice}</strong></p>
+        </article>
+      </div>
+
+      <div className="container program-frame" id="refund-policy">
+        <RefundPolicy />
       </div>
 
       <div id="program-next-step" className="container program-frame">

@@ -562,10 +562,10 @@ export function AdminPage({
                       checked={cohortForm.allowPaymentPlan}
                       onChange={handleCohortInput}
                     />
-                    <span>Offer an eight-payment weekly plan for this cohort</span>
+                    <span>Offer 12-weekly and 6-biweekly payment plans for this cohort</span>
                   </label>
                   <label>
-                    <span>Weekly installment cents (tuition must equal 8 installments)</span>
+                    <span>Registration fee cents (normally 25000)</span>
                     <input
                       name="paymentPlanDepositCents"
                       type="number"
@@ -604,7 +604,7 @@ export function AdminPage({
                         <p>{item.remainingSeats} seats left | {item.tuitionLabel}</p>
                         <p>
                           {item.allowPaymentPlan
-                            ? `Plan enabled | 8 weekly payments of ${item.paymentPlanDepositLabel}`
+                            ? `Plans enabled | ${item.paymentPlanDepositLabel} registration fee`
                             : "Full payment only"}
                         </p>
                       </div>
@@ -649,14 +649,14 @@ export function AdminPage({
                       </div>
                       <div>
                         <p>{item.cohortTitle}</p>
-                        <p>{item.paymentOption === "deposit" ? "Weekly payment plan" : "Paid in full"}</p>
+                        <p>{["weekly", "biweekly"].includes(item.paymentOption) ? `${item.paymentOption} payment plan` : "Paid in full"}</p>
                         <span>
                           {item.paymentStatus}
-                          {item.paymentOption === "deposit" && item.balanceDueLabel ? ` | ${item.balanceDueLabel} left` : ""}
+                          {["weekly", "biweekly"].includes(item.paymentOption) && item.balanceDueLabel ? ` | ${item.balanceDueLabel} left` : ""}
                         </span>
-                        {item.paymentOption === "deposit" ? (
+                        {["weekly", "biweekly"].includes(item.paymentOption) ? (
                           <>
-                            <span>{item.paymentInstallmentsPaid} of {item.paymentInstallmentsTotal} weekly payments</span>
+                            <span>{item.paymentInstallmentsPaid} of {item.paymentInstallmentsTotal} tuition payments</span>
                             <span>{item.amountPaidLabel} paid</span>
                             {item.nextPaymentDueAt ? <span>Next: {formatDateLabel(item.nextPaymentDueAt)}</span> : null}
                           </>

@@ -14,10 +14,11 @@ export function SiteCtaBand() {
         <div className="site-cta-panel">
           <div className="site-cta-copy">
             <p className="section-kicker">Plan your start with confidence</p>
-            <h2>Move from interest to enrollment with a clear next step.</h2>
+            <h2>Let’s Help You Find the Right Next Step</h2>
             <p>
-              Review the current schedule, choose the right training path, and speak with admissions
-              before seats tighten.
+              Whether you have questions about tuition, scheduling, requirements, or whether the
+              program is right for you, our admissions team is here to help. You can also explore
+              upcoming cohorts whenever you are ready.
             </p>
 
             <div className="button-row">

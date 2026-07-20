@@ -98,6 +98,8 @@ const initialEnrollmentState = {
   programId: "",
   cohortId: "",
   paymentOption: "full",
+  policyAcknowledged: false,
+  automaticPaymentAuthorized: false,
   notes: "",
 };
 
@@ -195,12 +197,12 @@ function AppEffects({ setEnrollmentStatus }) {
         } else if (["deposit_paid", "payment_plan_active"].includes(enrollment.paymentStatus)) {
           setEnrollmentStatus({
             type: "success",
-            text: `Weekly payment plan active. Payment ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} is complete for enrollment ${enrollment.enrollmentId}. Stripe will automatically collect the remaining weekly payments.`,
+            text: `Automatic payment plan active. Tuition payment ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} is complete for enrollment ${enrollment.enrollmentId}. Stripe will collect the remaining scheduled payments.`,
           });
         } else if (enrollment.paymentStatus === "installment_failed") {
           setEnrollmentStatus({
             type: "error",
-            text: "The latest weekly payment could not be collected. Please update the payment method in Stripe or contact admissions.",
+            text: "The latest automatic payment could not be collected. Please update the payment method in Stripe or contact admissions.",
           });
         } else if (checkoutStatus === "cancelled" || enrollment.paymentStatus === "checkout_expired") {
           setEnrollmentStatus({
@@ -413,7 +415,8 @@ function App() {
   }, []);
 
   const handleInquiryInput = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
+    const nextValue = type === "checkbox" ? checked : value;
     setInquiryForm((current) => ({ ...current, [name]: value }));
   };
 
@@ -427,16 +430,20 @@ function App() {
 
     setEnrollmentForm((current) => {
       if (name === "programId") {
-        return { ...current, programId: value, cohortId: "", paymentOption: "full" };
+        return { ...current, programId: nextValue, cohortId: "", paymentOption: "full", automaticPaymentAuthorized: false };
       }
 
       if (name === "cohortId") {
-        const cohort = cohorts.find((item) => item.id === value);
+        const cohort = cohorts.find((item) => item.id === nextValue);
         const paymentOption = cohort?.allowPaymentPlan ? current.paymentOption : "full";
-        return { ...current, cohortId: value, paymentOption };
+        return { ...current, cohortId: nextValue, paymentOption, automaticPaymentAuthorized: paymentOption === "full" ? false : current.automaticPaymentAuthorized };
       }
 
-      return { ...current, [name]: value };
+      if (name === "paymentOption") {
+        return { ...current, paymentOption: nextValue, automaticPaymentAuthorized: nextValue === "full" ? false : current.automaticPaymentAuthorized };
+      }
+
+      return { ...current, [name]: nextValue };
     });
   };
 
@@ -449,7 +456,9 @@ function App() {
       const nextCohortId =
         routeCohort && (!programId || routeCohort.programId === programId) ? routeCohort.id : "";
       const paymentOption =
-        routeCohort?.allowPaymentPlan && current.paymentOption === "deposit" ? "deposit" : "full";
+        routeCohort?.allowPaymentPlan && ["weekly", "biweekly"].includes(current.paymentOption)
+          ? current.paymentOption
+          : "full";
 
       if (
         current.programId === nextProgramId &&
@@ -565,6 +574,8 @@ function App() {
         emergencyContactPhone: enrollmentForm.emergencyContactPhone,
         cohortId: enrollmentForm.cohortId,
         paymentOption: enrollmentForm.paymentOption,
+        policyAcknowledged: enrollmentForm.policyAcknowledged,
+        automaticPaymentAuthorized: enrollmentForm.automaticPaymentAuthorized,
         // Send the student to Stripe's secure, Stripe-hosted checkout immediately.
         // This is the most reliable checkout surface across browsers and still
         // keeps payment tied to this exact enrollment and cohort.

@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import programsSupport from "../assets/programs-support-photo.jpg";
+import cnaGuideCover from "../assets/cna-career-starter-guide.png";
+import pathwayGuideCover from "../assets/oc-nursing-pathway-guide.png";
 import { TurnstileWidget, isTurnstileEnabled } from "../components/TurnstileWidget";
 import { submitInquiry } from "../lib/api";
 import {
   careerSupportItems,
+  guideResources,
   referralRules,
   retentionMilestones,
   studyToolItems,
@@ -210,7 +213,7 @@ export function RewardsGuidancePage() {
               </div>
               <div>
                 <strong>$250</strong>
-                <span>registration deposit</span>
+                <span>registration fee</span>
               </div>
               <div>
                 <strong>$100</strong>
@@ -316,8 +319,8 @@ export function RewardsGuidancePage() {
                   />
                 </label>
                 <label>
-                  <span>Phone number</span>
-                  <input name="phone" type="tel" value={resourceForm.phone} onChange={updateResourceField} />
+                  <span>Phone number *</span>
+                  <input name="phone" type="tel" value={resourceForm.phone} onChange={updateResourceField} required />
                 </label>
               </div>
               <TurnstileWidget
@@ -340,19 +343,19 @@ export function RewardsGuidancePage() {
             </form>
           </div>
           <div className="rg-guide-grid" aria-label="Free planning resources">
-            <article className="rg-guide-card rg-guide-card-blue">
+            <article className="rg-guide-card rg-guide-card-blue rg-guide-card-cover">
               <span>Free planning tool</span>
-              <div className="rg-guide-monogram" aria-hidden="true">CNA</div>
+              <img src={cnaGuideCover} alt="CNA Career Starter Guide cover" />
               <h3>CNA Career Starter Guide</h3>
               <p>Explore how your goals, strengths, and priorities may connect with CNA training.</p>
-              <Link to="/career-quiz">Start the career quiz <span aria-hidden="true">→</span></Link>
+              <a href={guideResources[0].href} target="_blank" rel="noreferrer">Open the guide <span aria-hidden="true">→</span></a>
             </article>
-            <article className="rg-guide-card rg-guide-card-gold">
+            <article className="rg-guide-card rg-guide-card-gold rg-guide-card-cover">
               <span>Education pathway</span>
-              <div className="rg-guide-monogram" aria-hidden="true">OC</div>
+              <img src={pathwayGuideCover} alt="Orange County Nursing School Pathway Guide cover" />
               <h3>OC Nursing School Pathway Guide</h3>
               <p>Review how CNA experience may support a longer-term LVN, RN, or BSN goal.</p>
-              <a href="#career-support">Review the pathway <span aria-hidden="true">→</span></a>
+              <a href={guideResources[1].href} target="_blank" rel="noreferrer">Open the guide <span aria-hidden="true">→</span></a>
             </article>
           </div>
         </div>
@@ -455,26 +458,26 @@ export function RewardsGuidancePage() {
           <div className="rg-centered-heading">
             <p className="section-kicker">Straightforward payment options</p>
             <h2>Choose the payment path that works for you.</h2>
-            <p>Program total is $2,000, including the $250 non-refundable registration fee.</p>
+            <p>Program total is $1,900, including the $250 non-refundable registration fee.</p>
           </div>
           <div className="rg-pricing-grid">
             <article className="rg-price-card rg-price-featured">
               <span className="rg-price-label">Option 1 - simplest</span>
               <h3>Pay in full</h3>
-              <p>Complete tuition payment before class and receive an additional $100 pay-in-full savings.</p>
+              <p>Complete the full published program amount before class.</p>
               <div className="rg-price-line"><span>Registration fee</span><strong>$250</strong></div>
-              <div className="rg-price-line"><span>Remaining tuition</span><strong>$1,750</strong></div>
-              <div className="rg-price-line rg-savings-line"><span>Pay-in-full savings</span><strong>-$100</strong></div>
+              <div className="rg-price-line"><span>Remaining tuition</span><strong>$1,650</strong></div>
               <div className="rg-price-total"><span>Total</span><strong>$1,900</strong></div>
               <Link to="/register" className="btn btn-primary">Register Now</Link>
             </article>
             <article className="rg-price-card">
               <span className="rg-price-label">Option 2 - flexible</span>
-              <h3>Start with the deposit</h3>
-              <p>Begin with the registration-fee deposit, then complete the remaining balance on the approved schedule.</p>
+              <h3>Choose a deferred plan</h3>
+              <p>Pay the registration fee today, then choose 12 weekly tuition payments or 6 biweekly tuition payments.</p>
               <div className="rg-price-line"><span>Due at registration</span><strong>$250</strong></div>
-              <div className="rg-price-line"><span>Remaining balance</span><strong>$1,750</strong></div>
-              <div className="rg-price-total"><span>Program total</span><strong>$2,000</strong></div>
+              <div className="rg-price-line"><span>12 weekly payments</span><strong>$137.50 each</strong></div>
+              <div className="rg-price-line"><span>6 biweekly payments</span><strong>$275 each</strong></div>
+              <div className="rg-price-total"><span>Program total</span><strong>$1,900</strong></div>
               <a href="#callback" className="btn btn-ghost">Discuss a Payment Plan</a>
             </article>
           </div>

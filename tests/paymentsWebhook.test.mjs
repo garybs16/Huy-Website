@@ -25,7 +25,7 @@ function createEnrollment(db) {
     endDate: "2026-09-01",
     scheduleLabel: "Weekday",
     meetingPattern: "Monday to Friday | 9:00 AM to 1:00 PM",
-    tuitionCents: 200_000,
+    tuitionCents: 190_000,
     allowPaymentPlan: true,
     paymentPlanDepositCents: 25_000,
     capacity: 20,
@@ -49,12 +49,12 @@ function createEnrollment(db) {
     notes: "Webhook integration test.",
     status: "payment_setup",
     paymentStatus: "payment_setup",
-    paymentOption: "deposit",
+    paymentOption: "weekly",
     paymentAmountCents: 25_000,
-    tuitionTotalCents: 200_000,
-    balanceDueCents: 175_000,
+    tuitionTotalCents: 190_000,
+    balanceDueCents: 165_000,
     amountPaidCents: 0,
-    paymentInstallmentsTotal: 8,
+    paymentInstallmentsTotal: 12,
     paymentInstallmentsPaid: 0,
     paymentInterval: "week",
     seatHoldExpiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
@@ -89,9 +89,9 @@ function invoiceEvent({ id, type, invoiceId, amountPaid = 25_000, amountDue = 25
               enrollmentId: "enrollment_webhook_test",
               cohortId: "webhook-cohort",
               programId: "webhook-program",
-              paymentOption: "deposit",
+              paymentOption: "weekly",
               checkoutPurpose: "payment_plan",
-              installmentsTotal: "8",
+              installmentsTotal: "12",
               paymentInterval: "week",
             },
           },
@@ -196,9 +196,9 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
           enrollmentId: "enrollment_webhook_test",
           cohortId: "webhook-cohort",
           programId: "webhook-program",
-          paymentOption: "deposit",
+          paymentOption: "weekly",
           checkoutPurpose: "payment_plan",
-          installmentsTotal: "8",
+          installmentsTotal: "12",
           paymentInterval: "week",
         },
       },
@@ -209,22 +209,24 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
 
   let enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentStatus, "payment_plan_active");
-  assert.equal(enrollment.paymentInstallmentsPaid, 1);
+  assert.equal(enrollment.paymentInstallmentsPaid, 0);
   assert.equal(enrollment.amountPaidCents, 25_000);
   assert.equal(enrollment.stripeSubscriptionScheduleId, "sub_sched_weekly_test");
   assert.equal(schedule.end_behavior, "cancel");
-  assert.deepEqual(schedule.phases[0].duration, { interval: "week", interval_count: 8 });
+  assert.deepEqual(schedule.phases[0].duration, { interval: "week", interval_count: 13 });
 
   await deliver(
     invoiceEvent({
       id: "evt_invoice_weekly_2",
       type: "invoice.paid",
       invoiceId: "in_weekly_2",
+      amountPaid: 13_750,
+      amountDue: 13_750,
     })
   );
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
-  assert.equal(enrollment.paymentInstallmentsPaid, 2);
-  assert.equal(enrollment.amountPaidCents, 50_000);
+  assert.equal(enrollment.paymentInstallmentsPaid, 1);
+  assert.equal(enrollment.amountPaidCents, 38_750);
 
   await deliver(
     invoiceEvent({
@@ -232,12 +234,13 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
       type: "invoice.payment_failed",
       invoiceId: "in_weekly_3",
       amountPaid: 0,
+      amountDue: 13_750,
     })
   );
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentStatus, "installment_failed");
-  assert.equal(enrollment.amountPaidCents, 50_000);
-  assert.equal(enrollmentDb.listEnrollmentPayments(enrollment.id).length, 3);
+  assert.equal(enrollment.amountPaidCents, 38_750);
+  assert.equal(enrollmentDb.listEnrollmentPayments(enrollment.id).length, 2);
   assert.ok(notifications.some((message) => message.type === "payment.failed"));
   assert.ok(emails.some((message) => message.subject.includes("Payment received")));
   assert.ok(emails.some((message) => message.subject.includes("Weekly payment needs attention")));

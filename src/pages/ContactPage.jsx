@@ -37,10 +37,8 @@ export function ContactPage({
             follow-up from admissions.
           </p>
           <ul className="detail-list">
-            <li>Coordinator: {contactDetails.coordinator}</li>
             <li>Phone: {contactDetails.phone}</li>
             <li>Email: {contactDetails.email}</li>
-            <li>Address: {contactDetails.address}</li>
             <li>Office hours: {contactDetails.officeHours}</li>
           </ul>
           <div className="contact-action-row">

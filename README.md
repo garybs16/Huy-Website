@@ -13,7 +13,7 @@ A full-stack admissions and enrollment website for First Step Healthcare Academy
 - Express API for admissions inquiries, waitlist requests, enrollments, cohorts, programs, admin operations, Stripe payments, and health checks
 - SQLite persistence through `better-sqlite3` for cohorts, enrollments, inquiries, waitlist, admin sessions, audit logs, and backups
 - Protected admin dashboard with signed `HttpOnly` sessions, CSRF checks, PBKDF2 password hashing, API-key fallback, and audit logging
-- Stripe Checkout integration for full tuition and deposit-based payment plans
+- Stripe Checkout integration for full tuition, 12-payment weekly plans, and 6-payment biweekly plans
 - Verification scripts covering build output, content regressions, backend contract checks, production serving behavior, database readiness, and backups
 
 Resume/project brief: [docs/RESUME_PROJECT.md](./docs/RESUME_PROJECT.md)
@@ -37,7 +37,7 @@ This project now includes:
 - SQLite-backed storage for cohorts, enrollments, inquiries, and waitlist
 - Provider-neutral deployment support with Docker, Procfile, health checks, and persistent-disk configuration
 - Stripe Checkout support for online tuition payment
-- Cohort-level payment-plan support with deposit-now / balance-later tracking
+- Cohort-level payment-plan support with registration-fee and scheduled tuition tracking
 - An admin dashboard section in the frontend backed by protected APIs
 - Admin CRUD for programs and cohorts backed by SQLite
 - Session-based admin login with signed cookies, audit logging, and API-key fallback
@@ -113,7 +113,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `POST /api/inquiries`: submit contact inquiry
 - `POST /api/waitlist`: submit waitlist request
 - `GET /api/cohorts`: live cohort availability with remaining seats
-- `POST /api/enrollments`: create enrollment with `paymentOption: "full" | "deposit"` and return Stripe Checkout URL when configured
+- `POST /api/enrollments`: create enrollment with `paymentOption: "full" | "weekly" | "biweekly"` and return Stripe Checkout URL when configured
 - `GET /api/enrollments/:id/status`: enrollment payment/status verification after checkout
 - `GET /api/admin/overview`: admin metrics and cohort capacity summary
 - `GET /api/admin/export`: admin-only operational JSON export
@@ -187,8 +187,8 @@ npm run admin:hash -- "YourStrongAdminPassword"
 
 ## Payment flow
 
-- Each cohort can be configured for full payment only, or full payment plus a deposit plan.
-- A deposit plan charges only the configured deposit amount through Stripe Checkout.
+- Each cohort can be configured for full payment only, or full payment plus weekly and biweekly deferred-payment plans.
+- Deferred plans collect the configured registration fee at checkout, then charge 12 weekly or 6 biweekly tuition installments.
 - The remaining balance stays attached to the enrollment record and is surfaced in admin for follow-up.
 - The current implementation is a school-friendly MVP payment plan, not automatic recurring billing.
 

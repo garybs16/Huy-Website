@@ -8,13 +8,12 @@ export const navItems = [
 ];
 
 export const contactDetails = {
-  coordinator: "Huy Hoang",
+  coordinator: "Admissions Team",
   brand: "First Step Healthcare Academy",
   phone: "(949) 407-9581",
   phoneHref: "tel:+19494079581",
   email: "huyh@firststepha.org",
   emailHref: "mailto:huyh@firststepha.org",
-  address: "2445 W. Chapman Ave. Suite 210, Orange, CA 92868",
   officeHours: "Monday to Friday | 8:00 AM to 5:00 PM",
 };
 
@@ -85,21 +84,6 @@ export const supportItems = [
   },
 ];
 
-export const aboutLeaderItems = [
-  {
-    role: "Founder",
-    name: contactDetails.coordinator,
-    detail:
-      "Huy Hoang founded First Step Healthcare Academy to give future healthcare workers a structured, supportive place to begin CNA training with confidence.",
-  },
-  {
-    role: "Technical Co-Founder",
-    name: "Gary Samuel",
-    detail:
-      "Gary Samuel supports the digital systems, student-facing workflows, and technical foundation that help the academy operate clearly and efficiently.",
-  },
-];
-
 export const trustProofItems = [
   {
     title: "Approved CNA training",
@@ -111,7 +95,7 @@ export const trustProofItems = [
   },
   {
     title: "Direct admissions contact",
-    detail: `Students can reach ${contactDetails.coordinator} directly by phone or email for enrollment questions.`,
+    detail: "Students can reach the admissions team directly by phone or email for enrollment questions.",
   },
 ];
 
@@ -256,19 +240,40 @@ export const registrationChecklist = [
 export const tuitionItems = [
   {
     title: "CNA Cohorts",
-    amount: "$1,750 + $250",
+    amount: "$1,650 + $250",
     detail:
-      "Published CNA tuition is $1,750 plus a $250 non-refundable registration fee, for a $2,000 program total.",
+      "Published CNA tuition is $1,650 plus a $250 non-refundable registration fee, for a $1,900 program total.",
   },
 ];
 
 export const miscFeeItems = [
   "Published CNA tuition and fees are reviewed before enrollment and may change for future cohorts",
   "Eligible veterans may receive an additional $100 discount when approved before enrollment",
-  "$250 registration fee is non-refundable and may be used as the payment-plan deposit",
-  "Payment plan: eight automatic weekly payments of $250, beginning at checkout, for the $2,000 program total",
-  "Additional possible costs may include uniform or dress code items, textbooks or learning materials, health clearance documents, TB testing, required health and safety certifications, Live Scan, and state testing fees",
+  "$250 registration fee is non-refundable and is due at checkout for either deferred-payment plan",
+  "Deferred payment plans: $250 non-refundable registration fee due at checkout, then choose 12 weekly tuition payments of $137.50 or 6 biweekly tuition payments of $275",
+  "Third-party charges are listed separately below so students can review them before enrollment",
   "Payment deadlines are provided before enrollment and must stay current for continued participation",
+];
+
+export const thirdPartyFeeItems = [
+  { title: "Books and uniform", amount: "$150", detail: "Includes one set of uniforms." },
+  { title: "Live Scan fee (fingerprinting)", amount: "$80", detail: "Paid for the required background screening." },
+  { title: "Online technology fee", amount: "$100", detail: "Applies only to online students." },
+  { title: "State exam fee", amount: "$130", detail: "Paid directly to the testing center vendor." },
+];
+
+export const thirdPartyFeeNotice =
+  "Third-party miscellaneous fees are non-refundable and non-transferable.";
+
+export const guideResources = [
+  {
+    title: "CNA Career Starter Guide",
+    href: "https://drive.google.com/file/d/1mTeM3TDSdtSDMcsE-MbfyN1CzVTeQwmI/view?usp=drive_link",
+  },
+  {
+    title: "OC Nursing School Pathway Guide",
+    href: "https://drive.google.com/file/d/1brIME0OkJE7gfIIbekqjUiFv-c0tAhpg/view?usp=sharing",
+  },
 ];
 
 export const refundPolicy = {
@@ -280,7 +285,7 @@ export const refundPolicy = {
   columns: [
     "Withdrawal / Cancellation Timing",
     "Refund for Full-Pay & Klarna/AfterPay Students",
-    "Obligation for Deferred-Pay Students to SisuCare",
+    "Tuition Obligation for Deferred-Pay Students",
   ],
   rows: [
     {
@@ -320,7 +325,6 @@ export const collectionsChargebackPolicy = {
 };
 
 export const locationDetails = {
-  classroom: "2445 W. Chapman Ave. Suite 210, Orange, CA 92868",
   clinicalCities: ["Orange", "Anaheim", "Santa Ana", "Garden Grove", "Fullerton", "Other nearby cities as assigned"],
   note: "Clinical site placement depends on cohort schedule, facility availability, student placement needs, and program requirements. Students are responsible for transportation.",
 };

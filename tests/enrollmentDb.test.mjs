@@ -23,10 +23,14 @@ function enrollmentInput(overrides = {}) {
     notes: "Automated enrollment database test.",
     status: "payment_setup",
     paymentStatus: "payment_setup",
-    paymentOption: "deposit",
+    paymentOption: "weekly",
     paymentAmountCents: 25_000,
-    tuitionTotalCents: 100_000,
-    balanceDueCents: 75_000,
+    tuitionTotalCents: 85_000,
+    balanceDueCents: 60_000,
+    paymentInstallmentsTotal: 12,
+    paymentInterval: "week",
+    policyAcknowledgedAt: new Date().toISOString(),
+    automaticPaymentAuthorizedAt: new Date().toISOString(),
     seatHoldExpiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
     ...overrides,
   };
@@ -69,9 +73,9 @@ test("EnrollmentDatabase stores enrollment records and protects cohort capacity"
 
   const enrollment = db.createEnrollment(enrollmentInput());
 
-  assert.equal(enrollment.paymentOption, "deposit");
+  assert.equal(enrollment.paymentOption, "weekly");
   assert.equal(enrollment.paymentAmountCents, 25_000);
-  assert.equal(enrollment.balanceDueCents, 75_000);
+  assert.equal(enrollment.balanceDueCents, 60_000);
 
   assert.throws(
     () => db.createEnrollment(enrollmentInput({ id: crypto.randomUUID() })),
@@ -82,8 +86,7 @@ test("EnrollmentDatabase stores enrollment records and protects cohort capacity"
   const replacement = db.createEnrollment(
     enrollmentInput({
       id: crypto.randomUUID(),
-      paymentInstallmentsTotal: 4,
-      paymentInterval: "week",
+      paymentInstallmentsTotal: 12,
     })
   );
 
@@ -95,65 +98,68 @@ test("EnrollmentDatabase stores enrollment records and protects cohort capacity"
     subscriptionId: "sub_weekly_test",
     scheduleId: "sub_sched_weekly_test",
     nextPaymentDueAt: "2026-08-08T12:00:00.000Z",
-    installmentsTotal: 4,
+    installmentsTotal: 12,
     interval: "week",
+  });
+
+  db.markPaymentPlanRegistrationPaid({
+    enrollmentId: replacement.id,
+    subscriptionId: "sub_weekly_test",
+    paidAt: "2026-08-01T12:00:00.000Z",
+    nextPaymentDueAt: "2026-08-08T12:00:00.000Z",
   });
 
   const firstPayment = db.recordSubscriptionPayment({
     enrollmentId: replacement.id,
     invoiceId: "in_weekly_1",
     subscriptionId: "sub_weekly_test",
-    amountCents: 25_000,
+    amountCents: 5_000,
     paidAt: "2026-08-01T12:00:00.000Z",
     nextPaymentDueAt: "2026-08-08T12:00:00.000Z",
   });
   assert.equal(firstPayment.applied, true);
   assert.equal(firstPayment.enrollment.paymentStatus, "payment_plan_active");
-  assert.equal(firstPayment.enrollment.amountPaidCents, 25_000);
-  assert.equal(firstPayment.enrollment.balanceDueCents, 75_000);
+  assert.equal(firstPayment.enrollment.amountPaidCents, 30_000);
+  assert.equal(firstPayment.enrollment.balanceDueCents, 55_000);
   assert.equal(firstPayment.enrollment.paymentInstallmentsPaid, 1);
 
   const replayedPayment = db.recordSubscriptionPayment({
     enrollmentId: replacement.id,
     invoiceId: "in_weekly_1",
     subscriptionId: "sub_weekly_test",
-    amountCents: 25_000,
+    amountCents: 5_000,
   });
   assert.equal(replayedPayment.applied, false);
-  assert.equal(replayedPayment.enrollment.amountPaidCents, 25_000);
+  assert.equal(replayedPayment.enrollment.amountPaidCents, 30_000);
 
   const failedPayment = db.recordSubscriptionPaymentFailed({
     enrollmentId: replacement.id,
     invoiceId: "in_weekly_2",
     subscriptionId: "sub_weekly_test",
-    amountCents: 25_000,
+    amountCents: 5_000,
     attemptCount: 1,
     failedAt: "2026-08-08T12:00:00.000Z",
   });
   assert.equal(failedPayment.enrollment.paymentStatus, "installment_failed");
-  assert.equal(failedPayment.enrollment.amountPaidCents, 25_000);
+  assert.equal(failedPayment.enrollment.amountPaidCents, 30_000);
 
-  for (const [invoiceId, paidAt] of [
-    ["in_weekly_2", "2026-08-09T12:00:00.000Z"],
-    ["in_weekly_3", "2026-08-15T12:00:00.000Z"],
-    ["in_weekly_4", "2026-08-22T12:00:00.000Z"],
-  ]) {
+  for (let installment = 2; installment <= 12; installment += 1) {
     db.recordSubscriptionPayment({
       enrollmentId: replacement.id,
-      invoiceId,
+      invoiceId: `in_weekly_${installment}`,
       subscriptionId: "sub_weekly_test",
-      amountCents: 25_000,
-      paidAt,
+      amountCents: 5_000,
+      paidAt: new Date(Date.UTC(2026, 7, 1 + installment * 7, 12)).toISOString(),
       nextPaymentDueAt: "2026-08-29T12:00:00.000Z",
     });
   }
 
   const completedPlan = db.getEnrollmentById(replacement.id);
   assert.equal(completedPlan.paymentStatus, "paid");
-  assert.equal(completedPlan.amountPaidCents, 100_000);
+  assert.equal(completedPlan.amountPaidCents, 85_000);
   assert.equal(completedPlan.balanceDueCents, 0);
-  assert.equal(completedPlan.paymentInstallmentsPaid, 4);
-  assert.equal(db.listEnrollmentPayments(replacement.id).length, 4);
+  assert.equal(completedPlan.paymentInstallmentsPaid, 12);
+  assert.equal(db.listEnrollmentPayments(replacement.id).length, 12);
 
   const exportData = db.exportOperationalData();
   assert.equal(exportData.enrollments.length, 2);

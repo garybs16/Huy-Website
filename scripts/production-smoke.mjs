@@ -146,14 +146,16 @@ async function run() {
         emergencyContactName: "Jordan Enrollment",
         emergencyContactPhone: "949-555-0111",
         cohortId: depositCohort.id,
-        paymentOption: "deposit",
+        paymentOption: "weekly",
+        policyAcknowledged: true,
+        automaticPaymentAuthorized: true,
         notes: "Production smoke registration.",
       }),
     });
     assert(enrollmentRes.status === 201, "Production enrollment submission failed");
     const enrollmentBody = await enrollmentRes.json();
-    assert(enrollmentBody.paymentOption === "deposit", "Production enrollment should keep deposit payment option");
-    assert(enrollmentBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Production deposit amount mismatch");
+    assert(enrollmentBody.paymentOption === "weekly", "Production enrollment should keep weekly payment option");
+    assert(enrollmentBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Production registration fee mismatch");
     assert(enrollmentBody.balanceDueCents > 0, "Production enrollment must keep a remaining balance");
 
     const enrollmentStatusRes = await fetch(
@@ -161,7 +163,7 @@ async function run() {
     );
     assert(enrollmentStatusRes.ok, "Production enrollment status endpoint failed");
     const enrollmentStatusBody = await enrollmentStatusRes.json();
-    assert(enrollmentStatusBody.paymentOption === "deposit", "Production enrollment status must include payment option");
+    assert(enrollmentStatusBody.paymentOption === "weekly", "Production enrollment status must include payment option");
 
     const paymentPortalRes = await fetch(
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/payment-session`,

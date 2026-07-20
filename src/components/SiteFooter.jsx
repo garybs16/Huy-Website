@@ -13,7 +13,6 @@ export function SiteFooter() {
             Career training with visible schedules, flexible cohort options, and direct admissions
             support from first inquiry to registration.
           </p>
-          <p className="footer-address">{contactDetails.address}</p>
           <div className="footer-action-row">
             <a className="footer-contact-link" href={contactDetails.phoneHref}>
               Call Admissions
@@ -38,7 +37,6 @@ export function SiteFooter() {
         <div>
           <h4>Contact</h4>
           <ul>
-            <li>{contactDetails.coordinator}</li>
             <li>
               <a href={contactDetails.phoneHref}>{contactDetails.phone}</a>
             </li>

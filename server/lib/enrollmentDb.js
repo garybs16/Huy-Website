@@ -157,6 +157,8 @@ export class EnrollmentDatabase {
         payment_installments_total INTEGER NOT NULL DEFAULT 1,
         payment_installments_paid INTEGER NOT NULL DEFAULT 0,
         payment_interval TEXT,
+        policy_acknowledged_at TEXT,
+        automatic_payment_authorized_at TEXT,
         stripe_checkout_session_id TEXT,
         stripe_checkout_purpose TEXT,
         stripe_customer_id TEXT,
@@ -251,6 +253,8 @@ export class EnrollmentDatabase {
     addColumnIfMissing(this.db, "enrollments", "payment_installments_total", "INTEGER NOT NULL DEFAULT 1");
     addColumnIfMissing(this.db, "enrollments", "payment_installments_paid", "INTEGER NOT NULL DEFAULT 0");
     addColumnIfMissing(this.db, "enrollments", "payment_interval", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "policy_acknowledged_at", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "automatic_payment_authorized_at", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "stripe_customer_id", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "stripe_subscription_id", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "stripe_subscription_schedule_id", "TEXT");
@@ -306,13 +310,13 @@ export class EnrollmentDatabase {
 
       UPDATE cohorts
       SET
-        tuition_cents = 200000,
+        tuition_cents = 190000,
         allow_payment_plan = 1,
         payment_plan_deposit_cents = 25000,
         updated_at = '${nowIso()}'
       WHERE id IN ('cna-weekday-apr-2026', 'cna-weekend-apr-2026', 'cna-evening-may-2026')
         AND (
-          tuition_cents = 196000
+          tuition_cents IN (196000, 200000)
           OR payment_plan_deposit_cents = 65000
           OR payment_plan_deposit_cents IS NULL
           OR allow_payment_plan = 0
@@ -669,6 +673,8 @@ export class EnrollmentDatabase {
             payment_installments_total AS paymentInstallmentsTotal,
             payment_installments_paid AS paymentInstallmentsPaid,
             payment_interval AS paymentInterval,
+            policy_acknowledged_at AS policyAcknowledgedAt,
+            automatic_payment_authorized_at AS automaticPaymentAuthorizedAt,
             stripe_checkout_session_id AS stripeCheckoutSessionId,
             stripe_checkout_purpose AS stripeCheckoutPurpose,
             stripe_customer_id AS stripeCustomerId,
@@ -1150,6 +1156,8 @@ export class EnrollmentDatabase {
             payment_installments_total,
             payment_installments_paid,
             payment_interval,
+            policy_acknowledged_at,
+            automatic_payment_authorized_at,
             stripe_checkout_session_id,
             stripe_checkout_purpose,
             stripe_customer_id,
@@ -1187,6 +1195,8 @@ export class EnrollmentDatabase {
             @paymentInstallmentsTotal,
             @paymentInstallmentsPaid,
             @paymentInterval,
+            @policyAcknowledgedAt,
+            @automaticPaymentAuthorizedAt,
             NULL,
             NULL,
             NULL,
@@ -1207,6 +1217,8 @@ export class EnrollmentDatabase {
           paymentInstallmentsTotal: enrollmentInput.paymentInstallmentsTotal ?? 1,
           paymentInstallmentsPaid: enrollmentInput.paymentInstallmentsPaid ?? 0,
           paymentInterval: enrollmentInput.paymentInterval ?? null,
+          policyAcknowledgedAt: enrollmentInput.policyAcknowledgedAt ?? null,
+          automaticPaymentAuthorizedAt: enrollmentInput.automaticPaymentAuthorizedAt ?? null,
           seatHoldExpiresAt: enrollmentInput.seatHoldExpiresAt ?? null,
           createdAt: timestamp,
           updatedAt: timestamp,
@@ -1247,6 +1259,8 @@ export class EnrollmentDatabase {
           payment_installments_total AS paymentInstallmentsTotal,
           payment_installments_paid AS paymentInstallmentsPaid,
           payment_interval AS paymentInterval,
+          policy_acknowledged_at AS policyAcknowledgedAt,
+          automatic_payment_authorized_at AS automaticPaymentAuthorizedAt,
           stripe_checkout_session_id AS stripeCheckoutSessionId,
           stripe_checkout_purpose AS stripeCheckoutPurpose,
           stripe_customer_id AS stripeCustomerId,
@@ -1350,6 +1364,36 @@ export class EnrollmentDatabase {
     return this.getEnrollmentById(enrollmentId);
   }
 
+  markPaymentPlanRegistrationPaid({ enrollmentId, subscriptionId, paidAt, nextPaymentDueAt }) {
+    const timestamp = toIsoOrNull(paidAt) ?? nowIso();
+    this.db
+      .prepare(`
+        UPDATE enrollments
+        SET
+          status = 'payment_plan_active',
+          payment_status = 'payment_plan_active',
+          amount_paid_cents = payment_amount_cents,
+          balance_due_cents = MAX(tuition_total_cents - payment_amount_cents, 0),
+          payment_installments_paid = 0,
+          stripe_subscription_id = COALESCE(stripe_subscription_id, @subscriptionId),
+          seat_hold_expires_at = NULL,
+          next_payment_due_at = @nextPaymentDueAt,
+          last_payment_at = @paidAt,
+          updated_at = @updatedAt
+        WHERE id = @enrollmentId
+          AND payment_option IN ('weekly', 'biweekly')
+      `)
+      .run({
+        enrollmentId,
+        subscriptionId,
+        nextPaymentDueAt: toIsoOrNull(nextPaymentDueAt),
+        paidAt: timestamp,
+        updatedAt: timestamp,
+      });
+
+    return this.getEnrollmentById(enrollmentId);
+  }
+
   getEnrollmentByStripeSubscriptionId(subscriptionId) {
     const record = this.db
       .prepare(`SELECT id FROM enrollments WHERE stripe_subscription_id = ?`)
@@ -1374,6 +1418,8 @@ export class EnrollmentDatabase {
             id,
             tuition_total_cents AS tuitionTotalCents,
             amount_paid_cents AS amountPaidCents,
+            payment_option AS paymentOption,
+            payment_amount_cents AS paymentAmountCents,
             stripe_subscription_id AS stripeSubscriptionId
           FROM enrollments
           WHERE id = @enrollmentId
@@ -1467,7 +1513,10 @@ export class EnrollmentDatabase {
             AND status = 'paid'
         `)
         .get({ enrollmentId: input.enrollmentId });
-      const amountPaidCents = Number(paymentSummary.amountPaidCents ?? 0);
+      const registrationPaidCents = ["weekly", "biweekly"].includes(enrollment.paymentOption)
+        ? Number(enrollment.paymentAmountCents ?? 0)
+        : 0;
+      const amountPaidCents = registrationPaidCents + Number(paymentSummary.amountPaidCents ?? 0);
       const installmentsPaid = Number(paymentSummary.installmentsPaid ?? 0);
       const balanceDueCents = Math.max(tuitionTotalCents - amountPaidCents, 0);
       const paidInFull = balanceDueCents === 0;
@@ -1679,7 +1728,7 @@ export class EnrollmentDatabase {
         UPDATE enrollments
         SET
           status = CASE
-            WHEN payment_option = 'deposit' AND balance_due_cents > 0 THEN 'payment_plan_pending'
+            WHEN payment_option IN ('weekly', 'biweekly') AND balance_due_cents > 0 THEN 'payment_plan_pending'
             ELSE 'submitted'
           END,
           payment_status = 'manual_pending',
@@ -1789,6 +1838,8 @@ export class EnrollmentDatabase {
           e.payment_installments_total AS paymentInstallmentsTotal,
           e.payment_installments_paid AS paymentInstallmentsPaid,
           e.payment_interval AS paymentInterval,
+          e.policy_acknowledged_at AS policyAcknowledgedAt,
+          e.automatic_payment_authorized_at AS automaticPaymentAuthorizedAt,
           e.next_payment_due_at AS nextPaymentDueAt,
           e.last_payment_at AS lastPaymentAt,
           e.last_payment_failure_at AS lastPaymentFailureAt,

@@ -16,7 +16,7 @@ Full-stack production website for a healthcare training academy, built with Reac
 - Express API serving enrollment, inquiry, waitlist, cohort, program, admin, payment, and health endpoints.
 - SQLite persistence through `better-sqlite3` for cohorts, enrollments, inquiries, waitlist submissions, admin sessions, audit logs, and operational backups.
 - Admin authentication with signed `HttpOnly` cookies, PBKDF2 password hashes, CSRF protection, API-key fallback, and audit logging.
-- Stripe Checkout support for full tuition and deposit-based payment plans, with webhook-based payment confirmation.
+- Stripe Checkout support for full tuition and finite weekly or biweekly payment plans, with webhook-based payment confirmation.
 - Production readiness scripts for build verification, API contract checks, content regression checks, database readiness, backup creation, and health checks.
 - GitHub Actions workflow that runs the full verification gate before deployment.
 - Operations runbook for health checks, alert rules, backup checks, deployment checks, and incident response.

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import admissionsLabPhoto from "../assets/admissions-lab-photo.jpg";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
 import programsSupportPhoto from "../assets/programs-support-photo.jpg";
+import cnaGuideCover from "../assets/cna-career-starter-guide.png";
+import pathwayGuideCover from "../assets/oc-nursing-pathway-guide.png";
 import { TurnstileWidget, isTurnstileEnabled } from "../components/TurnstileWidget";
 import { submitInquiry } from "../lib/api";
 import {
+  guideResources,
   industryGrowthRows,
   miscFeeItems,
   programMeta,
@@ -36,11 +38,6 @@ export function HomePage({ programs }) {
     { label: "CDPH approved CNA program" },
     { label: "Orange, California" },
   ];
-  const heroAssuranceItems = [
-    ["Program total", "$2,000"],
-    ["Registration deposit", "$250"],
-    ["Admissions help", "Direct"],
-  ];
   const trainingTimeline = [
     {
       title: "Find your start window",
@@ -54,9 +51,8 @@ export function HomePage({ programs }) {
     },
   ];
   const decisionStats = [
-    { value: "Schedule", label: "approved class details" },
-    { value: "$100", label: "eligible referral reward" },
-    { value: "Direct", label: "admissions guidance" },
+    { value: "$100", label: "eligible referral rewards" },
+    { value: "Free Guides", label: "OC Nursing Pathway + CNA Career Starter" },
   ];
   const heroQuickLinks = [
     { label: "Schedules", to: "/schedule" },
@@ -165,14 +161,6 @@ export function HomePage({ programs }) {
               ))}
             </div>
 
-            <div className="hero-assurance-panel" aria-label="Enrollment highlights">
-              {heroAssuranceItems.map(([label, value]) => (
-                <div key={label}>
-                  <span>{label}</span>
-                  <strong>{value}</strong>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="hero-visual">
@@ -308,16 +296,9 @@ export function HomePage({ programs }) {
 
       <section className="section visual-story-section">
         <div className="container visual-story-showcase">
-          <div className="visual-story-media">
-            <img
-              src={programsSupportPhoto}
-              alt="Healthcare students practicing patient care skills in a training lab"
-            />
-            <img
-              src={admissionsLabPhoto}
-              alt="Instructor guiding students through a clinical classroom exercise"
-            />
-          </div>
+            <div className="visual-story-media visual-story-media-single">
+              <img src={programsSupportPhoto} alt="Healthcare students practicing patient care skills in a training lab" />
+            </div>
 
           <div className="visual-story-copy">
             <p className="section-kicker">Rewards & Guidance</p>
@@ -449,8 +430,8 @@ export function HomePage({ programs }) {
                   />
                 </label>
                 <label>
-                  <span>Phone number</span>
-                  <input name="phone" type="tel" value={handoutForm.phone} onChange={updateHandoutField} />
+                  <span>Phone number *</span>
+                  <input name="phone" type="tel" value={handoutForm.phone} onChange={updateHandoutField} required />
                 </label>
               </div>
               <TurnstileWidget
@@ -476,16 +457,12 @@ export function HomePage({ programs }) {
           <div className="handout-visual" aria-label="Free handouts">
             <p>You will receive instant access to:</p>
             <div className="handout-cover-row">
-              <article className="handout-cover cna-cover">
-                <span>First Step</span>
-                <h3>CNA Career Starter Guide</h3>
-                <p>A guide to patient care, training, work settings, and future nursing growth.</p>
-              </article>
-              <article className="handout-cover pathway-cover">
-                <span>First Step</span>
-                <h3>OC Nursing School Pathway Guide</h3>
-                <p>Plan your path, prepare with purpose, and move forward with confidence.</p>
-              </article>
+              <a className="handout-cover handout-cover-image" href={guideResources[0].href} target="_blank" rel="noreferrer">
+                <img src={cnaGuideCover} alt="CNA Career Starter Guide cover" />
+              </a>
+              <a className="handout-cover handout-cover-image" href={guideResources[1].href} target="_blank" rel="noreferrer">
+                <img src={pathwayGuideCover} alt="Orange County Nursing School Pathway Guide cover" />
+              </a>
             </div>
             <div className="trusted-handout-card">
               <strong>Trusted. Local. Student-Focused.</strong>

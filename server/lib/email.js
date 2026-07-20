@@ -131,7 +131,7 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
     `Cohort: ${cohortTitle}`,
     schedule,
     paymentLine,
-    enrollment.balanceDueCents > 0 ? `Remaining balance after deposit: ${balanceDue}.` : "",
+    enrollment.balanceDueCents > 0 ? `Remaining tuition balance after registration: ${balanceDue}.` : "",
     checkoutUrl ? `Payment link: ${checkoutUrl}` : "",
     "Admissions will review your submission and follow up with next steps.",
   ];
@@ -166,18 +166,24 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
 }
 
 export function sendInquiryEmails(emailer, { record }) {
+  const isGuideRequest = ["home-free-handouts", "rewards-free-handouts"].includes(record.source);
+  const guideLines = [
+    "Your free planning guides are ready:",
+    "CNA Career Starter Guide: https://drive.google.com/file/d/1mTeM3TDSdtSDMcsE-MbfyN1CzVTeQwmI/view?usp=drive_link",
+    "OC Nursing School Pathway Guide: https://drive.google.com/file/d/1brIME0OkJE7gfIIbekqjUiFv-c0tAhpg/view?usp=sharing",
+  ];
   const studentLines = [
     `Hi ${record.fullName},`,
     "We received your inquiry for First Step Healthcare Academy.",
-    "Admissions will review your message and follow up as soon as possible.",
+    ...(isGuideRequest ? guideLines : ["Admissions will review your message and follow up as soon as possible."]),
     `Reference ID: ${record.id}`,
   ];
 
   safeSend(emailer, {
     to: record.email,
-    subject: "Inquiry received - First Step Healthcare Academy",
+    subject: isGuideRequest ? "Your free CNA and nursing pathway guides" : "Inquiry received - First Step Healthcare Academy",
     text: studentLines.join("\n"),
-    html: buildEmailHtml("Inquiry received", studentLines),
+    html: buildEmailHtml(isGuideRequest ? "Your free planning guides" : "Inquiry received", studentLines),
   });
 
   const adminLines = [

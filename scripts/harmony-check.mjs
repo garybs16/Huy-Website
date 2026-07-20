@@ -98,17 +98,19 @@ async function run() {
         emergencyContactName: "Casey Harmony",
         emergencyContactPhone: "949-555-0101",
         cohortId: depositCohort.id,
-        paymentOption: "deposit",
+        paymentOption: "weekly",
+        policyAcknowledged: true,
+        automaticPaymentAuthorized: true,
         notes: `Interested in ${firstProgramId}`,
       }),
     });
     assert(enrollmentRes.status === 201, "Enrollment submission failed contract check");
     const enrollmentBody = await enrollmentRes.json();
     assert(typeof enrollmentBody.enrollmentId === "string", "Enrollment response must contain enrollmentId");
-    assert(enrollmentBody.paymentStatus === "manual_pending", "Deposit enrollment should fall back to manual pending without Stripe");
-    assert(enrollmentBody.paymentOption === "deposit", "Deposit enrollment should preserve payment option");
-    assert(enrollmentBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Deposit amount mismatch");
-    assert(enrollmentBody.balanceDueCents > 0, "Deposit enrollment must retain a remaining balance");
+    assert(enrollmentBody.paymentStatus === "manual_pending", "Payment-plan enrollment should fall back to manual pending without Stripe");
+    assert(enrollmentBody.paymentOption === "weekly", "Enrollment should preserve the weekly payment option");
+    assert(enrollmentBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Registration fee mismatch");
+    assert(enrollmentBody.balanceDueCents > 0, "Payment-plan enrollment must retain a remaining balance");
 
     const enrollmentStatusRes = await fetch(
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
@@ -120,7 +122,7 @@ async function run() {
       typeof enrollmentStatusBody.paymentStatus === "string",
       "Enrollment status must include paymentStatus"
     );
-    assert(enrollmentStatusBody.paymentOption === "deposit", "Enrollment status must include deposit payment option");
+    assert(enrollmentStatusBody.paymentOption === "weekly", "Enrollment status must include weekly payment option");
     assert(enrollmentStatusBody.balanceDueCents > 0, "Enrollment status must include remaining balance");
 
     const paymentPortalRes = await fetch(

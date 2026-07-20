@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import academyLogo from "../assets/first-step-logo.svg";
+import academyLogoMark from "../assets/first-step-logo-mark.svg";
 import { contactDetails } from "../siteData";
 
 export function SiteHeader({ navItems }) {
@@ -44,10 +44,10 @@ export function SiteHeader({ navItems }) {
 
       <div className="container nav-frame">
         <Link className="brand-lockup" to="/">
-          <img className="brand-icon-image" src={academyLogo} alt={contactDetails.brand} />
+          <img className="brand-icon-image" src={academyLogoMark} alt="" aria-hidden="true" />
           <div className="brand-copy">
             <strong className="brand-title">{contactDetails.brand}</strong>
-            <span className="brand-subtitle">Orange, California</span>
+            <span className="brand-subtitle">Healthcare training with a clear next step</span>
           </div>
         </Link>
 

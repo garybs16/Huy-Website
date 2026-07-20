@@ -4,8 +4,8 @@ import { ZodError } from "zod";
 import { sendEnrollmentEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
 import {
-  WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
-  WEEKLY_PAYMENT_PLAN_INTERVAL,
+  getPaymentPlanTerms,
+  isPaymentPlanOption,
 } from "../lib/stripe.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { preventSensitiveCaching } from "../middleware/securityHeaders.js";
@@ -33,28 +33,25 @@ function resolveAppBaseUrl(req, configuredBaseUrl) {
 }
 
 function resolveEnrollmentPricing(cohort, paymentOption) {
-  if (paymentOption === "deposit") {
+  if (isPaymentPlanOption(paymentOption)) {
     if (!cohort.allowPaymentPlan || !cohort.paymentPlanDepositCents) {
       throw new Error("This cohort does not offer a payment plan.");
     }
 
-    if (
-      Number(cohort.paymentPlanDepositCents) * WEEKLY_PAYMENT_PLAN_INSTALLMENTS !==
-      Number(cohort.tuitionCents)
-    ) {
-      throw new Error(
-        `This cohort's weekly plan must equal ${WEEKLY_PAYMENT_PLAN_INSTALLMENTS} equal payments totaling the tuition.`
-      );
-    }
+    const terms = getPaymentPlanTerms(paymentOption, cohort.tuitionCents, cohort.paymentPlanDepositCents);
 
     return {
-      paymentOption: "deposit",
+      paymentOption,
       paymentAmountCents: cohort.paymentPlanDepositCents,
+      installmentAmountCents: terms.installmentAmountCents,
       tuitionTotalCents: cohort.tuitionCents,
-      balanceDueCents: Math.max(cohort.tuitionCents - cohort.paymentPlanDepositCents, 0),
-      paymentInstallmentsTotal: WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
-      paymentInterval: WEEKLY_PAYMENT_PLAN_INTERVAL,
-      checkoutLabel: "Weekly tuition payment plan",
+      balanceDueCents: terms.tuitionBalanceCents,
+      paymentInstallmentsTotal: terms.installmentsTotal,
+      paymentInterval: terms.paymentInterval,
+      interval: terms.interval,
+      intervalCount: terms.intervalCount,
+      trialDays: terms.trialDays,
+      checkoutLabel: paymentOption === "weekly" ? "12-payment weekly tuition plan" : "6-payment biweekly tuition plan",
     };
   }
 
@@ -70,7 +67,7 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
 }
 
 function getCheckoutPurpose(pricing) {
-  if (pricing.paymentOption === "deposit" && pricing.balanceDueCents > 0) {
+  if (isPaymentPlanOption(pricing.paymentOption) && pricing.balanceDueCents > 0) {
     return "payment_plan";
   }
 
@@ -90,8 +87,8 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
     productName: `${program.title} - ${cohort.title} ${isBalancePayment ? "Remaining balance" : pricing.checkoutLabel}`,
     productDescription: isBalancePayment
       ? `${cohort.meetingPattern} | Remaining balance for enrollment ${enrollment.id}`
-      : pricing.paymentOption === "deposit"
-        ? `${cohort.meetingPattern} | ${formatMoney(pricing.paymentAmountCents)} today and seven automatic weekly payments`
+      : isPaymentPlanOption(pricing.paymentOption)
+        ? `${cohort.meetingPattern} | ${formatMoney(pricing.paymentAmountCents)} registration today, then ${pricing.paymentInstallmentsTotal} automatic ${pricing.paymentOption} tuition payments of ${formatMoney(pricing.installmentAmountCents)}`
         : `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
   };
 }
@@ -110,7 +107,7 @@ export async function createEnrollmentCheckoutSession({
 }) {
   const appBaseUrl = resolveAppBaseUrl(req, publicAppUrl);
   const checkoutDetails = buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose });
-  const isWeeklyPlan = pricing.paymentOption === "deposit" && purpose === "payment_plan";
+  const isPaymentPlan = isPaymentPlanOption(pricing.paymentOption) && purpose === "payment_plan";
   const metadata = {
     enrollmentId: enrollment.id,
     cohortId: cohort.id,
@@ -119,45 +116,60 @@ export async function createEnrollmentCheckoutSession({
     checkoutPurpose: checkoutDetails.purpose,
     installmentsTotal: String(pricing.paymentInstallmentsTotal ?? 1),
     paymentInterval: pricing.paymentInterval ?? "one_time",
+    installmentAmountCents: String(pricing.installmentAmountCents ?? 0),
   };
 
   const sessionPayload = {
-    mode: isWeeklyPlan ? "subscription" : "payment",
+    mode: isPaymentPlan ? "subscription" : "payment",
     customer_email: enrollment.email,
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          unit_amount: checkoutDetails.amountCents,
-          ...(isWeeklyPlan
-            ? {
-                recurring: {
-                  interval: WEEKLY_PAYMENT_PLAN_INTERVAL,
-                  interval_count: 1,
-                },
-              }
-            : {}),
-          product_data: {
-            name: checkoutDetails.productName,
-            description: checkoutDetails.productDescription,
+    line_items: isPaymentPlan
+      ? [
+          {
+            price_data: {
+              currency: "usd",
+              unit_amount: checkoutDetails.amountCents,
+              product_data: {
+                name: `${program.title} - non-refundable registration fee`,
+                description: `Registration fee for ${cohort.title}`,
+              },
+            },
+            quantity: 1,
           },
-        },
-        quantity: 1,
-      },
-    ],
+          {
+            price_data: {
+              currency: "usd",
+              unit_amount: pricing.installmentAmountCents,
+              recurring: { interval: pricing.interval, interval_count: pricing.intervalCount },
+              product_data: {
+                name: `${program.title} - ${pricing.checkoutLabel}`,
+                description: checkoutDetails.productDescription,
+              },
+            },
+            quantity: 1,
+          },
+        ]
+      : [{
+          price_data: {
+            currency: "usd",
+            unit_amount: checkoutDetails.amountCents,
+            product_data: { name: checkoutDetails.productName, description: checkoutDetails.productDescription },
+          },
+          quantity: 1,
+        }],
     metadata,
   };
 
-  if (isWeeklyPlan) {
+  if (isPaymentPlan) {
     sessionPayload.payment_method_types = ["card"];
     sessionPayload.subscription_data = {
-      description: `${program.title} tuition plan: eight weekly payments of ${checkoutDetails.amountLabel}`,
+      description: `${program.title} tuition plan: ${pricing.paymentInstallmentsTotal} ${pricing.paymentOption} payments of ${formatMoney(pricing.installmentAmountCents)}`,
       metadata,
+      trial_period_days: pricing.trialDays,
     };
     sessionPayload.custom_text = {
       submit: {
-        message: `By continuing, you authorize ${checkoutDetails.amountLabel} today and seven additional automatic weekly payments, for ${formatMoney(pricing.tuitionTotalCents)} total.`,
+        message: `By continuing, you authorize the ${checkoutDetails.amountLabel} registration fee today, then ${pricing.paymentInstallmentsTotal} automatic ${pricing.paymentOption} tuition payments of ${formatMoney(pricing.installmentAmountCents)}, for ${formatMoney(pricing.tuitionTotalCents)} total.`,
       },
     };
   } else {
@@ -262,6 +274,8 @@ export function createEnrollmentsRouter({
         paymentInstallmentsTotal: pricing.paymentInstallmentsTotal,
         paymentInstallmentsPaid: 0,
         paymentInterval: pricing.paymentInterval,
+        policyAcknowledgedAt: new Date().toISOString(),
+        automaticPaymentAuthorizedAt: payload.automaticPaymentAuthorized ? new Date().toISOString() : null,
         seatHoldExpiresAt: initialSeatHoldExpiresAt,
       });
 
@@ -296,8 +310,8 @@ export function createEnrollmentsRouter({
           paymentInstallmentsPaid: manualEnrollment.paymentInstallmentsPaid,
           paymentInterval: manualEnrollment.paymentInterval,
           message:
-            manualEnrollment.paymentOption === "deposit"
-              ? `Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the ${amountDueNowLabel} deposit and confirm the remaining ${balanceDueLabel} balance plan.`
+            isPaymentPlanOption(manualEnrollment.paymentOption)
+              ? `Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the ${amountDueNowLabel} registration fee and confirm the remaining ${balanceDueLabel} tuition plan.`
               : "Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the program payment.",
         });
       }
@@ -379,7 +393,7 @@ export function createEnrollmentsRouter({
 
       if (
         error.message === "This cohort does not offer a payment plan." ||
-        error.message.includes("weekly plan must equal")
+        error.message.includes("cannot divide the tuition balance")
       ) {
         return res.status(400).json({ error: error.message });
       }
@@ -434,8 +448,8 @@ export function createEnrollmentsRouter({
           paymentInterval: enrollment.paymentInterval,
           nextPaymentDueAt: enrollment.nextPaymentDueAt,
           message: planNeedsAttention
-            ? "The weekly payment plan needs attention because Stripe could not collect the latest installment. Please update the payment method in Stripe or contact admissions."
-            : `The weekly payment plan is active. ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} payments are complete, with ${formatMoney(enrollment.balanceDueCents)} remaining.`,
+            ? "The automatic payment plan needs attention because Stripe could not collect the latest installment. Please update the payment method in Stripe or contact admissions."
+            : `The ${enrollment.paymentOption} payment plan is active. ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} tuition payments are complete, with ${formatMoney(enrollment.balanceDueCents)} remaining.`,
         });
       }
 
@@ -448,28 +462,26 @@ export function createEnrollmentsRouter({
 
       const purpose = enrollment.paymentStatus === "deposit_paid" && enrollment.balanceDueCents > 0
         ? "balance"
-        : enrollment.paymentOption === "deposit"
+        : isPaymentPlanOption(enrollment.paymentOption)
           ? "payment_plan"
           : "tuition";
 
-      if (
-        purpose === "payment_plan" &&
-        Number(enrollment.paymentAmountCents) * WEEKLY_PAYMENT_PLAN_INSTALLMENTS !==
-          Number(enrollment.tuitionTotalCents)
-      ) {
-        return res.status(409).json({
-          error: "This enrollment's weekly plan is not configured as eight equal payments. Please contact admissions.",
-        });
-      }
+      const planTerms = isPaymentPlanOption(enrollment.paymentOption)
+        ? getPaymentPlanTerms(enrollment.paymentOption, enrollment.tuitionTotalCents, enrollment.paymentAmountCents)
+        : null;
 
       const pricing = {
         paymentOption: enrollment.paymentOption,
         paymentAmountCents: enrollment.paymentAmountCents,
         tuitionTotalCents: enrollment.tuitionTotalCents,
         balanceDueCents: enrollment.balanceDueCents,
-        paymentInstallmentsTotal: enrollment.paymentInstallmentsTotal || WEEKLY_PAYMENT_PLAN_INSTALLMENTS,
-        paymentInterval: enrollment.paymentInterval || WEEKLY_PAYMENT_PLAN_INTERVAL,
-        checkoutLabel: purpose === "payment_plan" ? "Weekly tuition payment plan" : "Program payment",
+        installmentAmountCents: planTerms?.installmentAmountCents,
+        paymentInstallmentsTotal: enrollment.paymentInstallmentsTotal || planTerms?.installmentsTotal || 1,
+        paymentInterval: enrollment.paymentInterval || planTerms?.paymentInterval || null,
+        interval: planTerms?.interval,
+        intervalCount: planTerms?.intervalCount,
+        trialDays: planTerms?.trialDays,
+        checkoutLabel: purpose === "payment_plan" ? `${enrollment.paymentOption} tuition payment plan` : "Program payment",
       };
       const amountDueCents = purpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents;
       const amountDueLabel = formatMoney(amountDueCents);

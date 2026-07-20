@@ -42,12 +42,14 @@ test("enrollment schema normalizes state and validates required student details"
     emergencyContactName: "Casey Contact",
     emergencyContactPhone: "949-555-0103",
     cohortId: "cna-weekday",
-    paymentOption: "deposit",
+    paymentOption: "weekly",
+    policyAcknowledged: true,
+    automaticPaymentAuthorized: true,
     checkoutMode: "embedded",
   });
 
   assert.equal(enrollment.state, "CA");
-  assert.equal(enrollment.paymentOption, "deposit");
+  assert.equal(enrollment.paymentOption, "weekly");
   assert.equal(enrollment.checkoutMode, "embedded");
   assert.throws(
     () =>
@@ -68,7 +70,7 @@ test("admin cohort schema enforces date and payment-plan rules", () => {
     endDate: "2026-08-31",
     scheduleLabel: "Weekday",
     meetingPattern: "Monday to Friday | 9:00 AM to 1:00 PM",
-    tuitionCents: 200_000,
+    tuitionCents: 190_000,
     allowPaymentPlan: true,
     paymentPlanDepositCents: 25_000,
     capacity: 20,
@@ -87,16 +89,8 @@ test("admin cohort schema enforces date and payment-plan rules", () => {
     () =>
       adminCohortSchema.parse({
         ...valid,
-        paymentPlanDepositCents: 200_000,
+        paymentPlanDepositCents: 190_000,
       }),
     /paymentPlanDepositCents must be less than tuitionCents/
-  );
-  assert.throws(
-    () =>
-      adminCohortSchema.parse({
-        ...valid,
-        paymentPlanDepositCents: 20_000,
-      }),
-    /8 equal installments/
   );
 });

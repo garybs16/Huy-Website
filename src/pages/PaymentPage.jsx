@@ -40,7 +40,7 @@ function buildCheckoutMessage(enrollment) {
   }
 
   if (enrollment.paymentStatus === "installment_failed") {
-    return `The latest weekly payment needs attention. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}. Please update the payment method in Stripe or contact admissions.`;
+    return `The latest automatic payment needs attention. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}. Please update the payment method in Stripe or contact admissions.`;
   }
 
   if (enrollment.paymentStatus === "deposit_paid") {
@@ -151,7 +151,7 @@ export function PaymentPage() {
     <section className="section section-soft">
       <PageIntro
         kicker="Payment Portal"
-        title="Pay tuition or review an active weekly payment plan from one secure portal."
+        title="Pay tuition or review an active automatic payment plan from one secure portal."
         description="Enter the enrollment ID and email used during registration to view payment progress or open the correct Stripe checkout."
         accent="Secure enrollment payment"
         note="Payment links are verified against the student email before checkout starts."
@@ -163,7 +163,7 @@ export function PaymentPage() {
           <h2>Enter your card number in the secure Stripe checkout panel.</h2>
           <p>
             The portal checks the enrollment record before creating checkout, then loads the
-            correct tuition payment or shows weekly-plan progress and the next scheduled charge.
+            correct tuition payment or shows payment-plan progress and the next scheduled charge.
           </p>
           <ul className="detail-list">
             <li>Enrollment ID from your registration confirmation</li>
@@ -175,7 +175,7 @@ export function PaymentPage() {
         <article className="form-card">
           <h2>Pay by Card</h2>
           <p className="form-helper">
-            Verify the enrollment first. Active weekly plans show completed payments, remaining balance, and next charge.
+            Verify the enrollment first. Active plans show completed payments, remaining balance, and the next charge.
           </p>
           <form className="form-stack" onSubmit={handleSubmit}>
             <label>

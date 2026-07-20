@@ -18,7 +18,7 @@ export const cohortCatalogSeed = [
     endDate: "2026-05-18",
     scheduleLabel: "Weekday",
     meetingPattern: "Monday to Friday | 7:00 AM to 3:30 PM",
-    tuitionCents: 200000,
+    tuitionCents: 190000,
     allowPaymentPlan: true,
     paymentPlanDepositCents: 25000,
     capacity: 15,

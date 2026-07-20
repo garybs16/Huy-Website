@@ -37,14 +37,20 @@ const phoneString = z
 
 const sourceString = optionalString(80);
 
-export const inquirySchema = z.object({
-  fullName: requiredString("fullName", 2, 100),
-  email: emailString,
-  phone: phoneString,
-  program: requiredString("program", 2, 100),
-  message: requiredString("message", 10, 2000),
-  source: sourceString,
-});
+export const inquirySchema = z
+  .object({
+    fullName: requiredString("fullName", 2, 100),
+    email: emailString,
+    phone: phoneString,
+    program: requiredString("program", 2, 100),
+    message: requiredString("message", 10, 2000),
+    source: sourceString,
+  })
+  .superRefine((value, context) => {
+    if (["home-free-handouts", "rewards-free-handouts"].includes(value.source) && !value.phone) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["phone"], message: "Phone number is required" });
+    }
+  });
 
 export const waitlistSchema = z.object({
   fullName: requiredString("fullName", 2, 100),
@@ -79,7 +85,10 @@ const birthDateString = z.preprocess(
 export const enrollmentSchema = z.object({
   studentFullName: requiredString("studentFullName", 2, 100),
   email: emailString,
-  phone: phoneString,
+  phone: z.preprocess(
+    trimString,
+    z.string({ required_error: "phone is required" }).min(7).max(25).refine((value) => phonePattern.test(value), "Phone number format is invalid")
+  ),
   dateOfBirth: birthDateString,
   addressLine1: requiredString("addressLine1", 5, 160),
   city: requiredString("city", 2, 80),
@@ -95,9 +104,19 @@ export const enrollmentSchema = z.object({
       .refine((value) => phonePattern.test(value), "Emergency contact phone format is invalid")
   ),
   cohortId: requiredString("cohortId", 2, 100),
-  paymentOption: z.enum(["full", "deposit"]).default("full"),
+  paymentOption: z.enum(["full", "weekly", "biweekly"]).default("full"),
+  policyAcknowledged: z.literal(true, { errorMap: () => ({ message: "Policy acknowledgment is required" }) }),
+  automaticPaymentAuthorized: z.boolean().default(false),
   checkoutMode: z.enum(["redirect", "embedded"]).default("redirect"),
   notes: optionalString(600),
+}).superRefine((value, context) => {
+  if (["weekly", "biweekly"].includes(value.paymentOption) && !value.automaticPaymentAuthorized) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["automaticPaymentAuthorized"],
+      message: "Automatic-payment authorization is required for a payment plan",
+    });
+  }
 });
 
 export const enrollmentPaymentSessionSchema = z.object({
@@ -185,14 +204,4 @@ export const adminCohortSchema = z
       });
     }
 
-    if (
-      value.paymentPlanDepositCents !== null &&
-      value.paymentPlanDepositCents * 8 !== value.tuitionCents
-    ) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["paymentPlanDepositCents"],
-        message: "Weekly payment plans must use 8 equal installments that total tuitionCents",
-      });
-    }
   });

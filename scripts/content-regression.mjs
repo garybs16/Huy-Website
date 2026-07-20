@@ -28,7 +28,9 @@ async function run() {
     "withdrawalRefundPolicies",
     "Within 1 Day (24 hours) of enrollment",
     "Between Day 2 and Day 5 from the enrollment date",
-    "Deferred-Pay Students to SisuCare",
+    "Tuition Obligation for Deferred-Pay Students",
+    "thirdPartyFeeItems",
+    "12 weekly tuition payments",
     "30 days of withdrawal determination",
     "60 hours",
     "Collections and chargebacks",
@@ -43,7 +45,7 @@ async function run() {
   const refundPolicyOccurrences = siteData.match(/title:/g)?.length ?? 0;
   assert(refundPolicyOccurrences > 20, "Shared site data should expose structured public content.");
 
-  for (const anchor of ["refund-policy", "tuition-fees", "locations", "questions"]) {
+  for (const anchor of ["refund-policy", "tuition-fees", "questions"]) {
     assertIncludes(admissionsPage, anchor, "Admissions page anchor");
   }
 
@@ -52,6 +54,7 @@ async function run() {
     "program-requirements",
     "program-documentation",
     "program-fees",
+    "refund-policy",
     "program-next-step",
   ]) {
     assertIncludes(programsPage, anchor, "Programs page anchor");
