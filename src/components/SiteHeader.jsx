@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import academyLogoMark from "../assets/first-step-logo-mark.svg";
+import academyLogoMark from "../assets/logo.jpg";
 import { contactDetails } from "../siteData";
 
 export function SiteHeader({ navItems }) {
