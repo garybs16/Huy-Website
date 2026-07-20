@@ -8454,3 +8454,41 @@ textarea:focus-visible,
   .enrollment-process-steps,
   .third-party-fee-grid { grid-template-columns: 1fr; }
 }
+
+.policy-document-stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.policy-document-card {
+  padding: clamp(1.35rem, 3vw, 2.5rem);
+  border: 1px solid rgba(52, 104, 245, 0.14);
+  border-radius: var(--ui-radius-lg);
+  background: #ffffff;
+  box-shadow: var(--fig-shadow);
+}
+
+.policy-document-card > h2 {
+  margin-top: 0;
+  color: var(--ui-navy-950);
+}
+
+.policy-document-section + .policy-document-section {
+  margin-top: 1.6rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid rgba(16, 33, 63, 0.1);
+}
+
+.policy-document-section h3 {
+  margin: 0;
+  color: var(--fig-blue-deep);
+}
+
+.policy-document-section .detail-list {
+  margin-bottom: 0;
+}
+
+.policy-acknowledgment-card {
+  border-color: rgba(140, 228, 203, 0.48);
+  background: linear-gradient(135deg, #effbf7, #f8fbff);
+}

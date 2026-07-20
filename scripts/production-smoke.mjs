@@ -73,11 +73,14 @@ async function run() {
     const paymentRouteRes = await fetch(`http://localhost:${port}/payment`);
     assert(paymentRouteRes.ok, "Payment portal route did not resolve in production mode");
 
-    const faviconRes = await fetch(`http://localhost:${port}/favicon.ico`);
-    assert(faviconRes.ok, "Production favicon did not resolve");
+    const policiesRouteRes = await fetch(`http://localhost:${port}/policies`);
+    assert(policiesRouteRes.ok, "Policy Center route did not resolve in production mode");
+
+    const faviconRes = await fetch(`http://localhost:${port}/first-step-logo.jpg`);
+    assert(faviconRes.ok, "Production logo favicon did not resolve");
     assert(
-      faviconRes.headers.get("content-type")?.includes("image/svg+xml"),
-      "Production favicon must return an SVG image"
+      faviconRes.headers.get("content-type")?.includes("image/jpeg"),
+      "Production favicon must return the original JPEG logo"
     );
 
     const robotsRes = await fetch(`http://localhost:${port}/robots.txt`);

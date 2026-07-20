@@ -498,6 +498,7 @@ export const footerGroups = [
       { label: "Class Schedule", to: "/schedule" },
       { label: "Admissions Checklist", to: "/admissions" },
       { label: "Refund Policy", to: "/admissions#refund-policy" },
+      { label: "Policies & Privacy", to: "/policies" },
     ],
   },
 ];

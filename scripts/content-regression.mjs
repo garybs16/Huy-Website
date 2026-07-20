@@ -20,6 +20,7 @@ async function run() {
   const programsPage = await readSource("src/pages/ProgramsPage.jsx");
   const rewardsPage = await readSource("src/pages/RewardsGuidancePage.jsx");
   const registerPage = await readSource("src/pages/RegisterPage.jsx");
+  const policiesPage = await readSource("src/pages/PoliciesPage.jsx");
   const appEffects = await readSource("src/App.jsx");
 
   for (const expected of [
@@ -88,6 +89,19 @@ async function run() {
   }
 
   assertIncludes(registerPage, "/admissions#refund-policy", "Registration policy link");
+  assertIncludes(registerPage, "/policies#terms", "Registration terms link");
+  assertIncludes(registerPage, "/policies#privacy", "Registration privacy link");
+  for (const expected of [
+    "Terms of Service",
+    "Privacy Policy",
+    "Refund and Cancellation Policy",
+    "Automatic-Payment Authorization",
+    "The Academy does not sell student personal information",
+    "does not guarantee program completion",
+  ]) {
+    assertIncludes(policiesPage, expected, "Public policy content");
+  }
+  assertIncludes(appEffects, '"/policies"', "Policy Center route");
   assertIncludes(appEffects, "location.hash", "Hash anchor scrolling support");
   assertIncludes(appEffects, "scrollIntoView", "Hash anchor scrolling behavior");
 

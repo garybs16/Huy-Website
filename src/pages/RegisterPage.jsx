@@ -320,11 +320,13 @@ export function RegisterPage({
                 <summary>Review Terms of Service and student responsibilities</summary>
                 <p>Students must provide accurate information, meet admissions and clinical-clearance requirements, attend all required instruction, complete required theory and clinical hours, follow the Student Handbook and clinical-facility policies, and remain current on the selected payment schedule.</p>
                 <p>Program completion, state-exam passage, certification, employment, wages, clinical placement, and admission to another nursing program are not guaranteed.</p>
+                <Link to="/policies#terms" className="card-action-link">Read the full Terms of Service</Link>
               </details>
               <details>
                 <summary>Review Privacy and Refund policies</summary>
                 <p>Student information may be used to process enrollment, maintain records, collect payments, provide instruction, coordinate clinical training, communicate required updates, and satisfy regulatory obligations. Payments are processed securely through Stripe.</p>
                 <Link to="/admissions#refund-policy" className="card-action-link">Open the full Refund and Cancellation Policy</Link>
+                <Link to="/policies#privacy" className="card-action-link">Read the full Privacy Policy</Link>
               </details>
               <label className="policy-checkbox-row">
                 <input type="checkbox" name="policyAcknowledged" checked={enrollmentForm.policyAcknowledged} onChange={onInput} required />

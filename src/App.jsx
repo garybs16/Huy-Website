@@ -46,6 +46,7 @@ const ProgramsPage = lazy(() =>
   import("./pages/ProgramsPage").then((module) => ({ default: module.ProgramsPage }))
 );
 const PaymentPage = lazy(() => import("./pages/PaymentPage").then((module) => ({ default: module.PaymentPage })));
+const PoliciesPage = lazy(() => import("./pages/PoliciesPage").then((module) => ({ default: module.PoliciesPage })));
 const RegisterPage = lazy(() =>
   import("./pages/RegisterPage").then((module) => ({ default: module.RegisterPage }))
 );
@@ -111,6 +112,7 @@ const pageTitles = {
   "/schedule": "Schedule | First Step Healthcare Academy",
   "/register": "Register | First Step Healthcare Academy",
   "/payment": "Payment Portal | First Step Healthcare Academy",
+  "/policies": "Policies | First Step Healthcare Academy",
   "/admissions": "Admissions | First Step Healthcare Academy",
   "/contact": "Contact | First Step Healthcare Academy",
   "/admin": "Admin | First Step Healthcare Academy",
@@ -888,6 +890,7 @@ function App() {
               }
             />
             <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/policies" element={<PoliciesPage />} />
             <Route path="/admissions" element={<AdmissionsPage />} />
             <Route
               path="/contact"
