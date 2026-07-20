@@ -15,17 +15,19 @@ export function createWaitlistRouter({
   notifier,
   emailer,
   submissionProtection = (_req, _res, next) => next(),
+  publicCsrfProtection = (_req, _res, next) => next(),
 }) {
   const router = Router();
 
   router.use(preventSensitiveCaching);
 
-  router.post("/", submissionLimiter, submissionProtection, async (req, res, next) => {
+  router.post("/", submissionLimiter, publicCsrfProtection, submissionProtection, async (req, res, next) => {
     try {
       const payload = waitlistSchema.parse(req.body);
+      const { turnstileToken: _turnstileToken, ...validatedInput } = payload;
       const record = {
         id: randomUUID(),
-        ...payload,
+        ...validatedInput,
         createdAt: new Date().toISOString(),
       };
 

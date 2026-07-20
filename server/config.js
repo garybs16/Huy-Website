@@ -1,6 +1,11 @@
 import "dotenv/config";
+import { randomBytes } from "node:crypto";
 import path from "node:path";
-import { createPasswordHash } from "./lib/adminSecurity.js";
+import {
+  createPasswordHash,
+  isAdminTotpSecretValid,
+  isPasswordHashProductionReady,
+} from "./lib/adminSecurity.js";
 
 function parsePort(value, fallback) {
   const parsed = Number(value);
@@ -64,17 +69,24 @@ const staticDir = path.resolve(process.cwd(), process.env.STATIC_DIR ?? "dist");
 const databasePath = path.resolve(process.cwd(), process.env.DATABASE_URL ?? "server/data/enrollment.db");
 const adminPassword = (process.env.ADMIN_PASSWORD ?? "").trim();
 const adminPasswordHash = (process.env.ADMIN_PASSWORD_HASH ?? "").trim() || (adminPassword ? createPasswordHash(adminPassword) : "");
+const adminSessionSecret = (process.env.ADMIN_SESSION_SECRET ?? "").trim();
+const adminKey = (process.env.API_ADMIN_KEY ?? "").trim();
+const configuredRequestSecuritySecret = (process.env.REQUEST_SECURITY_SECRET ?? "").trim();
+const requestSecuritySecret =
+  configuredRequestSecuritySecret || adminSessionSecret || adminKey || randomBytes(48).toString("base64url");
+const adminTotpSecret = (process.env.ADMIN_TOTP_SECRET ?? "").trim();
 
 export const config = {
   port: parsePort(process.env.PORT, 4000),
   nodeEnv: process.env.NODE_ENV ?? "development",
-  adminKey: process.env.API_ADMIN_KEY ?? "",
+  adminKey,
   adminUsername: (process.env.ADMIN_USERNAME ?? "").trim(),
   adminPasswordHash,
   adminPasswordProvided: Boolean(adminPassword),
-  adminSessionSecret: (process.env.ADMIN_SESSION_SECRET ?? "").trim(),
+  adminSessionSecret,
   adminSessionCookieSameSite: parseSameSite(process.env.ADMIN_SESSION_COOKIE_SAME_SITE, "lax"),
   adminSessionTtlHours: parsePositiveInteger(process.env.ADMIN_SESSION_TTL_HOURS, 12),
+  adminTotpSecret,
   corsOrigins: parseOrigins(
     process.env.CORS_ORIGINS ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:5173")
   ),
@@ -94,6 +106,8 @@ export const config = {
   adminNotificationEmail: (process.env.ADMIN_NOTIFICATION_EMAIL ?? "").trim(),
   turnstileSecretKey: (process.env.TURNSTILE_SECRET_KEY ?? "").trim(),
   turnstileSiteKey: (process.env.VITE_TURNSTILE_SITE_KEY ?? "").trim(),
+  requestSecuritySecret,
+  requestSecuritySecretProvided: Boolean(configuredRequestSecuritySecret),
   serveStaticApp: parseBoolean(
     process.env.SERVE_STATIC_APP,
     (process.env.NODE_ENV ?? "development") === "production"
@@ -124,6 +138,9 @@ export function getRuntimeConfigReport(currentConfig = config) {
   const turnstileConfigured = Boolean(currentConfig.turnstileSecretKey && currentConfig.turnstileSiteKey);
   const turnstilePartiallyConfigured =
     Boolean(currentConfig.turnstileSecretKey || currentConfig.turnstileSiteKey) && !turnstileConfigured;
+  const requestSecuritySecret =
+    currentConfig.requestSecuritySecret || currentConfig.adminSessionSecret || currentConfig.adminKey || "";
+  const adminMfaConfigured = Boolean(currentConfig.adminTotpSecret);
 
   if (sessionAuthPartial) {
     issues.push(
@@ -145,8 +162,24 @@ export function getRuntimeConfigReport(currentConfig = config) {
     issues.push("ADMIN_SESSION_SECRET must be at least 32 characters in production.");
   }
 
+  if (
+    currentConfig.nodeEnv === "production" &&
+    sessionAuthConfigured &&
+    !isPasswordHashProductionReady(currentConfig.adminPasswordHash)
+  ) {
+    issues.push("ADMIN_PASSWORD_HASH must use PBKDF2-SHA256 with at least 600,000 iterations and a strong salt.");
+  }
+
   if (currentConfig.adminKey && currentConfig.adminKey.length < 32) {
     issues.push("API_ADMIN_KEY must be at least 32 characters when configured.");
+  }
+
+  if (currentConfig.nodeEnv === "production" && requestSecuritySecret.length < 32) {
+    issues.push("REQUEST_SECURITY_SECRET must resolve to at least 32 characters in production.");
+  }
+
+  if (adminMfaConfigured && !isAdminTotpSecretValid(currentConfig.adminTotpSecret)) {
+    issues.push("ADMIN_TOTP_SECRET must be a Base32 secret containing at least 160 bits.");
   }
 
   if (currentConfig.nodeEnv === "production" && currentConfig.adminSessionCookieSameSite === "none") {
@@ -250,6 +283,10 @@ export function getRuntimeConfigReport(currentConfig = config) {
     warnings.push("API_ADMIN_KEY is not configured. Session login works, but scripted admin access must use browser sessions only.");
   }
 
+  if (currentConfig.nodeEnv === "production" && sessionAuthConfigured && !adminMfaConfigured) {
+    warnings.push("ADMIN_TOTP_SECRET is not configured. Admin password login does not yet require MFA.");
+  }
+
   const adminAuthMode = sessionAuthConfigured && currentConfig.adminKey
     ? "hybrid"
     : sessionAuthConfigured
@@ -266,6 +303,7 @@ export function getRuntimeConfigReport(currentConfig = config) {
     emailConfigured,
     turnstileConfigured,
     sessionAuthConfigured,
+    adminMfaConfigured,
     adminAuthMode,
     paymentsEnabled: stripeConfigured && Boolean(
       currentConfig.stripeWebhookSecret &&

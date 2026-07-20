@@ -81,6 +81,7 @@ const initialAdminSessionState = {
   sessionAuthConfigured: false,
   apiKeySupported: false,
   adminAuthMode: "disabled",
+  adminMfaConfigured: false,
   authMethod: "",
   csrfToken: "",
 };
@@ -346,6 +347,7 @@ function App() {
   const [adminKey, setAdminKey] = useState("");
   const [adminUsername, setAdminUsername] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [adminMfaCode, setAdminMfaCode] = useState("");
   const [adminSession, setAdminSession] = useState(initialAdminSessionState);
   const [adminPending, setAdminPending] = useState(false);
   const [adminMutationPending, setAdminMutationPending] = useState(false);
@@ -650,8 +652,12 @@ function App() {
   const handleAdminLogin = async (event) => {
     event.preventDefault();
 
-    if (!adminUsername.trim() || !adminPassword) {
-      setAdminError("Enter the admin username and password.");
+    if (!adminUsername.trim() || !adminPassword || (adminSession.adminMfaConfigured && !/^\d{6}$/.test(adminMfaCode))) {
+      setAdminError(
+        adminSession.adminMfaConfigured
+          ? "Enter the admin username, password, and 6-digit authenticator code."
+          : "Enter the admin username and password."
+      );
       return;
     }
 
@@ -663,11 +669,13 @@ function App() {
       const session = await loginAdmin({
         username: adminUsername.trim(),
         password: adminPassword,
+        totpCode: adminMfaCode || undefined,
       });
 
       setAdminSession({ ...initialAdminSessionState, ...session, checked: true });
       setAdminCsrfToken(session.csrfToken);
       setAdminPassword("");
+      setAdminMfaCode("");
       setAdminNotice(`Signed in as ${session.username}.`);
 
       const [overview, enrollmentsData, inquiriesData, waitlistData, programsData, cohortsData] = await Promise.all([
@@ -929,6 +937,7 @@ function App() {
                   adminKey={adminKey}
                   adminUsername={adminUsername}
                   adminPassword={adminPassword}
+                  adminMfaCode={adminMfaCode}
                   adminSession={adminSession}
                   adminPending={adminPending}
                   adminMutationPending={adminMutationPending}
@@ -943,6 +952,7 @@ function App() {
                   onAdminKeyChange={setAdminKey}
                   onAdminUsernameChange={setAdminUsername}
                   onAdminPasswordChange={setAdminPassword}
+                  onAdminMfaCodeChange={setAdminMfaCode}
                   onAdminLoad={handleAdminLoad}
                   onAdminLogin={handleAdminLogin}
                   onAdminLogout={handleAdminLogout}

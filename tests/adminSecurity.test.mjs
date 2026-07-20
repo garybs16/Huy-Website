@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import * as OTPAuth from "otpauth";
 import {
   adminSessionMatchesUserAgent,
   constantTimeEqual,
@@ -7,9 +8,22 @@ import {
   createAdminSessionCookie,
   createPasswordHash,
   getAdminSessionIdFromRequest,
+  isPasswordHashProductionReady,
   verifyAdminCsrfToken,
+  verifyAdminTotpCode,
   verifyPassword,
 } from "../server/lib/adminSecurity.js";
+
+test("admin TOTP verification accepts only a current authenticator code", () => {
+  const secret = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP";
+  const timestamp = Date.UTC(2026, 6, 20, 12, 0, 0);
+  const totp = new OTPAuth.TOTP({ secret: OTPAuth.Secret.fromBase32(secret) });
+  const code = totp.generate({ timestamp });
+
+  assert.equal(verifyAdminTotpCode(code, secret, timestamp), true);
+  assert.equal(verifyAdminTotpCode("000000", secret, timestamp), false);
+  assert.equal(verifyAdminTotpCode(code, "invalid-secret", timestamp), false);
+});
 
 test("admin password hashing verifies only the correct password", () => {
   const hash = createPasswordHash("StrongPassword123!", {
@@ -22,6 +36,17 @@ test("admin password hashing verifies only the correct password", () => {
   assert.equal(verifyPassword("StrongPassword123!", "invalid-format"), false);
   assert.equal(verifyPassword("StrongPassword123!", "pbkdf2_sha256$1000001$salt$" + "a".repeat(64)), false);
   assert.equal(verifyPassword("StrongPassword123!", "pbkdf2_sha256$10000$salt$not-hex"), false);
+});
+
+test("production password hashes enforce the current work factor and salt size", () => {
+  const strongHash = createPasswordHash("StrongPassword123!", { salt: "a".repeat(32) });
+  const weakHash = createPasswordHash("StrongPassword123!", {
+    iterations: 10_000,
+    salt: "a".repeat(32),
+  });
+
+  assert.equal(isPasswordHashProductionReady(strongHash), true);
+  assert.equal(isPasswordHashProductionReady(weakHash), false);
 });
 
 test("constant-time secret comparison accepts only identical strings", () => {
@@ -40,7 +65,7 @@ test("admin sessions are bound to the browser user agent", () => {
 
 test("signed admin cookies and CSRF tokens reject tampering", () => {
   const sessionSecret = "test-session-secret";
-  const sessionId = "session-123";
+  const sessionId = "123e4567-e89b-42d3-a456-426614174000";
   const cookie = createAdminSessionCookie(sessionId, {
     sessionSecret,
     sameSite: "lax",

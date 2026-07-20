@@ -1,5 +1,8 @@
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 let adminCsrfToken = "";
+let publicCsrfToken = "";
+let publicCsrfRequest = null;
+const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 function buildUrl(path) {
   return `${apiBaseUrl}${path}`;
@@ -23,8 +26,44 @@ async function parseError(response) {
   return `Request failed with status ${response.status}`;
 }
 
+async function getPublicCsrfToken() {
+  if (publicCsrfToken) {
+    return publicCsrfToken;
+  }
+
+  if (!publicCsrfRequest) {
+    publicCsrfRequest = fetch(buildUrl("/api/csrf"), {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(await parseError(response));
+        }
+
+        const body = await response.json();
+
+        if (typeof body?.csrfToken !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(body.csrfToken)) {
+          throw new Error("The server returned an invalid request verification token.");
+        }
+
+        publicCsrfToken = body.csrfToken;
+        return publicCsrfToken;
+      })
+      .finally(() => {
+        publicCsrfRequest = null;
+      });
+  }
+
+  return publicCsrfRequest;
+}
+
 async function request(path, { method = "GET", payload, headers: extraHeaders } = {}) {
   const headers = { ...(extraHeaders ?? {}) };
+
+  if (STATE_CHANGING_METHODS.has(method)) {
+    headers["x-public-csrf-token"] = await getPublicCsrfToken();
+  }
 
   if (payload !== undefined) {
     headers["Content-Type"] = "application/json";

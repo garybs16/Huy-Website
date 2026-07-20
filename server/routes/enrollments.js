@@ -4,12 +4,21 @@ import { ZodError } from "zod";
 import { sendEnrollmentEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
 import {
+  createEnrollmentAccessCookie,
+  hasEnrollmentAccess,
+} from "../lib/publicRequestSecurity.js";
+import {
   getPaymentPlanTerms,
   isPaymentPlanOption,
 } from "../lib/stripe.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { preventSensitiveCaching } from "../middleware/securityHeaders.js";
-import { enrollmentPaymentSessionSchema, enrollmentSchema, paginationSchema } from "../validation/schemas.js";
+import {
+  enrollmentIdSchema,
+  enrollmentPaymentSessionSchema,
+  enrollmentSchema,
+  paginationSchema,
+} from "../validation/schemas.js";
 
 function formatMoney(cents) {
   return new Intl.NumberFormat("en-US", {
@@ -200,13 +209,22 @@ export function createEnrollmentsRouter({
   emailer,
   submissionLimiter,
   submissionProtection = (_req, _res, next) => next(),
+  publicCsrfProtection = (_req, _res, next) => next(),
+  requestSecuritySecret,
+  nodeEnv,
 }) {
   const router = Router();
 
   router.use(preventSensitiveCaching);
 
   router.get("/:id/status", (req, res) => {
-    const enrollment = enrollmentDb.getEnrollmentById(req.params.id);
+    const parsedId = enrollmentIdSchema.safeParse(req.params.id);
+
+    if (!parsedId.success || !hasEnrollmentAccess(req, parsedId.data, requestSecuritySecret)) {
+      return res.status(404).json({ error: "Enrollment not found." });
+    }
+
+    const enrollment = enrollmentDb.getEnrollmentById(parsedId.data);
 
     if (!enrollment) {
       return res.status(404).json({ error: "Enrollment not found." });
@@ -232,7 +250,7 @@ export function createEnrollmentsRouter({
     });
   });
 
-  router.post("/", submissionLimiter, submissionProtection, async (req, res, next) => {
+  router.post("/", submissionLimiter, publicCsrfProtection, submissionProtection, async (req, res, next) => {
     try {
       const payload = enrollmentSchema.parse(req.body);
       const cohort = enrollmentDb.getCohortById(payload.cohortId);
@@ -278,6 +296,13 @@ export function createEnrollmentsRouter({
         automaticPaymentAuthorizedAt: payload.automaticPaymentAuthorized ? new Date().toISOString() : null,
         seatHoldExpiresAt: initialSeatHoldExpiresAt,
       });
+      res.setHeader(
+        "Set-Cookie",
+        createEnrollmentAccessCookie(enrollment.id, {
+          secret: requestSecuritySecret,
+          secure: nodeEnv === "production",
+        })
+      );
 
       if (!stripeClient) {
         const manualEnrollment = enrollmentDb.markManualPending(enrollment.id);
@@ -402,10 +427,11 @@ export function createEnrollmentsRouter({
     }
   });
 
-  router.post("/:id/payment-session", submissionLimiter, async (req, res, next) => {
+  router.post("/:id/payment-session", submissionLimiter, publicCsrfProtection, async (req, res, next) => {
     try {
       const payload = enrollmentPaymentSessionSchema.parse(req.body);
-      const enrollment = enrollmentDb.getEnrollmentById(req.params.id);
+      const parsedId = enrollmentIdSchema.safeParse(req.params.id);
+      const enrollment = parsedId.success ? enrollmentDb.getEnrollmentById(parsedId.data) : null;
 
       if (!enrollment || enrollment.email.toLowerCase() !== payload.email.toLowerCase()) {
         return res.status(404).json({ error: "Enrollment not found for that email address." });

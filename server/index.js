@@ -10,6 +10,7 @@ import { config, getRuntimeConfigReport } from "./config.js";
 import { EnrollmentDatabase } from "./lib/enrollmentDb.js";
 import { createEmailer } from "./lib/email.js";
 import { createNotifier } from "./lib/notifications.js";
+import { createPublicCsrfProtection } from "./lib/publicRequestSecurity.js";
 import { createStripeClient } from "./lib/stripe.js";
 import { createTurnstileVerifier } from "./lib/turnstile.js";
 import { verifyTurnstile } from "./middleware/verifyTurnstile.js";
@@ -117,6 +118,10 @@ export function createApp() {
     adminKey: config.adminKey,
     adminSessionSecret: config.adminSessionSecret,
   };
+  const publicCsrf = createPublicCsrfProtection({
+    secret: config.requestSecuritySecret,
+    secure: config.nodeEnv === "production",
+  });
   app.locals.enrollmentDb = enrollmentDb;
   app.locals.configReport = configReport;
 
@@ -183,6 +188,7 @@ export function createApp() {
   app.use("/api", requireJsonRequestBody);
   app.use(morgan(config.nodeEnv === "production" ? "combined" : "dev"));
   app.use("/api", generalLimiter);
+  app.get("/api/csrf", publicCsrf.issueToken);
   app.use("/api/health", createHealthRouter({ enrollmentDb, configReport }));
   app.use("/api/programs", createProgramsRouter({ enrollmentDb }));
   app.use("/api/cohorts", createCohortsRouter({ enrollmentDb }));
@@ -195,11 +201,14 @@ export function createApp() {
       adminSessionSecret: config.adminSessionSecret,
       adminSessionCookieSameSite: config.adminSessionCookieSameSite,
       adminSessionTtlHours: config.adminSessionTtlHours,
+      adminTotpSecret: config.adminTotpSecret,
       nodeEnv: config.nodeEnv,
       adminAuthMode: configReport.adminAuthMode,
       sessionAuthConfigured: configReport.sessionAuthConfigured,
+      adminMfaConfigured: configReport.adminMfaConfigured,
       enrollmentDb,
       loginLimiter: adminLoginLimiter,
+      publicCsrfProtection: publicCsrf.requireToken,
     })
   );
   app.use(
@@ -213,6 +222,9 @@ export function createApp() {
       emailer,
       submissionLimiter,
       submissionProtection,
+      publicCsrfProtection: publicCsrf.requireToken,
+      requestSecuritySecret: config.requestSecuritySecret,
+      nodeEnv: config.nodeEnv,
     })
   );
   app.use(
@@ -228,6 +240,7 @@ export function createApp() {
       notifier,
       emailer,
       submissionProtection,
+      publicCsrfProtection: publicCsrf.requireToken,
     })
   );
   app.use(
@@ -243,6 +256,7 @@ export function createApp() {
       notifier,
       emailer,
       submissionProtection,
+      publicCsrfProtection: publicCsrf.requireToken,
     })
   );
 

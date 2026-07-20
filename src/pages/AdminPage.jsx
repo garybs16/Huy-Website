@@ -79,6 +79,7 @@ export function AdminPage({
   adminKey,
   adminUsername,
   adminPassword,
+  adminMfaCode,
   adminSession,
   adminPending,
   adminMutationPending,
@@ -93,6 +94,7 @@ export function AdminPage({
   onAdminKeyChange,
   onAdminUsernameChange,
   onAdminPasswordChange,
+  onAdminMfaCodeChange,
   onAdminLoad,
   onAdminLogin,
   onAdminLogout,
@@ -262,6 +264,21 @@ export function AdminPage({
                       autoComplete="username"
                     />
                   </label>
+                  {adminSession.adminMfaConfigured ? (
+                    <label>
+                      <span>Authenticator code</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        pattern="[0-9]{6}"
+                        maxLength="6"
+                        value={adminMfaCode}
+                        onChange={(event) => onAdminMfaCodeChange(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                        placeholder="6-digit code"
+                      />
+                    </label>
+                  ) : null}
                   <label>
                     <span>Password</span>
                     <input

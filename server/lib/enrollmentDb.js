@@ -4,6 +4,8 @@ import Database from "better-sqlite3";
 import { cohorts as cohortSeeds } from "../constants/cohorts.js";
 import { programs } from "../constants/programs.js";
 
+const PAGINATED_TABLE_NAMES = new Set(["inquiries", "waitlist"]);
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -2039,6 +2041,10 @@ export class EnrollmentDatabase {
   }
 
   paginateCollection({ tableName, page, pageSize, selectSql }) {
+    if (!PAGINATED_TABLE_NAMES.has(tableName)) {
+      throw new TypeError("Unsupported database collection.");
+    }
+
     const offset = (page - 1) * pageSize;
     const items = this.db
       .prepare(`

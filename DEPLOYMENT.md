@@ -42,6 +42,8 @@ STATIC_DIR=dist
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD_HASH=replace-with-generated-password-hash
 ADMIN_SESSION_SECRET=replace-with-generated-secret
+REQUEST_SECURITY_SECRET=replace-with-a-different-generated-secret
+ADMIN_TOTP_SECRET=replace-with-base32-secret-from-npm-run-admin-mfa-setup
 API_ADMIN_KEY=replace-with-generated-api-key
 
 PUBLIC_APP_URL=https://your-domain.com
@@ -90,6 +92,8 @@ docker run -p 4000:4000 \
   -e ADMIN_USERNAME=admin \
   -e ADMIN_PASSWORD='replace-with-a-strong-password' \
   -e ADMIN_SESSION_SECRET='replace-with-a-long-random-secret' \
+  -e REQUEST_SECURITY_SECRET='replace-with-a-different-long-random-secret' \
+  -e ADMIN_TOTP_SECRET='replace-with-your-base32-authenticator-secret' \
   -e API_ADMIN_KEY='replace-with-a-long-random-key' \
   -e PUBLIC_APP_URL='https://your-domain.com' \
   first-step-academy

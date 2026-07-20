@@ -7,10 +7,11 @@ function productionConfig(overrides = {}) {
     nodeEnv: "production",
     adminKey: "a".repeat(64),
     adminUsername: "site-admin",
-    adminPasswordHash: "configured-password-hash",
+    adminPasswordHash: `pbkdf2_sha256$600000$${"a".repeat(32)}$${"b".repeat(64)}`,
     adminPasswordProvided: false,
     adminSessionSecret: "s".repeat(64),
     adminSessionCookieSameSite: "strict",
+    adminTotpSecret: "",
     corsOrigins: [],
     publicAppUrl: "https://firststepha.com",
     stripeSecretKey: "sk_live_" + "x".repeat(32),
@@ -56,4 +57,9 @@ test("production configuration rejects weak secrets and unsafe origins", () => {
   assert.match(issues, /live secret key/);
   assert.match(issues, /live publishable key/);
   assert.match(issues, /WEBHOOK_SECRET format/);
+});
+
+test("production configuration rejects malformed MFA secrets", () => {
+  const report = getRuntimeConfigReport(productionConfig({ adminTotpSecret: "not-base32" }));
+  assert.match(report.issues.join(" "), /ADMIN_TOTP_SECRET/);
 });

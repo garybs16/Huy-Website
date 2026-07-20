@@ -8,14 +8,28 @@ import {
   createAdminCsrfToken,
   createAdminSessionCookie,
   getAdminSessionIdFromRequest,
+  verifyAdminTotpCode,
   verifyAdminCsrfToken,
   verifyPassword,
 } from "../lib/adminSecurity.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { preventSensitiveCaching } from "../middleware/securityHeaders.js";
-import { adminCohortSchema, adminLoginSchema, adminProgramSchema } from "../validation/schemas.js";
+import {
+  adminCohortSchema,
+  adminLoginSchema,
+  adminProgramSchema,
+  adminResourceIdSchema,
+} from "../validation/schemas.js";
 
-function buildSessionPayload({ req, session, adminSessionSecret, sessionAuthConfigured, apiKeySupported, adminAuthMode }) {
+function buildSessionPayload({
+  req,
+  session,
+  adminSessionSecret,
+  sessionAuthConfigured,
+  apiKeySupported,
+  adminAuthMode,
+  adminMfaConfigured,
+}) {
   return {
     authenticated: Boolean(session),
     username: session?.username ?? null,
@@ -23,6 +37,7 @@ function buildSessionPayload({ req, session, adminSessionSecret, sessionAuthConf
     sessionAuthConfigured,
     apiKeySupported,
     adminAuthMode,
+    adminMfaConfigured,
     authMethod: req.adminAuth?.method ?? (session ? "session" : null),
     csrfToken: session?.id ? createAdminCsrfToken(session.id, adminSessionSecret) : "",
   };
@@ -58,11 +73,14 @@ export function createAdminRouter({
   adminSessionSecret,
   adminSessionCookieSameSite,
   adminSessionTtlHours,
+  adminTotpSecret,
   nodeEnv,
   adminAuthMode,
   sessionAuthConfigured,
+  adminMfaConfigured,
   enrollmentDb,
   loginLimiter,
+  publicCsrfProtection = (_req, _res, next) => next(),
 }) {
   const router = Router();
 
@@ -100,11 +118,12 @@ export function createAdminRouter({
         sessionAuthConfigured,
         apiKeySupported: Boolean(adminKey),
         adminAuthMode,
+        adminMfaConfigured,
       })
     );
   });
 
-  router.post("/login", loginLimiter, (req, res, next) => {
+  router.post("/login", loginLimiter, publicCsrfProtection, (req, res, next) => {
     try {
       if (!sessionAuthConfigured) {
         return res.status(503).json({
@@ -115,7 +134,8 @@ export function createAdminRouter({
       const payload = adminLoginSchema.parse(req.body);
       const passwordValid = verifyPassword(payload.password, adminPasswordHash);
       const usernameValid = constantTimeEqual(payload.username, adminUsername);
-      const credentialsValid = usernameValid && passwordValid;
+      const totpValid = !adminMfaConfigured || verifyAdminTotpCode(payload.totpCode, adminTotpSecret);
+      const credentialsValid = usernameValid && passwordValid && totpValid;
 
       if (!credentialsValid) {
         enrollmentDb.insertAdminAuditEvent({
@@ -168,6 +188,7 @@ export function createAdminRouter({
           sessionAuthConfigured,
           apiKeySupported: Boolean(adminKey),
           adminAuthMode,
+          adminMfaConfigured,
         })
       );
     } catch (error) {
@@ -262,7 +283,7 @@ export function createAdminRouter({
   router.patch("/programs/:id", (req, res, next) => {
     try {
       const payload = adminProgramSchema.parse({ ...req.body, id: req.params.id });
-      const item = enrollmentDb.updateProgram(req.params.id, payload);
+      const item = enrollmentDb.updateProgram(payload.id, payload);
       writeAdminAuditEvent(enrollmentDb, req, "admin.program.updated", `Program ${item.id} updated.`);
       res.json(item);
     } catch (error) {
@@ -272,8 +293,9 @@ export function createAdminRouter({
 
   router.delete("/programs/:id", (req, res, next) => {
     try {
-      enrollmentDb.deleteProgram(req.params.id);
-      writeAdminAuditEvent(enrollmentDb, req, "admin.program.deleted", `Program ${req.params.id} deleted.`);
+      const id = adminResourceIdSchema.parse(req.params.id);
+      enrollmentDb.deleteProgram(id);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.program.deleted", `Program ${id} deleted.`);
       res.status(204).end();
     } catch (error) {
       next(error);
@@ -298,7 +320,7 @@ export function createAdminRouter({
   router.patch("/cohorts/:id", (req, res, next) => {
     try {
       const payload = adminCohortSchema.parse({ ...req.body, id: req.params.id });
-      const item = enrollmentDb.updateCohort(req.params.id, payload);
+      const item = enrollmentDb.updateCohort(payload.id, payload);
       writeAdminAuditEvent(enrollmentDb, req, "admin.cohort.updated", `Cohort ${item.id} updated.`);
       res.json(item);
     } catch (error) {
@@ -308,8 +330,9 @@ export function createAdminRouter({
 
   router.delete("/cohorts/:id", (req, res, next) => {
     try {
-      enrollmentDb.deleteCohort(req.params.id);
-      writeAdminAuditEvent(enrollmentDb, req, "admin.cohort.deleted", `Cohort ${req.params.id} deleted.`);
+      const id = adminResourceIdSchema.parse(req.params.id);
+      enrollmentDb.deleteCohort(id);
+      writeAdminAuditEvent(enrollmentDb, req, "admin.cohort.deleted", `Cohort ${id} deleted.`);
       res.status(204).end();
     } catch (error) {
       next(error);

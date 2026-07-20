@@ -1,9 +1,20 @@
 import { z } from "zod";
 
 const phonePattern = /^[0-9+().\-\s]{7,25}$/;
+const disallowedControlCharacterPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+const usStateCodes = [
+  "AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "GU", "HI", "ID",
+  "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE",
+  "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PA", "PR", "RI", "SC",
+  "SD", "TN", "TX", "UT", "VT", "VA", "VI", "WA", "WV", "WI", "WY",
+];
+
+function containsOnlySafeText(value) {
+  return !disallowedControlCharacterPattern.test(value);
+}
 
 function trimString(value) {
-  return typeof value === "string" ? value.trim() : value;
+  return typeof value === "string" ? value.normalize("NFC").trim() : value;
 }
 
 function requiredString(fieldName, min, max) {
@@ -13,12 +24,20 @@ function requiredString(fieldName, min, max) {
       .string({ required_error: `${fieldName} is required` })
       .min(min, `${fieldName} must be at least ${min} characters`)
       .max(max, `${fieldName} must be at most ${max} characters`)
+      .refine(containsOnlySafeText, `${fieldName} contains unsupported control characters`)
   );
 }
 
 function optionalString(max) {
   return z
-    .preprocess(trimString, z.string().max(max, `Must be at most ${max} characters`).optional())
+    .preprocess(
+      trimString,
+      z
+        .string()
+        .max(max, `Must be at most ${max} characters`)
+        .refine(containsOnlySafeText, "Contains unsupported control characters")
+        .optional()
+    )
     .transform((value) => (value ? value : undefined));
 }
 
@@ -35,17 +54,35 @@ const phoneString = z
   .transform((value) => (value ? value : undefined))
   .refine((value) => !value || phonePattern.test(value), "Phone number format is invalid");
 
-const sourceString = optionalString(80);
+const sourceString = z.preprocess(
+  trimString,
+  z
+    .enum([
+      "contact-page-form",
+      "home-free-handouts",
+      "rewards-free-handouts",
+      "rewards-guidance-landing",
+      "waitlist-page-form",
+    ])
+    .optional()
+);
+const turnstileTokenString = optionalString(2048);
+const publicProgramString = z.preprocess(
+  (value) => (typeof value === "string" ? value.normalize("NFC").trim().toLowerCase() : value),
+  z.literal("cna")
+);
 
 export const inquirySchema = z
   .object({
     fullName: requiredString("fullName", 2, 100),
     email: emailString,
     phone: phoneString,
-    program: requiredString("program", 2, 100),
+    program: publicProgramString,
     message: requiredString("message", 10, 2000),
     source: sourceString,
+    turnstileToken: turnstileTokenString,
   })
+  .strict()
   .superRefine((value, context) => {
     if (["home-free-handouts", "rewards-free-handouts"].includes(value.source) && !value.phone) {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ["phone"], message: "Phone number is required" });
@@ -58,14 +95,15 @@ export const waitlistSchema = z.object({
   phone: phoneString,
   notes: optionalString(600),
   source: sourceString,
-});
+  turnstileToken: turnstileTokenString,
+}).strict();
 
 const stateString = z.preprocess(
   trimString,
   z
     .string({ required_error: "state is required" })
-    .length(2, "State must be a 2-letter code")
     .transform((value) => value.toUpperCase())
+    .pipe(z.enum(usStateCodes, { error: "State must be a valid US state or territory code" }))
 );
 
 const postalCodeString = z.preprocess(
@@ -80,7 +118,19 @@ const birthDateString = z.preprocess(
   z
     .string({ required_error: "dateOfBirth is required" })
     .regex(/^\d{4}-\d{2}-\d{2}$/, "dateOfBirth must use YYYY-MM-DD format")
+    .refine(isValidCalendarDate, "dateOfBirth must be a real calendar date")
+    .refine(
+      (value) => value >= "1900-01-01" && value <= new Date().toISOString().slice(0, 10),
+      "dateOfBirth must be between 1900-01-01 and today"
+    )
 );
+
+function isValidCalendarDate(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
 
 export const enrollmentSchema = z.object({
   studentFullName: requiredString("studentFullName", 2, 100),
@@ -109,7 +159,8 @@ export const enrollmentSchema = z.object({
   automaticPaymentAuthorized: z.boolean().default(false),
   checkoutMode: z.enum(["redirect", "embedded"]).default("redirect"),
   notes: optionalString(600),
-}).superRefine((value, context) => {
+  turnstileToken: turnstileTokenString,
+}).strict().superRefine((value, context) => {
   if (["weekly", "biweekly"].includes(value.paymentOption) && !value.automaticPaymentAuthorized) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -122,17 +173,20 @@ export const enrollmentSchema = z.object({
 export const enrollmentPaymentSessionSchema = z.object({
   email: emailString,
   checkoutMode: z.enum(["redirect", "embedded"]).default("redirect"),
-});
+}).strict();
+
+export const enrollmentIdSchema = z.string().uuid();
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-});
+}).strict();
 
 export const adminLoginSchema = z.object({
   username: requiredString("username", 2, 120),
   password: requiredString("password", 8, 200),
-});
+  totpCode: z.preprocess(trimString, z.string().regex(/^\d{6}$/, "Authenticator code must be 6 digits").optional()),
+}).strict();
 
 const slugString = z.preprocess(
   trimString,
@@ -148,6 +202,7 @@ const isoDateString = z.preprocess(
   z
     .string({ required_error: "date is required" })
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must use YYYY-MM-DD format")
+    .refine(isValidCalendarDate, "Date must be a real calendar date")
 );
 
 export const adminProgramSchema = z.object({
@@ -158,7 +213,7 @@ export const adminProgramSchema = z.object({
   schedule: requiredString("schedule", 2, 120),
   isActive: z.boolean().default(true),
   sortOrder: z.coerce.number().int().min(0).max(10000).default(0),
-});
+}).strict();
 
 export const adminCohortSchema = z
   .object({
@@ -176,6 +231,7 @@ export const adminCohortSchema = z
     isActive: z.boolean().default(true),
     sortOrder: z.coerce.number().int().min(0).max(10000).default(0),
   })
+  .strict()
   .refine((value) => value.endDate >= value.startDate, {
     message: "endDate must be on or after startDate",
     path: ["endDate"],
@@ -205,3 +261,5 @@ export const adminCohortSchema = z
     }
 
   });
+
+export const adminResourceIdSchema = slugString;

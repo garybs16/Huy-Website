@@ -1,6 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import * as OTPAuth from "otpauth";
 import { createPasswordHash } from "../server/lib/adminSecurity.js";
 
 function assert(condition, message) {
@@ -22,6 +23,7 @@ async function run() {
     "New admin password hashes must use the hardened PBKDF2 work factor"
   );
   process.env.ADMIN_SESSION_SECRET = "production-session-secret-for-automated-checks";
+  process.env.ADMIN_TOTP_SECRET = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP";
   process.env.ADMIN_SESSION_COOKIE_SAME_SITE = "strict";
   process.env.SERVE_STATIC_APP = "true";
   // Production-mode smoke tests must not inherit real payment credentials.
@@ -44,6 +46,30 @@ async function run() {
   const { server } = startServer(port);
 
   try {
+    const crossSiteCsrfRes = await fetch(`http://localhost:${port}/api/csrf`, {
+      headers: { "Sec-Fetch-Site": "cross-site" },
+    });
+    assert(crossSiteCsrfRes.status === 403, "Cross-site CSRF token requests must be denied");
+
+    const csrfRes = await fetch(`http://localhost:${port}/api/csrf`);
+    assert(csrfRes.ok, "Production CSRF token endpoint failed");
+    const csrfBody = await csrfRes.json();
+    const csrfCookie = csrfRes.headers.get("set-cookie")?.split(";")[0];
+    assert(csrfBody.csrfToken && csrfCookie, "Production CSRF token handshake was incomplete");
+    const publicCsrfHeaders = {
+      Cookie: csrfCookie,
+      "x-public-csrf-token": csrfBody.csrfToken,
+    };
+
+    const malformedJsonRes = await fetch(`http://localhost:${port}/api/inquiries`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
+      body: "{",
+    });
+    const malformedJsonBody = await malformedJsonRes.text();
+    assert(malformedJsonRes.status === 400, "Malformed JSON must be rejected");
+    assert(!malformedJsonBody.includes("stack"), "Production errors must not expose stack traces");
+
     const healthRes = await fetch(`http://localhost:${port}/api/health`);
     assert(healthRes.ok, "Production health endpoint failed");
     const healthBody = await healthRes.json();
@@ -67,6 +93,15 @@ async function run() {
     assert(
       homeRes.headers.get("permissions-policy")?.includes("camera=()"),
       "Production responses must restrict sensitive browser capabilities"
+    );
+    assert(homeRes.headers.get("strict-transport-security"), "Production responses must enable HSTS");
+    assert(
+      homeRes.headers.get("x-frame-options")?.toUpperCase() === "SAMEORIGIN",
+      "Production responses must include X-Frame-Options"
+    );
+    assert(
+      homeRes.headers.get("x-content-type-options")?.toLowerCase() === "nosniff",
+      "Production responses must prevent MIME sniffing"
     );
 
     const spaRouteRes = await fetch(`http://localhost:${port}/schedule`);
@@ -119,9 +154,21 @@ async function run() {
     const depositCohort = cohortsBody.items.find((item) => item.allowPaymentPlan);
     assert(depositCohort, "Production cohorts must expose at least one payment-plan option");
 
-    const inquiryRes = await fetch(`http://localhost:${port}/api/inquiries`, {
+    const rejectedInquiryRes = await fetch(`http://localhost:${port}/api/inquiries`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: "Missing CSRF",
+        email: "missing-csrf@example.com",
+        program: "cna",
+        message: "This request must be rejected before it can be stored.",
+      }),
+    });
+    assert(rejectedInquiryRes.status === 403, "Public mutations must reject missing CSRF tokens");
+
+    const inquiryRes = await fetch(`http://localhost:${port}/api/inquiries`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         fullName: "Production Smoke",
         email: "production-smoke@example.com",
@@ -133,7 +180,7 @@ async function run() {
 
     const waitlistRes = await fetch(`http://localhost:${port}/api/waitlist`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         fullName: "Production Waitlist",
         email: "production-waitlist@example.com",
@@ -144,7 +191,7 @@ async function run() {
 
     const enrollmentRes = await fetch(`http://localhost:${port}/api/enrollments`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         studentFullName: "Production Enrollment",
         email: "production-enrollment@example.com",
@@ -164,13 +211,21 @@ async function run() {
       }),
     });
     assert(enrollmentRes.status === 201, "Production enrollment submission failed");
+    const enrollmentCookie = enrollmentRes.headers.get("set-cookie")?.split(";")[0];
+    assert(enrollmentCookie, "Production enrollment did not issue a private access cookie");
     const enrollmentBody = await enrollmentRes.json();
     assert(enrollmentBody.paymentOption === "weekly", "Production enrollment should keep weekly payment option");
     assert(enrollmentBody.amountDueNowCents === depositCohort.paymentPlanDepositCents, "Production registration fee mismatch");
     assert(enrollmentBody.balanceDueCents > 0, "Production enrollment must keep a remaining balance");
 
-    const enrollmentStatusRes = await fetch(
+    const unauthorizedStatusRes = await fetch(
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
+    );
+    assert(unauthorizedStatusRes.status === 404, "Enrollment status must require its private access cookie");
+
+    const enrollmentStatusRes = await fetch(
+      `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`,
+      { headers: { Cookie: enrollmentCookie } }
     );
     assert(enrollmentStatusRes.ok, "Production enrollment status endpoint failed");
     assert(
@@ -184,7 +239,7 @@ async function run() {
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/payment-session`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
         body: JSON.stringify({ email: "production-enrollment@example.com" }),
       }
     );
@@ -203,14 +258,18 @@ async function run() {
 
     const adminLoginRes = await fetch(`http://localhost:${port}/api/admin/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         username: "production-admin",
         password: "ProductionPassword123!",
+        totpCode: new OTPAuth.TOTP({
+          secret: OTPAuth.Secret.fromBase32(process.env.ADMIN_TOTP_SECRET),
+        }).generate(),
       }),
     });
     assert(adminLoginRes.ok, "Production admin login failed");
     const adminLoginBody = await adminLoginRes.json();
+    assert(adminLoginBody.adminMfaConfigured === true, "Production admin login must enforce MFA when configured");
     assert(adminLoginBody.csrfToken, "Production admin login did not return a CSRF token");
     const adminCookie = adminLoginRes.headers.get("set-cookie")?.split(";")[0];
     assert(adminCookie, "Production admin login did not return a cookie");

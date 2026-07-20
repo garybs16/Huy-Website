@@ -18,7 +18,7 @@ test("public submission schemas trim values and reject invalid contact data", ()
 
   assert.equal(inquiry.fullName, "Jane Student");
   assert.equal(inquiry.email, "jane@example.com");
-  assert.equal(inquiry.program, "CNA");
+  assert.equal(inquiry.program, "cna");
   assert.throws(
     () =>
       waitlistSchema.parse({
@@ -58,6 +58,18 @@ test("enrollment schema normalizes state and validates required student details"
         postalCode: "bad-zip",
       }),
     /Postal code must be a valid US ZIP code/
+  );
+  assert.throws(
+    () => enrollmentSchema.parse({ ...enrollment, state: "ZZ" }),
+    /State must be a valid US state or territory code/
+  );
+  assert.throws(
+    () => enrollmentSchema.parse({ ...enrollment, dateOfBirth: "2000-02-31" }),
+    /real calendar date/
+  );
+  assert.throws(
+    () => enrollmentSchema.parse({ ...enrollment, unexpected: "field" }),
+    /Unrecognized key/
   );
 });
 

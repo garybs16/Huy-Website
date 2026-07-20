@@ -17,6 +17,7 @@ async function run() {
   process.env.ADMIN_USERNAME = "harmony-admin";
   process.env.ADMIN_PASSWORD_HASH = createPasswordHash("HarmonyPassword123!");
   process.env.ADMIN_SESSION_SECRET = "harmony-session-secret-for-automated-checks";
+  process.env.ADMIN_TOTP_SECRET = "";
   // Keep this contract test offline and deterministic even when a developer's
   // local .env contains live payment credentials.
   process.env.STRIPE_SECRET_KEY = "";
@@ -38,6 +39,16 @@ async function run() {
   const { server } = startServer(port);
 
   try {
+    const csrfRes = await fetch(`http://localhost:${port}/api/csrf`);
+    assert(csrfRes.ok, "CSRF token endpoint failed");
+    const csrfBody = await csrfRes.json();
+    const csrfCookie = csrfRes.headers.get("set-cookie")?.split(";")[0];
+    assert(csrfBody.csrfToken && csrfCookie, "CSRF token handshake was incomplete");
+    const publicCsrfHeaders = {
+      Cookie: csrfCookie,
+      "x-public-csrf-token": csrfBody.csrfToken,
+    };
+
     const healthRes = await fetch(`http://localhost:${port}/api/health`);
     assert(healthRes.ok, "Health endpoint failed");
     const healthBody = await healthRes.json();
@@ -63,7 +74,7 @@ async function run() {
 
     const inquiryRes = await fetch(`http://localhost:${port}/api/inquiries`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         fullName: "Harmony Check",
         email: "harmony-check@example.com",
@@ -75,7 +86,7 @@ async function run() {
 
     const waitlistRes = await fetch(`http://localhost:${port}/api/waitlist`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         fullName: "Waitlist Harmony",
         email: "waitlist-harmony@example.com",
@@ -85,7 +96,7 @@ async function run() {
 
     const enrollmentRes = await fetch(`http://localhost:${port}/api/enrollments`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         studentFullName: "Enrollment Harmony",
         email: "enrollment-harmony@example.com",
@@ -105,6 +116,8 @@ async function run() {
       }),
     });
     assert(enrollmentRes.status === 201, "Enrollment submission failed contract check");
+    const enrollmentCookie = enrollmentRes.headers.get("set-cookie")?.split(";")[0];
+    assert(enrollmentCookie, "Enrollment did not issue a private access cookie");
     const enrollmentBody = await enrollmentRes.json();
     assert(typeof enrollmentBody.enrollmentId === "string", "Enrollment response must contain enrollmentId");
     assert(enrollmentBody.paymentStatus === "manual_pending", "Payment-plan enrollment should fall back to manual pending without Stripe");
@@ -113,7 +126,8 @@ async function run() {
     assert(enrollmentBody.balanceDueCents > 0, "Payment-plan enrollment must retain a remaining balance");
 
     const enrollmentStatusRes = await fetch(
-      `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
+      `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`,
+      { headers: { Cookie: enrollmentCookie } }
     );
     assert(enrollmentStatusRes.ok, "Enrollment status endpoint failed");
     const enrollmentStatusBody = await enrollmentStatusRes.json();
@@ -129,7 +143,7 @@ async function run() {
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/payment-session`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
         body: JSON.stringify({ email: "enrollment-harmony@example.com" }),
       }
     );
@@ -147,7 +161,7 @@ async function run() {
 
     const adminLoginRes = await fetch(`http://localhost:${port}/api/admin/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...publicCsrfHeaders },
       body: JSON.stringify({
         username: "harmony-admin",
         password: "HarmonyPassword123!",
