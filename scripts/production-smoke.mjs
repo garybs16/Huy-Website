@@ -17,6 +17,10 @@ async function run() {
   process.env.API_ADMIN_KEY = "production-admin-key-for-automated-checks";
   process.env.ADMIN_USERNAME = "production-admin";
   process.env.ADMIN_PASSWORD_HASH = createPasswordHash("ProductionPassword123!");
+  assert(
+    process.env.ADMIN_PASSWORD_HASH.startsWith("pbkdf2_sha256$600000$"),
+    "New admin password hashes must use the hardened PBKDF2 work factor"
+  );
   process.env.ADMIN_SESSION_SECRET = "production-session-secret-for-automated-checks";
   process.env.ADMIN_SESSION_COOKIE_SAME_SITE = "strict";
   process.env.SERVE_STATIC_APP = "true";
@@ -55,6 +59,10 @@ async function run() {
     assert(
       homeRes.headers.get("content-security-policy")?.includes("frame-ancestors 'none'"),
       "Production CSP must prevent clickjacking"
+    );
+    assert(
+      homeRes.headers.get("content-security-policy")?.includes("object-src 'none'"),
+      "Production CSP must block plugin content"
     );
     assert(
       homeRes.headers.get("permissions-policy")?.includes("camera=()"),
@@ -165,6 +173,10 @@ async function run() {
       `http://localhost:${port}/api/enrollments/${enrollmentBody.enrollmentId}/status`
     );
     assert(enrollmentStatusRes.ok, "Production enrollment status endpoint failed");
+    assert(
+      enrollmentStatusRes.headers.get("cache-control")?.includes("no-store"),
+      "Enrollment information must not be cached"
+    );
     const enrollmentStatusBody = await enrollmentStatusRes.json();
     assert(enrollmentStatusBody.paymentOption === "weekly", "Production enrollment status must include payment option");
 

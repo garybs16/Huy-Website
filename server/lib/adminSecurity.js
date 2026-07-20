@@ -4,7 +4,9 @@ const SESSION_COOKIE_NAME = "admin_session";
 const PASSWORD_HASH_PREFIX = "pbkdf2_sha256";
 const PASSWORD_HASH_DIGEST = "sha256";
 const PASSWORD_HASH_KEY_LENGTH = 32;
-const DEFAULT_PASSWORD_ITERATIONS = 210_000;
+// OWASP's current PBKDF2-HMAC-SHA256 guidance calls for at least 600,000
+// iterations. Existing valid hashes continue to verify during a rollout.
+const DEFAULT_PASSWORD_ITERATIONS = 600_000;
 const MAX_PASSWORD_ITERATIONS = 1_000_000;
 
 export function constantTimeEqual(left, right) {

@@ -13,7 +13,11 @@ import { createNotifier } from "./lib/notifications.js";
 import { createStripeClient } from "./lib/stripe.js";
 import { createTurnstileVerifier } from "./lib/turnstile.js";
 import { verifyTurnstile } from "./middleware/verifyTurnstile.js";
-import { requireJsonRequestBody, setPermissionsPolicy } from "./middleware/securityHeaders.js";
+import {
+  preventSensitiveCaching,
+  requireJsonRequestBody,
+  setPermissionsPolicy,
+} from "./middleware/securityHeaders.js";
 import { createAdminRouter } from "./routes/admin.js";
 import { createCohortsRouter } from "./routes/cohorts.js";
 import { createEnrollmentsRouter } from "./routes/enrollments.js";
@@ -122,6 +126,10 @@ export function createApp() {
       contentSecurityPolicy: {
         directives: {
           "upgrade-insecure-requests": null,
+          "base-uri": ["'self'"],
+          "form-action": ["'self'"],
+          "object-src": ["'none'"],
+          "script-src-attr": ["'none'"],
           // Stripe Checkout is rendered in a secure cross-origin frame.
           // Keep the site's default protections while explicitly allowing
           // the Stripe resources needed for embedded Checkout.
@@ -157,6 +165,9 @@ export function createApp() {
       callback(new Error("CORS origin not allowed"));
     })
   );
+  // API payloads can include student and administrative information. Never let
+  // browsers or intermediary caches retain an API response after it is used.
+  app.use("/api", preventSensitiveCaching);
   app.use(
     "/api/payments/stripe/webhook",
     webhookLimiter,
