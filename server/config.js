@@ -167,7 +167,9 @@ export function getRuntimeConfigReport(currentConfig = config) {
     sessionAuthConfigured &&
     !isPasswordHashProductionReady(currentConfig.adminPasswordHash)
   ) {
-    issues.push("ADMIN_PASSWORD_HASH must use PBKDF2-SHA256 with at least 600,000 iterations and a strong salt.");
+    warnings.push(
+      "ADMIN_PASSWORD_HASH predates the current 600,000-iteration policy. Regenerate it with npm run admin:hash; the existing hash remains usable during the credential rollout."
+    );
   }
 
   if (currentConfig.adminKey && currentConfig.adminKey.length < 32) {

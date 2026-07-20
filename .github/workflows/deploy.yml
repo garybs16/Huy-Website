@@ -108,4 +108,9 @@ jobs:
             fi
             sleep 2
           done
+          ssh -i ~/.ssh/lightsail_deploy_key \
+            -o IdentitiesOnly=yes \
+            "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}" \
+            'sudo systemctl status firststep --no-pager -l || true
+             sudo journalctl -u firststep --since "5 minutes ago" --no-pager -n 80 || true'
           exit 1

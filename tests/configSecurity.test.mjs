@@ -63,3 +63,14 @@ test("production configuration rejects malformed MFA secrets", () => {
   const report = getRuntimeConfigReport(productionConfig({ adminTotpSecret: "not-base32" }));
   assert.match(report.issues.join(" "), /ADMIN_TOTP_SECRET/);
 });
+
+test("production configuration permits a legacy password hash only with an upgrade warning", () => {
+  const report = getRuntimeConfigReport(
+    productionConfig({
+      adminPasswordHash: `pbkdf2_sha256$210000$${"a".repeat(32)}$${"b".repeat(64)}`,
+    })
+  );
+
+  assert.deepEqual(report.issues, []);
+  assert.match(report.warnings.join(" "), /600,000-iteration policy/);
+});
