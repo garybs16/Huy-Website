@@ -151,7 +151,7 @@ export function PaymentPage() {
     <section className="section section-soft">
       <PageIntro
         kicker="Payment Portal"
-        title="Pay tuition or review an active automatic payment plan from one secure portal."
+        title="Manage your enrollment payment securely."
         description="Enter the enrollment ID and email used during registration to view payment progress or open the correct Stripe checkout."
         accent="Secure enrollment payment"
         note="Payment links are verified against the student email before checkout starts."
@@ -177,7 +177,7 @@ export function PaymentPage() {
           <p className="form-helper">
             Verify the enrollment first. Active plans show completed payments, remaining balance, and the next charge.
           </p>
-          <form className="form-stack" onSubmit={handleSubmit}>
+          <form className="form-stack" onSubmit={handleSubmit} aria-busy={paymentPending}>
             <label>
               <span>Enrollment ID</span>
               <input
@@ -185,12 +185,17 @@ export function PaymentPage() {
                 value={paymentForm.enrollmentId}
                 onChange={handleInput}
                 placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                autoComplete="off"
+                inputMode="text"
+                pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}"
+                title="Enter the complete enrollment ID from your confirmation"
+                maxLength="36"
                 required
               />
             </label>
             <label>
               <span>Email address</span>
-              <input name="email" type="email" value={paymentForm.email} onChange={handleInput} required />
+              <input name="email" type="email" value={paymentForm.email} onChange={handleInput} autoComplete="email" maxLength="160" required />
             </label>
             <button type="submit" className="btn btn-primary" disabled={paymentPending}>
               {paymentPending ? "Checking payment status..." : "Check Payment or Open Checkout"}

@@ -223,7 +223,7 @@ export function RewardsGuidancePage() {
           </div>
 
           <div className="rg-hero-visual">
-            <img src={heroTraining} alt="CNA students receiving hands-on clinical skills instruction" />
+            <img src={heroTraining} alt="CNA students receiving hands-on clinical skills instruction" fetchPriority="high" decoding="async" />
             <div className="rg-offer-card">
               <span>Referral offer</span>
               <strong>$100 for your friend + $100 for you</strong>
@@ -263,7 +263,7 @@ export function RewardsGuidancePage() {
             </details>
           </div>
           <div className="rg-feature-photo">
-            <img src={programsSupport} alt="Instructor guiding students through CNA skills practice" />
+            <img src={programsSupport} alt="Instructor guiding students through CNA skills practice" loading="lazy" decoding="async" />
             <div><strong>Build skills together</strong><span>Encouragement - accountability - shared progress</span></div>
           </div>
         </div>
@@ -297,16 +297,16 @@ export function RewardsGuidancePage() {
               <span>Build confidence</span>
               <span>Create your future</span>
             </div>
-            <form className="rg-handout-form handout-form" onSubmit={handleResourceSubmit}>
+            <form className="rg-handout-form handout-form" onSubmit={handleResourceSubmit} aria-busy={resourcePending}>
               <h3>Get Your Free Handouts Now.</h3>
               <div className="form-grid two-up">
                 <label>
                   <span>First name *</span>
-                  <input name="firstName" value={resourceForm.firstName} onChange={updateResourceField} required />
+                  <input name="firstName" value={resourceForm.firstName} onChange={updateResourceField} autoComplete="given-name" minLength="1" maxLength="50" required />
                 </label>
                 <label>
                   <span>Last name *</span>
-                  <input name="lastName" value={resourceForm.lastName} onChange={updateResourceField} required />
+                  <input name="lastName" value={resourceForm.lastName} onChange={updateResourceField} autoComplete="family-name" minLength="1" maxLength="50" required />
                 </label>
                 <label>
                   <span>Email address *</span>
@@ -315,12 +315,14 @@ export function RewardsGuidancePage() {
                     type="email"
                     value={resourceForm.email}
                     onChange={updateResourceField}
+                    autoComplete="email"
+                    maxLength="160"
                     required
                   />
                 </label>
                 <label>
                   <span>Phone number *</span>
-                  <input name="phone" type="tel" value={resourceForm.phone} onChange={updateResourceField} required />
+                  <input name="phone" type="tel" value={resourceForm.phone} onChange={updateResourceField} autoComplete="tel" inputMode="tel" pattern="[0-9+().\-\s]{7,25}" maxLength="25" required />
                 </label>
               </div>
               <TurnstileWidget
@@ -345,14 +347,14 @@ export function RewardsGuidancePage() {
           <div className="rg-guide-grid" aria-label="Free planning resources">
             <article className="rg-guide-card rg-guide-card-blue rg-guide-card-cover">
               <span>Free planning tool</span>
-              <img src={cnaGuideCover} alt="CNA Career Starter Guide cover" />
+              <img src={cnaGuideCover} alt="CNA Career Starter Guide cover" loading="lazy" decoding="async" />
               <h3>CNA Career Starter Guide</h3>
               <p>Explore how your goals, strengths, and priorities may connect with CNA training.</p>
               <a href={guideResources[0].href} target="_blank" rel="noreferrer">Open the guide <span aria-hidden="true">→</span></a>
             </article>
             <article className="rg-guide-card rg-guide-card-gold rg-guide-card-cover">
               <span>Education pathway</span>
-              <img src={pathwayGuideCover} alt="Orange County Nursing School Pathway Guide cover" />
+              <img src={pathwayGuideCover} alt="Orange County Nursing School Pathway Guide cover" loading="lazy" decoding="async" />
               <h3>OC Nursing School Pathway Guide</h3>
               <p>Review how CNA experience may support a longer-term LVN, RN, or BSN goal.</p>
               <a href={guideResources[1].href} target="_blank" rel="noreferrer">Open the guide <span aria-hidden="true">→</span></a>
@@ -414,7 +416,7 @@ export function RewardsGuidancePage() {
             </div>
           </div>
           <div className="rg-study-visual">
-            <img src={heroTraining} alt="Instructor demonstrating a hands-on CNA skill to students" />
+            <img src={heroTraining} alt="Instructor demonstrating a hands-on CNA skill to students" loading="lazy" decoding="async" />
             <blockquote>“Preparation becomes manageable when students know what to focus on next.”</blockquote>
           </div>
         </div>
@@ -500,12 +502,12 @@ export function RewardsGuidancePage() {
             </div>
           </div>
 
-          <form className="rg-callback-form form-stack" onSubmit={handleSubmit}>
+          <form className="rg-callback-form form-stack" onSubmit={handleSubmit} aria-busy={pending}>
             <div className="form-grid two-up">
-              <label><span>Full name *</span><input name="fullName" value={form.fullName} onChange={updateField} required autoComplete="name" /></label>
-              <label><span>City *</span><input name="city" value={form.city} onChange={updateField} required autoComplete="address-level2" /></label>
-              <label><span>Phone number *</span><input name="phone" value={form.phone} onChange={updateField} required type="tel" autoComplete="tel" /></label>
-              <label><span>Email address *</span><input name="email" value={form.email} onChange={updateField} required type="email" autoComplete="email" /></label>
+              <label><span>Full name *</span><input name="fullName" value={form.fullName} onChange={updateField} required autoComplete="name" minLength="2" maxLength="100" /></label>
+              <label><span>City *</span><input name="city" value={form.city} onChange={updateField} required autoComplete="address-level2" minLength="2" maxLength="80" /></label>
+              <label><span>Phone number *</span><input name="phone" value={form.phone} onChange={updateField} required type="tel" autoComplete="tel" inputMode="tel" pattern="[0-9+().\-\s]{7,25}" maxLength="25" /></label>
+              <label><span>Email address *</span><input name="email" value={form.email} onChange={updateField} required type="email" autoComplete="email" maxLength="160" /></label>
             </div>
 
             <label>

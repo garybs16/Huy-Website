@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
+import "./polish.css";
 import {
   createAdminCohort,
   createAdminBackup,
@@ -42,6 +43,9 @@ const CareerQuizPage = lazy(() =>
   import("./pages/CareerQuizPage").then((module) => ({ default: module.CareerQuizPage }))
 );
 const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ default: module.HomePage })));
+const NotFoundPage = lazy(() =>
+  import("./pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage }))
+);
 const ProgramsPage = lazy(() =>
   import("./pages/ProgramsPage").then((module) => ({ default: module.ProgramsPage }))
 );
@@ -120,15 +124,36 @@ const pageTitles = {
 };
 
 const pageDescriptions = {
+  "/":
+    "Start CNA training with clear tuition, admissions requirements, class options, and student support from First Step Healthcare Academy in Orange, California.",
+  "/programs":
+    "Review First Step Healthcare Academy's approved CNA training path, curriculum, requirements, tuition, and clinical preparation.",
   "/rewards-guidance":
     "Explore CNA class formats, tuition and payment options, $100 referral rewards, study tools, career guidance, and admissions support from First Step Healthcare Academy in Orange, California.",
+  "/career-quiz":
+    "Take a short career reflection quiz and explore whether a people-centered healthcare path may fit your goals.",
+  "/schedule":
+    "Compare upcoming First Step Healthcare Academy CNA cohorts, schedules, tuition, and current seat availability.",
+  "/register":
+    "Choose a CNA cohort and complete First Step Healthcare Academy's secure student enrollment and payment process.",
+  "/payment":
+    "Access the secure First Step Healthcare Academy payment portal to review an enrollment payment or active payment plan.",
+  "/policies":
+    "Review First Step Healthcare Academy's student, privacy, payment, and program policies before enrollment.",
+  "/admissions":
+    "Review CNA admissions requirements, required documents, fees, and refund information before enrollment.",
+  "/contact":
+    "Contact First Step Healthcare Academy admissions for CNA training, scheduling, document, and enrollment support.",
 };
 
 function AppEffects({ setEnrollmentStatus }) {
   const location = useLocation();
 
   useEffect(() => {
-    document.title = pageTitles[location.pathname] ?? pageTitles["/"];
+    const knownPage = Object.prototype.hasOwnProperty.call(pageTitles, location.pathname);
+    document.title = knownPage
+      ? pageTitles[location.pathname]
+      : "Page Not Found | First Step Healthcare Academy";
     document.getElementById("main-content")?.focus({ preventScroll: true });
     const description = document.querySelector('meta[name="description"]');
     if (description) {
@@ -136,6 +161,13 @@ function AppEffects({ setEnrollmentStatus }) {
         "content",
         pageDescriptions[location.pathname] ??
           "Explore CNA training, class schedules, admissions, and student support at First Step Healthcare Academy in Orange, California."
+      );
+    }
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) {
+      robots.setAttribute(
+        "content",
+        location.pathname === "/admin" || !knownPage ? "noindex, nofollow" : "index, follow"
       );
     }
 
@@ -252,6 +284,7 @@ function RegisterRoute({
   enrollmentForm,
   enrollmentPending,
   enrollmentStatus,
+  checkoutClientSecret,
   cohortLoadError,
   onInput,
   onSubmit,
@@ -293,6 +326,7 @@ function RegisterRoute({
       enrollmentForm={enrollmentForm}
       enrollmentPending={enrollmentPending}
       enrollmentStatus={enrollmentStatus}
+      checkoutClientSecret={checkoutClientSecret}
       cohortLoadError={cohortLoadError}
       onInput={onInput}
       onSubmit={onSubmit}
@@ -303,7 +337,7 @@ function RegisterRoute({
 
 function AppShell({ children }) {
   const location = useLocation();
-  const showCtaBand = location.pathname !== "/admin";
+  const showPublicFooter = location.pathname !== "/admin";
 
   return (
     <div className="site-shell">
@@ -314,9 +348,8 @@ function AppShell({ children }) {
 
       <main id="main-content" tabIndex={-1}>{children}</main>
 
-      {showCtaBand ? <SiteCtaBand /> : null}
-
-      <SiteFooter />
+      {showPublicFooter ? <SiteCtaBand /> : null}
+      {showPublicFooter ? <SiteFooter /> : null}
     </div>
   );
 }
@@ -421,7 +454,7 @@ function App() {
   const handleInquiryInput = (event) => {
     const { name, value, type, checked } = event.target;
     const nextValue = type === "checkbox" ? checked : value;
-    setInquiryForm((current) => ({ ...current, [name]: value }));
+    setInquiryForm((current) => ({ ...current, [name]: nextValue }));
   };
 
   const handleWaitlistInput = (event) => {
@@ -430,7 +463,9 @@ function App() {
   };
 
   const handleEnrollmentInput = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
+    const rawValue = type === "checkbox" ? checked : value;
+    const nextValue = name === "state" && typeof rawValue === "string" ? rawValue.toUpperCase() : rawValue;
 
     setEnrollmentForm((current) => {
       if (name === "programId") {
@@ -859,7 +894,16 @@ function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AppEffects setEnrollmentStatus={setEnrollmentStatus} />
       <AppShell>
-        <Suspense fallback={<section className="section"><div className="container"><p className="section-note">Loading page content...</p></div></section>}>
+        <Suspense
+          fallback={
+            <section className="section route-loading" aria-live="polite" aria-busy="true">
+              <div className="container route-loading-card">
+                <span className="route-loading-mark" aria-hidden="true" />
+                <p>Preparing your page…</p>
+              </div>
+            </section>
+          }
+        >
           <Routes>
             <Route path="/" element={<HomePage cohorts={cohorts} programs={programs} />} />
             <Route
@@ -967,6 +1011,7 @@ function App() {
                 />
               }
             />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </AppShell>

@@ -15,7 +15,7 @@ export function AdmissionsPage() {
     <section className="section section-soft">
       <PageIntro
         kicker="Admissions"
-        title="Know what to prepare before you apply, enroll, and start class."
+        title="Prepare for CNA enrollment with confidence."
         description="Review the admissions checklist, tuition notes, refund policy, locations, and common questions in one organized place."
         accent="Everything students should prepare"
         note="Documents, pricing, policies, and clinical logistics stay visible before enrollment."
@@ -33,12 +33,16 @@ export function AdmissionsPage() {
           <img
             src={heroTrainingPhoto}
             alt="Healthcare instructor demonstrating bedside skills with students observing during lab training"
+            loading="lazy"
+            decoding="async"
           />
         </div>
         <div className="media-panel">
           <img
             src={programsSupportPhoto}
             alt="Students practicing patient care techniques in a clinical simulation room"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </div>

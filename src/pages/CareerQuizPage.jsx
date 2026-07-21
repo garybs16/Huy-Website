@@ -94,11 +94,22 @@ export function CareerQuizPage() {
             The highest score becomes your primary result. If another category is within two points,
             it appears as a supporting energy.
           </p>
+          <div
+            className="quiz-progress"
+            role="progressbar"
+            aria-label="Quiz completion"
+            aria-valuemin="0"
+            aria-valuemax={quizQuestions.length}
+            aria-valuenow={answeredCount}
+          >
+            <span style={{ width: `${(answeredCount / quizQuestions.length) * 100}%` }} />
+          </div>
+          <p className="quiz-progress-label">{answeredCount} of {quizQuestions.length} answered</p>
           <button type="submit" className="btn btn-primary" disabled={!isComplete}>
-            View Result
+            {isComplete ? "View result" : `Answer ${quizQuestions.length - answeredCount} more`}
           </button>
-          <button type="button" className="btn btn-ghost" onClick={handleReset}>
-            Reset Quiz
+          <button type="button" className="btn btn-ghost" onClick={handleReset} disabled={answeredCount === 0}>
+            Reset quiz
           </button>
 
           {result ? (

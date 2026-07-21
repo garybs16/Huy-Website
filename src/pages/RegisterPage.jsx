@@ -54,12 +54,13 @@ export function RegisterPage({
     : enrollmentForm.paymentOption === "biweekly"
       ? "6 biweekly tuition payments"
       : "Paid in full";
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <section className="section">
       <PageIntro
         kicker="Registration"
-        title="Reserve a seat with a registration flow that stays clear from cohort selection to checkout."
+        title="Reserve your CNA seat in a few clear steps."
         description="Choose the CNA program, confirm the right cohort, and submit one organized student record before payment or admissions follow-up."
         accent="Ready-to-enroll workflow"
         note="CNA program choice, cohort details, and student intake stay connected."
@@ -128,48 +129,48 @@ export function RegisterPage({
           <p className="form-helper">Complete each section, review the required policies, and confirm the payment schedule before checkout.</p>
           {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}
 
-          <form className="form-stack" onSubmit={onSubmit}>
+          <form className="form-stack" onSubmit={onSubmit} aria-busy={enrollmentPending}>
             <fieldset className="enrollment-form-section">
               <legend><span>1</span> Student details</legend>
             <div className="form-grid two-up">
               <label>
                 <span>Student full name</span>
-                <input name="studentFullName" value={enrollmentForm.studentFullName} onChange={onInput} required />
+                <input name="studentFullName" value={enrollmentForm.studentFullName} onChange={onInput} autoComplete="name" minLength="2" maxLength="100" required />
               </label>
               <label>
                 <span>Date of birth</span>
-                <input name="dateOfBirth" type="date" value={enrollmentForm.dateOfBirth} onChange={onInput} required />
+                <input name="dateOfBirth" type="date" value={enrollmentForm.dateOfBirth} onChange={onInput} autoComplete="bday" min="1900-01-01" max={today} required />
               </label>
             </div>
 
             <div className="form-grid two-up">
               <label>
                 <span>Email</span>
-                <input name="email" type="email" value={enrollmentForm.email} onChange={onInput} required />
+                <input name="email" type="email" value={enrollmentForm.email} onChange={onInput} autoComplete="email" maxLength="160" required />
               </label>
               <label>
                 <span>Phone</span>
-                <input name="phone" type="tel" value={enrollmentForm.phone} onChange={onInput} required />
+                <input name="phone" type="tel" value={enrollmentForm.phone} onChange={onInput} autoComplete="tel" inputMode="tel" pattern="[0-9+().\-\s]{7,25}" maxLength="25" required />
               </label>
             </div>
 
             <label>
               <span>Street address</span>
-              <input name="addressLine1" value={enrollmentForm.addressLine1} onChange={onInput} required />
+              <input name="addressLine1" value={enrollmentForm.addressLine1} onChange={onInput} autoComplete="street-address" minLength="5" maxLength="160" required />
             </label>
 
             <div className="form-grid three-up">
               <label>
                 <span>City</span>
-                <input name="city" value={enrollmentForm.city} onChange={onInput} required />
+                <input name="city" value={enrollmentForm.city} onChange={onInput} autoComplete="address-level2" minLength="2" maxLength="80" required />
               </label>
               <label>
                 <span>State</span>
-                <input name="state" value={enrollmentForm.state} onChange={onInput} maxLength={2} required />
+                <input name="state" value={enrollmentForm.state} onChange={onInput} autoComplete="address-level1" autoCapitalize="characters" inputMode="text" pattern="[A-Za-z]{2}" title="Enter a two-letter US state or territory code" maxLength="2" required />
               </label>
               <label>
                 <span>ZIP code</span>
-                <input name="postalCode" value={enrollmentForm.postalCode} onChange={onInput} required />
+                <input name="postalCode" value={enrollmentForm.postalCode} onChange={onInput} autoComplete="postal-code" inputMode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" title="Enter a 5-digit ZIP code or ZIP+4" maxLength="10" required />
               </label>
             </div>
 
@@ -180,6 +181,9 @@ export function RegisterPage({
                   name="emergencyContactName"
                   value={enrollmentForm.emergencyContactName}
                   onChange={onInput}
+                  autoComplete="off"
+                  minLength="2"
+                  maxLength="100"
                   required
                 />
               </label>
@@ -190,6 +194,10 @@ export function RegisterPage({
                   type="tel"
                   value={enrollmentForm.emergencyContactPhone}
                   onChange={onInput}
+                  autoComplete="off"
+                  inputMode="tel"
+                  pattern="[0-9+().\-\s]{7,25}"
+                  maxLength="25"
                   required
                 />
               </label>
@@ -311,6 +319,7 @@ export function RegisterPage({
                 value={enrollmentForm.notes}
                 onChange={onInput}
                 placeholder="Add scheduling requests, document status, or extra context."
+                maxLength="600"
               />
             </label>
 
@@ -345,8 +354,8 @@ export function RegisterPage({
               {enrollmentPending
                 ? "Preparing checkout..."
                 : isPaymentPlan
-                  ? "Continue to Secure Payment"
-                  : "Start Enrollment"}
+                  ? "Continue to secure payment"
+                  : "Continue to secure checkout"}
             </button>
           </form>
 

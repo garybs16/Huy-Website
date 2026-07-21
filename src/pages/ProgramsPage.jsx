@@ -70,8 +70,8 @@ export function ProgramsPage({ programLoadError }) {
         {programLoadError ? <p className="section-note">{programLoadError}</p> : null}
         <div className="program-certification-heading">
           <p className="section-kicker">CNA certification</p>
-          <h1>Your CNA Certification Is Just 3 Simple Steps Away.</h1>
-          <p>It is easy to start a high-demand CNA career when the next steps are clear.</p>
+          <h1>Your CNA training path in three clear steps.</h1>
+          <p>Review the full path from live theory and clinical training to the state exam.</p>
         </div>
         <div className="program-step-grid">
           {certificationSteps.map((item) => (
@@ -113,6 +113,8 @@ export function ProgramsPage({ programLoadError }) {
                 <img
                   src={admissionsLabPhoto}
                   alt="Student using training technology during a healthcare classroom session"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : null}
               <ul className="detail-list compact-list">

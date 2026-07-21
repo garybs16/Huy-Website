@@ -3,12 +3,14 @@ import academyLogo from "../assets/logo.jpg";
 import { contactDetails, footerGroups } from "../siteData";
 
 export function SiteFooter() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
           <p className="footer-kicker">Start with clarity</p>
-          <img className="footer-logo" src={academyLogo} alt="First Step Healthcare Academy logo" />
+          <img className="footer-logo" src={academyLogo} alt="First Step Healthcare Academy logo" loading="lazy" decoding="async" />
           <p>
             Career training with visible schedules, flexible cohort options, and direct admissions
             support from first inquiry to registration.
@@ -48,7 +50,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="footer-bar">
-        <p>Copyright 2026 First Step Healthcare Academy. All rights reserved.</p>
+        <p>Copyright {currentYear} First Step Healthcare Academy. All rights reserved.</p>
       </div>
     </footer>
   );

@@ -104,6 +104,9 @@ async function run() {
   assertIncludes(appEffects, '"/policies"', "Policy Center route");
   assertIncludes(appEffects, "location.hash", "Hash anchor scrolling support");
   assertIncludes(appEffects, "scrollIntoView", "Hash anchor scrolling behavior");
+  assertIncludes(appEffects, 'const rawValue = type === "checkbox" ? checked : value', "Enrollment input normalization");
+  assertIncludes(appEffects, "checkoutClientSecret={checkoutClientSecret}", "Embedded checkout handoff");
+  assertIncludes(appEffects, '<Route path="*" element={<NotFoundPage />} />', "Not-found route");
 
   console.log("Content regression check passed.");
 }

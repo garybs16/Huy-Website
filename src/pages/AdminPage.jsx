@@ -222,7 +222,7 @@ export function AdminPage({
     <section className="section section-soft">
       <PageIntro
         kicker="Admin"
-        title="Operations dashboard for enrollments, inquiries, and live catalog management."
+        title="Manage enrollment and catalog operations."
         description="Use signed admin sessions or the protected fallback key path, then manage operations and catalog data from one place."
         accent="Protected operations and catalog controls"
         note="Login, audit visibility, intake tracking, and catalog maintenance now live in the same dashboard."

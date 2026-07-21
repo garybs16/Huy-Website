@@ -26,7 +26,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
     <section className="section section-soft">
       <PageIntro
         kicker="Schedule"
-        title="See upcoming class formats, meeting times, pricing, and open seats in one place."
+        title="Compare upcoming CNA cohorts."
         description="Compare current CNA cohorts by schedule format and tuition so students can identify the right track before they register."
         accent="Real class visibility"
         note="Exact public cohort dates are coming soon while approved calendars are finalized."
@@ -63,21 +63,22 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
 
       <div className="container card-grid two-up">
         <article className="info-card">
-          <p className="section-kicker">Why this matters</p>
-          <h3>Students can compare timing, tuition, and seat availability before they commit.</h3>
+          <p className="section-kicker">Before you choose</p>
+          <h3>Make sure the complete training schedule fits your life.</h3>
           <p>
-            That matches how most applicants actually browse: they want dates, meeting patterns,
-            and seat context before anything else.
+            Review online theory hours, in-person clinical days, transportation needs, document
+            deadlines, and the full payment schedule before reserving a seat.
           </p>
         </article>
 
         <article className="info-card">
-          <p className="section-kicker">Next step</p>
-          <h3>Once a student sees the right cohort, they can move straight into registration.</h3>
+          <p className="section-kicker">Need help deciding?</p>
+          <h3>Admissions can help you compare cohort timing and requirements.</h3>
           <p>
-            The published schedule and the registration form speak the same language, which keeps
-            the experience clear from first review to seat reservation.
+            Ask about schedule fit, tuition, payment options, or documents before you begin the
+            registration process.
           </p>
+          <Link to="/contact" className="card-action-link">Talk to admissions</Link>
         </article>
       </div>
     </section>

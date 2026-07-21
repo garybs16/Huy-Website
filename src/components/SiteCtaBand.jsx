@@ -1,11 +1,7 @@
 import { Link } from "react-router-dom";
 import { contactDetails } from "../siteData";
 
-const ctaHighlights = [
-  "Published schedules",
-  "Flexible cohort timing",
-  "Direct admissions guidance",
-];
+const ctaHighlights = ["Clear tuition", "Published requirements", "Real admissions support"];
 
 export function SiteCtaBand() {
   return (
@@ -13,20 +9,19 @@ export function SiteCtaBand() {
       <div className="container">
         <div className="site-cta-panel">
           <div className="site-cta-copy">
-            <p className="section-kicker">Plan your start with confidence</p>
-            <h2>Let’s Help You Find the Right Next Step</h2>
+            <p className="section-kicker">Your next step</p>
+            <h2>Ready to start—or still deciding?</h2>
             <p>
-              Whether you have questions about tuition, scheduling, requirements, or whether the
-              program is right for you, our admissions team is here to help. You can also explore
-              upcoming cohorts whenever you are ready.
+              Compare the schedule and requirements at your own pace, or speak with admissions for
+              a clear answer about tuition, documents, and the best cohort for your availability.
             </p>
 
             <div className="button-row">
               <Link to="/register" className="btn btn-primary">
-                Reserve a Seat
+                Start registration
               </Link>
               <Link to="/contact" className="btn btn-ghost">
-                Talk to Admissions
+                Talk to admissions
               </Link>
             </div>
           </div>

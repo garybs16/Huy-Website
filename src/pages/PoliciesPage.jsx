@@ -92,7 +92,7 @@ export function PoliciesPage() {
     <section className="section section-soft">
       <PageIntro
         kicker="Policy Center"
-        title="Read the policies that guide enrollment, privacy, refunds, and payments."
+        title="Understand the policies behind your enrollment."
         description="These public summaries make the key student-facing terms available before registration. Your signed Enrollment Agreement and applicable law control where they differ."
         accent="Clear terms before checkout"
       />

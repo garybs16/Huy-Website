@@ -22,7 +22,7 @@ export function ContactPage({
     <section className="section">
       <PageIntro
         kicker="Contact"
-        title="Talk to admissions when you need help with CNA training, required documents, or planning a start date."
+        title="Get clear answers from admissions."
         description="Reach the admissions desk directly, submit an inquiry, or join the interest list for upcoming classes and schedule updates."
         accent="Admissions support in one place"
         note="Phone, email, office details, and follow-up forms stay easy to reach."
@@ -56,23 +56,25 @@ export function ContactPage({
             <img
               src={programsSupportPhoto}
               alt="Healthcare students practicing patient care skills in a classroom lab"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <article className="form-card">
             <h2>Request Information</h2>
             <p className="form-helper">Share your CNA training interest and an admissions coordinator will follow up.</p>
-            <form className="form-stack" onSubmit={onInquirySubmit}>
+            <form className="form-stack" onSubmit={onInquirySubmit} aria-busy={inquiryPending}>
               <label>
                 <span>Full name</span>
-                <input name="fullName" value={inquiryForm.fullName} onChange={onInquiryInput} required />
+                <input name="fullName" value={inquiryForm.fullName} onChange={onInquiryInput} autoComplete="name" minLength="2" maxLength="100" required />
               </label>
               <label>
                 <span>Email address</span>
-                <input name="email" type="email" value={inquiryForm.email} onChange={onInquiryInput} required />
+                <input name="email" type="email" value={inquiryForm.email} onChange={onInquiryInput} autoComplete="email" maxLength="160" required />
               </label>
               <label>
                 <span>Phone number</span>
-                <input name="phone" type="tel" value={inquiryForm.phone} onChange={onInquiryInput} />
+                <input name="phone" type="tel" value={inquiryForm.phone} onChange={onInquiryInput} autoComplete="tel" inputMode="tel" pattern="[0-9+().\-\s]{7,25}" maxLength="25" />
               </label>
               <label>
                 <span>CNA program of interest</span>
@@ -89,7 +91,7 @@ export function ContactPage({
               </label>
               <label>
                 <span>Your message</span>
-                <textarea name="message" rows="4" value={inquiryForm.message} onChange={onInquiryInput} required />
+                <textarea name="message" rows="4" value={inquiryForm.message} onChange={onInquiryInput} minLength="10" maxLength="2000" required />
               </label>
               <TurnstileWidget {...inquiryTurnstile} />
               <button type="submit" className="btn btn-primary" disabled={inquiryPending}>
@@ -121,18 +123,18 @@ export function ContactPage({
         <article className="form-card">
           <h2>Join the interest list</h2>
           <p className="form-helper">Best for students waiting on timing, documents, or the next open seat.</p>
-          <form className="form-stack" onSubmit={onWaitlistSubmit}>
+          <form className="form-stack" onSubmit={onWaitlistSubmit} aria-busy={waitlistPending}>
             <label>
               <span>Full name</span>
-              <input name="fullName" value={waitlistForm.fullName} onChange={onWaitlistInput} required />
+              <input name="fullName" value={waitlistForm.fullName} onChange={onWaitlistInput} autoComplete="name" minLength="2" maxLength="100" required />
             </label>
             <label>
               <span>Email address</span>
-              <input name="email" type="email" value={waitlistForm.email} onChange={onWaitlistInput} required />
+              <input name="email" type="email" value={waitlistForm.email} onChange={onWaitlistInput} autoComplete="email" maxLength="160" required />
             </label>
             <label>
               <span>Phone number</span>
-              <input name="phone" type="tel" value={waitlistForm.phone} onChange={onWaitlistInput} />
+              <input name="phone" type="tel" value={waitlistForm.phone} onChange={onWaitlistInput} autoComplete="tel" inputMode="tel" pattern="[0-9+().\-\s]{7,25}" maxLength="25" />
             </label>
             <label>
               <span>Preferred track</span>
@@ -145,7 +147,7 @@ export function ContactPage({
             </label>
             <label>
               <span>Notes</span>
-              <textarea name="notes" rows="3" value={waitlistForm.notes} onChange={onWaitlistInput} />
+              <textarea name="notes" rows="3" value={waitlistForm.notes} onChange={onWaitlistInput} maxLength="600" />
             </label>
             <TurnstileWidget {...waitlistTurnstile} />
             <button type="submit" className="btn btn-primary" disabled={waitlistPending}>

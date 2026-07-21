@@ -146,10 +146,10 @@ export function HomePage({ programs }) {
 
             <div className="button-row">
               <Link to="/register" className="btn btn-primary">
-                Register Now
+                Register now
               </Link>
               <Link to="/programs" className="btn btn-secondary">
-                View Programs
+                Explore CNA program
               </Link>
             </div>
 
@@ -168,6 +168,8 @@ export function HomePage({ programs }) {
               <img
                 src={heroTraining}
                 alt="Healthcare instructor guiding students through hands-on bedside skills training"
+                fetchPriority="high"
+                decoding="async"
               />
               <div className="hero-status-chip">Enrollment open</div>
               <div className="hero-photo-badge">
@@ -297,7 +299,7 @@ export function HomePage({ programs }) {
       <section className="section visual-story-section">
         <div className="container visual-story-showcase">
             <div className="visual-story-media visual-story-media-single">
-              <img src={supportTrainingPhoto} alt="CNA instructor guiding students through patient-care skills training" />
+              <img src={supportTrainingPhoto} alt="CNA instructor guiding students through patient-care skills training" loading="lazy" decoding="async" />
             </div>
 
           <div className="visual-story-copy">
@@ -312,7 +314,7 @@ export function HomePage({ programs }) {
               ))}
             </div>
             <Link to="/rewards-guidance" className="card-action-link">
-              Reward & Guidance
+              Rewards & Guidance
             </Link>
           </div>
         </div>
@@ -397,7 +399,7 @@ export function HomePage({ programs }) {
         <div className="container handout-layout">
           <div className="handout-copy">
             <p className="handout-pill">Free resources for your journey</p>
-            <h2>Take the First Step Toward Your Nursing Future.</h2>
+            <h2>Take the first step toward your nursing future.</h2>
             <p>
               Download two free handouts created to help future nursing students and working adults
               plan with clarity and confidence.
@@ -408,16 +410,16 @@ export function HomePage({ programs }) {
               <span>Build confidence</span>
               <span>Create your future</span>
             </div>
-            <form className="handout-form" onSubmit={handleHandoutSubmit}>
-              <h3>Get Your Free Handouts Now.</h3>
+            <form className="handout-form" onSubmit={handleHandoutSubmit} aria-busy={handoutPending}>
+              <h3>Get your free handouts.</h3>
               <div className="form-grid two-up">
                 <label>
                   <span>First name *</span>
-                  <input name="firstName" value={handoutForm.firstName} onChange={updateHandoutField} required />
+                  <input name="firstName" value={handoutForm.firstName} onChange={updateHandoutField} autoComplete="given-name" minLength="1" maxLength="50" required />
                 </label>
                 <label>
                   <span>Last name *</span>
-                  <input name="lastName" value={handoutForm.lastName} onChange={updateHandoutField} required />
+                  <input name="lastName" value={handoutForm.lastName} onChange={updateHandoutField} autoComplete="family-name" minLength="1" maxLength="50" required />
                 </label>
                 <label>
                   <span>Email address *</span>
@@ -426,12 +428,14 @@ export function HomePage({ programs }) {
                     type="email"
                     value={handoutForm.email}
                     onChange={updateHandoutField}
+                    autoComplete="email"
+                    maxLength="160"
                     required
                   />
                 </label>
                 <label>
                   <span>Phone number *</span>
-                  <input name="phone" type="tel" value={handoutForm.phone} onChange={updateHandoutField} required />
+                  <input name="phone" type="tel" value={handoutForm.phone} onChange={updateHandoutField} autoComplete="tel" inputMode="tel" pattern="[0-9+().\-\s]{7,25}" maxLength="25" required />
                 </label>
               </div>
               <TurnstileWidget
@@ -441,7 +445,7 @@ export function HomePage({ programs }) {
                 resetSignal={handoutTurnstileResetSignal}
               />
               <button className="btn btn-primary" type="submit" disabled={handoutPending}>
-                {handoutPending ? "Sending..." : "Send Me My Free Handouts"}
+                {handoutPending ? "Sending…" : "Send my free handouts"}
               </button>
               {handoutStatus.text ? (
                 <p
@@ -458,10 +462,10 @@ export function HomePage({ programs }) {
             <p>You will receive instant access to:</p>
             <div className="handout-cover-row">
               <a className="handout-cover handout-cover-image" href={guideResources[0].href} target="_blank" rel="noreferrer">
-                <img src={cnaGuideCover} alt="CNA Career Starter Guide cover" />
+                <img src={cnaGuideCover} alt="CNA Career Starter Guide cover" loading="lazy" decoding="async" />
               </a>
               <a className="handout-cover handout-cover-image" href={guideResources[1].href} target="_blank" rel="noreferrer">
-                <img src={pathwayGuideCover} alt="Orange County Nursing School Pathway Guide cover" />
+                <img src={pathwayGuideCover} alt="Orange County Nursing School Pathway Guide cover" loading="lazy" decoding="async" />
               </a>
             </div>
             <div className="trusted-handout-card">
