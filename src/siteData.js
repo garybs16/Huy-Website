@@ -240,9 +240,9 @@ export const registrationChecklist = [
 export const tuitionItems = [
   {
     title: "CNA Cohorts",
-    amount: "$1,650 + $250",
+    amount: "$1,900 total",
     detail:
-      "Published CNA tuition is $1,650 plus a $250 non-refundable registration fee, for a $1,900 program total.",
+      "The $1,900 program total includes $1,650 in tuition and a $250 non-refundable registration fee.",
   },
 ];
 

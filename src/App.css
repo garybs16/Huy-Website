@@ -3593,6 +3593,34 @@
 
 .rg-price-line strong { color: var(--rg-navy); }
 
+.rg-price-line-primary {
+  align-items: center;
+  background: #edf4ff;
+  color: var(--rg-navy);
+  font-weight: 800;
+}
+
+.rg-price-line-primary strong {
+  color: var(--brand);
+  font-size: 1.2rem;
+  white-space: nowrap;
+}
+
+.rg-price-includes {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.2rem 0.15rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.rg-price-includes span::before {
+  content: "✓";
+  margin-right: 0.5rem;
+  color: var(--brand);
+  font-weight: 900;
+}
+
 .rg-price-total {
   margin-top: 0.25rem;
   background: #e8f7f2;
@@ -3601,7 +3629,7 @@
 }
 
 .rg-price-total strong { color: var(--brand); font-size: 1.15rem; }
-.rg-price-card .btn { margin-top: 0.35rem; }
+.rg-price-card .btn { margin-top: auto; }
 
 .rg-fine-print {
   max-width: 72rem;
@@ -7395,6 +7423,8 @@ h6 {
 .tuition-line span {
   color: var(--ui-teal-700);
   font-weight: 800;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .registration-policy-callout,

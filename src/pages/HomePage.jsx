@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
-import programsSupportPhoto from "../assets/programs-support-photo.jpg";
+import supportTrainingPhoto from "../assets/hero-training-photo.jpg";
 import cnaGuideCover from "../assets/cna-career-starter-guide.png";
 import pathwayGuideCover from "../assets/oc-nursing-pathway-guide.png";
 import { TurnstileWidget, isTurnstileEnabled } from "../components/TurnstileWidget";
@@ -297,7 +297,7 @@ export function HomePage({ programs }) {
       <section className="section visual-story-section">
         <div className="container visual-story-showcase">
             <div className="visual-story-media visual-story-media-single">
-              <img src={programsSupportPhoto} alt="Healthcare students practicing patient care skills in a training lab" />
+              <img src={supportTrainingPhoto} alt="CNA instructor guiding students through patient-care skills training" />
             </div>
 
           <div className="visual-story-copy">

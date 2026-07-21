@@ -464,10 +464,12 @@ export function RewardsGuidancePage() {
             <article className="rg-price-card rg-price-featured">
               <span className="rg-price-label">Option 1 - simplest</span>
               <h3>Pay in full</h3>
-              <p>Complete the full published program amount before class.</p>
-              <div className="rg-price-line"><span>Registration fee</span><strong>$250</strong></div>
-              <div className="rg-price-line"><span>Remaining tuition</span><strong>$1,650</strong></div>
-              <div className="rg-price-total"><span>Total</span><strong>$1,900</strong></div>
+              <p>Complete the entire published program amount in one payment before class.</p>
+              <div className="rg-price-line rg-price-line-primary"><span>One payment due before class</span><strong>$1,900</strong></div>
+              <div className="rg-price-includes" aria-label="Full-payment breakdown">
+                <span>Includes $1,650 tuition</span>
+                <span>Includes $250 non-refundable registration fee</span>
+              </div>
               <Link to="/register" className="btn btn-primary">Register Now</Link>
             </article>
             <article className="rg-price-card">
