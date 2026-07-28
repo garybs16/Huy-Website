@@ -8522,3 +8522,152 @@ textarea:focus-visible,
   border-color: rgba(140, 228, 203, 0.48);
   background: linear-gradient(135deg, #effbf7, #f8fbff);
 }
+
+/* Mobile release safeguards.
+   Keep these after the presentation layers so late desktop overrides cannot
+   reintroduce cramped grids or clipped content on small screens. */
+@media (max-width: 760px) {
+  body.nav-menu-open {
+    overflow: hidden;
+  }
+
+  .site-header.is-menu-open {
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .nav-frame {
+    row-gap: 0.35rem;
+  }
+
+  .brand-icon-image {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    border-radius: 0.9rem;
+  }
+
+  .brand-title {
+    display: -webkit-box;
+    overflow: hidden;
+    line-height: 1.15;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .nav-toggle,
+  .btn,
+  .nav-link,
+  .card-action-link,
+  .text-link {
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+
+  .site-nav.is-open,
+  .nav-actions.is-open {
+    width: 100%;
+  }
+
+  .hero-decision-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-photo-badge {
+    position: static;
+    border-radius: 0;
+  }
+
+  .visual-story-media-single img,
+  .visual-story-media-single img:first-child {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .rg-guide-card-cover {
+    min-height: 26rem;
+  }
+
+  .page-jump-nav,
+  .rg-section-nav {
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-jump-nav::-webkit-scrollbar,
+  .rg-section-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .page-jump-nav a,
+  .rg-section-nav a {
+    scroll-snap-align: start;
+  }
+
+  .form-stack input,
+  .form-stack select,
+  .form-stack textarea,
+  .admin-access input {
+    font-size: 1rem;
+  }
+
+  .tuition-line span {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: calc(100% - 1rem);
+  }
+
+  .top-strip-email {
+    display: none;
+  }
+
+  .top-strip-meta {
+    font-size: 0.75rem;
+  }
+
+  .section {
+    padding: 3rem 0;
+  }
+
+  .hero-panel {
+    padding: 2.35rem 0 3rem;
+  }
+
+  .hero-copy h1 {
+    max-width: 11ch;
+    font-size: clamp(2.35rem, 12vw, 3rem);
+  }
+
+  .page-intro-main,
+  .page-intro-aside,
+  .quick-card,
+  .info-card,
+  .program-card,
+  .schedule-card,
+  .support-card,
+  .form-card,
+  .register-summary,
+  .modern-trust-card,
+  .modern-leader-card,
+  .site-cta-panel,
+  .policy-document-card {
+    padding: 1.1rem;
+  }
+
+  .third-party-fee-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .rg-guide-card-cover {
+    min-height: 22rem;
+  }
+}

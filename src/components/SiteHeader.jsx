@@ -44,7 +44,7 @@ export function SiteHeader({ navItems }) {
   }, [navOpen]);
 
   return (
-    <header className="site-header" ref={headerRef}>
+    <header className={`site-header ${navOpen ? "is-menu-open" : ""}`} ref={headerRef}>
       <div className="top-strip">
         <div className="container top-strip-inner">
           <div className="top-strip-meta">
