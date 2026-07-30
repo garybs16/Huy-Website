@@ -642,6 +642,20 @@ details summary {
     overflow: hidden;
   }
 
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-copy,
+  .hero-visual {
+    min-width: 0;
+  }
+
+  .hero-visual {
+    width: 100%;
+    max-width: 48rem;
+  }
+
   .nav-frame {
     grid-template-columns: minmax(0, 1fr) auto;
     padding-block: 0.65rem;
@@ -669,6 +683,31 @@ details summary {
 
   .container {
     width: min(100% - 1.25rem, 1180px);
+  }
+
+  /* App.css defines the mobile hero before this polish layer is loaded.
+     Repeat the structural rules here so the desktop minmax(410px, ...)
+     columns above cannot force the hero wider than the viewport. */
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .hero-copy,
+  .hero-visual,
+  .hero-visual-card {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .hero-visual-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center;
   }
 
   .section {
@@ -792,6 +831,28 @@ details summary {
 }
 
 @media (max-width: 520px) {
+  .hero-panel {
+    padding: 2rem 0 2.75rem;
+  }
+
+  .hero-copy h1 {
+    max-width: none;
+    font-size: clamp(2.35rem, 12vw, 3.25rem);
+  }
+
+  .hero-status-chip {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.6rem 0.78rem;
+    font-size: 0.72rem;
+  }
+
+  .hero-photo-badge {
+    position: static;
+    padding: 0.85rem;
+    border-radius: 0 0 1rem 1rem;
+  }
+
   .button-row,
   .contact-action-row,
   .footer-action-row,
