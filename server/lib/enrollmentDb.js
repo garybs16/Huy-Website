@@ -312,13 +312,13 @@ export class EnrollmentDatabase {
 
       UPDATE cohorts
       SET
-        tuition_cents = 190000,
+        tuition_cents = 200000,
         allow_payment_plan = 1,
         payment_plan_deposit_cents = 25000,
         updated_at = '${nowIso()}'
       WHERE id IN ('cna-weekday-apr-2026', 'cna-weekend-apr-2026', 'cna-evening-may-2026')
         AND (
-          tuition_cents IN (196000, 200000)
+          tuition_cents IN (190000, 196000)
           OR payment_plan_deposit_cents = 65000
           OR payment_plan_deposit_cents IS NULL
           OR allow_payment_plan = 0
@@ -1368,32 +1368,82 @@ export class EnrollmentDatabase {
 
   markPaymentPlanRegistrationPaid({ enrollmentId, subscriptionId, paidAt, nextPaymentDueAt }) {
     const timestamp = toIsoOrNull(paidAt) ?? nowIso();
-    this.db
-      .prepare(`
-        UPDATE enrollments
-        SET
-          status = 'payment_plan_active',
-          payment_status = 'payment_plan_active',
-          amount_paid_cents = payment_amount_cents,
-          balance_due_cents = MAX(tuition_total_cents - payment_amount_cents, 0),
-          payment_installments_paid = 0,
-          stripe_subscription_id = COALESCE(stripe_subscription_id, @subscriptionId),
-          seat_hold_expires_at = NULL,
-          next_payment_due_at = @nextPaymentDueAt,
-          last_payment_at = @paidAt,
-          updated_at = @updatedAt
-        WHERE id = @enrollmentId
-          AND payment_option IN ('weekly', 'biweekly')
-      `)
-      .run({
-        enrollmentId,
-        subscriptionId,
-        nextPaymentDueAt: toIsoOrNull(nextPaymentDueAt),
-        paidAt: timestamp,
-        updatedAt: timestamp,
-      });
+    const applyRegistrationPayment = this.db.transaction((input) => {
+      const enrollment = this.db
+        .prepare(`
+          SELECT
+            id,
+            payment_option AS paymentOption,
+            payment_status AS paymentStatus,
+            payment_amount_cents AS paymentAmountCents,
+            tuition_total_cents AS tuitionTotalCents,
+            amount_paid_cents AS amountPaidCents,
+            stripe_subscription_id AS stripeSubscriptionId
+          FROM enrollments
+          WHERE id = @enrollmentId
+        `)
+        .get({ enrollmentId: input.enrollmentId });
 
-    return this.getEnrollmentById(enrollmentId);
+      if (!enrollment || !["weekly", "biweekly"].includes(enrollment.paymentOption)) {
+        throw new Error("Payment-plan enrollment was not found.");
+      }
+
+      if (enrollment.stripeSubscriptionId && enrollment.stripeSubscriptionId !== input.subscriptionId) {
+        throw new Error("Stripe subscription did not match the payment-plan enrollment.");
+      }
+
+      const registrationFeeCents = Number(enrollment.paymentAmountCents ?? 0);
+      const currentAmountPaidCents = Number(enrollment.amountPaidCents ?? 0);
+      const amountPaidCents = Math.max(currentAmountPaidCents, registrationFeeCents);
+      const balanceDueCents = Math.max(Number(enrollment.tuitionTotalCents ?? 0) - amountPaidCents, 0);
+      const registrationPaymentApplied = currentAmountPaidCents < registrationFeeCents;
+      const planNeedsAttention = enrollment.paymentStatus === "installment_failed";
+      const paidInFull = enrollment.paymentStatus === "paid" || balanceDueCents === 0;
+
+      this.db
+        .prepare(`
+          UPDATE enrollments
+          SET
+            status = @status,
+            payment_status = @paymentStatus,
+            amount_paid_cents = @amountPaidCents,
+            balance_due_cents = @balanceDueCents,
+            stripe_subscription_id = COALESCE(stripe_subscription_id, @subscriptionId),
+            seat_hold_expires_at = NULL,
+            next_payment_due_at = CASE
+              WHEN @paidInFull = 1 THEN NULL
+              ELSE COALESCE(next_payment_due_at, @nextPaymentDueAt)
+            END,
+            last_payment_at = COALESCE(last_payment_at, @paidAt),
+            updated_at = @updatedAt
+          WHERE id = @enrollmentId
+        `)
+        .run({
+          enrollmentId: input.enrollmentId,
+          subscriptionId: input.subscriptionId,
+          status: paidInFull ? "registered" : planNeedsAttention ? "payment_plan_attention" : "payment_plan_active",
+          paymentStatus: paidInFull ? "paid" : planNeedsAttention ? "installment_failed" : "payment_plan_active",
+          amountPaidCents,
+          balanceDueCents,
+          paidInFull: paidInFull ? 1 : 0,
+          nextPaymentDueAt: toIsoOrNull(input.nextPaymentDueAt),
+          paidAt: input.paidAt,
+          updatedAt: input.paidAt,
+        });
+
+      return { applied: registrationPaymentApplied, enrollmentId: enrollment.id };
+    });
+    const result = applyRegistrationPayment.immediate({
+      enrollmentId,
+      subscriptionId,
+      nextPaymentDueAt,
+      paidAt: timestamp,
+    });
+
+    return {
+      applied: result.applied,
+      enrollment: this.getEnrollmentById(result.enrollmentId),
+    };
   }
 
   getEnrollmentByStripeSubscriptionId(subscriptionId) {
@@ -1589,7 +1639,9 @@ export class EnrollmentDatabase {
           SELECT
             id,
             stripe_subscription_id AS stripeSubscriptionId,
-            payment_installments_paid AS paymentInstallmentsPaid
+            payment_status AS paymentStatus,
+            payment_amount_cents AS paymentAmountCents,
+            amount_paid_cents AS amountPaidCents
           FROM enrollments
           WHERE id = @enrollmentId
         `)
@@ -1603,11 +1655,30 @@ export class EnrollmentDatabase {
         throw new Error("Failed Stripe invoice subscription did not match enrollment.");
       }
 
+      if (enrollment.paymentStatus === "paid") {
+        return { applied: false, enrollmentId: enrollment.id };
+      }
+
       const existingPayment = this.db
-        .prepare(`SELECT status FROM enrollment_payments WHERE stripe_invoice_id = ?`)
+        .prepare(`SELECT status, attempt_count AS attemptCount FROM enrollment_payments WHERE stripe_invoice_id = ?`)
         .get(input.invoiceId);
 
       if (existingPayment?.status === "paid") {
+        return { applied: false, enrollmentId: enrollment.id };
+      }
+      const parsedAttemptCount = Number(input.attemptCount ?? 1);
+      const normalizedAttemptCount = Number.isInteger(parsedAttemptCount) && parsedAttemptCount > 0
+        ? parsedAttemptCount
+        : 1;
+      const registrationFeeCents = Number(enrollment.paymentAmountCents ?? 0);
+      const planWasActivated = Boolean(enrollment.stripeSubscriptionId) || (
+        registrationFeeCents > 0 && Number(enrollment.amountPaidCents ?? 0) >= registrationFeeCents
+      );
+
+      if (
+        existingPayment?.status === "failed" &&
+        Number(existingPayment.attemptCount ?? 0) >= normalizedAttemptCount
+      ) {
         return { applied: false, enrollmentId: enrollment.id };
       }
 
@@ -1651,7 +1722,7 @@ export class EnrollmentDatabase {
           subscriptionId: input.subscriptionId,
           amountCents: Number(input.amountCents ?? 0),
           currency: String(input.currency ?? "usd").toLowerCase(),
-          attemptCount: Number(input.attemptCount ?? 1),
+          attemptCount: normalizedAttemptCount,
           failedAt: timestamp,
           createdAt: timestamp,
           updatedAt: timestamp,
@@ -1673,12 +1744,8 @@ export class EnrollmentDatabase {
         .run({
           enrollmentId: input.enrollmentId,
           subscriptionId: input.subscriptionId,
-          status: Number(enrollment.paymentInstallmentsPaid ?? 0) > 0
-            ? "payment_plan_attention"
-            : "payment_setup_failed",
-          paymentStatus: Number(enrollment.paymentInstallmentsPaid ?? 0) > 0
-            ? "installment_failed"
-            : "payment_failed",
+          status: planWasActivated ? "payment_plan_attention" : "payment_setup_failed",
+          paymentStatus: planWasActivated ? "installment_failed" : "payment_failed",
           seatHoldExpiresAt: null,
           failedAt: timestamp,
           updatedAt: timestamp,

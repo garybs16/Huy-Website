@@ -106,8 +106,9 @@ For payment errors:
 
 1. Confirm `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL` are set together.
 2. Confirm the Stripe webhook destination points to `/api/payments/stripe/webhook`.
-3. Review recent Stripe webhook delivery attempts.
-4. Use admin enrollment records to reconcile manual follow-up while payments are degraded.
+3. Run `npm run check:stripe` to verify account access, key mode, webhook status, API version, and required events without creating a charge.
+4. Review recent Stripe webhook delivery attempts.
+5. Use admin enrollment records to reconcile manual follow-up while payments are degraded.
 
 For admin login errors:
 

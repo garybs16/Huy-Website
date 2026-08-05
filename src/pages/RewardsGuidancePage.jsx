@@ -460,16 +460,16 @@ export function RewardsGuidancePage() {
           <div className="rg-centered-heading">
             <p className="section-kicker">Straightforward payment options</p>
             <h2>Choose the payment path that works for you.</h2>
-            <p>Program total is $1,900, including the $250 non-refundable registration fee.</p>
+            <p>Program total is $2,000, including the $250 non-refundable registration fee.</p>
           </div>
           <div className="rg-pricing-grid">
             <article className="rg-price-card rg-price-featured">
               <span className="rg-price-label">Option 1 - simplest</span>
               <h3>Pay in full</h3>
               <p>Complete the entire published program amount in one payment before class.</p>
-              <div className="rg-price-line rg-price-line-primary"><span>One payment due before class</span><strong>$1,900</strong></div>
+              <div className="rg-price-line rg-price-line-primary"><span>One payment due before class</span><strong>$2,000</strong></div>
               <div className="rg-price-includes" aria-label="Full-payment breakdown">
-                <span>Includes $1,650 tuition</span>
+                <span>Includes $1,750 tuition</span>
                 <span>Includes $250 non-refundable registration fee</span>
               </div>
               <Link to="/register" className="btn btn-primary">Register Now</Link>
@@ -477,11 +477,11 @@ export function RewardsGuidancePage() {
             <article className="rg-price-card">
               <span className="rg-price-label">Option 2 - flexible</span>
               <h3>Choose a deferred plan</h3>
-              <p>Pay the registration fee today, then choose 12 weekly tuition payments or 6 biweekly tuition payments.</p>
+              <p>Pay the registration fee today, then choose weekly or biweekly tuition installments with a small final-payment adjustment.</p>
               <div className="rg-price-line"><span>Due at registration</span><strong>$250</strong></div>
-              <div className="rg-price-line"><span>12 weekly payments</span><strong>$137.50 each</strong></div>
-              <div className="rg-price-line"><span>6 biweekly payments</span><strong>$275 each</strong></div>
-              <div className="rg-price-total"><span>Program total</span><strong>$1,900</strong></div>
+              <div className="rg-price-line"><span>12 weekly payments</span><strong>11 × $145.83, final $145.87</strong></div>
+              <div className="rg-price-line"><span>6 biweekly payments</span><strong>5 × $291.66, final $291.70</strong></div>
+              <div className="rg-price-total"><span>Program total</span><strong>$2,000</strong></div>
               <a href="#callback" className="btn btn-ghost">Discuss a Payment Plan</a>
             </article>
           </div>

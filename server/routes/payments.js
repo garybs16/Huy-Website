@@ -13,7 +13,7 @@ function eventTimestamp(value) {
 }
 
 function invoiceSubscriptionDetails(invoice) {
-  return invoice?.parent?.subscription_details ?? null;
+  return invoice?.parent?.subscription_details ?? invoice?.subscription_details ?? null;
 }
 
 function invoiceMetadata(invoice) {
@@ -21,7 +21,7 @@ function invoiceMetadata(invoice) {
 }
 
 function invoiceSubscriptionId(invoice) {
-  return getStripeResourceId(invoiceSubscriptionDetails(invoice)?.subscription);
+  return getStripeResourceId(invoiceSubscriptionDetails(invoice)?.subscription ?? invoice?.subscription);
 }
 
 function invoiceNextPaymentAt(invoice) {
@@ -30,6 +30,29 @@ function invoiceNextPaymentAt(invoice) {
     .filter((value) => Number.isFinite(value) && value > 0);
 
   return periodEnds.length > 0 ? new Date(Math.min(...periodEnds) * 1000).toISOString() : null;
+}
+
+function isRegistrationInvoice(invoice, enrollment, latestInvoiceId) {
+  const amountPaidCents = Number(invoice?.amount_paid ?? 0);
+
+  if (amountPaidCents !== Number(enrollment?.paymentAmountCents ?? 0)) {
+    return false;
+  }
+
+  if (["subscription_create", "subscription_update"].includes(invoice?.billing_reason)) {
+    return true;
+  }
+
+  return (
+    !invoice?.billing_reason &&
+    (
+      invoice?.id === latestInvoiceId ||
+      (
+        Number(enrollment?.paymentInstallmentsPaid ?? 0) === 0 &&
+        Number(enrollment?.amountPaidCents ?? 0) <= Number(enrollment?.paymentAmountCents ?? 0)
+      )
+    )
+  );
 }
 
 function enrollmentProgramDetails(enrollmentDb, enrollment) {
@@ -59,6 +82,22 @@ function validateEnrollmentMetadata(enrollment, metadata) {
     )
   ) {
     throw new Error("Stripe payment-plan metadata did not match the enrollment schedule.");
+  }
+
+  if (metadata?.checkoutPurpose === "payment_plan") {
+    const terms = getPaymentPlanTerms(
+      enrollment.paymentOption,
+      enrollment.tuitionTotalCents,
+      enrollment.paymentAmountCents
+    );
+
+    if (
+      Number(metadata?.installmentAmountCents ?? 0) !== terms.installmentAmountCents ||
+      Number(metadata?.finalInstallmentAmountCents ?? metadata?.installmentAmountCents ?? 0) !==
+        terms.finalInstallmentAmountCents
+    ) {
+      throw new Error("Stripe installment amounts did not match the enrollment schedule.");
+    }
   }
 }
 
@@ -138,7 +177,7 @@ async function handlePaymentPlanCheckoutCompleted({
     enrollment,
     subscriptionId,
   });
-  const startedEnrollment = enrollmentDb.markPaymentPlanRegistrationPaid({
+  const registrationResult = enrollmentDb.markPaymentPlanRegistrationPaid({
     enrollmentId: attachedEnrollment.id,
     subscriptionId,
     paidAt: eventTimestamp(event.created),
@@ -149,7 +188,7 @@ async function handlePaymentPlanCheckoutCompleted({
     enrollmentDb,
     notifier,
     emailer,
-    paymentResult: { applied: true, enrollment: startedEnrollment },
+    paymentResult: registrationResult,
     amountPaidCents: expectedAmount,
   });
 }
@@ -168,7 +207,7 @@ async function handleInvoicePaid({ event, invoice, stripeClient, enrollmentDb, n
   }
 
   validateEnrollmentMetadata(enrollment, metadata);
-  const { enrollment: attachedEnrollment } = await attachPaymentPlanSchedule({
+  const { enrollment: attachedEnrollment, scheduleDetails } = await attachPaymentPlanSchedule({
     stripeClient,
     enrollmentDb,
     enrollment,
@@ -181,17 +220,39 @@ async function handleInvoicePaid({ event, invoice, stripeClient, enrollmentDb, n
     attachedEnrollment.paymentAmountCents
   );
 
-  if (amountPaidCents === Number(attachedEnrollment.paymentAmountCents) && attachedEnrollment.paymentInstallmentsPaid === 0) {
-    enrollmentDb.markPaymentPlanRegistrationPaid({
+  if (isRegistrationInvoice(invoice, attachedEnrollment, scheduleDetails.latestInvoiceId)) {
+    const registrationResult = enrollmentDb.markPaymentPlanRegistrationPaid({
       enrollmentId: attachedEnrollment.id,
       subscriptionId,
       paidAt: eventTimestamp(invoice.status_transitions?.paid_at ?? event.created),
-      nextPaymentDueAt: invoiceNextPaymentAt(invoice),
+      nextPaymentDueAt: scheduleDetails.nextPaymentDueAt,
+    });
+    announceCompletedPayment({
+      enrollmentDb,
+      notifier,
+      emailer,
+      paymentResult: registrationResult,
+      amountPaidCents,
+      invoice,
     });
     return;
   }
 
-  if (invoice.currency !== "usd" || amountPaidCents !== terms.installmentAmountCents) {
+  const isFinalInstallment =
+    terms.hasFinalInstallmentAdjustment &&
+    amountPaidCents === terms.finalInstallmentAmountCents;
+  const isRegularInstallment = amountPaidCents === terms.installmentAmountCents;
+
+  if (
+    invoice.currency !== "usd" ||
+    (!isRegularInstallment && !isFinalInstallment) ||
+    (isFinalInstallment && attachedEnrollment.paymentInstallmentsPaid !== terms.installmentsTotal - 1) ||
+    (
+      terms.hasFinalInstallmentAdjustment &&
+      isRegularInstallment &&
+      attachedEnrollment.paymentInstallmentsPaid >= terms.regularInstallmentsTotal
+    )
+  ) {
     throw new Error("Stripe invoice amount did not match the selected tuition installment.");
   }
 
@@ -229,12 +290,46 @@ function handleInvoicePaymentFailed({ event, invoice, enrollmentDb, notifier, em
   }
 
   validateEnrollmentMetadata(enrollment, metadata);
+  const terms = getPaymentPlanTerms(
+    enrollment.paymentOption,
+    enrollment.tuitionTotalCents,
+    enrollment.paymentAmountCents
+  );
+  const amountDueCents = Number(invoice.amount_due ?? 0);
+  const isRegistrationFailure =
+    ["subscription_create", "subscription_update"].includes(invoice.billing_reason) &&
+    amountDueCents === Number(enrollment.paymentAmountCents ?? 0);
+
+  // Checkout presents registration-fee card errors to the customer immediately.
+  // Only recurring tuition failures belong in the installment ledger.
+  if (isRegistrationFailure) {
+    return;
+  }
+
+  const isFinalInstallment =
+    terms.hasFinalInstallmentAdjustment &&
+    amountDueCents === terms.finalInstallmentAmountCents;
+  const isRegularInstallment = amountDueCents === terms.installmentAmountCents;
+
+  if (
+    String(invoice.currency ?? "").toLowerCase() !== "usd" ||
+    (!isRegularInstallment && !isFinalInstallment) ||
+    (isFinalInstallment && enrollment.paymentInstallmentsPaid !== terms.installmentsTotal - 1) ||
+    (
+      terms.hasFinalInstallmentAdjustment &&
+      isRegularInstallment &&
+      enrollment.paymentInstallmentsPaid >= terms.regularInstallmentsTotal
+    )
+  ) {
+    throw new Error("Failed Stripe invoice amount did not match the selected payment plan.");
+  }
+
   const failureResult = enrollmentDb.recordSubscriptionPaymentFailed({
     enrollmentId: enrollment.id,
     invoiceId: invoice.id,
     subscriptionId,
-    amountCents: invoice.amount_due,
-    currency: invoice.currency,
+    amountCents: amountDueCents,
+    currency: String(invoice.currency).toLowerCase(),
     attemptCount: invoice.attempt_count,
     failedAt: eventTimestamp(event.created),
   });
@@ -253,7 +348,7 @@ function handleInvoicePaymentFailed({ event, invoice, enrollmentDb, notifier, em
     enrollment: failureResult.enrollment,
     program,
     cohort,
-    amountDueCents: invoice.amount_due,
+    amountDueCents,
     invoiceUrl: invoice.hosted_invoice_url ?? null,
   });
 }

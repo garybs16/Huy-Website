@@ -31,7 +31,7 @@ async function run() {
     "Between Day 2 and Day 5 from the enrollment date",
     "Tuition Obligation for Deferred-Pay Students",
     "thirdPartyFeeItems",
-    "12 weekly tuition payments",
+  "11 weekly payments of $145.83",
     "30 days of withdrawal determination",
     "60 hours",
     "Collections and chargebacks",

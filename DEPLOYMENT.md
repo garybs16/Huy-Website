@@ -49,6 +49,7 @@ API_ADMIN_KEY=replace-with-generated-api-key
 PUBLIC_APP_URL=https://your-domain.com
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
+VITE_STRIPE_PUBLISHABLE_KEY=
 NOTIFICATION_WEBHOOK_URL=
 NOTIFICATION_WEBHOOK_SECRET=
 RESEND_API_KEY=
@@ -192,6 +193,14 @@ https://your-domain.com/api/payments/stripe/webhook
 ```
 
 Then set `STRIPE_WEBHOOK_SECRET` from the Stripe webhook signing secret.
+
+Subscribe the endpoint to `checkout.session.completed`, `checkout.session.expired`, `invoice.paid`, and `invoice.payment_failed`. Keep its event API version at `2026-05-27.dahlia` unless `STRIPE_API_VERSION` is upgraded at the same time.
+
+After configuring the environment, run the read-only readiness check:
+
+```bash
+npm run check:stripe
+```
 
 ## Final Checks
 

@@ -27,6 +27,16 @@ function formatMoney(cents) {
   }).format(cents / 100);
 }
 
+function formatInstallmentSchedule(pricing) {
+  const cadence = pricing.paymentOption;
+
+  if (pricing.finalInstallmentAmountCents !== pricing.installmentAmountCents) {
+    return `${pricing.regularInstallmentsTotal} automatic ${cadence} tuition payments of ${formatMoney(pricing.installmentAmountCents)}, followed by a final ${cadence} payment of ${formatMoney(pricing.finalInstallmentAmountCents)}`;
+  }
+
+  return `${pricing.paymentInstallmentsTotal} automatic ${cadence} tuition payments of ${formatMoney(pricing.installmentAmountCents)}`;
+}
+
 function resolveAppBaseUrl(req, configuredBaseUrl) {
   if (configuredBaseUrl) {
     return configuredBaseUrl;
@@ -53,6 +63,8 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
       paymentOption,
       paymentAmountCents: cohort.paymentPlanDepositCents,
       installmentAmountCents: terms.installmentAmountCents,
+      finalInstallmentAmountCents: terms.finalInstallmentAmountCents,
+      regularInstallmentsTotal: terms.regularInstallmentsTotal,
       tuitionTotalCents: cohort.tuitionCents,
       balanceDueCents: terms.tuitionBalanceCents,
       paymentInstallmentsTotal: terms.installmentsTotal,
@@ -97,7 +109,7 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
     productDescription: isBalancePayment
       ? `${cohort.meetingPattern} | Remaining balance for enrollment ${enrollment.id}`
       : isPaymentPlanOption(pricing.paymentOption)
-        ? `${cohort.meetingPattern} | ${formatMoney(pricing.paymentAmountCents)} registration today, then ${pricing.paymentInstallmentsTotal} automatic ${pricing.paymentOption} tuition payments of ${formatMoney(pricing.installmentAmountCents)}`
+        ? `${cohort.meetingPattern} | ${formatMoney(pricing.paymentAmountCents)} registration today, then ${formatInstallmentSchedule(pricing)}`
         : `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
   };
 }
@@ -126,10 +138,12 @@ export async function createEnrollmentCheckoutSession({
     installmentsTotal: String(pricing.paymentInstallmentsTotal ?? 1),
     paymentInterval: pricing.paymentInterval ?? "one_time",
     installmentAmountCents: String(pricing.installmentAmountCents ?? 0),
+    finalInstallmentAmountCents: String(pricing.finalInstallmentAmountCents ?? pricing.installmentAmountCents ?? 0),
   };
 
   const sessionPayload = {
     mode: isPaymentPlan ? "subscription" : "payment",
+    client_reference_id: enrollment.id,
     customer_email: enrollment.email,
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     line_items: isPaymentPlan
@@ -172,13 +186,19 @@ export async function createEnrollmentCheckoutSession({
   if (isPaymentPlan) {
     sessionPayload.payment_method_types = ["card"];
     sessionPayload.subscription_data = {
-      description: `${program.title} tuition plan: ${pricing.paymentInstallmentsTotal} ${pricing.paymentOption} payments of ${formatMoney(pricing.installmentAmountCents)}`,
+      description: `${program.title} tuition plan: ${formatInstallmentSchedule(pricing)}`,
+      billing_mode: { type: "flexible" },
       metadata,
       trial_period_days: pricing.trialDays,
+      trial_settings: {
+        end_behavior: {
+          missing_payment_method: "cancel",
+        },
+      },
     };
     sessionPayload.custom_text = {
       submit: {
-        message: `By continuing, you authorize the ${checkoutDetails.amountLabel} registration fee today, then ${pricing.paymentInstallmentsTotal} automatic ${pricing.paymentOption} tuition payments of ${formatMoney(pricing.installmentAmountCents)}, for ${formatMoney(pricing.tuitionTotalCents)} total.`,
+        message: `By continuing, you authorize the ${checkoutDetails.amountLabel} registration fee today, then ${formatInstallmentSchedule(pricing)}, for ${formatMoney(pricing.tuitionTotalCents)} total.`,
       },
     };
   } else {
@@ -197,7 +217,9 @@ export async function createEnrollmentCheckoutSession({
     sessionPayload.cancel_url = `${appBaseUrl}/payment?checkout=cancelled&enrollment=${enrollment.id}`;
   }
 
-  return stripeClient.checkout.sessions.create(sessionPayload);
+  return stripeClient.checkout.sessions.create(sessionPayload, {
+    idempotencyKey: `first-step-checkout-${enrollment.id}-${randomUUID()}`,
+  });
 }
 
 export function createEnrollmentsRouter({
@@ -418,7 +440,7 @@ export function createEnrollmentsRouter({
 
       if (
         error.message === "This cohort does not offer a payment plan." ||
-        error.message.includes("cannot divide the tuition balance")
+        error.message.includes("plan amounts are invalid")
       ) {
         return res.status(400).json({ error: error.message });
       }
@@ -502,6 +524,8 @@ export function createEnrollmentsRouter({
         tuitionTotalCents: enrollment.tuitionTotalCents,
         balanceDueCents: enrollment.balanceDueCents,
         installmentAmountCents: planTerms?.installmentAmountCents,
+        finalInstallmentAmountCents: planTerms?.finalInstallmentAmountCents,
+        regularInstallmentsTotal: planTerms?.regularInstallmentsTotal,
         paymentInstallmentsTotal: enrollment.paymentInstallmentsTotal || planTerms?.installmentsTotal || 1,
         paymentInterval: enrollment.paymentInterval || planTerms?.paymentInterval || null,
         interval: planTerms?.interval,

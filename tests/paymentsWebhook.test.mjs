@@ -25,7 +25,7 @@ function createEnrollment(db) {
     endDate: "2026-09-01",
     scheduleLabel: "Weekday",
     meetingPattern: "Monday to Friday | 9:00 AM to 1:00 PM",
-    tuitionCents: 190_000,
+    tuitionCents: 200_000,
     allowPaymentPlan: true,
     paymentPlanDepositCents: 25_000,
     capacity: 20,
@@ -51,8 +51,8 @@ function createEnrollment(db) {
     paymentStatus: "payment_setup",
     paymentOption: "weekly",
     paymentAmountCents: 25_000,
-    tuitionTotalCents: 190_000,
-    balanceDueCents: 165_000,
+    tuitionTotalCents: 200_000,
+    balanceDueCents: 175_000,
     amountPaidCents: 0,
     paymentInstallmentsTotal: 12,
     paymentInstallmentsPaid: 0,
@@ -67,7 +67,14 @@ function createEnrollment(db) {
   });
 }
 
-function invoiceEvent({ id, type, invoiceId, amountPaid = 25_000, amountDue = 25_000 }) {
+function invoiceEvent({
+  id,
+  type,
+  invoiceId,
+  amountPaid = 25_000,
+  amountDue = 25_000,
+  billingReason = amountPaid === 25_000 ? "subscription_create" : "subscription_cycle",
+}) {
   return {
     id,
     type,
@@ -78,6 +85,7 @@ function invoiceEvent({ id, type, invoiceId, amountPaid = 25_000, amountDue = 25
         currency: "usd",
         amount_paid: amountPaid,
         amount_due: amountDue,
+        billing_reason: billingReason,
         attempt_count: 1,
         hosted_invoice_url: `https://invoice.stripe.test/${invoiceId}`,
         status_transitions: { paid_at: type === "invoice.paid" ? 1_800_000_000 : null },
@@ -93,6 +101,8 @@ function invoiceEvent({ id, type, invoiceId, amountPaid = 25_000, amountDue = 25
               checkoutPurpose: "payment_plan",
               installmentsTotal: "12",
               paymentInterval: "week",
+              installmentAmountCents: "14583",
+              finalInstallmentAmountCents: "14587",
             },
           },
         },
@@ -113,7 +123,7 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
     created: 1_800_000_000,
     schedule: null,
     items: {
-      data: [{ price: "price_weekly_test", quantity: 1, current_period_end: 1_800_604_800 }],
+      data: [{ price: { id: "price_weekly_test", product: "prod_weekly_test" }, quantity: 1, current_period_end: 1_800_604_800 }],
     },
   };
   let schedule = null;
@@ -200,11 +210,34 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
           checkoutPurpose: "payment_plan",
           installmentsTotal: "12",
           paymentInterval: "week",
+          installmentAmountCents: "14583",
+          finalInstallmentAmountCents: "14587",
         },
       },
     },
   };
+  // Stripe doesn't guarantee event order. Process the initial invoice before
+  // Checkout completion, then replay both events to verify idempotency.
+  const registrationInvoice = invoiceEvent({
+    id: "evt_invoice_weekly_1",
+    type: "invoice.paid",
+    invoiceId: "in_weekly_1",
+  });
+  await deliver(
+    invoiceEvent({
+      id: "evt_invoice_weekly_1_failed",
+      type: "invoice.payment_failed",
+      invoiceId: "in_weekly_1",
+      amountPaid: 0,
+      amountDue: 25_000,
+      billingReason: "subscription_create",
+    })
+  );
+  assert.equal(enrollmentDb.getEnrollmentById("enrollment_webhook_test").paymentStatus, "checkout_pending");
+  assert.equal(enrollmentDb.listEnrollmentPayments("enrollment_webhook_test").length, 0);
+  await deliver(registrationInvoice);
   await deliver(checkoutEvent);
+  await deliver(registrationInvoice);
   await deliver(checkoutEvent);
 
   let enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
@@ -213,20 +246,46 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
   assert.equal(enrollment.amountPaidCents, 25_000);
   assert.equal(enrollment.stripeSubscriptionScheduleId, "sub_sched_weekly_test");
   assert.equal(schedule.end_behavior, "cancel");
-  assert.deepEqual(schedule.phases[0].duration, { interval: "week", interval_count: 13 });
+  assert.deepEqual(schedule.phases[0].duration, { interval: "week", interval_count: 12 });
+  assert.deepEqual(schedule.phases[1].duration, { interval: "week", interval_count: 1 });
+  assert.equal(schedule.phases[1].items[0].price_data.unit_amount, 14_587);
+  assert.equal(notifications.filter((message) => message.type === "payment.completed").length, 1);
+  assert.equal(emails.filter((message) => message.subject.includes("Payment received")).length, 2);
 
-  await deliver(
-    invoiceEvent({
-      id: "evt_invoice_weekly_2",
-      type: "invoice.paid",
-      invoiceId: "in_weekly_2",
-      amountPaid: 13_750,
-      amountDue: 13_750,
-    })
-  );
+  const firstInstallmentFailure = invoiceEvent({
+    id: "evt_invoice_weekly_2_failed",
+    type: "invoice.payment_failed",
+    invoiceId: "in_weekly_2",
+    amountPaid: 0,
+    amountDue: 14_583,
+  });
+  await deliver(firstInstallmentFailure);
+  await deliver(firstInstallmentFailure);
+  enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
+  assert.equal(enrollment.paymentStatus, "installment_failed");
+  assert.equal(enrollment.paymentInstallmentsPaid, 0);
+  assert.equal(enrollment.amountPaidCents, 25_000);
+  assert.equal(notifications.filter((message) => message.type === "payment.failed").length, 1);
+
+  const recoveredInstallment = invoiceEvent({
+    id: "evt_invoice_weekly_2_paid",
+    type: "invoice.paid",
+    invoiceId: "in_weekly_2",
+    amountPaid: 14_583,
+    amountDue: 14_583,
+  });
+  await deliver(recoveredInstallment);
+  await deliver(recoveredInstallment);
+  enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
+  assert.equal(enrollment.paymentStatus, "payment_plan_active");
+  assert.equal(enrollment.paymentInstallmentsPaid, 1);
+  assert.equal(enrollment.amountPaidCents, 39_583);
+
+  // A late replay of the registration invoice must never erase installment progress.
+  await deliver(registrationInvoice);
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentInstallmentsPaid, 1);
-  assert.equal(enrollment.amountPaidCents, 38_750);
+  assert.equal(enrollment.amountPaidCents, 39_583);
 
   await deliver(
     invoiceEvent({
@@ -234,14 +293,43 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
       type: "invoice.payment_failed",
       invoiceId: "in_weekly_3",
       amountPaid: 0,
-      amountDue: 13_750,
+      amountDue: 14_583,
     })
   );
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentStatus, "installment_failed");
-  assert.equal(enrollment.amountPaidCents, 38_750);
+  assert.equal(enrollment.amountPaidCents, 39_583);
   assert.equal(enrollmentDb.listEnrollmentPayments(enrollment.id).length, 2);
-  assert.ok(notifications.some((message) => message.type === "payment.failed"));
-  assert.ok(emails.some((message) => message.subject.includes("Payment received")));
+  assert.equal(notifications.filter((message) => message.type === "payment.failed").length, 2);
+  assert.equal(notifications.filter((message) => message.type === "payment.completed").length, 2);
   assert.ok(emails.some((message) => message.subject.includes("Weekly payment needs attention")));
+
+  for (let installment = 2; installment <= 12; installment += 1) {
+    const invoiceNumber = installment + 1;
+    const amountCents = installment === 12 ? 14_587 : 14_583;
+    await deliver(
+      invoiceEvent({
+        id: `evt_invoice_weekly_${invoiceNumber}_paid`,
+        type: "invoice.paid",
+        invoiceId: `in_weekly_${invoiceNumber}`,
+        amountPaid: amountCents,
+        amountDue: amountCents,
+      })
+    );
+  }
+
+  enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
+  assert.equal(enrollment.paymentStatus, "paid");
+  assert.equal(enrollment.paymentInstallmentsPaid, 12);
+  assert.equal(enrollment.amountPaidCents, 200_000);
+  assert.equal(enrollment.balanceDueCents, 0);
+  assert.equal(enrollment.nextPaymentDueAt, null);
+  assert.equal(enrollmentDb.listEnrollmentPayments(enrollment.id).length, 12);
+
+  // Even a very late Checkout retry must not reopen or reset a completed plan.
+  await deliver(checkoutEvent);
+  enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
+  assert.equal(enrollment.paymentStatus, "paid");
+  assert.equal(enrollment.paymentInstallmentsPaid, 12);
+  assert.equal(enrollment.amountPaidCents, 200_000);
 });
