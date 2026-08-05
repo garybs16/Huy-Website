@@ -82,7 +82,7 @@ test("admin cohort schema enforces date and payment-plan rules", () => {
     endDate: "2026-08-31",
     scheduleLabel: "Weekday",
     meetingPattern: "Monday to Friday | 9:00 AM to 1:00 PM",
-    tuitionCents: 190_000,
+    tuitionCents: 200_000,
     allowPaymentPlan: true,
     paymentPlanDepositCents: 25_000,
     capacity: 20,
@@ -101,7 +101,7 @@ test("admin cohort schema enforces date and payment-plan rules", () => {
     () =>
       adminCohortSchema.parse({
         ...valid,
-        paymentPlanDepositCents: 190_000,
+        paymentPlanDepositCents: 200_000,
       }),
     /paymentPlanDepositCents must be less than tuitionCents/
   );

@@ -83,6 +83,7 @@ Frontend runs on `http://localhost:5173` and API runs on `http://localhost:4000`
 - `PUBLIC_APP_URL`: absolute public app URL used for Stripe Checkout redirects
 - `STRIPE_SECRET_KEY`: Stripe secret key for Checkout session creation
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook signing secret for payment confirmation
+- `VITE_STRIPE_PUBLISHABLE_KEY`: matching Stripe publishable key used by embedded Checkout, with hosted Checkout as the fallback
 - `NOTIFICATION_WEBHOOK_URL`: optional admissions notification webhook for inquiries, waitlist, enrollments, and payment events
 - `NOTIFICATION_WEBHOOK_SECRET`: optional HMAC secret sent as `x-first-step-signature` for webhook verification
 - `VITE_DEV_API_TARGET`: Vite proxy target in development
@@ -164,6 +165,7 @@ Important:
 
 - Production startup requires at least one protected admin access path.
 - Stripe Checkout only starts when `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `PUBLIC_APP_URL` are all configured together.
+- Run `npm run check:stripe` after changing Stripe credentials or webhook settings; it performs read-only account, mode, API-version, and event-subscription checks.
 - If Stripe is not configured, enrollments still work in manual payment mode and admissions can follow up directly.
 - `GET /api/health` now reports database readiness plus whether payments are configured or manual.
 - In production, configure either full session auth (`ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` or `ADMIN_PASSWORD`, plus `ADMIN_SESSION_SECRET`) or `API_ADMIN_KEY`. Hybrid mode supports both.

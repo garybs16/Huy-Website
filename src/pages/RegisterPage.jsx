@@ -50,9 +50,9 @@ export function RegisterPage({
       ? selectedCohort.paymentPlanRemainingCents ?? 0
       : 0;
   const paymentPath = enrollmentForm.paymentOption === "weekly"
-    ? "12 weekly tuition payments"
+    ? "11 weekly payments of $145.83, then a final payment of $145.87"
     : enrollmentForm.paymentOption === "biweekly"
-      ? "6 biweekly tuition payments"
+      ? "5 biweekly payments of $291.66, then a final payment of $291.70"
       : "Paid in full";
   const today = new Date().toISOString().slice(0, 10);
 

@@ -240,9 +240,9 @@ export const registrationChecklist = [
 export const tuitionItems = [
   {
     title: "CNA Cohorts",
-    amount: "$1,900 total",
+    amount: "$2,000 total",
     detail:
-      "The $1,900 program total includes $1,650 in tuition and a $250 non-refundable registration fee.",
+      "The $2,000 program total includes $1,750 in tuition and a $250 non-refundable registration fee.",
   },
 ];
 
@@ -250,7 +250,7 @@ export const miscFeeItems = [
   "Published CNA tuition and fees are reviewed before enrollment and may change for future cohorts",
   "Eligible veterans may receive an additional $100 discount when approved before enrollment",
   "$250 registration fee is non-refundable and is due at checkout for either deferred-payment plan",
-  "Deferred payment plans: $250 non-refundable registration fee due at checkout, then choose 12 weekly tuition payments of $137.50 or 6 biweekly tuition payments of $275",
+  "Deferred payment plans: $250 non-refundable registration fee due at checkout, then choose 11 weekly payments of $145.83 plus a final payment of $145.87, or 5 biweekly payments of $291.66 plus a final payment of $291.70",
   "Third-party charges are listed separately below so students can review them before enrollment",
   "Payment deadlines are provided before enrollment and must stay current for continued participation",
 ];
@@ -296,12 +296,12 @@ export const refundPolicy = {
     {
       timing: "Between Day 2 and Day 5 from the enrollment date",
       refund: "50% refund of tuition paid",
-      deferred: "50% tuition owed = $825",
+      deferred: "50% tuition owed = $875",
     },
     {
       timing: "After Day 5 from the enrollment date",
       refund: "No refund",
-      deferred: "100% tuition owed = $1650",
+      deferred: "100% tuition owed = $1,750",
     },
   ],
   notes: [

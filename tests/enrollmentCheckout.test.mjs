@@ -4,11 +4,13 @@ import { createEnrollmentCheckoutSession } from "../server/routes/enrollments.js
 
 test("weekly checkout uses a Stripe-compatible subscription payload", async () => {
   let capturedPayload;
+  let capturedOptions;
   const stripeClient = {
     checkout: {
       sessions: {
-        async create(payload) {
+        async create(payload, options) {
           capturedPayload = payload;
+          capturedOptions = options;
           return { id: "cs_weekly_payload_test" };
         },
       },
@@ -40,9 +42,11 @@ test("weekly checkout uses a Stripe-compatible subscription payload", async () =
     pricing: {
       paymentOption: "weekly",
       paymentAmountCents: 25_000,
-      installmentAmountCents: 13_750,
-      tuitionTotalCents: 190_000,
-      balanceDueCents: 165_000,
+      installmentAmountCents: 14_583,
+      finalInstallmentAmountCents: 14_587,
+      regularInstallmentsTotal: 11,
+      tuitionTotalCents: 200_000,
+      balanceDueCents: 175_000,
       paymentInstallmentsTotal: 12,
       paymentInterval: "week",
       interval: "week",
@@ -54,6 +58,7 @@ test("weekly checkout uses a Stripe-compatible subscription payload", async () =
   });
 
   assert.equal(capturedPayload.mode, "subscription");
+  assert.equal(capturedPayload.client_reference_id, "enrollment_payload_test");
   assert.equal(capturedPayload.submit_type, undefined);
   assert.equal(capturedPayload.line_items[0].price_data.recurring, undefined);
   assert.deepEqual(capturedPayload.line_items[1].price_data.recurring, {
@@ -61,6 +66,16 @@ test("weekly checkout uses a Stripe-compatible subscription payload", async () =
     interval_count: 1,
   });
   assert.equal(capturedPayload.metadata.installmentsTotal, "12");
+  assert.equal(capturedPayload.metadata.installmentAmountCents, "14583");
+  assert.equal(capturedPayload.metadata.finalInstallmentAmountCents, "14587");
   assert.equal(capturedPayload.subscription_data.metadata.paymentInterval, "week");
+  assert.deepEqual(capturedPayload.subscription_data.billing_mode, { type: "flexible" });
   assert.equal(capturedPayload.subscription_data.trial_period_days, 7);
+  assert.deepEqual(capturedPayload.subscription_data.trial_settings, {
+    end_behavior: { missing_payment_method: "cancel" },
+  });
+  assert.match(
+    capturedOptions.idempotencyKey,
+    /^first-step-checkout-enrollment_payload_test-[0-9a-f-]{36}$/
+  );
 });

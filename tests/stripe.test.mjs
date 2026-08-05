@@ -7,29 +7,41 @@ import {
   getSubscriptionNextPaymentAt,
 } from "../server/lib/stripe.js";
 
-test("published weekly and biweekly terms divide the tuition balance exactly", () => {
-  assert.deepEqual(getPaymentPlanTerms("weekly", 190_000, 25_000), {
+test("published weekly and biweekly terms allocate the exact tuition total to the final installment", () => {
+  assert.deepEqual(getPaymentPlanTerms("weekly", 200_000, 25_000), {
     paymentOption: "weekly",
     installmentsTotal: 12,
     interval: "week",
     intervalCount: 1,
     trialDays: 7,
     registrationFeeCents: 25_000,
-    tuitionBalanceCents: 165_000,
-    installmentAmountCents: 13_750,
+    tuitionBalanceCents: 175_000,
+    installmentAmountCents: 14_583,
+    finalInstallmentAmountCents: 14_587,
+    installmentRemainderCents: 4,
+    hasFinalInstallmentAdjustment: true,
+    regularInstallmentsTotal: 11,
     paymentInterval: "week",
+    regularPhaseDurationWeeks: 12,
+    finalPhaseDurationWeeks: 1,
     scheduleDurationWeeks: 13,
   });
-  assert.deepEqual(getPaymentPlanTerms("biweekly", 190_000, 25_000), {
+  assert.deepEqual(getPaymentPlanTerms("biweekly", 200_000, 25_000), {
     paymentOption: "biweekly",
     installmentsTotal: 6,
     interval: "week",
     intervalCount: 2,
     trialDays: 14,
     registrationFeeCents: 25_000,
-    tuitionBalanceCents: 165_000,
-    installmentAmountCents: 27_500,
+    tuitionBalanceCents: 175_000,
+    installmentAmountCents: 29_166,
+    finalInstallmentAmountCents: 29_170,
+    installmentRemainderCents: 4,
+    hasFinalInstallmentAdjustment: true,
+    regularInstallmentsTotal: 5,
     paymentInterval: "2_weeks",
+    regularPhaseDurationWeeks: 12,
+    finalPhaseDurationWeeks: 2,
     scheduleDurationWeeks: 14,
   });
 });
@@ -45,7 +57,7 @@ test("weekly Stripe schedules charge twelve tuition installments after registrat
     items: {
       data: [
         {
-          price: { id: "price_weekly_test" },
+          price: { id: "price_weekly_test", product: "prod_weekly_test" },
           quantity: 1,
           current_period_end: 1_800_604_800,
         },
@@ -99,10 +111,25 @@ test("weekly Stripe schedules charge twelve tuition installments after registrat
   assert.equal(calls.update[0].payload.end_behavior, "cancel");
   assert.deepEqual(calls.update[0].payload.phases[0].duration, {
     interval: "week",
-    interval_count: 13,
+    interval_count: 12,
   });
   assert.deepEqual(calls.update[0].payload.phases[0].items, [
     { price: "price_weekly_test", quantity: 1 },
+  ]);
+  assert.deepEqual(calls.update[0].payload.phases[1].duration, {
+    interval: "week",
+    interval_count: 1,
+  });
+  assert.deepEqual(calls.update[0].payload.phases[1].items, [
+    {
+      price_data: {
+        currency: "usd",
+        product: "prod_weekly_test",
+        unit_amount: 14_587,
+        recurring: { interval: "week", interval_count: 1 },
+      },
+      quantity: 1,
+    },
   ]);
   assert.equal(result.scheduleId, "sub_sched_weekly_test");
   assert.equal(result.customerId, "cus_weekly_test");

@@ -17,6 +17,7 @@
     "check:content": "node scripts/content-regression.mjs",
     "check:readiness": "node scripts/readiness-check.mjs",
     "check:health": "node scripts/healthcheck.mjs",
+    "check:stripe": "node scripts/stripe-readiness.mjs",
     "admin:hash": "node scripts/hash-admin-password.mjs",
     "admin:mfa-setup": "node scripts/generate-admin-mfa.mjs",
     "backup:encrypted": "node scripts/encrypted-database-backup.mjs",
@@ -27,8 +28,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^6.3.0",
-    "@stripe/stripe-js": "^9.4.0",
+    "@stripe/react-stripe-js": "^6.8.0",
+    "@stripe/stripe-js": "^9.13.0",
     "better-sqlite3": "^12.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -40,7 +41,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "7.18.1",
-    "stripe": "^22.0.0",
+    "stripe": "^22.4.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
