@@ -1,6 +1,17 @@
 import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
 
+const WEEKDAY_COHORT_ID = "cna-weekday-apr-2026";
+
+const weekdayCohortContent = {
+  programTitle: "Certified Nurse Assistant Training Program",
+  programDates: "Coming soon",
+  programLength: "6 weeks",
+  onlineTheorySchedule: "Monday–Friday | 5:00 PM–9:00 PM | 3 weeks",
+  clinicalSchedule: "Monday–Friday | 7:00 AM–3:30 PM | 3 weeks",
+  clinicalSiteCity: "Anaheim, California",
+};
+
 function getSeatTone(remainingSeats) {
   if (remainingSeats <= 4) {
     return "is-limited";
@@ -36,8 +47,11 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
         {cohortLoadError ? <p className="section-note">{cohortLoadError}</p> : null}
 
         <div className="card-grid three-up">
-          {cohorts.map((cohort) => (
-            <article key={cohort.id} className="schedule-card">
+          {cohorts.map((cohort) => {
+            const content = cohort.id === WEEKDAY_COHORT_ID ? weekdayCohortContent : null;
+
+            return (
+              <article key={cohort.id} className="schedule-card">
               <div className="schedule-card-top">
                 <p className="section-kicker">{cohort.scheduleLabel}</p>
                 <span className={`seat-pill ${getSeatTone(cohort.remainingSeats)}`}>
@@ -45,10 +59,22 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
                 </span>
               </div>
               <h3>{cohort.title}</h3>
-              <p className="schedule-program">{cohort.programTitle}</p>
+              <p className="schedule-program">{content?.programTitle ?? cohort.programTitle}</p>
               <ul className="detail-list">
-                <li>Dates: Coming soon</li>
-                <li>Schedule: {cohort.meetingPattern}</li>
+                {content ? (
+                  <>
+                    <li>Program dates: {content.programDates}</li>
+                    <li>Program length: {content.programLength}</li>
+                    <li>Online theory schedule: {content.onlineTheorySchedule}</li>
+                    <li>Clinical schedule: {content.clinicalSchedule}</li>
+                    <li>Clinical-site city: {content.clinicalSiteCity}</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Dates: Coming soon</li>
+                    <li>Schedule: {cohort.meetingPattern}</li>
+                  </>
+                )}
                 <li>Program total: {cohort.tuitionLabel}</li>
                 <li>Remaining seats: {cohort.remainingSeats}</li>
               </ul>
@@ -56,8 +82,9 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
               <Link to={buildRegisterUrl(cohort)} className="card-action-link">
                 Register for this cohort
               </Link>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
 

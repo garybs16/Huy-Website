@@ -4,6 +4,10 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
 import { TurnstileWidget } from "../components/TurnstileWidget";
+import {
+  calculateInstallmentDisplayTerms,
+  formatInstallmentDisplaySummary,
+} from "../lib/installmentTerms";
 import { registrationChecklist } from "../siteData";
 
 function formatMoney(cents) {
@@ -49,10 +53,22 @@ export function RegisterPage({
     selectedCohort && isPaymentPlan && selectedCohort.allowPaymentPlan
       ? selectedCohort.paymentPlanRemainingCents ?? 0
       : 0;
+  const weeklyTerms = calculateInstallmentDisplayTerms({
+    tuitionTotalCents: selectedCohort?.tuitionCents,
+    registrationFeeCents: selectedCohort?.paymentPlanDepositCents,
+    installmentsTotal: 12,
+  });
+  const biweeklyTerms = calculateInstallmentDisplayTerms({
+    tuitionTotalCents: selectedCohort?.tuitionCents,
+    registrationFeeCents: selectedCohort?.paymentPlanDepositCents,
+    installmentsTotal: 6,
+  });
+  const weeklySummary = formatInstallmentDisplaySummary(weeklyTerms, "weekly", formatMoney);
+  const biweeklySummary = formatInstallmentDisplaySummary(biweeklyTerms, "biweekly", formatMoney);
   const paymentPath = enrollmentForm.paymentOption === "weekly"
-    ? "11 weekly payments of $145.83, then a final payment of $145.87"
+    ? weeklySummary
     : enrollmentForm.paymentOption === "biweekly"
-      ? "5 biweekly payments of $291.66, then a final payment of $291.70"
+      ? biweeklySummary
       : "Paid in full";
   const today = new Date().toISOString().slice(0, 10);
 
@@ -106,7 +122,7 @@ export function RegisterPage({
                 <li>Remaining seats: {selectedCohort.remainingSeats}</li>
                 {selectedCohort.allowPaymentPlan ? (
                   <li>
-                    Payment plans: {selectedCohort.paymentPlanDepositLabel} registration fee, then 12 weekly payments of $137.50 or 6 biweekly payments of $275
+                    Payment plans: {selectedCohort.paymentPlanDepositLabel} registration fee, then {weeklySummary}; or {biweeklySummary}.
                   </li>
                 ) : null}
               </ul>
@@ -250,7 +266,7 @@ export function RegisterPage({
                   <h3>Choose how this seat should be reserved.</h3>
                   <p>
                     Deferred plans collect the $250 non-refundable registration fee today. Tuition begins after checkout
-                    as either 12 weekly payments of $137.50 or 6 biweekly payments of $275.
+                    as either {weeklySummary} or {biweeklySummary}.
                   </p>
                 </div>
 
@@ -277,20 +293,20 @@ export function RegisterPage({
                       onChange={onInput}
                       disabled={!selectedCohort.allowPaymentPlan}
                     />
-                    <span>12 weekly payments</span>
-                    <strong>{selectedCohort.allowPaymentPlan ? "$137.50 / week" : "Not available"}</strong>
+                    <span>Weekly plan · 12 payments</span>
+                    <strong>{selectedCohort.allowPaymentPlan && weeklyTerms ? `${formatMoney(weeklyTerms.installmentAmountCents)} / week` : "Not available"}</strong>
                     <small>
                       {selectedCohort.allowPaymentPlan
-                        ? `${selectedCohort.paymentPlanDepositLabel} registration today, then 12 automatic weekly tuition payments beginning in 7 days. Total: ${selectedCohort.tuitionLabel}.`
+                        ? `${selectedCohort.paymentPlanDepositLabel} registration today, then ${weeklySummary} beginning in 7 days. Total: ${selectedCohort.tuitionLabel}.`
                         : "This cohort requires full tuition at checkout."}
                     </small>
                   </label>
 
                   <label className={`payment-choice-card ${enrollmentForm.paymentOption === "biweekly" ? "is-selected" : ""} ${selectedCohort.allowPaymentPlan ? "" : "is-disabled"}`}>
                     <input type="radio" name="paymentOption" value="biweekly" checked={enrollmentForm.paymentOption === "biweekly"} onChange={onInput} disabled={!selectedCohort.allowPaymentPlan} />
-                    <span>6 biweekly payments</span>
-                    <strong>{selectedCohort.allowPaymentPlan ? "$275 / 2 weeks" : "Not available"}</strong>
-                    <small>{selectedCohort.allowPaymentPlan ? `${selectedCohort.paymentPlanDepositLabel} registration today, then 6 automatic biweekly tuition payments beginning in 14 days. Total: ${selectedCohort.tuitionLabel}.` : "This cohort requires full tuition at checkout."}</small>
+                    <span>Biweekly plan · 6 payments</span>
+                    <strong>{selectedCohort.allowPaymentPlan && biweeklyTerms ? `${formatMoney(biweeklyTerms.installmentAmountCents)} / 2 weeks` : "Not available"}</strong>
+                    <small>{selectedCohort.allowPaymentPlan ? `${selectedCohort.paymentPlanDepositLabel} registration today, then ${biweeklySummary} beginning in 14 days. Total: ${selectedCohort.tuitionLabel}.` : "This cohort requires full tuition at checkout."}</small>
                   </label>
                 </div>
 

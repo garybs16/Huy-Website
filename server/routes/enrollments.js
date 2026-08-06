@@ -100,6 +100,11 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
   const amountCents = isBalancePayment ? enrollment.balanceDueCents : pricing.paymentAmountCents;
   const amountLabel = formatMoney(amountCents);
 
+  const programDatesLabel =
+    cohort.id === "cna-weekday-apr-2026"
+      ? "Program dates: Coming soon"
+      : `${cohort.startDate} to ${cohort.endDate}`;
+
   return {
     amountCents,
     amountLabel,
@@ -110,7 +115,7 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
       ? `${cohort.meetingPattern} | Remaining balance for enrollment ${enrollment.id}`
       : isPaymentPlanOption(pricing.paymentOption)
         ? `${cohort.meetingPattern} | ${formatMoney(pricing.paymentAmountCents)} registration today, then ${formatInstallmentSchedule(pricing)}`
-        : `${cohort.meetingPattern} | ${cohort.startDate} to ${cohort.endDate}`,
+        : `${cohort.meetingPattern} | ${programDatesLabel}`,
   };
 }
 
