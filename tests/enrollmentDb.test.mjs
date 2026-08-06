@@ -29,8 +29,10 @@ function enrollmentInput(overrides = {}) {
     balanceDueCents: 60_000,
     paymentInstallmentsTotal: 12,
     paymentInterval: "week",
+    eligibilityAcknowledgedAt: new Date().toISOString(),
     policyAcknowledgedAt: new Date().toISOString(),
     automaticPaymentAuthorizedAt: new Date().toISOString(),
+    studentSignature: "Test Student",
     seatHoldExpiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
     ...overrides,
   };
@@ -76,6 +78,8 @@ test("EnrollmentDatabase stores enrollment records and protects cohort capacity"
   assert.equal(enrollment.paymentOption, "weekly");
   assert.equal(enrollment.paymentAmountCents, 25_000);
   assert.equal(enrollment.balanceDueCents, 60_000);
+  assert.equal(enrollment.studentSignature, "Test Student");
+  assert.ok(enrollment.eligibilityAcknowledgedAt);
 
   assert.throws(
     () => db.createEnrollment(enrollmentInput({ id: crypto.randomUUID() })),

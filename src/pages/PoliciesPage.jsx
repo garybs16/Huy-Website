@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
+import { RefundPolicy } from "../components/RefundPolicy";
 
 const termsSections = [
   {
@@ -123,7 +124,7 @@ export function PoliciesPage() {
           <p>Submit a written cancellation or withdrawal notice with the student name, program or cohort, effective date, and current contact information. The applicable Enrollment Agreement and governing requirements determine the effective date and refund calculation.</p>
           <p>Dismissal does not automatically remove refund rights. Charges paid directly to third parties, including screening, medical, immunization, uniform, textbook, state-exam, CPR, or drug-screening costs, may be governed by that provider&apos;s own rules and are not guaranteed refundable by the Academy.</p>
           <p>Approved refunds are generally returned to the original method when possible. Students should contact the Academy before initiating a chargeback; a payment dispute does not replace the formal cancellation or withdrawal process.</p>
-          <Link className="card-action-link" to="/admissions#refund-policy">View the published refund schedule</Link>
+          <RefundPolicy />
         </article>
 
         <article id="automatic-payments" className="policy-document-card">

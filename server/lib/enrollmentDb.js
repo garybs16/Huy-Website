@@ -159,8 +159,10 @@ export class EnrollmentDatabase {
         payment_installments_total INTEGER NOT NULL DEFAULT 1,
         payment_installments_paid INTEGER NOT NULL DEFAULT 0,
         payment_interval TEXT,
+        eligibility_acknowledged_at TEXT,
         policy_acknowledged_at TEXT,
         automatic_payment_authorized_at TEXT,
+        student_signature TEXT,
         stripe_checkout_session_id TEXT,
         stripe_checkout_purpose TEXT,
         stripe_customer_id TEXT,
@@ -255,8 +257,10 @@ export class EnrollmentDatabase {
     addColumnIfMissing(this.db, "enrollments", "payment_installments_total", "INTEGER NOT NULL DEFAULT 1");
     addColumnIfMissing(this.db, "enrollments", "payment_installments_paid", "INTEGER NOT NULL DEFAULT 0");
     addColumnIfMissing(this.db, "enrollments", "payment_interval", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "eligibility_acknowledged_at", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "policy_acknowledged_at", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "automatic_payment_authorized_at", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "student_signature", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "stripe_customer_id", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "stripe_subscription_id", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "stripe_subscription_schedule_id", "TEXT");
@@ -336,15 +340,18 @@ export class EnrollmentDatabase {
 
       UPDATE programs
       SET
+        title = 'Certified Nurse Assistant Training Program',
         summary = 'Structured classroom, lab, and supervised clinical training built for direct patient-care roles.',
-        duration = '160 approved program hours',
-        schedule = 'Approved weekday schedule with online theory and in-person clinical training listed separately',
+        duration = '6 weeks (160 approved program hours)',
+        schedule = '60 hours live online theory and 100 hours supervised clinical in Anaheim, California',
         updated_at = '${nowIso()}'
       WHERE id = 'cna'
         AND (
-          duration IN ('4-6 weeks', '6-12 weeks')
+          duration IN ('4-6 weeks', '6-12 weeks', '160 approved program hours')
+          OR title = 'Certified Nurse Assistant'
           OR schedule LIKE '%weekend%'
           OR schedule LIKE '%Weekend%'
+          OR schedule = 'Approved weekday schedule with online theory and in-person clinical training listed separately'
         );
 
       UPDATE cohorts
@@ -685,8 +692,10 @@ export class EnrollmentDatabase {
             payment_installments_total AS paymentInstallmentsTotal,
             payment_installments_paid AS paymentInstallmentsPaid,
             payment_interval AS paymentInterval,
+            eligibility_acknowledged_at AS eligibilityAcknowledgedAt,
             policy_acknowledged_at AS policyAcknowledgedAt,
             automatic_payment_authorized_at AS automaticPaymentAuthorizedAt,
+            student_signature AS studentSignature,
             stripe_checkout_session_id AS stripeCheckoutSessionId,
             stripe_checkout_purpose AS stripeCheckoutPurpose,
             stripe_customer_id AS stripeCustomerId,
@@ -1168,8 +1177,10 @@ export class EnrollmentDatabase {
             payment_installments_total,
             payment_installments_paid,
             payment_interval,
+            eligibility_acknowledged_at,
             policy_acknowledged_at,
             automatic_payment_authorized_at,
+            student_signature,
             stripe_checkout_session_id,
             stripe_checkout_purpose,
             stripe_customer_id,
@@ -1207,8 +1218,10 @@ export class EnrollmentDatabase {
             @paymentInstallmentsTotal,
             @paymentInstallmentsPaid,
             @paymentInterval,
+            @eligibilityAcknowledgedAt,
             @policyAcknowledgedAt,
             @automaticPaymentAuthorizedAt,
+            @studentSignature,
             NULL,
             NULL,
             NULL,
@@ -1229,8 +1242,10 @@ export class EnrollmentDatabase {
           paymentInstallmentsTotal: enrollmentInput.paymentInstallmentsTotal ?? 1,
           paymentInstallmentsPaid: enrollmentInput.paymentInstallmentsPaid ?? 0,
           paymentInterval: enrollmentInput.paymentInterval ?? null,
+          eligibilityAcknowledgedAt: enrollmentInput.eligibilityAcknowledgedAt ?? null,
           policyAcknowledgedAt: enrollmentInput.policyAcknowledgedAt ?? null,
           automaticPaymentAuthorizedAt: enrollmentInput.automaticPaymentAuthorizedAt ?? null,
+          studentSignature: enrollmentInput.studentSignature ?? null,
           seatHoldExpiresAt: enrollmentInput.seatHoldExpiresAt ?? null,
           createdAt: timestamp,
           updatedAt: timestamp,
@@ -1271,8 +1286,10 @@ export class EnrollmentDatabase {
           payment_installments_total AS paymentInstallmentsTotal,
           payment_installments_paid AS paymentInstallmentsPaid,
           payment_interval AS paymentInterval,
+          eligibility_acknowledged_at AS eligibilityAcknowledgedAt,
           policy_acknowledged_at AS policyAcknowledgedAt,
           automatic_payment_authorized_at AS automaticPaymentAuthorizedAt,
+          student_signature AS studentSignature,
           stripe_checkout_session_id AS stripeCheckoutSessionId,
           stripe_checkout_purpose AS stripeCheckoutPurpose,
           stripe_customer_id AS stripeCustomerId,
@@ -1917,8 +1934,10 @@ export class EnrollmentDatabase {
           e.payment_installments_total AS paymentInstallmentsTotal,
           e.payment_installments_paid AS paymentInstallmentsPaid,
           e.payment_interval AS paymentInterval,
+          e.eligibility_acknowledged_at AS eligibilityAcknowledgedAt,
           e.policy_acknowledged_at AS policyAcknowledgedAt,
           e.automatic_payment_authorized_at AS automaticPaymentAuthorizedAt,
+          e.student_signature AS studentSignature,
           e.next_payment_due_at AS nextPaymentDueAt,
           e.last_payment_at AS lastPaymentAt,
           e.last_payment_failure_at AS lastPaymentFailureAt,

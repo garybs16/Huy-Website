@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { contactDetails } from "../siteData";
 
-const ctaHighlights = ["Clear tuition", "Published requirements", "Real admissions support"];
+const ctaHighlights = ["Early cohort notice", "2026–2027 planning", "Priority enrollment access"];
 
 export function SiteCtaBand() {
   return (
@@ -9,16 +9,16 @@ export function SiteCtaBand() {
       <div className="container">
         <div className="site-cta-panel">
           <div className="site-cta-copy">
-            <p className="section-kicker">Your next step</p>
-            <h2>Ready to start—or still deciding?</h2>
+            <p className="section-kicker">2026–2027 cohort interest list</p>
+            <h2>Get early access to upcoming CNA cohorts.</h2>
             <p>
-              Compare the schedule and requirements at your own pace, or speak with admissions for
-              a clear answer about tuition, documents, and the best cohort for your availability.
+              Join the priority interest list for early cohort announcements. Members are contacted
+              first when enrollment opens, giving them an earlier opportunity to reserve an available seat.
             </p>
 
             <div className="button-row">
-              <Link to="/register" className="btn btn-primary">
-                Start registration
+              <Link to="/contact#interest-list" className="btn btn-primary">
+                Join the priority waitlist
               </Link>
               <Link to="/contact" className="btn btn-ghost">
                 Talk to admissions

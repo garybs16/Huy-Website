@@ -22,6 +22,8 @@ async function run() {
   const registerPage = await readSource("src/pages/RegisterPage.jsx");
   const schedulePage = await readSource("src/pages/SchedulePage.jsx");
   const homePage = await readSource("src/pages/HomePage.jsx");
+  const contactPage = await readSource("src/pages/ContactPage.jsx");
+  const siteCtaBand = await readSource("src/components/SiteCtaBand.jsx");
   const policiesPage = await readSource("src/pages/PoliciesPage.jsx");
   const appEffects = await readSource("src/App.jsx");
 
@@ -93,6 +95,18 @@ async function run() {
   assertIncludes(registerPage, "/admissions#refund-policy", "Registration policy link");
   assertIncludes(registerPage, "/policies#terms", "Registration terms link");
   assertIncludes(registerPage, "/policies#privacy", "Registration privacy link");
+  for (const expected of [
+    "Eligibility check",
+    "englishAcknowledged",
+    "technologyAcknowledged",
+    "clinicalTravelAcknowledged",
+    "stateExamAcknowledged",
+    "Electronic signature (type the student full name)",
+    "Required refund policy review",
+    "<RefundPolicy />",
+  ]) {
+    assertIncludes(registerPage, expected, "Registration eligibility and policy process");
+  }
   assert(!registerPage.includes("$137.50"), "Registration page must not show the former weekly installment.");
   assert(!registerPage.includes("$275 / 2 weeks"), "Registration page must not show the former biweekly installment.");
   for (const expected of [
@@ -110,12 +124,39 @@ async function run() {
   }
   assert(!homePage.includes("hero-quick-links"), "Removed hero shortcut row must stay removed.");
   for (const expected of [
+    "Program length:</strong> 6 weeks (160 approved program hours)",
+    "Live online theory:</strong> 60 hours",
+    "Supervised clinical:</strong> 100 hours",
+    "Clinical-site city:</strong> Anaheim, California",
+    "Program fee:</strong> $2,000 total ($250 non-refundable registration fee + $1,750 tuition)",
+  ]) {
+    assertIncludes(homePage, expected, "AFL landing-page program disclosure");
+  }
+  for (const expected of [
+    "2026–2027 cohort interest list",
+    "Get early access to upcoming CNA cohorts.",
+    "/contact#interest-list",
+    "Join the priority waitlist",
+    "Priority enrollment access",
+  ]) {
+    assertIncludes(siteCtaBand, expected, "Priority waitlist call to action");
+  }
+  for (const expected of [
+    'id="interest-list"',
+    "2026–2027 priority waitlist",
+    "Seats remain subject to eligibility and availability.",
+    "Join the Priority Waitlist",
+  ]) {
+    assertIncludes(contactPage, expected, "Priority waitlist form content");
+  }
+  for (const expected of [
     "Terms of Service",
     "Privacy Policy",
     "Refund and Cancellation Policy",
     "Automatic-Payment Authorization",
     "The Academy does not sell student personal information",
     "does not guarantee program completion",
+    "<RefundPolicy />",
   ]) {
     assertIncludes(policiesPage, expected, "Public policy content");
   }

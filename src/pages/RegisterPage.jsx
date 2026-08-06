@@ -3,6 +3,7 @@ import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe
 import { loadStripe } from "@stripe/stripe-js";
 import { Link } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
+import { RefundPolicy } from "../components/RefundPolicy";
 import { TurnstileWidget } from "../components/TurnstileWidget";
 import {
   calculateInstallmentDisplayTerms,
@@ -70,7 +71,9 @@ export function RegisterPage({
     : enrollmentForm.paymentOption === "biweekly"
       ? biweeklySummary
       : "Paid in full";
-  const today = new Date().toISOString().slice(0, 10);
+  const youngestEligibleDate = new Date();
+  youngestEligibleDate.setFullYear(youngestEligibleDate.getFullYear() - 16);
+  const youngestEligibleDateValue = youngestEligibleDate.toISOString().slice(0, 10);
 
   return (
     <section className="section">
@@ -117,6 +120,7 @@ export function RegisterPage({
               <ul className="detail-list">
                 <li>{selectedCohort.programTitle}</li>
                 <li>Dates: Coming soon</li>
+                <li>Program length: 6 weeks (60 hours theory + 100 hours clinical)</li>
                 <li>Schedule: {selectedCohort.meetingPattern}</li>
                 <li>Program total: {selectedCohort.tuitionLabel}</li>
                 <li>Remaining seats: {selectedCohort.remainingSeats}</li>
@@ -155,7 +159,8 @@ export function RegisterPage({
               </label>
               <label>
                 <span>Date of birth</span>
-                <input name="dateOfBirth" type="date" value={enrollmentForm.dateOfBirth} onChange={onInput} autoComplete="bday" min="1900-01-01" max={today} required />
+                <input name="dateOfBirth" type="date" value={enrollmentForm.dateOfBirth} onChange={onInput} autoComplete="bday" min="1900-01-01" max={youngestEligibleDateValue} required />
+                <small>Students must be at least 16 years old.</small>
               </label>
             </div>
 
@@ -340,7 +345,29 @@ export function RegisterPage({
             </label>
 
             <fieldset className="enrollment-form-section policy-acknowledgment-section">
-              <legend><span>3</span> Eligibility and policy review</legend>
+              <legend><span>3</span> Eligibility check</legend>
+              <p className="form-helper">Confirm each requirement before reviewing the enrollment policies.</p>
+              <label className="policy-checkbox-row">
+                <input type="checkbox" name="englishAcknowledged" checked={enrollmentForm.englishAcknowledged} onChange={onInput} required />
+                <span>I can study, communicate, and complete required coursework and examinations in English. *</span>
+              </label>
+              <label className="policy-checkbox-row">
+                <input type="checkbox" name="technologyAcknowledged" checked={enrollmentForm.technologyAcknowledged} onChange={onInput} required />
+                <span>I have reliable internet, access to a computer or approved device with camera and audio, and the basic computer skills needed for live online theory. *</span>
+              </label>
+              <label className="policy-checkbox-row">
+                <input type="checkbox" name="clinicalTravelAcknowledged" checked={enrollmentForm.clinicalTravelAcknowledged} onChange={onInput} required />
+                <span>I can travel to the in-person clinical site in Anaheim, California and complete all 100 supervised clinical hours. *</span>
+              </label>
+              <label className="policy-checkbox-row">
+                <input type="checkbox" name="stateExamAcknowledged" checked={enrollmentForm.stateExamAcknowledged} onChange={onInput} required />
+                <span>I understand that completing the training program does not itself grant CNA certification; I must meet state application and competency-examination requirements. *</span>
+              </label>
+              <p className="form-helper">Admissions will verify identification, eligibility documents, and clinical-clearance records separately. Do not enter a Social Security or ITIN number in this form.</p>
+            </fieldset>
+
+            <fieldset className="enrollment-form-section policy-acknowledgment-section">
+              <legend><span>4</span> Policy review and confirmation</legend>
               <details>
                 <summary>Review Terms of Service and student responsibilities</summary>
                 <p>Students must provide accurate information, meet admissions and clinical-clearance requirements, attend all required instruction, complete required theory and clinical hours, follow the Student Handbook and clinical-facility policies, and remain current on the selected payment schedule.</p>
@@ -353,6 +380,9 @@ export function RegisterPage({
                 <Link to="/admissions#refund-policy" className="card-action-link">Open the full Refund and Cancellation Policy</Link>
                 <Link to="/policies#privacy" className="card-action-link">Read the full Privacy Policy</Link>
               </details>
+              <div className="registration-refund-review" aria-label="Required refund policy review">
+                <RefundPolicy />
+              </div>
               <label className="policy-checkbox-row">
                 <input type="checkbox" name="policyAcknowledged" checked={enrollmentForm.policyAcknowledged} onChange={onInput} required />
                 <span>I acknowledge that I have reviewed and agree to First Step Healthcare Academy’s Terms of Service, Privacy Policy, Refund and Cancellation Policy, and applicable Payment-Plan Terms. I understand that payment alone does not guarantee clinical placement, certification, or employment. *</span>
@@ -363,16 +393,33 @@ export function RegisterPage({
                   <span>I authorize First Step Healthcare Academy and Stripe to charge my selected payment method according to the payment schedule presented to me. *</span>
                 </label>
               ) : null}
+              <label>
+                <span>Electronic signature (type the student full name)</span>
+                <input
+                  name="studentSignature"
+                  value={enrollmentForm.studentSignature}
+                  onChange={onInput}
+                  autoComplete="off"
+                  minLength="2"
+                  maxLength="100"
+                  required
+                />
+                <small>Your typed name must match the student full name entered in Step 1.</small>
+              </label>
             </fieldset>
 
-            <TurnstileWidget {...turnstile} />
-            <button type="submit" className="btn btn-primary" disabled={enrollmentPending || cohorts.length === 0}>
-              {enrollmentPending
-                ? "Preparing checkout..."
-                : isPaymentPlan
-                  ? "Continue to secure payment"
-                  : "Continue to secure checkout"}
-            </button>
+            <fieldset className="enrollment-form-section checkout-confirmation-section">
+              <legend><span>5</span> Secure payment</legend>
+              <p className="form-helper">Submitting creates the enrollment record and opens Stripe&apos;s secure checkout for the payment option shown above.</p>
+              <TurnstileWidget {...turnstile} />
+              <button type="submit" className="btn btn-primary" disabled={enrollmentPending || cohorts.length === 0}>
+                {enrollmentPending
+                  ? "Preparing checkout..."
+                  : isPaymentPlan
+                    ? "Continue to secure payment"
+                    : "Continue to secure checkout"}
+              </button>
+            </fieldset>
           </form>
 
           {enrollmentStatus.text ? (

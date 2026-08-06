@@ -110,8 +110,13 @@ async function run() {
         emergencyContactPhone: "949-555-0101",
         cohortId: depositCohort.id,
         paymentOption: "weekly",
+        englishAcknowledged: true,
+        technologyAcknowledged: true,
+        clinicalTravelAcknowledged: true,
+        stateExamAcknowledged: true,
         policyAcknowledged: true,
         automaticPaymentAuthorized: true,
+        studentSignature: "Enrollment Harmony",
         notes: `Interested in ${firstProgramId}`,
       }),
     });

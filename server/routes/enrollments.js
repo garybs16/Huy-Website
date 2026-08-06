@@ -319,8 +319,10 @@ export function createEnrollmentsRouter({
         paymentInstallmentsTotal: pricing.paymentInstallmentsTotal,
         paymentInstallmentsPaid: 0,
         paymentInterval: pricing.paymentInterval,
+        eligibilityAcknowledgedAt: new Date().toISOString(),
         policyAcknowledgedAt: new Date().toISOString(),
         automaticPaymentAuthorizedAt: payload.automaticPaymentAuthorized ? new Date().toISOString() : null,
+        studentSignature: payload.studentSignature,
         seatHoldExpiresAt: initialSeatHoldExpiresAt,
       });
       res.setHeader(

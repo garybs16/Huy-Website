@@ -110,19 +110,19 @@ export function ContactPage({
         </div>
       </div>
 
-      <div className="container split-panel">
+      <div className="container split-panel" id="interest-list">
         <article className="info-card">
-          <p className="section-kicker">Waitlist</p>
-          <h3>Stay in line for new cohort openings and schedule updates.</h3>
+          <p className="section-kicker">2026–2027 priority waitlist</p>
+          <h3>Be among the first contacted when upcoming CNA cohorts open.</h3>
           <p>
-            If a student is not ready to register yet, this form keeps them connected to new class
-            dates, added sections, and admissions follow-up.
+            Join for early schedule announcements and a priority opportunity to enroll before new
+            openings are shared broadly. Seats remain subject to eligibility and availability.
           </p>
         </article>
 
         <article className="form-card">
-          <h2>Join the interest list</h2>
-          <p className="form-helper">Best for students waiting on timing, documents, or the next open seat.</p>
+          <h2>Join the priority interest list</h2>
+          <p className="form-helper">Tell us how to reach you and which upcoming cohort timing works best.</p>
           <form className="form-stack" onSubmit={onWaitlistSubmit} aria-busy={waitlistPending}>
             <label>
               <span>Full name</span>
@@ -151,7 +151,7 @@ export function ContactPage({
             </label>
             <TurnstileWidget {...waitlistTurnstile} />
             <button type="submit" className="btn btn-primary" disabled={waitlistPending}>
-              {waitlistPending ? "Submitting..." : "Request Updates"}
+              {waitlistPending ? "Submitting..." : "Join the Priority Waitlist"}
             </button>
           </form>
           {waitlistStatus.text ? (

@@ -353,8 +353,10 @@ export const programRequirementSections = [
   {
     title: "Program Length",
     items: [
+      "Program length: 6 weeks (160 approved program hours)",
       "Live online theory instruction: 60 hours",
       "In-person supervised clinical training: 100 hours",
+      "Clinical-site city: Anaheim, California",
       "The approved class calendar controls the exact program timeline, including any holidays, instructor availability, clinical site availability, and student document completion requirements.",
       "The online theory portion is separate from the in-person supervised clinical training portion.",
       "Program completion requires all required theory hours, clinical hours, quizzes, skills requirements, remediation if assigned, and program documentation.",
