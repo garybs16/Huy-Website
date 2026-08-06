@@ -324,6 +324,16 @@ export class EnrollmentDatabase {
           OR allow_payment_plan = 0
         );
 
+      UPDATE cohorts
+      SET
+        meeting_pattern = 'Online theory: Monday–Friday | 5:00 PM–9:00 PM | 3 weeks; Clinical: Monday–Friday | 7:00 AM–3:30 PM | 3 weeks; Clinical-site city: Anaheim, California',
+        updated_at = '${nowIso()}'
+      WHERE id = 'cna-weekday-apr-2026'
+        AND meeting_pattern IN (
+          'Monday to Friday | 7:00 AM to 3:30 PM',
+          'Monday–Friday | 7:00 AM–3:30 PM'
+        );
+
       UPDATE programs
       SET
         summary = 'Structured classroom, lab, and supervised clinical training built for direct patient-care roles.',

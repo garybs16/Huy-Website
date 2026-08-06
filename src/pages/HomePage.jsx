@@ -54,11 +54,6 @@ export function HomePage({ programs }) {
     { value: "$100", label: "eligible referral rewards" },
     { value: "Free Guides", label: "OC Nursing Pathway + CNA Career Starter" },
   ];
-  const heroQuickLinks = [
-    { label: "Schedules", to: "/schedule" },
-    { label: "Admissions", to: "/admissions" },
-    { label: "Payment", to: "/payment" },
-  ];
   const quizThemes = ["Purpose", "Stability", "Growth", "Independence"];
   const homeSupportItems = [
     {
@@ -151,14 +146,6 @@ export function HomePage({ programs }) {
               <Link to="/programs" className="btn btn-secondary">
                 Explore CNA program
               </Link>
-            </div>
-
-            <div className="hero-quick-links" aria-label="Fast access">
-              {heroQuickLinks.map((item) => (
-                <Link key={item.label} to={item.to}>
-                  {item.label}
-                </Link>
-              ))}
             </div>
 
           </div>

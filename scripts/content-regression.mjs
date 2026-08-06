@@ -20,6 +20,8 @@ async function run() {
   const programsPage = await readSource("src/pages/ProgramsPage.jsx");
   const rewardsPage = await readSource("src/pages/RewardsGuidancePage.jsx");
   const registerPage = await readSource("src/pages/RegisterPage.jsx");
+  const schedulePage = await readSource("src/pages/SchedulePage.jsx");
+  const homePage = await readSource("src/pages/HomePage.jsx");
   const policiesPage = await readSource("src/pages/PoliciesPage.jsx");
   const appEffects = await readSource("src/App.jsx");
 
@@ -91,6 +93,22 @@ async function run() {
   assertIncludes(registerPage, "/admissions#refund-policy", "Registration policy link");
   assertIncludes(registerPage, "/policies#terms", "Registration terms link");
   assertIncludes(registerPage, "/policies#privacy", "Registration privacy link");
+  assert(!registerPage.includes("$137.50"), "Registration page must not show the former weekly installment.");
+  assert(!registerPage.includes("$275 / 2 weeks"), "Registration page must not show the former biweekly installment.");
+  for (const expected of [
+    "Certified Nurse Assistant Training Program",
+    "Program dates: {content.programDates}",
+    "Program length: {content.programLength}",
+    "Online theory schedule: {content.onlineTheorySchedule}",
+    "Clinical schedule: {content.clinicalSchedule}",
+    "Clinical-site city: {content.clinicalSiteCity}",
+    "Monday–Friday | 5:00 PM–9:00 PM | 3 weeks",
+    "Monday–Friday | 7:00 AM–3:30 PM | 3 weeks",
+    "Anaheim, California",
+  ]) {
+    assertIncludes(schedulePage, expected, "Weekday cohort schedule content");
+  }
+  assert(!homePage.includes("hero-quick-links"), "Removed hero shortcut row must stay removed.");
   for (const expected of [
     "Terms of Service",
     "Privacy Policy",
