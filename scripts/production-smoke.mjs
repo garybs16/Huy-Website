@@ -205,8 +205,13 @@ async function run() {
         emergencyContactPhone: "949-555-0111",
         cohortId: depositCohort.id,
         paymentOption: "weekly",
+        englishAcknowledged: true,
+        technologyAcknowledged: true,
+        clinicalTravelAcknowledged: true,
+        stateExamAcknowledged: true,
         policyAcknowledged: true,
         automaticPaymentAuthorized: true,
+        studentSignature: "Production Enrollment",
         notes: "Production smoke registration.",
       }),
     });

@@ -104,8 +104,13 @@ const initialEnrollmentState = {
   programId: "",
   cohortId: "",
   paymentOption: "full",
+  englishAcknowledged: false,
+  technologyAcknowledged: false,
+  clinicalTravelAcknowledged: false,
+  stateExamAcknowledged: false,
   policyAcknowledged: false,
   automaticPaymentAuthorized: false,
+  studentSignature: "",
   notes: "",
 };
 
@@ -573,7 +578,7 @@ function App() {
       });
       setWaitlistStatus({
         type: "success",
-        text: "You are on the interest list. We will share class dates and milestone updates.",
+        text: "You are on the priority interest list. We will contact you early when 2026–2027 cohort enrollment opens.",
       });
       setWaitlistForm(initialWaitlistState);
       setWaitlistTurnstileToken("");
@@ -613,8 +618,13 @@ function App() {
         emergencyContactPhone: enrollmentForm.emergencyContactPhone,
         cohortId: enrollmentForm.cohortId,
         paymentOption: enrollmentForm.paymentOption,
+        englishAcknowledged: enrollmentForm.englishAcknowledged,
+        technologyAcknowledged: enrollmentForm.technologyAcknowledged,
+        clinicalTravelAcknowledged: enrollmentForm.clinicalTravelAcknowledged,
+        stateExamAcknowledged: enrollmentForm.stateExamAcknowledged,
         policyAcknowledged: enrollmentForm.policyAcknowledged,
         automaticPaymentAuthorized: enrollmentForm.automaticPaymentAuthorized,
+        studentSignature: enrollmentForm.studentSignature,
         // Send the student to Stripe's secure, Stripe-hosted checkout immediately.
         // This is the most reliable checkout surface across browsers and still
         // keeps payment tied to this exact enrollment and cohort.

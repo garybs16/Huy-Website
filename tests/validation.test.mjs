@@ -43,8 +43,13 @@ test("enrollment schema normalizes state and validates required student details"
     emergencyContactPhone: "949-555-0103",
     cohortId: "cna-weekday",
     paymentOption: "weekly",
+    englishAcknowledged: true,
+    technologyAcknowledged: true,
+    clinicalTravelAcknowledged: true,
+    stateExamAcknowledged: true,
     policyAcknowledged: true,
     automaticPaymentAuthorized: true,
+    studentSignature: "Jordan Student",
     checkoutMode: "embedded",
   });
 
@@ -66,6 +71,18 @@ test("enrollment schema normalizes state and validates required student details"
   assert.throws(
     () => enrollmentSchema.parse({ ...enrollment, dateOfBirth: "2000-02-31" }),
     /real calendar date/
+  );
+  assert.throws(
+    () => enrollmentSchema.parse({ ...enrollment, dateOfBirth: new Date().toISOString().slice(0, 10) }),
+    /at least 16 years old/
+  );
+  assert.throws(
+    () => enrollmentSchema.parse({ ...enrollment, technologyAcknowledged: false }),
+    /Technology eligibility confirmation is required/
+  );
+  assert.throws(
+    () => enrollmentSchema.parse({ ...enrollment, studentSignature: "Different Person" }),
+    /Electronic signature must match the student full name/
   );
   assert.throws(
     () => enrollmentSchema.parse({ ...enrollment, unexpected: "field" }),

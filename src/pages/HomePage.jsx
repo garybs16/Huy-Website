@@ -360,9 +360,11 @@ export function HomePage({ programs }) {
                 <h3>{program.title}</h3>
                 <p>{program.summary}</p>
                 <ul className="detail-list">
-                  <li>Duration: {program.duration}</li>
-                  <li>Schedule: {program.schedule}</li>
-                  <li>{meta.detail}</li>
+                  <li><strong>Program length:</strong> 6 weeks (160 approved program hours)</li>
+                  <li><strong>Live online theory:</strong> 60 hours | Monday–Friday | 5:00 PM–9:00 PM | 3 weeks</li>
+                  <li><strong>Supervised clinical:</strong> 100 hours | Monday–Friday | 7:00 AM–3:30 PM | 3 weeks</li>
+                  <li><strong>Clinical-site city:</strong> Anaheim, California</li>
+                  <li><strong>Program fee:</strong> $2,000 total ($250 non-refundable registration fee + $1,750 tuition)</li>
                 </ul>
               </article>
             );

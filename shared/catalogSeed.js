@@ -1,11 +1,11 @@
 export const programCatalogSeed = [
   {
     id: "cna",
-    title: "Certified Nurse Assistant",
+    title: "Certified Nurse Assistant Training Program",
     summary:
       "Structured classroom, lab, and supervised clinical training built for direct patient-care roles.",
-    duration: "6-12 weeks",
-    schedule: "Approved weekday schedule with online theory and in-person clinical training listed separately",
+    duration: "6 weeks (160 approved program hours)",
+    schedule: "60 hours live online theory and 100 hours supervised clinical in Anaheim, California",
   },
 ];
 

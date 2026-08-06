@@ -123,6 +123,11 @@ const birthDateString = z.preprocess(
       (value) => value >= "1900-01-01" && value <= new Date().toISOString().slice(0, 10),
       "dateOfBirth must be between 1900-01-01 and today"
     )
+    .refine((value) => {
+      const sixteenthBirthday = new Date(`${value}T00:00:00.000Z`);
+      sixteenthBirthday.setUTCFullYear(sixteenthBirthday.getUTCFullYear() + 16);
+      return sixteenthBirthday <= new Date();
+    }, "Student must be at least 16 years old")
 );
 
 function isValidCalendarDate(value) {
@@ -155,8 +160,13 @@ export const enrollmentSchema = z.object({
   ),
   cohortId: requiredString("cohortId", 2, 100),
   paymentOption: z.enum(["full", "weekly", "biweekly"]).default("full"),
-  policyAcknowledged: z.literal(true, { errorMap: () => ({ message: "Policy acknowledgment is required" }) }),
+  englishAcknowledged: z.boolean().refine(Boolean, "English-language eligibility confirmation is required"),
+  technologyAcknowledged: z.boolean().refine(Boolean, "Technology eligibility confirmation is required"),
+  clinicalTravelAcknowledged: z.boolean().refine(Boolean, "Clinical travel confirmation is required"),
+  stateExamAcknowledged: z.boolean().refine(Boolean, "State-exam confirmation is required"),
+  policyAcknowledged: z.boolean().refine(Boolean, "Policy acknowledgment is required"),
   automaticPaymentAuthorized: z.boolean().default(false),
+  studentSignature: requiredString("studentSignature", 2, 100),
   checkoutMode: z.enum(["redirect", "embedded"]).default("redirect"),
   notes: optionalString(600),
   turnstileToken: turnstileTokenString,
@@ -166,6 +176,15 @@ export const enrollmentSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["automaticPaymentAuthorized"],
       message: "Automatic-payment authorization is required for a payment plan",
+    });
+  }
+
+  const normalizeName = (name) => name.toLocaleLowerCase("en-US").replace(/\s+/g, " ").trim();
+  if (normalizeName(value.studentSignature) !== normalizeName(value.studentFullName)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["studentSignature"],
+      message: "Electronic signature must match the student full name",
     });
   }
 });
