@@ -21,7 +21,7 @@ export const cohortCatalogSeed = [
       "Online theory: Monday–Friday | 5:00 PM–9:00 PM | 3 weeks; Clinical: Monday–Friday | 7:00 AM–3:30 PM | 3 weeks; Clinical-site city: Anaheim, California",
     tuitionCents: 200000,
     allowPaymentPlan: true,
-    paymentPlanDepositCents: 1000,
+    paymentPlanDepositCents: 25000,
     capacity: 15,
     isActive: true,
     sortOrder: 10,

@@ -41,18 +41,18 @@ test("weekly checkout uses a Stripe-compatible subscription payload", async () =
     },
     pricing: {
       paymentOption: "weekly",
-      paymentAmountCents: 1_000,
-      installmentAmountCents: 16_583,
-      finalInstallmentAmountCents: 16_587,
+      paymentAmountCents: 25_000,
+      installmentAmountCents: 14_583,
+      finalInstallmentAmountCents: 14_587,
       regularInstallmentsTotal: 11,
       tuitionTotalCents: 200_000,
-      balanceDueCents: 199_000,
+      balanceDueCents: 175_000,
       paymentInstallmentsTotal: 12,
       paymentInterval: "week",
       interval: "week",
       intervalCount: 1,
       trialDays: 7,
-      checkoutLabel: "12-payment weekly program balance plan",
+      checkoutLabel: "12-payment weekly tuition plan",
     },
     purpose: "payment_plan",
   });
@@ -61,15 +61,15 @@ test("weekly checkout uses a Stripe-compatible subscription payload", async () =
   assert.equal(capturedPayload.client_reference_id, "enrollment_payload_test");
   assert.equal(capturedPayload.submit_type, undefined);
   assert.equal(capturedPayload.line_items[0].price_data.recurring, undefined);
-  assert.equal(capturedPayload.line_items[0].price_data.unit_amount, 1_000);
-  assert.match(capturedPayload.line_items[0].price_data.product_data.name, /temporary test down payment/i);
+  assert.equal(capturedPayload.line_items[0].price_data.unit_amount, 25_000);
+  assert.match(capturedPayload.line_items[0].price_data.product_data.name, /non-refundable registration fee/i);
   assert.deepEqual(capturedPayload.line_items[1].price_data.recurring, {
     interval: "week",
     interval_count: 1,
   });
   assert.equal(capturedPayload.metadata.installmentsTotal, "12");
-  assert.equal(capturedPayload.metadata.installmentAmountCents, "16583");
-  assert.equal(capturedPayload.metadata.finalInstallmentAmountCents, "16587");
+  assert.equal(capturedPayload.metadata.installmentAmountCents, "14583");
+  assert.equal(capturedPayload.metadata.finalInstallmentAmountCents, "14587");
   assert.equal(capturedPayload.subscription_data.metadata.paymentInterval, "week");
   assert.deepEqual(capturedPayload.subscription_data.billing_mode, { type: "flexible" });
   assert.equal(capturedPayload.subscription_data.trial_period_days, 7);
