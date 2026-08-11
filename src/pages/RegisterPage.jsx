@@ -100,7 +100,13 @@ export function RegisterPage({
               Refund eligibility depends on withdrawal timing, completed course hours, payment-plan
               status, and program standing.
             </p>
-            <Link to="/admissions#refund-policy" className="card-action-link">
+            <Link
+              to="/admissions#refund-policy"
+              className="card-action-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View refund policy (opens in a new tab)"
+            >
               View refund policy
             </Link>
           </div>
@@ -372,13 +378,37 @@ export function RegisterPage({
                 <summary>Review Terms of Service and student responsibilities</summary>
                 <p>Students must provide accurate information, meet admissions and clinical-clearance requirements, attend all required instruction, complete required theory and clinical hours, follow the Student Handbook and clinical-facility policies, and remain current on the selected payment schedule.</p>
                 <p>Program completion, state-exam passage, certification, employment, wages, clinical placement, and admission to another nursing program are not guaranteed.</p>
-                <Link to="/policies#terms" className="card-action-link">Read the full Terms of Service</Link>
+                <Link
+                  to="/policies#terms"
+                  className="card-action-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Read the full Terms of Service (opens in a new tab)"
+                >
+                  Read the full Terms of Service
+                </Link>
               </details>
               <details>
                 <summary>Review Privacy and Refund policies</summary>
                 <p>Student information may be used to process enrollment, maintain records, collect payments, provide instruction, coordinate clinical training, communicate required updates, and satisfy regulatory obligations. Payments are processed securely through Stripe.</p>
-                <Link to="/admissions#refund-policy" className="card-action-link">Open the full Refund and Cancellation Policy</Link>
-                <Link to="/policies#privacy" className="card-action-link">Read the full Privacy Policy</Link>
+                <Link
+                  to="/admissions#refund-policy"
+                  className="card-action-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open the full Refund and Cancellation Policy (opens in a new tab)"
+                >
+                  Open the full Refund and Cancellation Policy
+                </Link>
+                <Link
+                  to="/policies#privacy"
+                  className="card-action-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Read the full Privacy Policy (opens in a new tab)"
+                >
+                  Read the full Privacy Policy
+                </Link>
               </details>
               <div className="registration-refund-review" aria-label="Required refund policy review">
                 <RefundPolicy />
