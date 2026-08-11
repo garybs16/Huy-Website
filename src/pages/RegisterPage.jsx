@@ -126,7 +126,7 @@ export function RegisterPage({
                 <li>Remaining seats: {selectedCohort.remainingSeats}</li>
                 {selectedCohort.allowPaymentPlan ? (
                   <li>
-                    Payment plans: {selectedCohort.paymentPlanDepositLabel} registration fee, then {weeklySummary}; or {biweeklySummary}.
+                    Payment plans: temporary {selectedCohort.paymentPlanDepositLabel} test down payment, then {weeklySummary}; or {biweeklySummary}.
                   </li>
                 ) : null}
               </ul>
@@ -270,9 +270,11 @@ export function RegisterPage({
                   <span className="section-kicker">Payment setup</span>
                   <h3>Choose how this seat should be reserved.</h3>
                   <p>
-                    Deferred plans collect the $250 non-refundable registration fee today. Tuition begins after checkout
+                    Temporary payment verification: deferred plans collect only $10 today toward the $250
+                    non-refundable registration fee. The remaining $1,990 program balance begins after checkout
                     as either {weeklySummary} or {biweeklySummary}.
                   </p>
+                  <p className="section-note"><strong>Testing notice:</strong> This temporary $10 down payment will be charged by live Stripe. Future automatic installments remain scheduled unless the plan is canceled after testing.</p>
                 </div>
 
                 <div className="payment-choice-grid">
@@ -302,7 +304,7 @@ export function RegisterPage({
                     <strong>{selectedCohort.allowPaymentPlan && weeklyTerms ? `${formatMoney(weeklyTerms.installmentAmountCents)} / week` : "Not available"}</strong>
                     <small>
                       {selectedCohort.allowPaymentPlan
-                        ? `${selectedCohort.paymentPlanDepositLabel} registration today, then ${weeklySummary} beginning in 7 days. Total: ${selectedCohort.tuitionLabel}.`
+                        ? `${selectedCohort.paymentPlanDepositLabel} test down payment today, then ${weeklySummary} beginning in 7 days. Total: ${selectedCohort.tuitionLabel}.`
                         : "This cohort requires full tuition at checkout."}
                     </small>
                   </label>
@@ -311,7 +313,7 @@ export function RegisterPage({
                     <input type="radio" name="paymentOption" value="biweekly" checked={enrollmentForm.paymentOption === "biweekly"} onChange={onInput} disabled={!selectedCohort.allowPaymentPlan} />
                     <span>Biweekly plan · 6 payments</span>
                     <strong>{selectedCohort.allowPaymentPlan && biweeklyTerms ? `${formatMoney(biweeklyTerms.installmentAmountCents)} / 2 weeks` : "Not available"}</strong>
-                    <small>{selectedCohort.allowPaymentPlan ? `${selectedCohort.paymentPlanDepositLabel} registration today, then ${biweeklySummary} beginning in 14 days. Total: ${selectedCohort.tuitionLabel}.` : "This cohort requires full tuition at checkout."}</small>
+                    <small>{selectedCohort.allowPaymentPlan ? `${selectedCohort.paymentPlanDepositLabel} test down payment today, then ${biweeklySummary} beginning in 14 days. Total: ${selectedCohort.tuitionLabel}.` : "This cohort requires full tuition at checkout."}</small>
                   </label>
                 </div>
 
