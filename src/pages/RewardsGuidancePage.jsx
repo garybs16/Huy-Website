@@ -477,10 +477,10 @@ export function RewardsGuidancePage() {
             <article className="rg-price-card">
               <span className="rg-price-label">Option 2 - flexible</span>
               <h3>Choose a deferred plan</h3>
-              <p>Temporary live-card verification: pay $10 today toward the registration fee, then choose weekly or biweekly installments for the remaining program balance.</p>
-              <div className="rg-price-line"><span>Temporary test down payment</span><strong>$10</strong></div>
-              <div className="rg-price-line"><span>12 weekly payments</span><strong>11 × $165.83, final $165.87</strong></div>
-              <div className="rg-price-line"><span>6 biweekly payments</span><strong>5 × $331.66, final $331.70</strong></div>
+              <p>Pay the registration fee today, then choose weekly or biweekly tuition installments with a small final-payment adjustment.</p>
+              <div className="rg-price-line"><span>Due at registration</span><strong>$250</strong></div>
+              <div className="rg-price-line"><span>12 weekly payments</span><strong>11 × $145.83, final $145.87</strong></div>
+              <div className="rg-price-line"><span>6 biweekly payments</span><strong>5 × $291.66, final $291.70</strong></div>
               <div className="rg-price-total"><span>Program total</span><strong>$2,000</strong></div>
               <a href="#callback" className="btn btn-ghost">Discuss a Payment Plan</a>
             </article>

@@ -31,10 +31,10 @@ function formatInstallmentSchedule(pricing) {
   const cadence = pricing.paymentOption;
 
   if (pricing.finalInstallmentAmountCents !== pricing.installmentAmountCents) {
-    return `${pricing.regularInstallmentsTotal} automatic ${cadence} program-balance payments of ${formatMoney(pricing.installmentAmountCents)}, followed by a final ${cadence} payment of ${formatMoney(pricing.finalInstallmentAmountCents)}`;
+    return `${pricing.regularInstallmentsTotal} automatic ${cadence} tuition payments of ${formatMoney(pricing.installmentAmountCents)}, followed by a final ${cadence} payment of ${formatMoney(pricing.finalInstallmentAmountCents)}`;
   }
 
-  return `${pricing.paymentInstallmentsTotal} automatic ${cadence} program-balance payments of ${formatMoney(pricing.installmentAmountCents)}`;
+  return `${pricing.paymentInstallmentsTotal} automatic ${cadence} tuition payments of ${formatMoney(pricing.installmentAmountCents)}`;
 }
 
 function resolveAppBaseUrl(req, configuredBaseUrl) {
@@ -72,7 +72,7 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
       interval: terms.interval,
       intervalCount: terms.intervalCount,
       trialDays: terms.trialDays,
-      checkoutLabel: paymentOption === "weekly" ? "12-payment weekly program balance plan" : "6-payment biweekly program balance plan",
+      checkoutLabel: paymentOption === "weekly" ? "12-payment weekly tuition plan" : "6-payment biweekly tuition plan",
     };
   }
 
@@ -158,8 +158,8 @@ export async function createEnrollmentCheckoutSession({
               currency: "usd",
               unit_amount: checkoutDetails.amountCents,
               product_data: {
-                name: `${program.title} - temporary test down payment`,
-                description: `Temporary $10 payment verification toward the registration fee for ${cohort.title}`,
+                name: `${program.title} - non-refundable registration fee`,
+                description: `Registration fee for ${cohort.title}`,
               },
             },
             quantity: 1,
@@ -191,7 +191,7 @@ export async function createEnrollmentCheckoutSession({
   if (isPaymentPlan) {
     sessionPayload.payment_method_types = ["card"];
     sessionPayload.subscription_data = {
-      description: `${program.title} program balance plan: ${formatInstallmentSchedule(pricing)}`,
+      description: `${program.title} tuition plan: ${formatInstallmentSchedule(pricing)}`,
       billing_mode: { type: "flexible" },
       metadata,
       trial_period_days: pricing.trialDays,
@@ -203,7 +203,7 @@ export async function createEnrollmentCheckoutSession({
     };
     sessionPayload.custom_text = {
       submit: {
-        message: `By continuing, you authorize the temporary ${checkoutDetails.amountLabel} down payment today, then ${formatInstallmentSchedule(pricing)}, for ${formatMoney(pricing.tuitionTotalCents)} total.`,
+        message: `By continuing, you authorize the ${checkoutDetails.amountLabel} registration fee today, then ${formatInstallmentSchedule(pricing)}, for ${formatMoney(pricing.tuitionTotalCents)} total.`,
       },
     };
   } else {
@@ -365,7 +365,7 @@ export function createEnrollmentsRouter({
           paymentInterval: manualEnrollment.paymentInterval,
           message:
             isPaymentPlanOption(manualEnrollment.paymentOption)
-              ? `Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the temporary ${amountDueNowLabel} down payment and confirm the remaining ${balanceDueLabel} program balance plan.`
+              ? `Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the ${amountDueNowLabel} registration fee and confirm the remaining ${balanceDueLabel} tuition plan.`
               : "Registration submitted. Online payment is not configured yet, so admissions will contact you to collect the program payment.",
         });
       }
@@ -504,7 +504,7 @@ export function createEnrollmentsRouter({
           nextPaymentDueAt: enrollment.nextPaymentDueAt,
           message: planNeedsAttention
             ? "The automatic payment plan needs attention because Stripe could not collect the latest installment. Please update the payment method in Stripe or contact admissions."
-            : `The ${enrollment.paymentOption} payment plan is active. ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} program-balance payments are complete, with ${formatMoney(enrollment.balanceDueCents)} remaining.`,
+            : `The ${enrollment.paymentOption} payment plan is active. ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} tuition payments are complete, with ${formatMoney(enrollment.balanceDueCents)} remaining.`,
         });
       }
 

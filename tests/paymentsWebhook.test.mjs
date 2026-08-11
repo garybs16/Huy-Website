@@ -27,7 +27,7 @@ function createEnrollment(db) {
     meetingPattern: "Monday to Friday | 9:00 AM to 1:00 PM",
     tuitionCents: 200_000,
     allowPaymentPlan: true,
-    paymentPlanDepositCents: 1_000,
+    paymentPlanDepositCents: 25_000,
     capacity: 20,
     isActive: true,
     sortOrder: 1,
@@ -50,9 +50,9 @@ function createEnrollment(db) {
     status: "payment_setup",
     paymentStatus: "payment_setup",
     paymentOption: "weekly",
-    paymentAmountCents: 1_000,
+    paymentAmountCents: 25_000,
     tuitionTotalCents: 200_000,
-    balanceDueCents: 199_000,
+    balanceDueCents: 175_000,
     amountPaidCents: 0,
     paymentInstallmentsTotal: 12,
     paymentInstallmentsPaid: 0,
@@ -71,9 +71,9 @@ function invoiceEvent({
   id,
   type,
   invoiceId,
-  amountPaid = 1_000,
-  amountDue = 1_000,
-  billingReason = amountPaid === 1_000 ? "subscription_create" : "subscription_cycle",
+  amountPaid = 25_000,
+  amountDue = 25_000,
+  billingReason = amountPaid === 25_000 ? "subscription_create" : "subscription_cycle",
 }) {
   return {
     id,
@@ -101,8 +101,8 @@ function invoiceEvent({
               checkoutPurpose: "payment_plan",
               installmentsTotal: "12",
               paymentInterval: "week",
-              installmentAmountCents: "16583",
-              finalInstallmentAmountCents: "16587",
+              installmentAmountCents: "14583",
+              finalInstallmentAmountCents: "14587",
             },
           },
         },
@@ -199,7 +199,7 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
         mode: "subscription",
         payment_status: "paid",
         currency: "usd",
-        amount_total: 1_000,
+        amount_total: 25_000,
         subscription: subscription.id,
         invoice: "in_weekly_1",
         metadata: {
@@ -210,8 +210,8 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
           checkoutPurpose: "payment_plan",
           installmentsTotal: "12",
           paymentInterval: "week",
-          installmentAmountCents: "16583",
-          finalInstallmentAmountCents: "16587",
+          installmentAmountCents: "14583",
+          finalInstallmentAmountCents: "14587",
         },
       },
     },
@@ -229,7 +229,7 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
       type: "invoice.payment_failed",
       invoiceId: "in_weekly_1",
       amountPaid: 0,
-      amountDue: 1_000,
+      amountDue: 25_000,
       billingReason: "subscription_create",
     })
   );
@@ -243,12 +243,12 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
   let enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentStatus, "payment_plan_active");
   assert.equal(enrollment.paymentInstallmentsPaid, 0);
-  assert.equal(enrollment.amountPaidCents, 1_000);
+  assert.equal(enrollment.amountPaidCents, 25_000);
   assert.equal(enrollment.stripeSubscriptionScheduleId, "sub_sched_weekly_test");
   assert.equal(schedule.end_behavior, "cancel");
   assert.deepEqual(schedule.phases[0].duration, { interval: "week", interval_count: 12 });
   assert.deepEqual(schedule.phases[1].duration, { interval: "week", interval_count: 1 });
-  assert.equal(schedule.phases[1].items[0].price_data.unit_amount, 16_587);
+  assert.equal(schedule.phases[1].items[0].price_data.unit_amount, 14_587);
   assert.equal(notifications.filter((message) => message.type === "payment.completed").length, 1);
   assert.equal(emails.filter((message) => message.subject.includes("Payment received")).length, 2);
 
@@ -257,35 +257,35 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
     type: "invoice.payment_failed",
     invoiceId: "in_weekly_2",
     amountPaid: 0,
-    amountDue: 16_583,
+    amountDue: 14_583,
   });
   await deliver(firstInstallmentFailure);
   await deliver(firstInstallmentFailure);
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentStatus, "installment_failed");
   assert.equal(enrollment.paymentInstallmentsPaid, 0);
-  assert.equal(enrollment.amountPaidCents, 1_000);
+  assert.equal(enrollment.amountPaidCents, 25_000);
   assert.equal(notifications.filter((message) => message.type === "payment.failed").length, 1);
 
   const recoveredInstallment = invoiceEvent({
     id: "evt_invoice_weekly_2_paid",
     type: "invoice.paid",
     invoiceId: "in_weekly_2",
-    amountPaid: 16_583,
-    amountDue: 16_583,
+    amountPaid: 14_583,
+    amountDue: 14_583,
   });
   await deliver(recoveredInstallment);
   await deliver(recoveredInstallment);
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentStatus, "payment_plan_active");
   assert.equal(enrollment.paymentInstallmentsPaid, 1);
-  assert.equal(enrollment.amountPaidCents, 17_583);
+  assert.equal(enrollment.amountPaidCents, 39_583);
 
   // A late replay of the registration invoice must never erase installment progress.
   await deliver(registrationInvoice);
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentInstallmentsPaid, 1);
-  assert.equal(enrollment.amountPaidCents, 17_583);
+  assert.equal(enrollment.amountPaidCents, 39_583);
 
   await deliver(
     invoiceEvent({
@@ -293,12 +293,12 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
       type: "invoice.payment_failed",
       invoiceId: "in_weekly_3",
       amountPaid: 0,
-      amountDue: 16_583,
+      amountDue: 14_583,
     })
   );
   enrollment = enrollmentDb.getEnrollmentById("enrollment_webhook_test");
   assert.equal(enrollment.paymentStatus, "installment_failed");
-  assert.equal(enrollment.amountPaidCents, 17_583);
+  assert.equal(enrollment.amountPaidCents, 39_583);
   assert.equal(enrollmentDb.listEnrollmentPayments(enrollment.id).length, 2);
   assert.equal(notifications.filter((message) => message.type === "payment.failed").length, 2);
   assert.equal(notifications.filter((message) => message.type === "payment.completed").length, 2);
@@ -306,7 +306,7 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
 
   for (let installment = 2; installment <= 12; installment += 1) {
     const invoiceNumber = installment + 1;
-    const amountCents = installment === 12 ? 16_587 : 16_583;
+    const amountCents = installment === 12 ? 14_587 : 14_583;
     await deliver(
       invoiceEvent({
         id: `evt_invoice_weekly_${invoiceNumber}_paid`,

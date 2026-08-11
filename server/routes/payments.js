@@ -168,7 +168,7 @@ async function handlePaymentPlanCheckoutCompleted({
   const expectedAmount = Number(enrollment.paymentAmountCents ?? 0);
 
   if (Number(session.amount_total ?? 0) !== expectedAmount) {
-    throw new Error("Stripe checkout amount did not match the payment-plan down payment.");
+    throw new Error("Stripe checkout amount did not match the registration fee.");
   }
 
   const { enrollment: attachedEnrollment, scheduleDetails } = await attachPaymentPlanSchedule({
@@ -253,7 +253,7 @@ async function handleInvoicePaid({ event, invoice, stripeClient, enrollmentDb, n
       attachedEnrollment.paymentInstallmentsPaid >= terms.regularInstallmentsTotal
     )
   ) {
-    throw new Error("Stripe invoice amount did not match the selected program-balance installment.");
+    throw new Error("Stripe invoice amount did not match the selected tuition installment.");
   }
 
   const paymentResult = enrollmentDb.recordSubscriptionPayment({
