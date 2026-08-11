@@ -582,7 +582,7 @@ export function AdminPage({
                     <span>Offer 12-weekly and 6-biweekly payment plans for this cohort</span>
                   </label>
                   <label>
-                    <span>Registration fee cents (normally 25000)</span>
+                    <span>Payment-plan down payment cents (temporary test: 1000)</span>
                     <input
                       name="paymentPlanDepositCents"
                       type="number"
@@ -591,7 +591,7 @@ export function AdminPage({
                       onChange={handleCohortInput}
                       disabled={!cohortForm.allowPaymentPlan}
                       required={cohortForm.allowPaymentPlan}
-                      placeholder={cohortForm.allowPaymentPlan ? "25000" : "Enable payment plan first"}
+                      placeholder={cohortForm.allowPaymentPlan ? "1000" : "Enable payment plan first"}
                     />
                   </label>
                   <label className="admin-toggle">

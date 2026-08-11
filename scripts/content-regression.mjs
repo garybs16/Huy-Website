@@ -35,7 +35,7 @@ async function run() {
     "Between Day 2 and Day 5 from the enrollment date",
     "Tuition Obligation for Deferred-Pay Students",
     "thirdPartyFeeItems",
-  "11 weekly payments of $145.83",
+    "11 weekly payments of $165.83",
     "30 days of withdrawal determination",
     "60 hours",
     "Collections and chargebacks",
@@ -109,6 +109,9 @@ async function run() {
   }
   assert(!registerPage.includes("$137.50"), "Registration page must not show the former weekly installment.");
   assert(!registerPage.includes("$275 / 2 weeks"), "Registration page must not show the former biweekly installment.");
+  for (const expected of ["only $10 today", "remaining $1,990", "Testing notice:", "test down payment today"]) {
+    assertIncludes(registerPage, expected, "Temporary Stripe test-deposit disclosure");
+  }
   for (const expected of [
     "Certified Nurse Assistant Training Program",
     "Program dates: {content.programDates}",

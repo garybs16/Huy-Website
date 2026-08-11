@@ -3,7 +3,8 @@ import Stripe from "stripe";
 // Keep API reads aligned with the production webhook endpoint's snapshot shape.
 // Upgrade this together with the Stripe Workbench event destination version.
 export const STRIPE_API_VERSION = "2026-05-27.dahlia";
-export const REGISTRATION_FEE_CENTS = 25_000;
+// Temporary live-card verification amount. Revert to 25_000 immediately after testing.
+export const REGISTRATION_FEE_CENTS = 1_000;
 export const PAYMENT_PLAN_OPTIONS = {
   weekly: {
     installmentsTotal: 12,
