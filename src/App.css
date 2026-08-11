@@ -1538,6 +1538,27 @@
   line-height: 1.5;
 }
 
+/* The policy is also embedded in the narrower registration form column. */
+.registration-refund-review {
+  min-width: 0;
+}
+
+.registration-refund-review .refund-policy-hero {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+  padding: 1.25rem;
+}
+
+.registration-refund-review .refund-policy-hero h2 {
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  line-height: 1.05;
+}
+
+.registration-refund-review .refund-policy-hero p:last-child {
+  max-width: 34rem;
+}
+
 .refund-policy-body {
   display: grid;
   gap: 1.15rem;
@@ -2249,6 +2270,7 @@
 .form-grid {
   display: grid;
   gap: 0.9rem;
+  align-items: start;
 }
 
 .three-up.form-grid {
