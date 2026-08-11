@@ -7,7 +7,6 @@ import pathwayGuideCover from "../assets/oc-nursing-pathway-guide.png";
 import { TurnstileWidget, isTurnstileEnabled } from "../components/TurnstileWidget";
 import { submitInquiry } from "../lib/api";
 import {
-  guideResources,
   industryGrowthRows,
   miscFeeItems,
   programMeta,
@@ -447,15 +446,15 @@ export function HomePage({ programs }) {
             </form>
           </div>
 
-          <div className="handout-visual" aria-label="Free handouts">
-            <p>You will receive instant access to:</p>
+          <div className="handout-visual" aria-label="Free guide previews">
+            <p>You will receive by email:</p>
             <div className="handout-cover-row">
-              <a className="handout-cover handout-cover-image" href={guideResources[0].href} target="_blank" rel="noreferrer">
+              <div className="handout-cover handout-cover-image">
                 <img src={cnaGuideCover} alt="CNA Career Starter Guide cover" loading="lazy" decoding="async" />
-              </a>
-              <a className="handout-cover handout-cover-image" href={guideResources[1].href} target="_blank" rel="noreferrer">
+              </div>
+              <div className="handout-cover handout-cover-image">
                 <img src={pathwayGuideCover} alt="Orange County Nursing School Pathway Guide cover" loading="lazy" decoding="async" />
-              </a>
+              </div>
             </div>
             <div className="trusted-handout-card">
               <strong>Trusted. Local. Student-Focused.</strong>
