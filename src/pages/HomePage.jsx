@@ -89,7 +89,7 @@ export function HomePage({ programs }) {
         return;
       }
 
-      await submitInquiry({
+      const result = await submitInquiry({
         fullName: `${handoutForm.firstName} ${handoutForm.lastName}`.trim(),
         email: handoutForm.email,
         phone: handoutForm.phone,
@@ -103,7 +103,7 @@ export function HomePage({ programs }) {
       setHandoutTurnstileResetSignal((current) => current + 1);
       setHandoutStatus({
         type: "success",
-        text: "Request sent. Admissions will send the free handouts shortly.",
+        text: result.message || "Request received. Check your email for both free guides.",
       });
     } catch (error) {
       setHandoutTurnstileToken("");
@@ -390,8 +390,8 @@ export function HomePage({ programs }) {
             <p className="handout-pill">Free resources for your journey</p>
             <h2>Take the first step toward your nursing future.</h2>
             <p>
-              Download two free handouts created to help future nursing students and working adults
-              plan with clarity and confidence.
+              Enter your information and we will email two free PDF guides created to help future
+              nursing students and working adults plan with clarity and confidence.
             </p>
             <div className="handout-benefits" aria-label="Handout benefits">
               <span>Expertly prepared</span>
@@ -400,7 +400,7 @@ export function HomePage({ programs }) {
               <span>Create your future</span>
             </div>
             <form className="handout-form" onSubmit={handleHandoutSubmit} aria-busy={handoutPending}>
-              <h3>Get your free handouts.</h3>
+              <h3>Get both guides by email.</h3>
               <div className="form-grid two-up">
                 <label>
                   <span>First name *</span>
@@ -434,7 +434,7 @@ export function HomePage({ programs }) {
                 resetSignal={handoutTurnstileResetSignal}
               />
               <button className="btn btn-primary" type="submit" disabled={handoutPending}>
-                {handoutPending ? "Sending…" : "Send my free handouts"}
+                {handoutPending ? "Emailing…" : "Email my free guides"}
               </button>
               {handoutStatus.text ? (
                 <p
