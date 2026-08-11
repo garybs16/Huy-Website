@@ -1,5 +1,18 @@
-const DEFAULT_TIMEOUT_MS = 8000;
+import { readFile } from "node:fs/promises";
+
+const DEFAULT_TIMEOUT_MS = 15000;
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
+const localAttachmentCache = new Map();
+const GUIDE_EMAIL_ATTACHMENTS = [
+  {
+    filename: "CNA Career Starter Guide.pdf",
+    fileUrl: new URL("../assets/guides/cna-career-starter-guide.pdf", import.meta.url),
+  },
+  {
+    filename: "OC Nursing School Pathway Guide.pdf",
+    fileUrl: new URL("../assets/guides/oc-nursing-school-pathway-guide.pdf", import.meta.url),
+  },
+];
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -40,11 +53,60 @@ function buildEmailHtml(title, lines) {
 </html>`;
 }
 
-async function sendResendEmail({ apiKey, from, replyTo, timeoutMs, to, subject, text, html }) {
+function buildGuideEmailHtml(firstName, referenceId) {
+  return `<!doctype html>
+<html>
+  <body style="margin:0;background:#f3f6fb;color:#132033;font-family:Arial,sans-serif;">
+    <div style="max-width:640px;margin:0 auto;padding:30px 18px;">
+      <div style="overflow:hidden;border:1px solid #d7e1ee;border-radius:16px;background:#ffffff;box-shadow:0 16px 40px rgba(7,31,65,0.08);">
+        <div style="padding:26px 28px;background:linear-gradient(135deg,#071f41,#2457c5);color:#ffffff;">
+          <p style="margin:0 0 10px;color:#ffd36c;font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;">Your free guides</p>
+          <h1 style="margin:0;font-size:28px;line-height:1.18;">Thank you for taking the first step.</h1>
+        </div>
+        <div style="padding:28px;color:#39495f;font-size:15px;line-height:1.65;">
+          <p style="margin:0 0 16px;">Hi ${escapeHtml(firstName)},</p>
+          <p style="margin:0 0 18px;">Your two free nursing guides are attached and ready to explore:</p>
+          <div style="margin:0 0 20px;padding:16px 18px;border:1px solid #dbe5f2;border-radius:12px;background:#f7faff;">
+            <p style="margin:0 0 8px;color:#071f41;font-weight:800;">CNA Career Starter Guide</p>
+            <p style="margin:0;color:#071f41;font-weight:800;">OC Nursing School Pathway Guide</p>
+          </div>
+          <p style="margin:0 0 18px;">Use them to understand your options, plan your next move, and move forward with confidence.</p>
+          <p style="margin:0 0 22px;color:#071f41;font-size:17px;font-weight:800;line-height:1.5;">Every meaningful healthcare career begins with one clear step - and you have already taken it.</p>
+          <p style="margin:0 0 22px;">Questions? Reply to this email. Our admissions team is happy to help.</p>
+          <p style="margin:0;color:#071f41;font-weight:800;">With encouragement,<br>First Step Healthcare Academy</p>
+          <p style="margin:22px 0 0;color:#718096;font-size:12px;">Request reference: ${escapeHtml(referenceId)}</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>`;
+}
+
+async function prepareAttachments(attachments = []) {
+  return Promise.all(
+    attachments.map(async ({ fileUrl, ...attachment }) => {
+      if (!fileUrl) {
+        return attachment;
+      }
+
+      const cacheKey = fileUrl.href ?? String(fileUrl);
+      let content = localAttachmentCache.get(cacheKey);
+      if (!content) {
+        content = await readFile(fileUrl, { encoding: "base64" });
+        localAttachmentCache.set(cacheKey, content);
+      }
+
+      return { ...attachment, content };
+    })
+  );
+}
+
+async function sendResendEmail({ apiKey, from, replyTo, timeoutMs, to, subject, text, html, attachments }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const preparedAttachments = await prepareAttachments(attachments);
     const response = await fetch(RESEND_ENDPOINT, {
       method: "POST",
       headers: {
@@ -58,6 +120,7 @@ async function sendResendEmail({ apiKey, from, replyTo, timeoutMs, to, subject, 
         text,
         html,
         ...(replyTo ? { reply_to: replyTo } : {}),
+        ...(preparedAttachments.length ? { attachments: preparedAttachments } : {}),
       }),
       signal: controller.signal,
     });
@@ -103,14 +166,18 @@ export function createEmailer({
   };
 }
 
-function safeSend(emailer, message) {
+async function safeSend(emailer, message) {
   if (!emailer?.enabled || !message?.to) {
-    return;
+    return false;
   }
 
-  emailer.send(message).catch((error) => {
+  try {
+    await emailer.send(message);
+    return true;
+  } catch (error) {
     console.error(`Email notification failed: ${error.message}`);
-  });
+    return false;
+  }
 }
 
 export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, paymentRequired, checkoutUrl }) {
@@ -165,25 +232,37 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
   });
 }
 
-export function sendInquiryEmails(emailer, { record }) {
+export async function sendInquiryEmails(emailer, { record }) {
   const isGuideRequest = ["home-free-handouts", "rewards-free-handouts"].includes(record.source);
+  const firstName = record.fullName.trim().split(/\s+/)[0] || "there";
   const guideLines = [
-    "Your free planning guides are ready:",
-    "CNA Career Starter Guide: https://drive.google.com/file/d/1mTeM3TDSdtSDMcsE-MbfyN1CzVTeQwmI/view?usp=drive_link",
-    "OC Nursing School Pathway Guide: https://drive.google.com/file/d/1brIME0OkJE7gfIIbekqjUiFv-c0tAhpg/view?usp=sharing",
+    `Hi ${firstName},`,
+    "Thank you for taking the first step toward your nursing future.",
+    "Your two free guides are attached:",
+    "- CNA Career Starter Guide",
+    "- OC Nursing School Pathway Guide",
+    "Use them to understand your options, plan your next move, and move forward with confidence.",
+    "Every meaningful healthcare career begins with one clear step - and you have already taken it.",
+    "Questions? Reply to this email. Our admissions team is happy to help.",
+    "With encouragement,",
+    "First Step Healthcare Academy",
+    `Request reference: ${record.id}`,
   ];
   const studentLines = [
     `Hi ${record.fullName},`,
     "We received your inquiry for First Step Healthcare Academy.",
-    ...(isGuideRequest ? guideLines : ["Admissions will review your message and follow up as soon as possible."]),
+    "Admissions will review your message and follow up as soon as possible.",
     `Reference ID: ${record.id}`,
   ];
 
-  safeSend(emailer, {
+  const studentSent = await safeSend(emailer, {
     to: record.email,
-    subject: isGuideRequest ? "Your free CNA and nursing pathway guides" : "Inquiry received - First Step Healthcare Academy",
-    text: studentLines.join("\n"),
-    html: buildEmailHtml(isGuideRequest ? "Your free planning guides" : "Inquiry received", studentLines),
+    subject: isGuideRequest ? "Your free nursing guides are here" : "Inquiry received - First Step Healthcare Academy",
+    text: (isGuideRequest ? guideLines : studentLines).join("\n"),
+    html: isGuideRequest
+      ? buildGuideEmailHtml(firstName, record.id)
+      : buildEmailHtml("Inquiry received", studentLines),
+    ...(isGuideRequest ? { attachments: GUIDE_EMAIL_ATTACHMENTS } : {}),
   });
 
   const adminLines = [
@@ -202,6 +281,8 @@ export function sendInquiryEmails(emailer, { record }) {
     text: adminLines.join("\n"),
     html: buildEmailHtml("New inquiry", adminLines),
   });
+
+  return { studentSent };
 }
 
 export function sendWaitlistEmails(emailer, { record }) {

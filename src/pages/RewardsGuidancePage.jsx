@@ -113,7 +113,7 @@ export function RewardsGuidancePage() {
         return;
       }
 
-      await submitInquiry({
+      const result = await submitInquiry({
         fullName: `${resourceForm.firstName} ${resourceForm.lastName}`.trim(),
         email: resourceForm.email,
         phone: resourceForm.phone,
@@ -127,7 +127,7 @@ export function RewardsGuidancePage() {
       setTurnstileResetSignals((current) => ({ ...current, resource: current.resource + 1 }));
       setResourceStatus({
         type: "success",
-        text: "Request sent. Admissions will send the free handouts shortly.",
+        text: result.message || "Request received. Check your email for both free guides.",
       });
     } catch (error) {
       setResourceTurnstileToken("");
@@ -288,8 +288,8 @@ export function RewardsGuidancePage() {
             <p className="section-kicker">Free resources for your journey</p>
             <h2>Take the first step toward your nursing future.</h2>
             <p>
-              Download the two free handouts created to help future nursing students and working
-              adults plan with clarity and confidence.
+              Enter your information and we will email two free PDF guides created to help future
+              nursing students and working adults plan with clarity and confidence.
             </p>
             <div className="rg-resource-benefits" aria-label="Resource benefits">
               <span>Expertly prepared</span>
@@ -298,7 +298,7 @@ export function RewardsGuidancePage() {
               <span>Create your future</span>
             </div>
             <form className="rg-handout-form handout-form" onSubmit={handleResourceSubmit} aria-busy={resourcePending}>
-              <h3>Get Your Free Handouts Now.</h3>
+              <h3>Get Both Guides by Email.</h3>
               <div className="form-grid two-up">
                 <label>
                   <span>First name *</span>
@@ -332,7 +332,7 @@ export function RewardsGuidancePage() {
                 resetSignal={turnstileResetSignals.resource}
               />
               <button className="btn btn-primary" type="submit" disabled={resourcePending}>
-                {resourcePending ? "Sending..." : "Send Me My Free Handouts"}
+                {resourcePending ? "Emailing..." : "Email My Free Guides"}
               </button>
               {resourceStatus.text ? (
                 <p

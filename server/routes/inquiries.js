@@ -41,11 +41,17 @@ export function createInquiriesRouter({
         type: "inquiry.created",
         record,
       });
-      sendInquiryEmails(emailer, { record });
+      const emailDelivery = await sendInquiryEmails(emailer, { record });
+      const isGuideRequest = ["home-free-handouts", "rewards-free-handouts"].includes(record.source);
 
       res.status(201).json({
-        message: "Inquiry submitted successfully.",
+        message: isGuideRequest
+          ? emailDelivery.studentSent
+            ? "Your free guides were sent. Check your email and spam folder."
+            : "Your request was received. Admissions will send your guides shortly."
+          : "Inquiry submitted successfully.",
         id: record.id,
+        emailSent: emailDelivery.studentSent,
       });
     } catch (error) {
       next(error);
