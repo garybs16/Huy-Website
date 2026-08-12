@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import "./polish.css";
+import "./refine.css";
 import {
   createAdminCohort,
   createAdminBackup,
@@ -28,6 +29,7 @@ import {
   updateAdminCohort,
   updateAdminProgram,
 } from "./lib/api";
+import { useSiteMotion } from "./lib/siteMotion";
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
 import { SiteCtaBand } from "./components/SiteCtaBand";
@@ -343,6 +345,8 @@ function RegisterRoute({
 function AppShell({ children }) {
   const location = useLocation();
   const showPublicFooter = location.pathname !== "/admin";
+
+  useSiteMotion(location.pathname);
 
   return (
     <div className="site-shell">
