@@ -588,7 +588,18 @@ export function createEnrollmentsRouter({
           purpose,
           checkoutMode: payload.checkoutMode,
         });
-      } catch {
+      } catch (error) {
+        // Without this the payment portal fails silently: the student sees a generic error
+        // and nobody can tell why Stripe refused the session.
+        console.error("Stripe payment portal checkout session creation failed", {
+          enrollmentId: enrollment.id,
+          purpose,
+          message: error instanceof Error ? error.message : String(error),
+          type: error?.type,
+          code: error?.code,
+          param: error?.param,
+        });
+
         return res.status(502).json({
           error: "Payment checkout could not be created right now. Please try again or contact admissions.",
         });
