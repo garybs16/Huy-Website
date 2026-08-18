@@ -175,18 +175,18 @@ h6 {
 
 .brand-title {
   color: var(--brand-navy);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .brand-subtitle {
   color: var(--brand-blue);
-  font-size: 0.68rem;
+  font-size: 0.85rem;
 }
 
 .nav-link {
   min-height: 40px;
   color: #31455e;
-  font-size: 0.74rem;
+  font-size: 0.85rem;
 }
 
 .nav-link::after {
@@ -208,7 +208,7 @@ h6 {
 .btn {
   min-height: 48px;
   border-radius: 0.75rem;
-  font-size: 0.84rem;
+  font-size: 0.95rem;
 }
 
 .btn-primary {
@@ -559,7 +559,7 @@ button:disabled {
 
 .quiz-progress-label {
   margin: -0.4rem 0 0;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
@@ -725,7 +725,7 @@ details summary {
 
   .top-strip-meta {
     justify-content: center;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
   }
 
   .nav-frame {
@@ -746,7 +746,7 @@ details summary {
   .brand-title {
     display: block;
     overflow: hidden;
-    font-size: 0.79rem;
+    font-size: 0.9rem;
     line-height: 1.15;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -844,7 +844,7 @@ details summary {
     top: 0.75rem;
     right: 0.75rem;
     padding: 0.6rem 0.78rem;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
   }
 
   .hero-photo-badge {

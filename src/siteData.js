@@ -3,8 +3,10 @@ import { cohortCatalogSeed, programCatalogSeed } from "../shared/catalogSeed";
 export const navItems = [
   { label: "Home", to: "/" },
   { label: "CNA Program", to: "/programs" },
-  { label: "Quiz", to: "/career-quiz" },
+  { label: "Class Dates", to: "/schedule" },
+  { label: "Career Quiz", to: "/career-quiz" },
   { label: "Rewards & Guidance", to: "/rewards-guidance" },
+  { label: "Contact Us", to: "/contact" },
 ];
 
 export const contactDetails = {
