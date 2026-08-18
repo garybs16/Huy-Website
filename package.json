@@ -18,6 +18,7 @@
     "check:readiness": "node scripts/readiness-check.mjs",
     "check:health": "node scripts/healthcheck.mjs",
     "check:stripe": "node scripts/stripe-readiness.mjs",
+    "check:plan": "node scripts/verify-payment-plan.mjs",
     "admin:hash": "node scripts/hash-admin-password.mjs",
     "admin:mfa-setup": "node scripts/generate-admin-mfa.mjs",
     "backup:encrypted": "node scripts/encrypted-database-backup.mjs",
