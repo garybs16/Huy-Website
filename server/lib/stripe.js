@@ -4,6 +4,23 @@ import Stripe from "stripe";
 // Upgrade this together with the Stripe Workbench event destination version.
 export const STRIPE_API_VERSION = "2026-05-27.dahlia";
 export const REGISTRATION_FEE_CENTS = 25_000;
+
+// Stripe rejects USD charges under $0.50, so an installment below that floor would fail at
+// collection time instead of at configuration time.
+export const MINIMUM_STRIPE_CHARGE_CENTS = 50;
+
+// Raised for payment-plan inputs that can never succeed on a retry: impossible plan amounts,
+// enrollment metadata that does not match, or a subscription that lost the trial separating
+// the registration fee from installment one. Webhook callers answer Stripe with a 2xx for
+// these instead of inviting three days of pointless redelivery.
+export class PaymentPlanValidationError extends Error {
+  constructor(message, context = {}) {
+    super(message);
+    this.name = "PaymentPlanValidationError";
+    this.context = context;
+  }
+}
+
 export const PAYMENT_PLAN_OPTIONS = {
   weekly: {
     installmentsTotal: 12,
@@ -43,7 +60,13 @@ export function getPaymentPlanTerms(paymentOption, tuitionTotalCents, registrati
     !Number.isInteger(normalizedRegistrationFeeCents) ||
     installmentAmountCents <= 0
   ) {
-    throw new Error(`The ${paymentOption} plan amounts are invalid.`);
+    throw new PaymentPlanValidationError(`The ${paymentOption} plan amounts are invalid.`);
+  }
+
+  if (installmentAmountCents < MINIMUM_STRIPE_CHARGE_CENTS) {
+    throw new PaymentPlanValidationError(
+      `The ${paymentOption} plan amounts are invalid: every installment must be at least ${MINIMUM_STRIPE_CHARGE_CENTS} cents for Stripe to collect it.`
+    );
   }
 
   const installmentRemainderCents = tuitionBalanceCents - installmentAmountCents * option.installmentsTotal;
@@ -101,6 +124,20 @@ export function getSubscriptionNextPaymentAt(subscription) {
   }
 
   return new Date(Math.min(...periodEnds) * 1000).toISOString();
+}
+
+function buildPlanMetadata({ enrollmentId, cohortId, programId, terms }) {
+  return {
+    enrollmentId,
+    cohortId,
+    programId,
+    paymentOption: terms.paymentOption,
+    checkoutPurpose: "payment_plan",
+    installmentsTotal: String(terms.installmentsTotal),
+    paymentInterval: terms.paymentInterval,
+    installmentAmountCents: String(terms.installmentAmountCents),
+    finalInstallmentAmountCents: String(terms.finalInstallmentAmountCents),
+  };
 }
 
 function scheduleIsConfigured(schedule, enrollmentId, terms) {
@@ -190,6 +227,7 @@ export async function ensureFinitePaymentSchedule(
     const phase = schedule.phases?.[0];
     const startDate = phase?.start_date ?? subscription.created;
     const items = buildScheduleItems(phase, subscription);
+    const trialEnd = phase?.trial_end ?? subscription.trial_end ?? null;
 
     if (!startDate || items.length === 0) {
       throw new Error("Stripe subscription schedule could not determine its billing phase.");
@@ -199,6 +237,17 @@ export async function ensureFinitePaymentSchedule(
       throw new Error("Stripe payment plan must contain exactly one recurring tuition item.");
     }
 
+    // Every plan opens with a trial so the registration fee sits alone on the first invoice.
+    // Rebuilding the phases without that trial_end would bill installment one immediately and
+    // pull every later charge forward, so refuse rather than silently recharge the student.
+    if (terms.trialDays > 0 && !trialEnd) {
+      throw new PaymentPlanValidationError(
+        "Stripe payment plan is missing the trial that separates the registration fee from installment one.",
+        { subscriptionId, enrollmentId }
+      );
+    }
+
+    const planMetadata = buildPlanMetadata({ enrollmentId, cohortId, programId, terms });
     const phases = [
       {
         start_date: startDate,
@@ -209,14 +258,8 @@ export async function ensureFinitePaymentSchedule(
             : terms.scheduleDurationWeeks,
         },
         items,
-        ...(phase?.trial_end ? { trial_end: phase.trial_end } : {}),
-        metadata: {
-          enrollmentId,
-          cohortId,
-          programId,
-          paymentOption,
-          installmentType: "regular",
-        },
+        ...(trialEnd ? { trial_end: trialEnd } : {}),
+        metadata: { ...planMetadata, installmentType: "regular" },
         proration_behavior: "none",
       },
     ];
@@ -239,29 +282,14 @@ export async function ensureFinitePaymentSchedule(
             quantity: 1,
           },
         ],
-        metadata: {
-          enrollmentId,
-          cohortId,
-          programId,
-          paymentOption,
-          installmentType: "final",
-        },
+        metadata: { ...planMetadata, installmentType: "final" },
         proration_behavior: "none",
       });
     }
 
     schedule = await stripeClient.subscriptionSchedules.update(scheduleId, {
       end_behavior: "cancel",
-      metadata: {
-        enrollmentId,
-        cohortId,
-        programId,
-        installmentsTotal: String(terms.installmentsTotal),
-        installmentAmountCents: String(terms.installmentAmountCents),
-        finalInstallmentAmountCents: String(terms.finalInstallmentAmountCents),
-        interval: terms.paymentInterval,
-        paymentOption,
-      },
+      metadata: { ...planMetadata, interval: terms.paymentInterval },
       proration_behavior: "none",
       phases,
     });

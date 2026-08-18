@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MINIMUM_STRIPE_CHARGE_CENTS, PAYMENT_PLAN_OPTIONS } from "../lib/stripe.js";
 
 const phonePattern = /^[0-9+().\-\s]{7,25}$/;
 const disallowedControlCharacterPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
@@ -279,6 +280,32 @@ export const adminCohortSchema = z
       });
     }
 
+    // The longest plan splits the balance the most, so it produces the smallest installment.
+    // Reject the cohort here rather than discovering at collection time that Stripe will not
+    // charge an amount below its minimum.
+    if (
+      value.paymentPlanDepositCents !== null &&
+      value.paymentPlanDepositCents > 0 &&
+      value.paymentPlanDepositCents < value.tuitionCents
+    ) {
+      const longestPlanInstallments = Math.max(
+        ...Object.values(PAYMENT_PLAN_OPTIONS).map((option) => option.installmentsTotal)
+      );
+      const smallestInstallmentCents = Math.floor(
+        (value.tuitionCents - value.paymentPlanDepositCents) / longestPlanInstallments
+      );
+
+      if (smallestInstallmentCents < MINIMUM_STRIPE_CHARGE_CENTS) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["paymentPlanDepositCents"],
+          message:
+            "Each tuition installment must be at least " +
+            MINIMUM_STRIPE_CHARGE_CENTS +
+            " cents; lower the deposit or raise tuitionCents",
+        });
+      }
+    }
   });
 
 export const adminResourceIdSchema = slugString;

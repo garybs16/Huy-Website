@@ -53,6 +53,7 @@ test("weekly Stripe schedules charge twelve tuition installments after registrat
     customer: "cus_weekly_test",
     latest_invoice: "in_weekly_1",
     created: 1_800_000_000,
+    trial_end: 1_800_604_800,
     schedule: null,
     items: {
       data: [
@@ -81,6 +82,7 @@ test("weekly Stripe schedules charge twelve tuition installments after registrat
           phases: [
             {
               start_date: subscription.created,
+              trial_end: 1_800_604_800,
               items: [{ price: "price_weekly_test", quantity: 1 }],
             },
           ],
@@ -109,6 +111,11 @@ test("weekly Stripe schedules charge twelve tuition installments after registrat
   assert.equal(calls.update.length, 1);
   assert.equal(calls.update[0].scheduleId, "sub_sched_weekly_test");
   assert.equal(calls.update[0].payload.end_behavior, "cancel");
+  // Losing this would bill installment one on the day of registration.
+  assert.equal(calls.update[0].payload.phases[0].trial_end, 1_800_604_800);
+  assert.equal(calls.update[0].payload.phases[0].metadata.checkoutPurpose, "payment_plan");
+  assert.equal(calls.update[0].payload.phases[0].metadata.installmentAmountCents, "14583");
+  assert.equal(calls.update[0].payload.phases[1].metadata.finalInstallmentAmountCents, "14587");
   assert.deepEqual(calls.update[0].payload.phases[0].duration, {
     interval: "week",
     interval_count: 12,

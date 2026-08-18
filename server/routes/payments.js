@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { sendPaymentCompletedEmails, sendPaymentFailedEmails } from "../lib/email.js";
 import { notifyAdmissions } from "../lib/notifications.js";
 import {
+  PaymentPlanValidationError,
   ensureFinitePaymentSchedule,
   getPaymentPlanTerms,
   getStripeResourceId,
@@ -70,7 +71,10 @@ function validateEnrollmentMetadata(enrollment, metadata) {
     metadata?.programId !== enrollment.programId ||
     metadata?.paymentOption !== enrollment.paymentOption
   ) {
-    throw new Error("Stripe payment metadata did not match an active enrollment.");
+    throw new PaymentPlanValidationError(
+      "Stripe payment metadata did not match an active enrollment.",
+      { enrollmentId: enrollment?.id ?? null }
+    );
   }
 
   if (
@@ -81,7 +85,10 @@ function validateEnrollmentMetadata(enrollment, metadata) {
       metadata?.paymentInterval !== enrollment.paymentInterval
     )
   ) {
-    throw new Error("Stripe payment-plan metadata did not match the enrollment schedule.");
+    throw new PaymentPlanValidationError(
+      "Stripe payment-plan metadata did not match the enrollment schedule.",
+      { enrollmentId: enrollment.id }
+    );
   }
 
   if (metadata?.checkoutPurpose === "payment_plan") {
@@ -96,7 +103,10 @@ function validateEnrollmentMetadata(enrollment, metadata) {
       Number(metadata?.finalInstallmentAmountCents ?? metadata?.installmentAmountCents ?? 0) !==
         terms.finalInstallmentAmountCents
     ) {
-      throw new Error("Stripe installment amounts did not match the enrollment schedule.");
+      throw new PaymentPlanValidationError(
+        "Stripe installment amounts did not match the enrollment schedule.",
+        { enrollmentId: enrollment.id }
+      );
     }
   }
 }
@@ -162,13 +172,19 @@ async function handlePaymentPlanCheckoutCompleted({
   const subscriptionId = getStripeResourceId(session.subscription);
 
   if (session.mode !== "subscription" || !subscriptionId) {
-    throw new Error("Payment-plan checkout did not create a Stripe subscription.");
+    throw new PaymentPlanValidationError(
+      "Payment-plan checkout did not create a Stripe subscription.",
+      { enrollmentId: enrollment.id, sessionId: session.id }
+    );
   }
 
   const expectedAmount = Number(enrollment.paymentAmountCents ?? 0);
 
   if (Number(session.amount_total ?? 0) !== expectedAmount) {
-    throw new Error("Stripe checkout amount did not match the registration fee.");
+    throw new PaymentPlanValidationError(
+      "Stripe checkout amount did not match the registration fee.",
+      { enrollmentId: enrollment.id, sessionId: session.id }
+    );
   }
 
   const { enrollment: attachedEnrollment, scheduleDetails } = await attachPaymentPlanSchedule({
@@ -253,7 +269,10 @@ async function handleInvoicePaid({ event, invoice, stripeClient, enrollmentDb, n
       attachedEnrollment.paymentInstallmentsPaid >= terms.regularInstallmentsTotal
     )
   ) {
-    throw new Error("Stripe invoice amount did not match the selected tuition installment.");
+    throw new PaymentPlanValidationError(
+      "Stripe invoice amount did not match the selected tuition installment.",
+      { enrollmentId: attachedEnrollment.id, invoiceId: invoice.id, amountPaidCents }
+    );
   }
 
   const paymentResult = enrollmentDb.recordSubscriptionPayment({
@@ -321,7 +340,10 @@ function handleInvoicePaymentFailed({ event, invoice, enrollmentDb, notifier, em
       enrollment.paymentInstallmentsPaid >= terms.regularInstallmentsTotal
     )
   ) {
-    throw new Error("Failed Stripe invoice amount did not match the selected payment plan.");
+    throw new PaymentPlanValidationError(
+      "Failed Stripe invoice amount did not match the selected payment plan.",
+      { enrollmentId: enrollment.id, invoiceId: invoice.id, amountDueCents }
+    );
   }
 
   const failureResult = enrollmentDb.recordSubscriptionPaymentFailed({
@@ -380,15 +402,22 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
         const session = event.data.object;
         const enrollment = enrollmentDb.getEnrollmentById(session.metadata?.enrollmentId);
 
+        // Stripe can deliver before the enrollment row records the session id. That gap is
+        // transient, so fail loudly and let the redelivery find the committed row.
+        if (!enrollment || enrollment.stripeCheckoutSessionId !== session.id) {
+          throw new Error("Stripe checkout session is not yet bound to an enrollment.");
+        }
+
         if (
-          !enrollment ||
-          enrollment.stripeCheckoutSessionId !== session.id ||
           session.payment_status !== "paid" ||
           session.currency !== "usd" ||
           session.metadata?.cohortId !== enrollment.cohortId ||
           session.metadata?.checkoutPurpose !== enrollment.stripeCheckoutPurpose
         ) {
-          return res.status(400).json({ error: "Stripe checkout session did not match an active enrollment." });
+          throw new PaymentPlanValidationError(
+            "Stripe checkout session did not match an active enrollment.",
+            { enrollmentId: enrollment.id, sessionId: session.id }
+          );
         }
 
         validateEnrollmentMetadata(enrollment, session.metadata);
@@ -408,7 +437,10 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
             enrollment.stripeCheckoutPurpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents;
 
           if (Number(session.amount_total ?? 0) !== Number(expectedAmount ?? 0)) {
-            return res.status(400).json({ error: "Stripe checkout amount did not match enrollment balance." });
+            throw new PaymentPlanValidationError(
+              "Stripe checkout amount did not match enrollment balance.",
+              { enrollmentId: enrollment.id, sessionId: session.id }
+            );
           }
 
           const paidEnrollment = enrollmentDb.markPaidByCheckoutSession(session.id);
@@ -458,6 +490,27 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
 
       return res.json({ received: true });
     } catch (error) {
+      // A validation failure is deterministic: every redelivery of this event fails the same
+      // way. Acknowledge it so Stripe stops retrying for three days and stops accumulating the
+      // failures that eventually disable the endpoint, and page admissions instead.
+      if (error instanceof PaymentPlanValidationError) {
+        console.error("Stripe webhook rejected an event that cannot succeed on retry", {
+          eventId: event.id,
+          eventType: event.type,
+          message: error.message,
+          ...error.context,
+        });
+        notifyAdmissions(notifier, {
+          type: "payment.validation_failed",
+          eventId: event.id,
+          eventType: event.type,
+          reason: error.message,
+          ...error.context,
+        });
+
+        return res.json({ received: true, ignored: true });
+      }
+
       console.error("Stripe webhook processing failed", {
         eventId: event.id,
         eventType: event.type,

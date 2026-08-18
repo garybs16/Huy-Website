@@ -1364,9 +1364,14 @@ export class EnrollmentDatabase {
     subscriptionId,
     scheduleId,
     nextPaymentDueAt,
-    installmentsTotal = 8,
-    interval = "week",
+    installmentsTotal,
+    interval,
   }) {
+    // Defaulting these would quietly write a schedule belonging to no offered plan.
+    if (!Number.isInteger(installmentsTotal) || installmentsTotal <= 0 || !interval) {
+      throw new Error("Stripe subscription details must include the plan installment count and interval.");
+    }
+
     this.db
       .prepare(`
         UPDATE enrollments

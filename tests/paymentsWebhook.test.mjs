@@ -121,6 +121,7 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
     customer: "cus_weekly_test",
     latest_invoice: "in_weekly_1",
     created: 1_800_000_000,
+    trial_end: 1_800_604_800,
     schedule: null,
     items: {
       data: [{ price: { id: "price_weekly_test", product: "prod_weekly_test" }, quantity: 1, current_period_end: 1_800_604_800 }],
@@ -137,7 +138,7 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
           id: "sub_sched_weekly_test",
           end_behavior: "release",
           metadata: {},
-          phases: [{ start_date: subscription.created, items: [{ price: "price_weekly_test", quantity: 1 }] }],
+          phases: [{ start_date: subscription.created, trial_end: 1_800_604_800, items: [{ price: "price_weekly_test", quantity: 1 }] }],
         };
         subscription.schedule = schedule.id;
         return schedule;

@@ -8,6 +8,7 @@ import {
   hasEnrollmentAccess,
 } from "../lib/publicRequestSecurity.js";
 import {
+  PaymentPlanValidationError,
   getPaymentPlanTerms,
   isPaymentPlanOption,
 } from "../lib/stripe.js";
@@ -19,6 +20,14 @@ import {
   enrollmentSchema,
   paginationSchema,
 } from "../validation/schemas.js";
+
+// Stripe measures its 30-minute floor for expires_at against the creation timestamp it
+// stamps on arrival, so a value computed exactly 30 minutes out lands just under the limit
+// once request latency and clock skew are counted, and the session is rejected outright.
+const CHECKOUT_SESSION_TTL_MINUTES = 35;
+// The pre-session hold only has to outlive checkout creation; markCheckoutPending then
+// replaces it with the real session expiry.
+const INITIAL_SEAT_HOLD_MINUTES = CHECKOUT_SESSION_TTL_MINUTES + 5;
 
 function formatMoney(cents) {
   return new Intl.NumberFormat("en-US", {
@@ -150,7 +159,7 @@ export async function createEnrollmentCheckoutSession({
     mode: isPaymentPlan ? "subscription" : "payment",
     client_reference_id: enrollment.id,
     customer_email: enrollment.email,
-    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_TTL_MINUTES * 60,
     line_items: isPaymentPlan
       ? [
           {
@@ -293,7 +302,9 @@ export function createEnrollmentsRouter({
       }
 
       const pricing = resolveEnrollmentPricing(cohort, payload.paymentOption);
-      const initialSeatHoldExpiresAt = stripeClient ? new Date(Date.now() + 35 * 60 * 1000).toISOString() : null;
+      const initialSeatHoldExpiresAt = stripeClient
+        ? new Date(Date.now() + INITIAL_SEAT_HOLD_MINUTES * 60 * 1000).toISOString()
+        : null;
       const enrollment = enrollmentDb.createEnrollment({
         id: randomUUID(),
         studentFullName: payload.studentFullName,
@@ -446,8 +457,8 @@ export function createEnrollmentsRouter({
       }
 
       if (
-        error.message === "This cohort does not offer a payment plan." ||
-        error.message.includes("plan amounts are invalid")
+        error instanceof PaymentPlanValidationError ||
+        error.message === "This cohort does not offer a payment plan."
       ) {
         return res.status(400).json({ error: error.message });
       }
