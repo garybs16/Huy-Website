@@ -200,20 +200,36 @@ test("a referred student is found by code and cannot refer themselves", async (t
   assert.match(unknown.reason, /not found/);
 });
 
-test("the $100 credit divides cleanly across both published plans", () => {
+test("the $100 credit comes off the deposit and the total, leaving installments unchanged", () => {
   const creditedTuition = 200_000 - REFERRAL_CREDIT_CENTS;
+  const creditedDeposit = 25_000 - REFERRAL_CREDIT_CENTS;
 
-  const weekly = getPaymentPlanTerms("weekly", creditedTuition, 25_000);
-  assert.equal(weekly.installmentAmountCents, 13_750);
-  assert.equal(weekly.finalInstallmentAmountCents, 13_750);
-  assert.equal(weekly.hasFinalInstallmentAdjustment, false);
-  assert.equal(25_000 + weekly.installmentAmountCents * 12, creditedTuition);
+  assert.equal(creditedDeposit, 15_000, "the student pays $150 today instead of $250");
 
-  const biweekly = getPaymentPlanTerms("biweekly", creditedTuition, 25_000);
-  assert.equal(biweekly.installmentAmountCents, 27_500);
-  assert.equal(biweekly.finalInstallmentAmountCents, 27_500);
-  assert.equal(biweekly.hasFinalInstallmentAdjustment, false);
-  assert.equal(25_000 + biweekly.installmentAmountCents * 6, creditedTuition);
+  // The whole point of moving the credit onto the deposit: installments stay at the
+  // published amounts, and only the amount due today changes.
+  const weekly = getPaymentPlanTerms("weekly", creditedTuition, creditedDeposit);
+  assert.equal(weekly.installmentAmountCents, 14_583);
+  assert.equal(weekly.finalInstallmentAmountCents, 14_587);
+  assert.equal(weekly.regularInstallmentsTotal, 11);
+  assert.equal(
+    creditedDeposit + weekly.installmentAmountCents * 11 + weekly.finalInstallmentAmountCents,
+    creditedTuition
+  );
+
+  const biweekly = getPaymentPlanTerms("biweekly", creditedTuition, creditedDeposit);
+  assert.equal(biweekly.installmentAmountCents, 29_166);
+  assert.equal(biweekly.finalInstallmentAmountCents, 29_170);
+  assert.equal(biweekly.regularInstallmentsTotal, 5);
+  assert.equal(
+    creditedDeposit + biweekly.installmentAmountCents * 5 + biweekly.finalInstallmentAmountCents,
+    creditedTuition
+  );
+
+  // A referred student pays $100 less overall, not $100 later.
+  const uncredited = getPaymentPlanTerms("weekly", 200_000, 25_000);
+  assert.equal(uncredited.installmentAmountCents, weekly.installmentAmountCents);
+  assert.equal(200_000 - creditedTuition, REFERRAL_CREDIT_CENTS);
 });
 
 test("a reward stays pending until attendance is confirmed, then becomes payable and paid", async (t) => {

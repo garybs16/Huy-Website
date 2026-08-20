@@ -13,6 +13,7 @@ import {
   evaluateReferralCode,
 } from "../lib/referrals.js";
 import {
+  MINIMUM_STRIPE_CHARGE_CENTS,
   PaymentPlanValidationError,
   getPaymentPlanTerms,
   isPaymentPlanOption,
@@ -66,20 +67,29 @@ function resolveAppBaseUrl(req, configuredBaseUrl) {
 }
 
 function resolveEnrollmentPricing(cohort, paymentOption, referralCreditCents = 0) {
-  // A referral credit lowers the program total before the plan is split, so the
-  // discount is spread across every installment rather than landing on one.
-  const tuitionTotalCents = Math.max(Number(cohort.tuitionCents) - Number(referralCreditCents || 0), 0);
+  // The credit comes off the program total AND off the amount due today, so the
+  // student feels all of it at checkout while the installments stay at their
+  // published amounts. Taking it off the deposit alone would defer $100 rather
+  // than discount it, and the student would still pay the full program total.
+  const credit = Number(referralCreditCents || 0);
+  const tuitionTotalCents = Math.max(Number(cohort.tuitionCents) - credit, 0);
 
   if (isPaymentPlanOption(paymentOption)) {
     if (!cohort.allowPaymentPlan || !cohort.paymentPlanDepositCents) {
       throw new Error("This cohort does not offer a payment plan.");
     }
 
-    const terms = getPaymentPlanTerms(paymentOption, tuitionTotalCents, cohort.paymentPlanDepositCents);
+    // A credit larger than the deposit cannot drive today's charge below what
+    // Stripe will collect, so anything left over stays in the balance.
+    const depositCents = Math.max(
+      Number(cohort.paymentPlanDepositCents) - credit,
+      credit > 0 ? MINIMUM_STRIPE_CHARGE_CENTS : Number(cohort.paymentPlanDepositCents)
+    );
+    const terms = getPaymentPlanTerms(paymentOption, tuitionTotalCents, depositCents);
 
     return {
       paymentOption,
-      paymentAmountCents: cohort.paymentPlanDepositCents,
+      paymentAmountCents: depositCents,
       installmentAmountCents: terms.installmentAmountCents,
       finalInstallmentAmountCents: terms.finalInstallmentAmountCents,
       regularInstallmentsTotal: terms.regularInstallmentsTotal,

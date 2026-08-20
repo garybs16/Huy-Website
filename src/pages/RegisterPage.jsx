@@ -349,8 +349,9 @@ export function RegisterPage({
                 placeholder="FSHA-XXXXX"
               />
               <small>
-                Have a code from a current or former student? Enter it to take $100 off your program
-                total. Codes must be entered now; they cannot be added after enrollment.
+                Have a code from a current or former student? Enter it to take $100 off — the credit
+                comes straight off what you pay today, and your program total drops by $100 too.
+                Codes must be entered now; they cannot be added after enrollment.
               </small>
             </label>
 
