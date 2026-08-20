@@ -378,6 +378,21 @@ export class EnrollmentDatabase {
           OR allow_payment_plan = 0
         );
 
+      /*
+        Seeding skips rows that already exist, so the confirmed October dates never
+        reached a database that was created while the placeholder April dates were in
+        place. Matching on the exact stale values means an intentional later edit is
+        never overwritten: once the dates are anything else, this stops applying.
+      */
+      UPDATE cohorts
+      SET
+        start_date = '2026-10-19',
+        end_date = '2026-11-13',
+        updated_at = '${nowIso()}'
+      WHERE id = 'cna-weekday-apr-2026'
+        AND start_date = '2026-04-20'
+        AND end_date = '2026-05-18';
+
       UPDATE cohorts
       SET
         meeting_pattern = 'Online theory: Monday–Friday | 5:00 PM–9:00 PM | 3 weeks; Clinical: Monday–Friday | 7:00 AM–3:30 PM | 3 weeks; Clinical-site city: Anaheim, California',
