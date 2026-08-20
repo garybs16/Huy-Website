@@ -180,7 +180,15 @@ async function safeSend(emailer, message) {
   }
 }
 
-export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, paymentRequired, checkoutUrl }) {
+// notifyStudent defaults to true for the no-Stripe fallback, where admissions collects
+// payment manually and there is no later "payment succeeded" webhook to defer to -- this
+// email is the only confirmation that will ever exist for that enrollment. When Stripe is
+// configured, the caller passes notifyStudent: false: the student has not paid anything
+// yet at submission time, so the registration-confirmed email (with the schedule, the
+// payment link, and their referral code) waits for sendPaymentCompletedEmails to send it
+// once money actually moves. Admissions still gets this email immediately either way, so
+// a lead that never finishes checkout is not invisible to the business.
+export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, paymentRequired, checkoutUrl, notifyStudent = true }) {
   const amountDue = formatMoney(enrollment.paymentAmountCents);
   const balanceDue = formatMoney(enrollment.balanceDueCents);
   const programTitle = program?.title ?? enrollment.programId ?? "CNA program";
@@ -196,34 +204,37 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
     Number(enrollment.referralCreditCents ?? 0) > 0
       ? `Referral credit applied: ${formatMoney(enrollment.referralCreditCents)} off your program total.`
       : "";
-  const referralCodeLines = enrollment.referralCode
-    ? [
-        `Your referral code: ${enrollment.referralCode}`,
-        "Share it with anyone considering CNA training. They get $100 off their program total, and you receive a $100 check once both of you fully attend your designated first week of theory.",
-      ]
-    : [];
 
-  const studentLines = [
-    `Hi ${enrollment.studentFullName},`,
-    "We received your registration for First Step Healthcare Academy.",
-    `Enrollment ID: ${enrollment.id}`,
-    `Program: ${programTitle}`,
-    `Cohort: ${cohortTitle}`,
-    schedule,
-    paymentLine,
-    referralCreditLine,
-    enrollment.balanceDueCents > 0 ? `Remaining tuition balance after registration: ${balanceDue}.` : "",
-    checkoutUrl ? `Payment link: ${checkoutUrl}` : "",
-    ...referralCodeLines,
-    "Admissions will review your submission and follow up with next steps.",
-  ];
+  if (notifyStudent) {
+    const referralCodeLines = enrollment.referralCode
+      ? [
+          `Your referral code: ${enrollment.referralCode}`,
+          "Share it with anyone considering CNA training. They get $100 off their program total, and you receive a $100 check once both of you fully attend your designated first week of theory.",
+        ]
+      : [];
 
-  safeSend(emailer, {
-    to: enrollment.email,
-    subject: "Registration received - First Step Healthcare Academy",
-    text: studentLines.filter(Boolean).join("\n"),
-    html: buildEmailHtml("Registration received", studentLines),
-  });
+    const studentLines = [
+      `Hi ${enrollment.studentFullName},`,
+      "We received your registration for First Step Healthcare Academy.",
+      `Enrollment ID: ${enrollment.id}`,
+      `Program: ${programTitle}`,
+      `Cohort: ${cohortTitle}`,
+      schedule,
+      paymentLine,
+      referralCreditLine,
+      enrollment.balanceDueCents > 0 ? `Remaining tuition balance after registration: ${balanceDue}.` : "",
+      checkoutUrl ? `Payment link: ${checkoutUrl}` : "",
+      ...referralCodeLines,
+      "Admissions will review your submission and follow up with next steps.",
+    ];
+
+    safeSend(emailer, {
+      to: enrollment.email,
+      subject: "Registration received - First Step Healthcare Academy",
+      text: studentLines.filter(Boolean).join("\n"),
+      html: buildEmailHtml("Registration received", studentLines),
+    });
+  }
 
   const adminLines = [
     "A new registration was submitted.",
@@ -334,7 +345,12 @@ export function sendWaitlistEmails(emailer, { record }) {
   });
 }
 
-export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohort, amountPaidCents, invoiceUrl }) {
+// isFirstPayment marks the moment money actually moves for the first time on this
+// enrollment (the registration fee for a payment plan, or the one and only charge for a
+// full payment). That is when the student's own registration is real, so this is where
+// the schedule and their referral code belong -- not at form submission, when they might
+// never come back to pay. Later installment receipts stay a plain payment confirmation.
+export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohort, amountPaidCents, invoiceUrl, isFirstPayment = false }) {
   const amountPaid = formatMoney(
     amountPaidCents ?? (
       enrollment.stripeCheckoutPurpose === "balance" ? enrollment.balanceDueCents : enrollment.paymentAmountCents
@@ -342,13 +358,25 @@ export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohor
   );
   const programTitle = program?.title ?? enrollment.programId ?? "CNA program";
   const cohortTitle = cohort?.title ?? enrollment.cohortId ?? "selected cohort";
+  const schedule = cohort?.meetingPattern ? `Schedule: ${cohort.meetingPattern}` : "";
+  const referralCodeLines =
+    isFirstPayment && enrollment.referralCode
+      ? [
+          `Your referral code: ${enrollment.referralCode}`,
+          "Share it with anyone considering CNA training. They get $100 off their program total, and you receive a $100 check once both of you fully attend your designated first week of theory.",
+        ]
+      : [];
+  const subjectText = isFirstPayment
+    ? "Registration confirmed - First Step Healthcare Academy"
+    : "Payment received - First Step Healthcare Academy";
 
   const studentLines = [
     `Hi ${enrollment.studentFullName},`,
-    "Your payment was received.",
+    isFirstPayment ? "Your registration is confirmed -- payment was received." : "Your payment was received.",
     `Enrollment ID: ${enrollment.id}`,
-    `Program: ${programTitle}`,
-    `Cohort: ${cohortTitle}`,
+    isFirstPayment ? `Program: ${programTitle}` : "",
+    isFirstPayment ? `Cohort: ${cohortTitle}` : "",
+    isFirstPayment ? schedule : "",
     `Payment received: ${amountPaid}`,
     enrollment.paymentInstallmentsTotal > 1
       ? `Payment ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} is complete.`
@@ -356,14 +384,15 @@ export function sendPaymentCompletedEmails(emailer, { enrollment, program, cohor
     enrollment.balanceDueCents > 0 ? `Remaining tuition balance: ${formatMoney(enrollment.balanceDueCents)}.` : "Paid in full.",
     enrollment.nextPaymentDueAt ? `Next automatic payment: ${new Date(enrollment.nextPaymentDueAt).toLocaleDateString("en-US")}.` : "",
     invoiceUrl ? `Stripe invoice and receipt: ${invoiceUrl}` : "",
+    ...referralCodeLines,
     "Admissions will follow up with any remaining class readiness steps.",
   ];
 
   safeSend(emailer, {
     to: enrollment.email,
-    subject: "Payment received - First Step Healthcare Academy",
-    text: studentLines.join("\n"),
-    html: buildEmailHtml("Payment received", studentLines),
+    subject: subjectText,
+    text: studentLines.filter(Boolean).join("\n"),
+    html: buildEmailHtml(isFirstPayment ? "Registration confirmed" : "Payment received", studentLines.filter(Boolean)),
   });
 
   const adminLines = [

@@ -129,6 +129,54 @@ test("the registration email tells the student the code they can share", async (
   assert.match(adminEmail.text, /Referred by code: FSHA-99XYZ/);
 });
 
+test("before a Stripe checkout is paid, admissions hears about it but the student does not get the code yet", async () => {
+  const messages = [];
+  const emailer = {
+    enabled: true,
+    adminEmail: "admissions@example.com",
+    async send(message) {
+      messages.push(message);
+      return true;
+    },
+  };
+
+  // This is the enrollments.js call site for a Stripe-configured checkout: money has not
+  // moved yet, so notifyStudent is false. The code only reaches the student once
+  // sendPaymentCompletedEmails fires it as the first payment's confirmation.
+  sendEnrollmentEmails(emailer, {
+    enrollment: {
+      id: "enrollment-pending-checkout",
+      studentFullName: "Jon Diaz",
+      email: "jon@example.com",
+      phone: "949-555-0100",
+      programId: "cna",
+      cohortId: "cna-weekday",
+      paymentStatus: "checkout_pending",
+      paymentAmountCents: 25_000,
+      balanceDueCents: 165_000,
+      referralCode: "FSHA-7K2MA",
+      referralCreditCents: 0,
+    },
+    program: { title: "Certified Nurse Assistant" },
+    cohort: { title: "Weekday Cohort", meetingPattern: "Monday to Friday" },
+    paymentRequired: true,
+    checkoutUrl: "https://checkout.stripe.com/pay/cs_test_unpaid",
+    notifyStudent: false,
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(
+    messages.some((message) => message.to === "jon@example.com"),
+    false,
+    "the student must not be emailed before they have paid anything"
+  );
+
+  const adminEmail = messages.find((message) => message.to === "admissions@example.com");
+  assert.ok(adminEmail, "admissions must still see the lead immediately");
+  assert.match(adminEmail.text, /Payment status: checkout_pending/);
+});
+
 test("referral codes survive however a student retypes them", () => {
   const code = generateReferralCode();
 

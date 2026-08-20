@@ -485,12 +485,16 @@ export function createEnrollmentsRouter({
         paymentMode: "stripe",
         enrollment: pendingEnrollment,
       });
+      // notifyStudent: false -- nothing has been paid yet, so the student does not get a
+      // "registration received" email (or their referral code) until the Stripe webhook
+      // confirms money actually moved. Admissions still gets the lead immediately below.
       sendEnrollmentEmails(emailer, {
         enrollment: pendingEnrollment,
         program,
         cohort,
         paymentRequired: true,
         checkoutUrl: session.url,
+        notifyStudent: false,
       });
 
       return res.status(201).json({

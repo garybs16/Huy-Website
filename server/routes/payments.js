@@ -140,7 +140,7 @@ async function attachPaymentPlanSchedule({ stripeClient, enrollmentDb, enrollmen
   return { enrollment: attachedEnrollment, scheduleDetails };
 }
 
-function announceCompletedPayment({ enrollmentDb, notifier, emailer, paymentResult, amountPaidCents, invoice }) {
+function announceCompletedPayment({ enrollmentDb, notifier, emailer, paymentResult, amountPaidCents, invoice, isFirstPayment = false }) {
   if (!paymentResult.applied) {
     return;
   }
@@ -157,6 +157,7 @@ function announceCompletedPayment({ enrollmentDb, notifier, emailer, paymentResu
     cohort,
     amountPaidCents,
     invoiceUrl: invoice?.hosted_invoice_url ?? null,
+    isFirstPayment,
   });
 }
 
@@ -206,6 +207,7 @@ async function handlePaymentPlanCheckoutCompleted({
     emailer,
     paymentResult: registrationResult,
     amountPaidCents: expectedAmount,
+    isFirstPayment: true,
   });
 }
 
@@ -250,6 +252,7 @@ async function handleInvoicePaid({ event, invoice, stripeClient, enrollmentDb, n
       paymentResult: registrationResult,
       amountPaidCents,
       invoice,
+      isFirstPayment: true,
     });
     return;
   }
@@ -455,6 +458,9 @@ export function createStripePaymentsRouter({ stripeClient, webhookSecret, enroll
             program,
             cohort,
             amountPaidCents: expectedAmount,
+            // "balance" means this enrollment already made its first payment earlier
+            // (e.g. a deposit) and is now paying off what was left -- not a first payment.
+            isFirstPayment: enrollment.stripeCheckoutPurpose !== "balance",
           });
         }
       }

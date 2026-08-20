@@ -251,7 +251,15 @@ test("Stripe webhooks activate, advance, and flag a weekly tuition plan", async 
   assert.deepEqual(schedule.phases[1].duration, { interval: "week", interval_count: 1 });
   assert.equal(schedule.phases[1].items[0].price_data.unit_amount, 14_587);
   assert.equal(notifications.filter((message) => message.type === "payment.completed").length, 1);
-  assert.equal(emails.filter((message) => message.subject.includes("Payment received")).length, 2);
+  // The registration fee is this enrollment's first payment, so the student gets a
+  // "Registration confirmed" email rather than a plain "Payment received" receipt --
+  // admissions still gets its own "Payment received" copy either way.
+  const studentRegistrationEmail = emails.find(
+    (message) => message.to === "weekly-student@example.com" && message.subject.includes("Registration confirmed")
+  );
+  assert.ok(studentRegistrationEmail, "the student should receive a registration-confirmed email");
+  assert.match(studentRegistrationEmail.text, /Schedule: Monday to Friday/);
+  assert.equal(emails.filter((message) => message.subject.includes("Payment received")).length, 1);
 
   const firstInstallmentFailure = invoiceEvent({
     id: "evt_invoice_weekly_2_failed",

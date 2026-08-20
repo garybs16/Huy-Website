@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createEmailer, sendInquiryEmails, sendPaymentFailedEmails } from "../server/lib/email.js";
+import { createEmailer, sendInquiryEmails, sendPaymentCompletedEmails, sendPaymentFailedEmails } from "../server/lib/email.js";
 
 test("guide requests produce an encouraging email with both PDF attachments", async () => {
   const messages = [];
@@ -139,4 +139,73 @@ test("a failed weekly installment still says weekly", async () => {
 
   const studentEmail = messages.find((message) => message.to === "jordan@example.com");
   assert.match(studentEmail.text, /\$145\.83 weekly payment/);
+});
+
+test("a student's first payment confirms their registration and hands them their referral code", async () => {
+  const messages = [];
+  const emailer = {
+    enabled: true,
+    adminEmail: "admissions@example.com",
+    async send(message) {
+      messages.push(message);
+      return true;
+    },
+  };
+
+  await sendPaymentCompletedEmails(emailer, {
+    enrollment: {
+      id: "enrollment-first-payment",
+      studentFullName: "Jon Diaz",
+      email: "jon@example.com",
+      paymentOption: "weekly",
+      paymentInstallmentsTotal: 12,
+      paymentInstallmentsPaid: 0,
+      balanceDueCents: 175_000,
+      referralCode: "FSHA-7K2MA",
+    },
+    program: { title: "Certified Nurse Assistant" },
+    cohort: { title: "Weekday Cohort", meetingPattern: "Monday to Friday | 9:00 AM to 1:00 PM" },
+    amountPaidCents: 25_000,
+    isFirstPayment: true,
+  });
+
+  const studentEmail = messages.find((message) => message.to === "jon@example.com");
+  assert.equal(studentEmail.subject, "Registration confirmed - First Step Healthcare Academy");
+  assert.match(studentEmail.text, /Schedule: Monday to Friday/);
+  assert.match(studentEmail.text, /Your referral code: FSHA-7K2MA/);
+  assert.match(studentEmail.text, /\$100 check once both of you fully attend/);
+});
+
+test("a later installment is a plain receipt with no schedule or referral code repeated", async () => {
+  const messages = [];
+  const emailer = {
+    enabled: true,
+    adminEmail: "admissions@example.com",
+    async send(message) {
+      messages.push(message);
+      return true;
+    },
+  };
+
+  await sendPaymentCompletedEmails(emailer, {
+    enrollment: {
+      id: "enrollment-later-installment",
+      studentFullName: "Jon Diaz",
+      email: "jon@example.com",
+      paymentOption: "weekly",
+      paymentInstallmentsTotal: 12,
+      paymentInstallmentsPaid: 3,
+      balanceDueCents: 130_000,
+      referralCode: "FSHA-7K2MA",
+    },
+    program: { title: "Certified Nurse Assistant" },
+    cohort: { title: "Weekday Cohort", meetingPattern: "Monday to Friday | 9:00 AM to 1:00 PM" },
+    amountPaidCents: 14_583,
+    isFirstPayment: false,
+  });
+
+  const studentEmail = messages.find((message) => message.to === "jon@example.com");
+  assert.equal(studentEmail.subject, "Payment received - First Step Healthcare Academy");
+  assert.doesNotMatch(studentEmail.text, /Schedule:/);
+  assert.doesNotMatch(studentEmail.text, /referral code/);
 });
