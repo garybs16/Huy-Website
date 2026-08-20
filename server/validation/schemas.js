@@ -170,6 +170,7 @@ export const enrollmentSchema = z.object({
   studentSignature: requiredString("studentSignature", 2, 100),
   checkoutMode: z.enum(["redirect", "embedded"]).default("redirect"),
   notes: optionalString(600),
+  referralCode: optionalString(20),
   turnstileToken: turnstileTokenString,
 }).strict().superRefine((value, context) => {
   if (["weekly", "biweekly"].includes(value.paymentOption) && !value.automaticPaymentAuthorized) {

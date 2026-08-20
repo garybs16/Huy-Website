@@ -339,6 +339,22 @@ export function RegisterPage({
             ) : null}
 
             <label>
+              <span>Referral code (optional)</span>
+              <input
+                name="referralCode"
+                value={enrollmentForm.referralCode}
+                onChange={onInput}
+                autoComplete="off"
+                maxLength="20"
+                placeholder="FSHA-XXXXX"
+              />
+              <small>
+                Have a code from a current or former student? Enter it to take $100 off your program
+                total. Codes must be entered now; they cannot be added after enrollment.
+              </small>
+            </label>
+
+            <label>
               <span>Admissions notes</span>
               <textarea
                 name="notes"

@@ -3,6 +3,7 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { cohorts as cohortSeeds } from "../constants/cohorts.js";
 import { programs } from "../constants/programs.js";
+import { generateReferralCode, normalizeReferralCode } from "./referrals.js";
 
 const PAGINATED_TABLE_NAMES = new Set(["inquiries", "waitlist"]);
 
@@ -267,11 +268,47 @@ export class EnrollmentDatabase {
     addColumnIfMissing(this.db, "enrollments", "next_payment_due_at", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "last_payment_at", "TEXT");
     addColumnIfMissing(this.db, "enrollments", "last_payment_failure_at", "TEXT");
+    // Referral program. Every enrollment carries its own shareable code, and records
+    // the code it arrived through so the credit and the reward can both be traced.
+    addColumnIfMissing(this.db, "enrollments", "referral_code", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "referred_by_code", "TEXT");
+    addColumnIfMissing(this.db, "enrollments", "referral_credit_cents", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing(this.db, "enrollments", "stripe_connect_account_id", "TEXT");
 
     this.db.exec(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_enrollments_subscription_id
         ON enrollments(stripe_subscription_id)
         WHERE stripe_subscription_id IS NOT NULL;
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_enrollments_referral_code
+        ON enrollments(referral_code)
+        WHERE referral_code IS NOT NULL;
+
+      CREATE INDEX IF NOT EXISTS idx_enrollments_referred_by_code
+        ON enrollments(referred_by_code)
+        WHERE referred_by_code IS NOT NULL;
+
+      CREATE TABLE IF NOT EXISTS referral_rewards (
+        id TEXT PRIMARY KEY,
+        referrer_enrollment_id TEXT NOT NULL,
+        referred_enrollment_id TEXT NOT NULL UNIQUE,
+        referral_code TEXT NOT NULL,
+        amount_cents INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        attendance_confirmed_at TEXT,
+        paid_at TEXT,
+        stripe_transfer_id TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (referrer_enrollment_id) REFERENCES enrollments(id) ON DELETE CASCADE,
+        FOREIGN KEY (referred_enrollment_id) REFERENCES enrollments(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_referral_rewards_referrer
+        ON referral_rewards(referrer_enrollment_id);
+
+      CREATE INDEX IF NOT EXISTS idx_referral_rewards_status
+        ON referral_rewards(status);
     `);
 
     this.db.exec(`
@@ -707,6 +744,10 @@ export class EnrollmentDatabase {
             last_payment_at AS lastPaymentAt,
             last_payment_failure_at AS lastPaymentFailureAt,
             paid_at AS paidAt,
+            referral_code AS referralCode,
+            referred_by_code AS referredByCode,
+            referral_credit_cents AS referralCreditCents,
+            stripe_connect_account_id AS stripeConnectAccountId,
             created_at AS createdAt,
             updated_at AS updatedAt
           FROM enrollments
@@ -1192,6 +1233,9 @@ export class EnrollmentDatabase {
             last_payment_at,
             last_payment_failure_at,
             paid_at,
+            referral_code,
+            referred_by_code,
+            referral_credit_cents,
             created_at,
             updated_at
           ) VALUES (
@@ -1233,12 +1277,18 @@ export class EnrollmentDatabase {
             NULL,
             NULL,
             NULL,
+            @referralCode,
+            @referredByCode,
+            @referralCreditCents,
             @createdAt,
             @updatedAt
           )
         `)
         .run({
           ...enrollmentInput,
+          referralCode: enrollmentInput.referralCode ?? null,
+          referredByCode: enrollmentInput.referredByCode ?? null,
+          referralCreditCents: enrollmentInput.referralCreditCents ?? 0,
           amountPaidCents: enrollmentInput.amountPaidCents ?? 0,
           paymentInstallmentsTotal: enrollmentInput.paymentInstallmentsTotal ?? 1,
           paymentInstallmentsPaid: enrollmentInput.paymentInstallmentsPaid ?? 0,
@@ -1301,6 +1351,10 @@ export class EnrollmentDatabase {
           last_payment_at AS lastPaymentAt,
           last_payment_failure_at AS lastPaymentFailureAt,
           paid_at AS paidAt,
+          referral_code AS referralCode,
+          referred_by_code AS referredByCode,
+          referral_credit_cents AS referralCreditCents,
+          stripe_connect_account_id AS stripeConnectAccountId,
           created_at AS createdAt,
           updated_at AS updatedAt
         FROM enrollments
@@ -1485,6 +1539,196 @@ export class EnrollmentDatabase {
       .get(subscriptionId);
 
     return record ? this.getEnrollmentById(record.id) : null;
+  }
+
+  getEnrollmentByReferralCode(referralCode) {
+    const normalized = normalizeReferralCode(referralCode);
+
+    if (!normalized) {
+      return null;
+    }
+
+    const record = this.db
+      .prepare(`SELECT id FROM enrollments WHERE referral_code = ?`)
+      .get(normalized);
+
+    return record ? this.getEnrollmentById(record.id) : null;
+  }
+
+  // A unique index guards the column, so a collision is a retry rather than a failure.
+  // Five characters from a 31-glyph alphabet leaves ample room at school scale.
+  issueReferralCode(attempts = 8) {
+    const exists = this.db.prepare(`SELECT 1 FROM enrollments WHERE referral_code = ?`);
+
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      const candidate = generateReferralCode();
+
+      if (!exists.get(candidate)) {
+        return candidate;
+      }
+    }
+
+    throw new Error("Could not issue a unique referral code.");
+  }
+
+  createReferralReward({ id, referrerEnrollmentId, referredEnrollmentId, referralCode, amountCents }) {
+    const timestamp = nowIso();
+
+    this.db
+      .prepare(`
+        INSERT INTO referral_rewards (
+          id,
+          referrer_enrollment_id,
+          referred_enrollment_id,
+          referral_code,
+          amount_cents,
+          status,
+          attendance_confirmed_at,
+          paid_at,
+          stripe_transfer_id,
+          created_at,
+          updated_at
+        ) VALUES (
+          @id,
+          @referrerEnrollmentId,
+          @referredEnrollmentId,
+          @referralCode,
+          @amountCents,
+          'pending',
+          NULL,
+          NULL,
+          NULL,
+          @createdAt,
+          @updatedAt
+        )
+        ON CONFLICT(referred_enrollment_id) DO NOTHING
+      `)
+      .run({
+        id,
+        referrerEnrollmentId,
+        referredEnrollmentId,
+        referralCode,
+        amountCents,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+
+    return this.getReferralRewardByReferredEnrollment(referredEnrollmentId);
+  }
+
+  getReferralRewardByReferredEnrollment(referredEnrollmentId) {
+    return this.db
+      .prepare(`
+        SELECT
+          id,
+          referrer_enrollment_id AS referrerEnrollmentId,
+          referred_enrollment_id AS referredEnrollmentId,
+          referral_code AS referralCode,
+          amount_cents AS amountCents,
+          status,
+          attendance_confirmed_at AS attendanceConfirmedAt,
+          paid_at AS paidAt,
+          stripe_transfer_id AS stripeTransferId,
+          created_at AS createdAt,
+          updated_at AS updatedAt
+        FROM referral_rewards
+        WHERE referred_enrollment_id = ?
+      `)
+      .get(referredEnrollmentId);
+  }
+
+  listReferralRewards() {
+    return this.db
+      .prepare(`
+        SELECT
+          r.id,
+          r.referral_code AS referralCode,
+          r.amount_cents AS amountCents,
+          r.status,
+          r.attendance_confirmed_at AS attendanceConfirmedAt,
+          r.paid_at AS paidAt,
+          r.stripe_transfer_id AS stripeTransferId,
+          r.created_at AS createdAt,
+          referrer.student_full_name AS referrerName,
+          referrer.email AS referrerEmail,
+          referrer.stripe_connect_account_id AS referrerConnectAccountId,
+          referred.student_full_name AS referredName,
+          referred.email AS referredEmail,
+          referred.payment_status AS referredPaymentStatus
+        FROM referral_rewards r
+        JOIN enrollments referrer ON referrer.id = r.referrer_enrollment_id
+        JOIN enrollments referred ON referred.id = r.referred_enrollment_id
+        ORDER BY r.created_at DESC
+      `)
+      .all();
+  }
+
+  // "The referrer reward is issued only after the referred student attends the first
+  // day of the theory cohort." Confirming attendance is what makes a reward payable.
+  confirmReferralAttendance(rewardId) {
+    this.db
+      .prepare(`
+        UPDATE referral_rewards
+        SET
+          status = 'payable',
+          attendance_confirmed_at = COALESCE(attendance_confirmed_at, @now),
+          updated_at = @now
+        WHERE id = @rewardId
+          AND status = 'pending'
+      `)
+      .run({ rewardId, now: nowIso() });
+
+    return this.getReferralRewardById(rewardId);
+  }
+
+  markReferralRewardPaid(rewardId, { stripeTransferId = null } = {}) {
+    this.db
+      .prepare(`
+        UPDATE referral_rewards
+        SET
+          status = 'paid',
+          paid_at = COALESCE(paid_at, @now),
+          stripe_transfer_id = COALESCE(@stripeTransferId, stripe_transfer_id),
+          updated_at = @now
+        WHERE id = @rewardId
+          AND status = 'payable'
+      `)
+      .run({ rewardId, stripeTransferId, now: nowIso() });
+
+    return this.getReferralRewardById(rewardId);
+  }
+
+  getReferralRewardById(rewardId) {
+    return this.db
+      .prepare(`
+        SELECT
+          id,
+          referrer_enrollment_id AS referrerEnrollmentId,
+          referred_enrollment_id AS referredEnrollmentId,
+          referral_code AS referralCode,
+          amount_cents AS amountCents,
+          status,
+          attendance_confirmed_at AS attendanceConfirmedAt,
+          paid_at AS paidAt,
+          stripe_transfer_id AS stripeTransferId,
+          created_at AS createdAt,
+          updated_at AS updatedAt
+        FROM referral_rewards
+        WHERE id = ?
+      `)
+      .get(rewardId);
+  }
+
+  setReferrerConnectAccount(enrollmentId, stripeConnectAccountId) {
+    this.db
+      .prepare(`
+        UPDATE enrollments
+        SET stripe_connect_account_id = @stripeConnectAccountId, updated_at = @now
+        WHERE id = @enrollmentId
+      `)
+      .run({ enrollmentId, stripeConnectAccountId, now: nowIso() });
+
+    return this.getEnrollmentById(enrollmentId);
   }
 
   recordSubscriptionPayment({

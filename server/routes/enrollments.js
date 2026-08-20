@@ -8,6 +8,11 @@ import {
   hasEnrollmentAccess,
 } from "../lib/publicRequestSecurity.js";
 import {
+  REFERRAL_CREDIT_CENTS,
+  REFERRAL_REWARD_CENTS,
+  evaluateReferralCode,
+} from "../lib/referrals.js";
+import {
   PaymentPlanValidationError,
   getPaymentPlanTerms,
   isPaymentPlanOption,
@@ -60,13 +65,17 @@ function resolveAppBaseUrl(req, configuredBaseUrl) {
   return `${req.protocol}://${req.get("host")}`;
 }
 
-function resolveEnrollmentPricing(cohort, paymentOption) {
+function resolveEnrollmentPricing(cohort, paymentOption, referralCreditCents = 0) {
+  // A referral credit lowers the program total before the plan is split, so the
+  // discount is spread across every installment rather than landing on one.
+  const tuitionTotalCents = Math.max(Number(cohort.tuitionCents) - Number(referralCreditCents || 0), 0);
+
   if (isPaymentPlanOption(paymentOption)) {
     if (!cohort.allowPaymentPlan || !cohort.paymentPlanDepositCents) {
       throw new Error("This cohort does not offer a payment plan.");
     }
 
-    const terms = getPaymentPlanTerms(paymentOption, cohort.tuitionCents, cohort.paymentPlanDepositCents);
+    const terms = getPaymentPlanTerms(paymentOption, tuitionTotalCents, cohort.paymentPlanDepositCents);
 
     return {
       paymentOption,
@@ -74,7 +83,8 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
       installmentAmountCents: terms.installmentAmountCents,
       finalInstallmentAmountCents: terms.finalInstallmentAmountCents,
       regularInstallmentsTotal: terms.regularInstallmentsTotal,
-      tuitionTotalCents: cohort.tuitionCents,
+      tuitionTotalCents,
+      referralCreditCents: Number(referralCreditCents || 0),
       balanceDueCents: terms.tuitionBalanceCents,
       paymentInstallmentsTotal: terms.installmentsTotal,
       paymentInterval: terms.paymentInterval,
@@ -87,8 +97,9 @@ function resolveEnrollmentPricing(cohort, paymentOption) {
 
   return {
     paymentOption: "full",
-    paymentAmountCents: cohort.tuitionCents,
-    tuitionTotalCents: cohort.tuitionCents,
+    paymentAmountCents: tuitionTotalCents,
+    tuitionTotalCents,
+    referralCreditCents: Number(referralCreditCents || 0),
     balanceDueCents: 0,
     paymentInstallmentsTotal: 1,
     paymentInterval: null,
@@ -300,7 +311,29 @@ export function createEnrollmentsRouter({
         return res.status(400).json({ error: "Selected cohort is attached to an unavailable program." });
       }
 
-      const pricing = resolveEnrollmentPricing(cohort, payload.paymentOption);
+      // A referral code is optional, but a bad one is rejected rather than ignored so
+      // nobody enrols believing a credit was applied when it was not.
+      let referral = null;
+
+      if (payload.referralCode) {
+        const outcome = evaluateReferralCode({
+          submittedCode: payload.referralCode,
+          referrer: enrollmentDb.getEnrollmentByReferralCode(payload.referralCode),
+          referredEmail: payload.email,
+        });
+
+        if (!outcome.ok) {
+          return res.status(400).json({ error: outcome.reason });
+        }
+
+        referral = outcome;
+      }
+
+      const pricing = resolveEnrollmentPricing(
+        cohort,
+        payload.paymentOption,
+        referral ? REFERRAL_CREDIT_CENTS : 0
+      );
       const initialSeatHoldExpiresAt = stripeClient
         ? new Date(Date.now() + INITIAL_SEAT_HOLD_MINUTES * 60 * 1000).toISOString()
         : null;
@@ -334,7 +367,22 @@ export function createEnrollmentsRouter({
         automaticPaymentAuthorizedAt: payload.automaticPaymentAuthorized ? new Date().toISOString() : null,
         studentSignature: payload.studentSignature,
         seatHoldExpiresAt: initialSeatHoldExpiresAt,
+        referralCode: enrollmentDb.issueReferralCode(),
+        referredByCode: referral?.code ?? null,
+        referralCreditCents: referral ? REFERRAL_CREDIT_CENTS : 0,
       });
+
+      // The reward stays pending until admissions confirms the referred student
+      // attended day one, which is what the published rules require.
+      if (referral) {
+        enrollmentDb.createReferralReward({
+          id: randomUUID(),
+          referrerEnrollmentId: referral.referrer.id,
+          referredEnrollmentId: enrollment.id,
+          referralCode: referral.code,
+          amountCents: REFERRAL_REWARD_CENTS,
+        });
+      }
       res.setHeader(
         "Set-Cookie",
         createEnrollmentAccessCookie(enrollment.id, {

@@ -113,6 +113,7 @@ const initialEnrollmentState = {
   policyAcknowledged: false,
   automaticPaymentAuthorized: false,
   studentSignature: "",
+  referralCode: "",
   notes: "",
 };
 
@@ -629,6 +630,7 @@ function App() {
         policyAcknowledged: enrollmentForm.policyAcknowledged,
         automaticPaymentAuthorized: enrollmentForm.automaticPaymentAuthorized,
         studentSignature: enrollmentForm.studentSignature,
+        referralCode: enrollmentForm.referralCode,
         // Send the student to Stripe's secure, Stripe-hosted checkout immediately.
         // This is the most reliable checkout surface across browsers and still
         // keeps payment tied to this exact enrollment and cohort.
