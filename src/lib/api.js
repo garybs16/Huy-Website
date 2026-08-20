@@ -162,9 +162,25 @@ export async function getAdminReferrals(apiKey) {
   return Array.isArray(data?.items) ? data.items : [];
 }
 
-export function confirmAdminReferralAttendance(apiKey, rewardId) {
+export function confirmAdminReferralAttendance(apiKey, rewardId, party = "referred") {
   return request(`/api/admin/referrals/${rewardId}/confirm-attendance`, {
     method: "POST",
+    payload: { party },
+    headers: adminHeaders(apiKey),
+  });
+}
+
+export function waiveAdminReferrerAttendance(apiKey, rewardId) {
+  return request(`/api/admin/referrals/${rewardId}/waive-referrer-attendance`, {
+    method: "POST",
+    headers: adminHeaders(apiKey),
+  });
+}
+
+export function forfeitAdminReferral(apiKey, rewardId, reason, scope = "single") {
+  return request(`/api/admin/referrals/${rewardId}/forfeit`, {
+    method: "POST",
+    payload: { reason, scope },
     headers: adminHeaders(apiKey),
   });
 }

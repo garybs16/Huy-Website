@@ -82,7 +82,7 @@ function toCohortForm(cohort) {
   };
 }
 
-function ReferralRewardRow({ reward, pending, onConfirmAttendance, onMarkPaid }) {
+function ReferralRewardRow({ reward, pending, onConfirmAttendance, onMarkPaid, onWaiveReferrerAttendance, onForfeitReferral }) {
   const [checkNumber, setCheckNumber] = useState("");
   const amountLabel = formatMoney(reward.amountCents);
 
@@ -105,15 +105,85 @@ function ReferralRewardRow({ reward, pending, onConfirmAttendance, onMarkPaid })
           </span>
         ) : null}
 
+        {reward.status === "forfeited" ? (
+          <span>Forfeited{reward.forfeitReason ? `: ${reward.forfeitReason}` : ""}</span>
+        ) : null}
+
         {reward.status === "pending" ? (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={pending}
-            onClick={() => onConfirmAttendance(reward.id)}
-          >
-            Confirm first-day attendance
-          </button>
+          <div className="referral-attendance-row">
+            {/* Both sides must fully attend their first week before a check is owed. */}
+            <span>
+              Referred student: {reward.attendanceConfirmedAt ? "first week confirmed" : "not confirmed"}
+            </span>
+            {!reward.attendanceConfirmedAt ? (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={pending}
+                onClick={() => onConfirmAttendance(reward.id, "referred")}
+              >
+                Confirm referred student first week
+              </button>
+            ) : null}
+
+            <span>
+              Referrer:{" "}
+              {Number(reward.referrerAttendanceRequired) === 0
+                ? "not applicable"
+                : reward.referrerAttendanceConfirmedAt
+                  ? "first week confirmed"
+                  : "not confirmed"}
+            </span>
+            {Number(reward.referrerAttendanceRequired) !== 0 && !reward.referrerAttendanceConfirmedAt ? (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  disabled={pending}
+                  onClick={() => onConfirmAttendance(reward.id, "referrer")}
+                >
+                  Confirm referrer first week
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={pending}
+                  onClick={() => onWaiveReferrerAttendance(reward.id)}
+                >
+                  Referrer is a graduate (not applicable)
+                </button>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+
+        {reward.status === "pending" || reward.status === "payable" ? (
+          <div className="referral-forfeit-row">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={pending}
+              onClick={() =>
+                onForfeitReferral(reward.id, "Referred student did not complete the first week.", "single")
+              }
+            >
+              Forfeit this reward
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={pending}
+              onClick={() =>
+                onForfeitReferral(
+                  reward.id,
+                  "Referrer did not complete their own first week.",
+                  "all-for-referrer"
+                )
+              }
+            >
+              Referrer withdrew — forfeit all their unpaid rewards
+            </button>
+          </div>
         ) : null}
 
         {reward.status === "payable" ? (
@@ -161,6 +231,8 @@ export function AdminPage({
   adminReferrals = [],
   onConfirmReferralAttendance,
   onMarkReferralPaid,
+  onWaiveReferrerAttendance,
+  onForfeitReferral,
   onAdminKeyChange,
   onAdminUsernameChange,
   onAdminPasswordChange,
@@ -741,6 +813,8 @@ export function AdminPage({
                       pending={adminMutationPending}
                       onConfirmAttendance={onConfirmReferralAttendance}
                       onMarkPaid={onMarkReferralPaid}
+                      onWaiveReferrerAttendance={onWaiveReferrerAttendance}
+                      onForfeitReferral={onForfeitReferral}
                     />
                   ))}
                 </div>

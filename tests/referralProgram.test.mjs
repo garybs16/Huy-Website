@@ -121,7 +121,7 @@ test("the registration email tells the student the code they can share", async (
   assert.ok(studentEmail, "the student must receive a registration email");
   // A code nobody is told about cannot be shared.
   assert.match(studentEmail.text, /Your referral code: FSHA-7K2MA/);
-  assert.match(studentEmail.text, /\$100 check once they attend the first day/);
+  assert.match(studentEmail.text, /\$100 check once both of you fully attend/);
   assert.match(studentEmail.text, /Referral credit applied: \$100\.00/);
 
   const adminEmail = messages.find((message) => message.to === "admissions@example.com");
@@ -272,7 +272,10 @@ test("a reward stays pending until attendance is confirmed, then becomes payable
   // Paying before attendance is confirmed must not be possible.
   assert.equal(db.markReferralRewardPaid(rewardId).status, "pending");
 
-  assert.equal(db.confirmReferralAttendance(rewardId).status, "payable");
+  // Both sides must fully attend their first week, so one confirmation is not enough.
+  assert.equal(db.confirmReferralAttendance(rewardId).status, "pending");
+  assert.equal(db.markReferralRewardPaid(rewardId).status, "pending");
+  assert.equal(db.confirmReferrerAttendance(rewardId).status, "payable");
   // Rewards go out as checks, so the check number is the audit trail.
   const paid = db.markReferralRewardPaid(rewardId, { payoutReference: "check 10482" });
   assert.equal(paid.status, "paid");
@@ -294,4 +297,114 @@ test("a reward stays pending until attendance is confirmed, then becomes payable
   });
   assert.equal(db.listReferralRewards().length, 1);
   assert.equal(db.listReferralRewards()[0].status, "paid");
+});
+
+test("a graduate referrer has no first week, so only the referred student gates the reward", async (t) => {
+  const db = await createDb(t);
+  const referrerId = randomUUID();
+  const referredId = randomUUID();
+  const code = db.issueReferralCode();
+
+  seedEnrollment(db, { id: referrerId, name: "Grad Referrer", email: "grad@example.com", referralCode: code });
+  seedEnrollment(db, {
+    id: referredId,
+    name: "New Student",
+    email: "new@example.com",
+    referralCode: db.issueReferralCode(),
+    referredByCode: code,
+    credit: REFERRAL_CREDIT_CENTS,
+  });
+
+  const rewardId = randomUUID();
+  db.createReferralReward({
+    id: rewardId,
+    referrerEnrollmentId: referrerId,
+    referredEnrollmentId: referredId,
+    referralCode: code,
+    amountCents: REFERRAL_REWARD_CENTS,
+  });
+
+  db.waiveReferrerAttendance(rewardId);
+  assert.equal(db.getReferralRewardById(rewardId).status, "pending");
+  assert.equal(db.confirmReferralAttendance(rewardId).status, "payable");
+});
+
+test("a referrer who does not finish their own first week loses every unpaid reward", async (t) => {
+  const db = await createDb(t);
+  const referrerId = randomUUID();
+  const code = db.issueReferralCode();
+  seedEnrollment(db, { id: referrerId, name: "Maria Santos", email: "maria@example.com", referralCode: code });
+
+  const rewardIds = [];
+
+  for (let index = 0; index < 3; index += 1) {
+    const referredId = randomUUID();
+    seedEnrollment(db, {
+      id: referredId,
+      name: `Referred ${index}`,
+      email: `referred${index}@example.com`,
+      referralCode: db.issueReferralCode(),
+      referredByCode: code,
+      credit: REFERRAL_CREDIT_CENTS,
+    });
+
+    const rewardId = randomUUID();
+    db.createReferralReward({
+      id: rewardId,
+      referrerEnrollmentId: referrerId,
+      referredEnrollmentId: referredId,
+      referralCode: code,
+      amountCents: REFERRAL_REWARD_CENTS,
+    });
+    rewardIds.push(rewardId);
+  }
+
+  // One is already paid out before the referrer withdraws.
+  db.confirmReferralAttendance(rewardIds[0]);
+  db.confirmReferrerAttendance(rewardIds[0]);
+  db.markReferralRewardPaid(rewardIds[0], { payoutReference: "check 1001" });
+
+  const result = db.forfeitAllRewardsForReferrer(referrerId, "Referrer withdrew during first week.");
+
+  assert.equal(result.forfeited, 2, "both unpaid rewards are forfeited");
+  // Money already sent is not clawed back here.
+  assert.equal(db.getReferralRewardById(rewardIds[0]).status, "paid");
+  assert.equal(db.getReferralRewardById(rewardIds[1]).status, "forfeited");
+  assert.equal(db.getReferralRewardById(rewardIds[2]).status, "forfeited");
+  assert.match(db.getReferralRewardById(rewardIds[1]).forfeitReason, /withdrew/);
+
+  // A forfeited reward can never be paid.
+  assert.equal(db.markReferralRewardPaid(rewardIds[1], { payoutReference: "check 9" }).status, "forfeited");
+});
+
+test("one referred student failing their first week forfeits only that reward", async (t) => {
+  const db = await createDb(t);
+  const referrerId = randomUUID();
+  const referredId = randomUUID();
+  const code = db.issueReferralCode();
+
+  seedEnrollment(db, { id: referrerId, name: "Referrer", email: "ref@example.com", referralCode: code });
+  seedEnrollment(db, {
+    id: referredId,
+    name: "No Show",
+    email: "noshow@example.com",
+    referralCode: db.issueReferralCode(),
+    referredByCode: code,
+    credit: REFERRAL_CREDIT_CENTS,
+  });
+
+  const rewardId = randomUUID();
+  db.createReferralReward({
+    id: rewardId,
+    referrerEnrollmentId: referrerId,
+    referredEnrollmentId: referredId,
+    referralCode: code,
+    amountCents: REFERRAL_REWARD_CENTS,
+  });
+
+  const forfeited = db.forfeitReferralReward(rewardId, "Referred student withdrew in week one.");
+  assert.equal(forfeited.status, "forfeited");
+  assert.ok(forfeited.forfeitedAt);
+  // Confirming attendance afterwards must not resurrect it.
+  assert.equal(db.confirmReferralAttendance(rewardId).status, "forfeited");
 });

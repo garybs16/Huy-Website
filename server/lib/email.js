@@ -199,7 +199,7 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
   const referralCodeLines = enrollment.referralCode
     ? [
         `Your referral code: ${enrollment.referralCode}`,
-        "Share it with anyone considering CNA training. They get $100 off their program total, and you receive a $100 check once they attend the first day of theory.",
+        "Share it with anyone considering CNA training. They get $100 off their program total, and you receive a $100 check once both of you fully attend your designated first week of theory.",
       ]
     : [];
 

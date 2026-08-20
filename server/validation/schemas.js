@@ -314,6 +314,13 @@ export const adminResourceIdSchema = slugString;
 export const referralRewardIdSchema = z.string().uuid();
 
 // The check number is what ties a paid reward back to the bank record.
+export const referralForfeitSchema = z
+  .object({
+    reason: optionalString(200),
+    scope: z.enum(["single", "all-for-referrer"]).default("single"),
+  })
+  .strict();
+
 export const referralPayoutSchema = z
   .object({
     payoutReference: optionalString(60),

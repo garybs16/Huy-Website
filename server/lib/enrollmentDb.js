@@ -315,6 +315,13 @@ export class EnrollmentDatabase {
     // Rewards are paid by check, so the audit trail needs the check number rather
     // than a transfer id. Added separately for databases created before this change.
     addColumnIfMissing(this.db, "referral_rewards", "payout_reference", "TEXT");
+    // Both sides must fully attend their first week of theory. attendance_confirmed_at
+    // covers the referred student; the referrer is tracked separately because a
+    // graduate referring a friend has no cohort week of their own to attend.
+    addColumnIfMissing(this.db, "referral_rewards", "referrer_attendance_confirmed_at", "TEXT");
+    addColumnIfMissing(this.db, "referral_rewards", "referrer_attendance_required", "INTEGER NOT NULL DEFAULT 1");
+    addColumnIfMissing(this.db, "referral_rewards", "forfeited_at", "TEXT");
+    addColumnIfMissing(this.db, "referral_rewards", "forfeit_reason", "TEXT");
 
     this.db.exec(`
       UPDATE cohorts
@@ -1635,6 +1642,10 @@ export class EnrollmentDatabase {
           paid_at AS paidAt,
           stripe_transfer_id AS stripeTransferId,
           payout_reference AS payoutReference,
+          referrer_attendance_confirmed_at AS referrerAttendanceConfirmedAt,
+          referrer_attendance_required AS referrerAttendanceRequired,
+          forfeited_at AS forfeitedAt,
+          forfeit_reason AS forfeitReason,
           created_at AS createdAt,
           updated_at AS updatedAt
         FROM referral_rewards
@@ -1655,6 +1666,11 @@ export class EnrollmentDatabase {
           r.paid_at AS paidAt,
           r.stripe_transfer_id AS stripeTransferId,
           r.payout_reference AS payoutReference,
+          r.referrer_attendance_confirmed_at AS referrerAttendanceConfirmedAt,
+          r.referrer_attendance_required AS referrerAttendanceRequired,
+          r.forfeited_at AS forfeitedAt,
+          r.forfeit_reason AS forfeitReason,
+          r.referrer_enrollment_id AS referrerEnrollmentId,
           r.created_at AS createdAt,
           referrer.student_full_name AS referrerName,
           referrer.email AS referrerEmail,
@@ -1672,20 +1688,89 @@ export class EnrollmentDatabase {
 
   // "The referrer reward is issued only after the referred student attends the first
   // day of the theory cohort." Confirming attendance is what makes a reward payable.
-  confirmReferralAttendance(rewardId) {
+  // A reward becomes payable only once every required party has fully attended their
+  // first week of theory. The referrer's attendance is skipped when they have no
+  // cohort of their own, which is the "(if applicable)" case in the published rules.
+  recomputeReferralPayable(rewardId) {
     this.db
       .prepare(`
         UPDATE referral_rewards
-        SET
-          status = 'payable',
-          attendance_confirmed_at = COALESCE(attendance_confirmed_at, @now),
-          updated_at = @now
+        SET status = 'payable', updated_at = @now
         WHERE id = @rewardId
           AND status = 'pending'
+          AND attendance_confirmed_at IS NOT NULL
+          AND (referrer_attendance_required = 0 OR referrer_attendance_confirmed_at IS NOT NULL)
       `)
       .run({ rewardId, now: nowIso() });
 
     return this.getReferralRewardById(rewardId);
+  }
+
+  confirmReferralAttendance(rewardId) {
+    this.db
+      .prepare(`
+        UPDATE referral_rewards
+        SET attendance_confirmed_at = COALESCE(attendance_confirmed_at, @now), updated_at = @now
+        WHERE id = @rewardId AND status = 'pending'
+      `)
+      .run({ rewardId, now: nowIso() });
+
+    return this.recomputeReferralPayable(rewardId);
+  }
+
+  confirmReferrerAttendance(rewardId) {
+    this.db
+      .prepare(`
+        UPDATE referral_rewards
+        SET referrer_attendance_confirmed_at = COALESCE(referrer_attendance_confirmed_at, @now), updated_at = @now
+        WHERE id = @rewardId AND status = 'pending'
+      `)
+      .run({ rewardId, now: nowIso() });
+
+    return this.recomputeReferralPayable(rewardId);
+  }
+
+  // For a referrer who is a graduate, with no first week of their own to attend.
+  waiveReferrerAttendance(rewardId) {
+    this.db
+      .prepare(`
+        UPDATE referral_rewards
+        SET referrer_attendance_required = 0, updated_at = @now
+        WHERE id = @rewardId AND status = 'pending'
+      `)
+      .run({ rewardId, now: nowIso() });
+
+    return this.recomputeReferralPayable(rewardId);
+  }
+
+  // "If the referred students do not attend fully the first week... the referring
+  // student will also lose their referral bonus for that particular referred student."
+  forfeitReferralReward(rewardId, reason) {
+    this.db
+      .prepare(`
+        UPDATE referral_rewards
+        SET status = 'forfeited', forfeited_at = @now, forfeit_reason = @reason, updated_at = @now
+        WHERE id = @rewardId AND status IN ('pending', 'payable')
+      `)
+      .run({ rewardId, reason: reason ?? null, now: nowIso() });
+
+    return this.getReferralRewardById(rewardId);
+  }
+
+  // "If the referring students do not attend fully their designated first week...
+  // they lose all the $$ from the referral they shared." Already-paid rewards are
+  // left alone; money that has gone out is not clawed back here.
+  forfeitAllRewardsForReferrer(referrerEnrollmentId, reason) {
+    const result = this.db
+      .prepare(`
+        UPDATE referral_rewards
+        SET status = 'forfeited', forfeited_at = @now, forfeit_reason = @reason, updated_at = @now
+        WHERE referrer_enrollment_id = @referrerEnrollmentId
+          AND status IN ('pending', 'payable')
+      `)
+      .run({ referrerEnrollmentId, reason: reason ?? null, now: nowIso() });
+
+    return { forfeited: result.changes };
   }
 
   // Rewards go out as checks, so payoutReference carries the check number. The
@@ -1722,6 +1807,10 @@ export class EnrollmentDatabase {
           paid_at AS paidAt,
           stripe_transfer_id AS stripeTransferId,
           payout_reference AS payoutReference,
+          referrer_attendance_confirmed_at AS referrerAttendanceConfirmedAt,
+          referrer_attendance_required AS referrerAttendanceRequired,
+          forfeited_at AS forfeitedAt,
+          forfeit_reason AS forfeitReason,
           created_at AS createdAt,
           updated_at AS updatedAt
         FROM referral_rewards

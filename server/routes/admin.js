@@ -20,6 +20,7 @@ import {
   adminLoginSchema,
   adminProgramSchema,
   adminResourceIdSchema,
+  referralForfeitSchema,
   referralPayoutSchema,
   referralRewardIdSchema,
 } from "../validation/schemas.js";
@@ -264,24 +265,96 @@ export function createAdminRouter({
         return res.status(404).json({ error: "Referral reward not found." });
       }
 
-      const reward = enrollmentDb.confirmReferralAttendance(parsedId.data);
+      const party = req.body?.party === "referrer" ? "referrer" : "referred";
+      const existing = enrollmentDb.getReferralRewardById(parsedId.data);
 
-      if (!reward) {
+      if (!existing) {
         return res.status(404).json({ error: "Referral reward not found." });
       }
 
-      if (reward.status === "pending") {
-        return res.status(409).json({ error: "Referral reward could not be confirmed." });
+      if (existing.status !== "pending") {
+        return res.status(409).json({ error: "Only a pending referral reward can be confirmed." });
       }
+
+      // Both sides must fully attend their first week, so a single confirmation may
+      // leave the reward pending until the other side is recorded.
+      const reward =
+        party === "referrer"
+          ? enrollmentDb.confirmReferrerAttendance(parsedId.data)
+          : enrollmentDb.confirmReferralAttendance(parsedId.data);
 
       writeAdminAuditEvent(
         enrollmentDb,
         req,
         "referral.attendance.confirmed",
-        `Referral ${reward.referralCode} confirmed for payout.`
+        `Referral ${reward.referralCode}: ${party} first week confirmed (now ${reward.status}).`
       );
 
       return res.json(reward);
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  // The referrer has no first week of their own, so only the referred student's
+  // attendance gates the reward.
+  router.post("/referrals/:id/waive-referrer-attendance", (req, res, next) => {
+    try {
+      const parsedId = referralRewardIdSchema.safeParse(req.params.id);
+
+      if (!parsedId.success || !enrollmentDb.getReferralRewardById(parsedId.data)) {
+        return res.status(404).json({ error: "Referral reward not found." });
+      }
+
+      const reward = enrollmentDb.waiveReferrerAttendance(parsedId.data);
+      writeAdminAuditEvent(
+        enrollmentDb,
+        req,
+        "referral.referrer_attendance.waived",
+        `Referral ${reward.referralCode}: referrer attendance not applicable (now ${reward.status}).`
+      );
+
+      return res.json(reward);
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  router.post("/referrals/:id/forfeit", (req, res, next) => {
+    try {
+      const parsedId = referralRewardIdSchema.safeParse(req.params.id);
+      const existing = parsedId.success ? enrollmentDb.getReferralRewardById(parsedId.data) : null;
+
+      if (!existing) {
+        return res.status(404).json({ error: "Referral reward not found." });
+      }
+
+      if (existing.status === "paid") {
+        return res.status(409).json({ error: "This referral reward was already paid." });
+      }
+
+      const payload = referralForfeitSchema.parse(req.body ?? {});
+      const reason = payload.reason ?? "First-week attendance not completed.";
+
+      // A referrer who does not complete their own first week loses every reward
+      // they have not already been paid, not just this one.
+      const cascade = payload.scope === "all-for-referrer";
+      const result = cascade
+        ? enrollmentDb.forfeitAllRewardsForReferrer(existing.referrerEnrollmentId, reason)
+        : { forfeited: 1 };
+
+      if (!cascade) {
+        enrollmentDb.forfeitReferralReward(parsedId.data, reason);
+      }
+
+      writeAdminAuditEvent(
+        enrollmentDb,
+        req,
+        "referral.reward.forfeited",
+        `Referral ${existing.referralCode} forfeited (${cascade ? `${result.forfeited} rewards` : "1 reward"}): ${reason}`
+      );
+
+      return res.json({ forfeited: result.forfeited, reward: enrollmentDb.getReferralRewardById(parsedId.data) });
     } catch (error) {
       return next(error);
     }

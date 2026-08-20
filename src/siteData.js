@@ -106,7 +106,7 @@ export const rewardsGuidanceItems = [
   {
     title: "Referral Incentives",
     detail:
-      "Referred students may receive a $100 tuition credit, and eligible referrers may receive a $100 reward after first-day attendance is confirmed.",
+      "Referred students may receive a $100 tuition credit, and eligible referrers may receive a $100 reward after first-week attendance is confirmed for both students.",
   },
   {
     title: "Retention Incentives",
@@ -130,18 +130,21 @@ export const referralProgramSteps = [
   "The student shares the referral code with someone interested in CNA training.",
   "The referred student enters the referral code during enrollment.",
   "The referred student receives a $100 tuition credit applied to their payment plan.",
-  "One week after the theory cohort start date, the referrer may receive a $100 referral reward if the referred student attends the first day of the theory cohort.",
+  "One week after the theory cohort start date, the referring student may receive a $100 referral reward only if the referred student, and the referring student where applicable, fully attend their designated first week of the theory cohort.",
 ];
 
 export const referralRules = [
   "Each enrolled student may receive one personal referral code.",
-  "Referral codes may remain active after graduation unless program terms change.",
+  "Referral codes may remain active for 5 years after graduation.",
   "A referred student may use only one referral code.",
-  "Referral codes must be submitted before or during enrollment. Retroactive referral claims may not be accepted.",
+  "Referral codes must be provided before or at the time of enrollment. Retroactive referral claims may not be accepted.",
   "Students may not refer themselves.",
   "Eligible referrers may refer more than one qualified student.",
-  "Referral rewards apply to new students who meet program eligibility requirements.",
-  "The referrer reward is issued only after the referred student attends the first day of the theory cohort.",
+  "The referrer reward is issued only after the referred student, and the referring student where applicable, fully attend their designated first week of the theory cohort.",
+  "If a referring student does not fully attend their designated first week, or cancels or withdraws before completing that week, they lose every referral reward they have not already been paid.",
+  "If a referred student does not fully attend the first week, or withdraws before completing it, the referring student loses the reward for that particular referred student.",
+  "The referred student $100 credit is applied toward tuition only.",
+  "First Step Healthcare Academy may verify eligibility, deny duplicate or ineligible referrals, modify referral terms, or discontinue the referral program at any time.",
 ];
 
 export const retentionMilestones = [

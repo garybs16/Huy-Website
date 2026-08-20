@@ -14,6 +14,8 @@ import {
   getAdminReferrals,
   confirmAdminReferralAttendance,
   markAdminReferralPaid,
+  waiveAdminReferrerAttendance,
+  forfeitAdminReferral,
   getAdminEnrollments,
   getAdminExport,
   getAdminInquiries,
@@ -878,10 +880,24 @@ function App() {
     }
   };
 
-  const handleConfirmReferralAttendance = (rewardId) =>
+  const handleConfirmReferralAttendance = (rewardId, party) =>
     runReferralAction(
-      (key) => confirmAdminReferralAttendance(key, rewardId),
-      "Attendance confirmed. The $100 referral check is now payable."
+      (key) => confirmAdminReferralAttendance(key, rewardId, party),
+      "First-week attendance recorded."
+    );
+
+  const handleWaiveReferrerAttendance = (rewardId) =>
+    runReferralAction(
+      (key) => waiveAdminReferrerAttendance(key, rewardId),
+      "Referrer attendance marked as not applicable."
+    );
+
+  const handleForfeitReferral = (rewardId, reason, scope) =>
+    runReferralAction(
+      (key) => forfeitAdminReferral(key, rewardId, reason, scope),
+      scope === "all-for-referrer"
+        ? "All unpaid rewards for this referrer were forfeited."
+        : "Referral reward forfeited."
     );
 
   const handleMarkReferralPaid = (rewardId, payoutReference) =>
@@ -1063,6 +1079,8 @@ function App() {
                   adminReferrals={adminReferrals}
                   onConfirmReferralAttendance={handleConfirmReferralAttendance}
                   onMarkReferralPaid={handleMarkReferralPaid}
+                  onWaiveReferrerAttendance={handleWaiveReferrerAttendance}
+                  onForfeitReferral={handleForfeitReferral}
                   onAdminKeyChange={setAdminKey}
                   onAdminUsernameChange={setAdminUsername}
                   onAdminPasswordChange={setAdminPassword}
