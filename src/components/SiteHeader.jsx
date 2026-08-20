@@ -66,7 +66,6 @@ export function SiteHeader({ navItems }) {
           <img className="brand-icon-image" src={academyLogoMark} alt="" aria-hidden="true" />
           <div className="brand-copy">
             <strong className="brand-title">{contactDetails.brand}</strong>
-            <span className="brand-subtitle">Healthcare training with a clear next step</span>
           </div>
         </Link>
 
