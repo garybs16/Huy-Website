@@ -14,11 +14,14 @@ import {
 } from "../lib/adminSecurity.js";
 import { requireAdminAccess } from "../middleware/requireAdminAccess.js";
 import { preventSensitiveCaching } from "../middleware/securityHeaders.js";
+import { REFERRAL_REWARD_CENTS } from "../lib/referrals.js";
 import {
   adminCohortSchema,
   adminLoginSchema,
   adminProgramSchema,
   adminResourceIdSchema,
+  referralPayoutSchema,
+  referralRewardIdSchema,
 } from "../validation/schemas.js";
 
 function buildSessionPayload({
@@ -242,6 +245,87 @@ export function createAdminRouter({
 
   router.get("/overview", (_req, res) => {
     res.json(enrollmentDb.getAdminOverview());
+  });
+
+  router.get("/referrals", (_req, res) => {
+    res.json({
+      rewardAmountCents: REFERRAL_REWARD_CENTS,
+      items: enrollmentDb.listReferralRewards(),
+    });
+  });
+
+  // The published rule is that a reward is earned once the referred student attends
+  // the first day of theory. Confirming that here is what makes the check payable.
+  router.post("/referrals/:id/confirm-attendance", (req, res, next) => {
+    try {
+      const parsedId = referralRewardIdSchema.safeParse(req.params.id);
+
+      if (!parsedId.success) {
+        return res.status(404).json({ error: "Referral reward not found." });
+      }
+
+      const reward = enrollmentDb.confirmReferralAttendance(parsedId.data);
+
+      if (!reward) {
+        return res.status(404).json({ error: "Referral reward not found." });
+      }
+
+      if (reward.status === "pending") {
+        return res.status(409).json({ error: "Referral reward could not be confirmed." });
+      }
+
+      writeAdminAuditEvent(
+        enrollmentDb,
+        req,
+        "referral.attendance.confirmed",
+        `Referral ${reward.referralCode} confirmed for payout.`
+      );
+
+      return res.json(reward);
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  router.post("/referrals/:id/mark-paid", (req, res, next) => {
+    try {
+      const parsedId = referralRewardIdSchema.safeParse(req.params.id);
+
+      if (!parsedId.success) {
+        return res.status(404).json({ error: "Referral reward not found." });
+      }
+
+      const payload = referralPayoutSchema.parse(req.body ?? {});
+      const existing = enrollmentDb.getReferralRewardById(parsedId.data);
+
+      if (!existing) {
+        return res.status(404).json({ error: "Referral reward not found." });
+      }
+
+      if (existing.status !== "payable") {
+        return res.status(409).json({
+          error:
+            existing.status === "paid"
+              ? "This referral reward was already paid."
+              : "Confirm first-day attendance before recording a check.",
+        });
+      }
+
+      const reward = enrollmentDb.markReferralRewardPaid(parsedId.data, {
+        payoutReference: payload.payoutReference ?? null,
+      });
+
+      writeAdminAuditEvent(
+        enrollmentDb,
+        req,
+        "referral.reward.paid",
+        `Referral ${reward.referralCode} paid by check ${reward.payoutReference ?? "(no number recorded)"}.`
+      );
+
+      return res.json(reward);
+    } catch (error) {
+      return next(error);
+    }
   });
 
   router.get("/export", (req, res) => {

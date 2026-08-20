@@ -211,10 +211,16 @@ test("a reward stays pending until attendance is confirmed, then becomes payable
   assert.equal(db.markReferralRewardPaid(rewardId).status, "pending");
 
   assert.equal(db.confirmReferralAttendance(rewardId).status, "payable");
-  const paid = db.markReferralRewardPaid(rewardId, { stripeTransferId: "tr_test_123" });
+  // Rewards go out as checks, so the check number is the audit trail.
+  const paid = db.markReferralRewardPaid(rewardId, { payoutReference: "check 10482" });
   assert.equal(paid.status, "paid");
-  assert.equal(paid.stripeTransferId, "tr_test_123");
+  assert.equal(paid.payoutReference, "check 10482");
   assert.ok(paid.paidAt);
+
+  // Paying twice must not overwrite the original check number or timestamp.
+  const replayed = db.markReferralRewardPaid(rewardId, { payoutReference: "check 99999" });
+  assert.equal(replayed.payoutReference, "check 10482");
+  assert.equal(replayed.paidAt, paid.paidAt);
 
   // One reward per referred student, no matter how often the event is replayed.
   db.createReferralReward({

@@ -310,3 +310,12 @@ export const adminCohortSchema = z
   });
 
 export const adminResourceIdSchema = slugString;
+
+export const referralRewardIdSchema = z.string().uuid();
+
+// The check number is what ties a paid reward back to the bank record.
+export const referralPayoutSchema = z
+  .object({
+    payoutReference: optionalString(60),
+  })
+  .strict();

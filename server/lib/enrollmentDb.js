@@ -298,6 +298,7 @@ export class EnrollmentDatabase {
         attendance_confirmed_at TEXT,
         paid_at TEXT,
         stripe_transfer_id TEXT,
+        payout_reference TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         FOREIGN KEY (referrer_enrollment_id) REFERENCES enrollments(id) ON DELETE CASCADE,
@@ -310,6 +311,10 @@ export class EnrollmentDatabase {
       CREATE INDEX IF NOT EXISTS idx_referral_rewards_status
         ON referral_rewards(status);
     `);
+
+    // Rewards are paid by check, so the audit trail needs the check number rather
+    // than a transfer id. Added separately for databases created before this change.
+    addColumnIfMissing(this.db, "referral_rewards", "payout_reference", "TEXT");
 
     this.db.exec(`
       UPDATE cohorts
@@ -1629,6 +1634,7 @@ export class EnrollmentDatabase {
           attendance_confirmed_at AS attendanceConfirmedAt,
           paid_at AS paidAt,
           stripe_transfer_id AS stripeTransferId,
+          payout_reference AS payoutReference,
           created_at AS createdAt,
           updated_at AS updatedAt
         FROM referral_rewards
@@ -1648,6 +1654,7 @@ export class EnrollmentDatabase {
           r.attendance_confirmed_at AS attendanceConfirmedAt,
           r.paid_at AS paidAt,
           r.stripe_transfer_id AS stripeTransferId,
+          r.payout_reference AS payoutReference,
           r.created_at AS createdAt,
           referrer.student_full_name AS referrerName,
           referrer.email AS referrerEmail,
@@ -1681,19 +1688,22 @@ export class EnrollmentDatabase {
     return this.getReferralRewardById(rewardId);
   }
 
-  markReferralRewardPaid(rewardId, { stripeTransferId = null } = {}) {
+  // Rewards go out as checks, so payoutReference carries the check number. The
+  // status guard means a reward can only be paid after attendance was confirmed.
+  markReferralRewardPaid(rewardId, { payoutReference = null, stripeTransferId = null } = {}) {
     this.db
       .prepare(`
         UPDATE referral_rewards
         SET
           status = 'paid',
           paid_at = COALESCE(paid_at, @now),
+          payout_reference = COALESCE(@payoutReference, payout_reference),
           stripe_transfer_id = COALESCE(@stripeTransferId, stripe_transfer_id),
           updated_at = @now
         WHERE id = @rewardId
           AND status = 'payable'
       `)
-      .run({ rewardId, stripeTransferId, now: nowIso() });
+      .run({ rewardId, payoutReference, stripeTransferId, now: nowIso() });
 
     return this.getReferralRewardById(rewardId);
   }
@@ -1711,6 +1721,7 @@ export class EnrollmentDatabase {
           attendance_confirmed_at AS attendanceConfirmedAt,
           paid_at AS paidAt,
           stripe_transfer_id AS stripeTransferId,
+          payout_reference AS payoutReference,
           created_at AS createdAt,
           updated_at AS updatedAt
         FROM referral_rewards

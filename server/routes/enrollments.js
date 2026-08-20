@@ -293,6 +293,9 @@ export function createEnrollmentsRouter({
       lastPaymentFailureAt: enrollment.lastPaymentFailureAt,
       paidAt: enrollment.paidAt,
       seatHoldExpiresAt: enrollment.seatHoldExpiresAt,
+      referralCode: enrollment.referralCode,
+      referredByCode: enrollment.referredByCode,
+      referralCreditCents: enrollment.referralCreditCents,
     });
   });
 
@@ -497,6 +500,8 @@ export function createEnrollmentsRouter({
         checkoutUrl: session.url,
         checkoutClientSecret: session.client_secret,
         checkoutExpiresAt: pendingEnrollment.seatHoldExpiresAt,
+        referralCode: pendingEnrollment.referralCode,
+        referralCreditCents: pendingEnrollment.referralCreditCents,
       });
     } catch (error) {
       if (error.message === "This cohort is full. Please choose another class date.") {
