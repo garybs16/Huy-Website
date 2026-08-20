@@ -14,8 +14,8 @@ export const cohortCatalogSeed = [
     id: "cna-weekday-apr-2026",
     programId: "cna",
     title: "Weekday Cohort",
-    startDate: "2026-04-20",
-    endDate: "2026-05-18",
+    startDate: "2026-10-19",
+    endDate: "2026-11-13",
     scheduleLabel: "Weekday",
     meetingPattern:
       "Online theory: Monday–Friday | 5:00 PM–9:00 PM | 3 weeks; Clinical: Monday–Friday | 7:00 AM–3:30 PM | 3 weeks; Clinical-site city: Anaheim, California",

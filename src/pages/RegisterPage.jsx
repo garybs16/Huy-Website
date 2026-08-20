@@ -125,7 +125,7 @@ export function RegisterPage({
               <h3>{selectedCohort.title}</h3>
               <ul className="detail-list">
                 <li>{selectedCohort.programTitle}</li>
-                <li>Dates: Coming soon</li>
+                <li>Dates: {selectedCohort.startDate} to {selectedCohort.endDate}</li>
                 <li>Program length: 6 weeks (60 hours theory + 100 hours clinical)</li>
                 <li>Schedule: {selectedCohort.meetingPattern}</li>
                 <li>Program total: {selectedCohort.tuitionLabel}</li>
@@ -262,7 +262,7 @@ export function RegisterPage({
                   </option>
                   {filteredCohorts.map((cohort) => (
                     <option key={cohort.id} value={cohort.id} disabled={cohort.remainingSeats <= 0}>
-                      {`${cohort.title} | Coming soon | ${cohort.remainingSeats} seats left`}
+                      {`${cohort.title} | ${cohort.startDate} to ${cohort.endDate} | ${cohort.remainingSeats} seats left`}
                     </option>
                   ))}
                 </select>

@@ -5,10 +5,10 @@ const WEEKDAY_COHORT_ID = "cna-weekday-apr-2026";
 
 const weekdayCohortContent = {
   programTitle: "Certified Nurse Assistant Training Program",
-  programDates: "Coming soon",
+  programDates: "October 19 – November 13, 2026",
   programLength: "6 weeks",
-  onlineTheorySchedule: "Monday–Friday | 5:00 PM–9:00 PM | 3 weeks",
-  clinicalSchedule: "Monday–Friday | 7:00 AM–3:30 PM | 3 weeks",
+  onlineTheorySchedule: "October 19 – October 30, 2026 | Monday–Friday | 5:00 PM–9:00 PM | 3 weeks",
+  clinicalSchedule: "November 2 – November 13, 2026 | Monday–Friday | 7:00 AM–3:30 PM | 3 weeks",
   clinicalSiteCity: "Anaheim, California",
 };
 
@@ -40,7 +40,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
         title="Compare upcoming CNA cohorts."
         description="Compare current CNA cohorts by schedule format and tuition so students can identify the right track before they register."
         accent="Real class visibility"
-        note="Exact public cohort dates are coming soon while approved calendars are finalized."
+        note="Weekday cohort dates are confirmed: theory runs October 19–30, 2026, and clinical runs November 2–13, 2026."
       />
 
       <div className="container">
@@ -71,7 +71,7 @@ export function SchedulePage({ cohorts, cohortLoadError }) {
                   </>
                 ) : (
                   <>
-                    <li>Dates: Coming soon</li>
+                    <li>Dates: {cohort.startDate} to {cohort.endDate}</li>
                     <li>Schedule: {cohort.meetingPattern}</li>
                   </>
                 )}

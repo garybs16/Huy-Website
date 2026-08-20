@@ -464,7 +464,7 @@ export const faqItems = [
   {
     question: "Do published cohort dates stay fixed?",
     answer:
-      "Public cohort dates are currently marked coming soon while the school finalizes approved calendars and clinical logistics.",
+      "The weekday cohort is confirmed: theory runs October 19–30, 2026, and clinical runs November 2–13, 2026. Admissions contacts enrolled students directly if an approved calendar or clinical placement has to shift.",
   },
   {
     question: "What usually slows down enrollment?",

@@ -109,10 +109,9 @@ function buildCheckoutDetails({ enrollment, program, cohort, pricing, purpose })
   const amountCents = isBalancePayment ? enrollment.balanceDueCents : pricing.paymentAmountCents;
   const amountLabel = formatMoney(amountCents);
 
-  const programDatesLabel =
-    cohort.id === "cna-weekday-apr-2026"
-      ? "Program dates: Coming soon"
-      : `${cohort.startDate} to ${cohort.endDate}`;
+  // Dates are confirmed for every published cohort, so checkout shows the real
+  // range rather than the placeholder the weekday cohort used to carry.
+  const programDatesLabel = `${cohort.startDate} to ${cohort.endDate}`;
 
   return {
     amountCents,
