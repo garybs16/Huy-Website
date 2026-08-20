@@ -1,12 +1,13 @@
 import { cohortCatalogSeed, programCatalogSeed } from "../shared/catalogSeed";
 
+// Four items is what fits on one row inside the 1280px container once the brand
+// lockup and the two header buttons take their share. Schedule stays reachable
+// through the View Schedule button, and contact through the top strip and footer.
 export const navItems = [
   { label: "Home", to: "/" },
   { label: "CNA Program", to: "/programs" },
-  { label: "Class Dates", to: "/schedule" },
   { label: "Career Quiz", to: "/career-quiz" },
   { label: "Rewards & Guidance", to: "/rewards-guidance" },
-  { label: "Contact Us", to: "/contact" },
 ];
 
 export const contactDetails = {
