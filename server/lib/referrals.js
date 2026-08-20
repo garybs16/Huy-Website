@@ -43,6 +43,16 @@ export function isReferralCodeShaped(value) {
   return normalizeReferralCode(value) !== null;
 }
 
+// A code is issued the moment an enrollment row is created, before anyone has paid
+// anything, so the row it points at can still die: the Stripe session expires unused,
+// or the session could never be created at all. Neither of those referrers ever became
+// a real prospective student, and releaseExpiredSeatHolds() guarantees every abandoned
+// enrollment converges to one of these two states within one seat-hold window -- so
+// this set reliably catches an abandoned cart without a delay window of its own.
+// installment_failed is deliberately absent: that referrer already has a payment plan
+// running, which is exactly the kind of real enrollment this program is meant to reward.
+const DEAD_REFERRER_PAYMENT_STATUSES = new Set(["checkout_expired", "payment_failed"]);
+
 /**
  * Applies the published referral rules to a submitted code.
  *
@@ -56,7 +66,7 @@ export function evaluateReferralCode({ submittedCode, referrer, referredEmail })
     return { ok: false, reason: "That referral code is not a valid code. Check the code and try again." };
   }
 
-  if (!referrer) {
+  if (!referrer || DEAD_REFERRER_PAYMENT_STATUSES.has(referrer.paymentStatus)) {
     return { ok: false, reason: "That referral code was not found. Check the code and try again." };
   }
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createEmailer, sendInquiryEmails } from "../server/lib/email.js";
+import { createEmailer, sendInquiryEmails, sendPaymentFailedEmails } from "../server/lib/email.js";
 
 test("guide requests produce an encouraging email with both PDF attachments", async () => {
   const messages = [];
@@ -78,4 +78,65 @@ test("Resend payload contains valid Base64 PDF attachments", async () => {
     assert.match(attachment.content, /^[A-Za-z0-9+/]+=*$/);
     assert.equal(Buffer.from(attachment.content, "base64").subarray(0, 4).toString("ascii"), "%PDF");
   }
+});
+
+test("a failed biweekly installment tells the student biweekly, not weekly", async () => {
+  const messages = [];
+  const emailer = {
+    enabled: true,
+    adminEmail: "admissions@example.com",
+    async send(message) {
+      messages.push(message);
+      return true;
+    },
+  };
+
+  await sendPaymentFailedEmails(emailer, {
+    enrollment: {
+      id: "enrollment-biweekly-1",
+      studentFullName: "Jordan Student",
+      email: "jordan@example.com",
+      paymentOption: "biweekly",
+      paymentAmountCents: 29_166,
+      balanceDueCents: 145_830,
+    },
+    program: { title: "CNA Program" },
+    cohort: { title: "Weekday Cohort" },
+    amountDueCents: 29_166,
+    invoiceUrl: null,
+  });
+
+  const studentEmail = messages.find((message) => message.to === "jordan@example.com");
+  assert.match(studentEmail.text, /\$291\.66 biweekly payment/);
+  assert.doesNotMatch(studentEmail.text, /[^i]weekly payment/);
+});
+
+test("a failed weekly installment still says weekly", async () => {
+  const messages = [];
+  const emailer = {
+    enabled: true,
+    adminEmail: "admissions@example.com",
+    async send(message) {
+      messages.push(message);
+      return true;
+    },
+  };
+
+  await sendPaymentFailedEmails(emailer, {
+    enrollment: {
+      id: "enrollment-weekly-1",
+      studentFullName: "Jordan Student",
+      email: "jordan@example.com",
+      paymentOption: "weekly",
+      paymentAmountCents: 14_583,
+      balanceDueCents: 87_498,
+    },
+    program: { title: "CNA Program" },
+    cohort: { title: "Weekday Cohort" },
+    amountDueCents: 14_583,
+    invoiceUrl: null,
+  });
+
+  const studentEmail = messages.find((message) => message.to === "jordan@example.com");
+  assert.match(studentEmail.text, /\$145\.83 weekly payment/);
 });

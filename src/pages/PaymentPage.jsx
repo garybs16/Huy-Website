@@ -30,13 +30,25 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+// The confirmation email is the only other place this code appears, and email delivery
+// can fail silently (a bad address, a provider outage) with nothing to retell the student.
+// Repeating it here, right after Stripe hands them back to a page they're already looking
+// at, gives it a second channel that doesn't depend on an inbox.
+function referralShareLine(enrollment) {
+  if (!enrollment.referralCode) {
+    return "";
+  }
+
+  return ` Your referral code is ${enrollment.referralCode} — share it and you'll receive a $100 check once you and the student you refer both fully attend your first week of theory.`;
+}
+
 function buildCheckoutMessage(enrollment) {
   if (enrollment.paymentStatus === "paid") {
-    return `Payment received. Enrollment ${enrollment.enrollmentId} is paid in full.`;
+    return `Payment received. Enrollment ${enrollment.enrollmentId} is paid in full.${referralShareLine(enrollment)}`;
   }
 
   if (enrollment.paymentStatus === "payment_plan_active") {
-    return `Weekly plan active: ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} payments complete. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}. Next automatic payment: ${formatDate(enrollment.nextPaymentDueAt)}.`;
+    return `Weekly plan active: ${enrollment.paymentInstallmentsPaid} of ${enrollment.paymentInstallmentsTotal} payments complete. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}. Next automatic payment: ${formatDate(enrollment.nextPaymentDueAt)}.${referralShareLine(enrollment)}`;
   }
 
   if (enrollment.paymentStatus === "installment_failed") {
@@ -44,7 +56,7 @@ function buildCheckoutMessage(enrollment) {
   }
 
   if (enrollment.paymentStatus === "deposit_paid") {
-    return `Deposit received. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}.`;
+    return `Deposit received. Remaining balance: ${formatMoney(enrollment.balanceDueCents)}.${referralShareLine(enrollment)}`;
   }
 
   if (enrollment.paymentStatus === "checkout_expired") {

@@ -394,9 +394,12 @@ export function sendPaymentFailedEmails(emailer, { enrollment, program, cohort, 
   const amountDue = formatMoney(amountDueCents ?? enrollment.paymentAmountCents);
   const programTitle = program?.title ?? enrollment.programId ?? "CNA program";
   const cohortTitle = cohort?.title ?? enrollment.cohortId ?? "selected cohort";
+  // This fires for both plans, and telling a biweekly student their "weekly payment"
+  // failed reads as a wrong plan on the account rather than a wording slip.
+  const cadence = enrollment.paymentOption === "biweekly" ? "biweekly" : "weekly";
   const studentLines = [
     `Hi ${enrollment.studentFullName},`,
-    `Stripe could not collect your scheduled ${amountDue} weekly payment.`,
+    `Stripe could not collect your scheduled ${amountDue} ${cadence} payment.`,
     `Enrollment ID: ${enrollment.id}`,
     `Program: ${programTitle}`,
     `Cohort: ${cohortTitle}`,

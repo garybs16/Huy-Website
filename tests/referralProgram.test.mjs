@@ -200,6 +200,49 @@ test("a referred student is found by code and cannot refer themselves", async (t
   assert.match(unknown.reason, /not found/);
 });
 
+test("a code stops working once its own enrollment dies, but keeps working through a live payment plan", async (t) => {
+  const db = await createDb(t);
+
+  // A code is issued the moment the row is created, before anyone has paid anything.
+  // If that student abandons checkout or Stripe never manages to create their session,
+  // their code must stop working -- otherwise it stays redeemable forever, discounting
+  // real students $100 against a referrer who never became a paying prospect.
+  for (const deadStatus of ["checkout_expired", "payment_failed"]) {
+    const code = db.issueReferralCode();
+    seedEnrollment(db, {
+      id: randomUUID(),
+      name: "Abandoned Cart",
+      email: `abandoned-${deadStatus}@example.com`,
+      referralCode: code,
+    });
+    db.db.prepare(`UPDATE enrollments SET payment_status = ? WHERE referral_code = ?`).run(deadStatus, code);
+
+    const referrer = db.getEnrollmentByReferralCode(code);
+    const result = evaluateReferralCode({ submittedCode: code, referrer, referredEmail: "jon@example.com" });
+    assert.equal(result.ok, false, `a ${deadStatus} referrer's code should be rejected`);
+    assert.match(result.reason, /not found/);
+  }
+
+  // installment_failed means a payment plan is running with a hiccup -- that referrer
+  // is a real enrolled student and their code must keep working.
+  const activeCode = db.issueReferralCode();
+  seedEnrollment(db, {
+    id: randomUUID(),
+    name: "Mid Plan",
+    email: "midplan@example.com",
+    referralCode: activeCode,
+  });
+  db.db.prepare(`UPDATE enrollments SET payment_status = 'installment_failed' WHERE referral_code = ?`).run(activeCode);
+
+  const activeReferrer = db.getEnrollmentByReferralCode(activeCode);
+  const activeResult = evaluateReferralCode({
+    submittedCode: activeCode,
+    referrer: activeReferrer,
+    referredEmail: "jon@example.com",
+  });
+  assert.equal(activeResult.ok, true);
+});
+
 test("the $100 credit comes off the deposit and the total, leaving installments unchanged", () => {
   const creditedTuition = 200_000 - REFERRAL_CREDIT_CENTS;
   const creditedDeposit = 25_000 - REFERRAL_CREDIT_CENTS;
