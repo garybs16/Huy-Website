@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import heroTraining from "../assets/hero-training-photo-v2.jpg";
-import supportTrainingPhoto from "../assets/hero-training-photo.jpg";
 import cnaGuideCover from "../assets/cna-career-starter-guide.png";
 import pathwayGuideCover from "../assets/oc-nursing-pathway-guide.png";
 import { TurnstileWidget, isTurnstileEnabled } from "../components/TurnstileWidget";
@@ -12,7 +11,6 @@ import {
   programMeta,
   requirementItems,
   tuitionItems,
-  trustProofItems,
   workforceProjectionStats,
 } from "../siteData";
 
@@ -54,20 +52,6 @@ export function HomePage({ programs }) {
     { value: "Free Guides", label: "OC Nursing Pathway + CNA Career Starter" },
   ];
   const quizThemes = ["Purpose", "Stability", "Growth", "Independence"];
-  const homeSupportItems = [
-    {
-      title: "Referral Incentives",
-      detail: "Eligible students can earn a $100 tuition credit through the referral program.",
-    },
-    {
-      title: "Study Toolkit",
-      detail: "Use practical guides, checklists, and exam-review resources throughout training.",
-    },
-    {
-      title: "Career Guidance",
-      detail: "Get support with job readiness and planning your next healthcare step.",
-    },
-  ];
   const sectorRows = industryGrowthRows.filter((row) => row.label !== "Total wage and salary employment");
   const maxJobsChange = Math.max(...sectorRows.map((row) => parseJobsChange(row.change)));
 
@@ -278,53 +262,6 @@ export function HomePage({ programs }) {
             >
               Source: U.S. Bureau of Labor Statistics, Monthly Labor Review, 2024-34 projections
             </a>
-          </div>
-        </div>
-      </section>
-
-      <section className="section visual-story-section">
-        <div className="container visual-story-showcase">
-            <div className="visual-story-media visual-story-media-single">
-              <img src={supportTrainingPhoto} alt="CNA instructor guiding students through patient-care skills training" loading="lazy" decoding="async" />
-            </div>
-
-          <div className="visual-story-copy">
-            <p className="section-kicker">Rewards & Guidance</p>
-            <h2>Support that helps students keep moving before, during, and after training.</h2>
-            <div className="support-feature-list">
-              {homeSupportItems.map((item) => (
-                <article key={item.title} className="support-card">
-                  <h3>{item.title}</h3>
-                  <p>{item.detail}</p>
-                </article>
-              ))}
-            </div>
-            <Link to="/rewards-guidance" className="card-action-link">
-              Rewards & Guidance
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="section modern-trust-section" id="about-us">
-        <div className="container modern-trust-layout">
-          <div className="modern-trust-copy">
-            <p className="section-kicker">About First Step</p>
-            <h2>Built for students who want a clear, supported start in healthcare.</h2>
-            <p>
-              First Step Healthcare Academy combines practical CNA training, direct admissions
-              guidance, and transparent program details so students and families can make enrollment
-              decisions with more confidence.
-            </p>
-          </div>
-
-          <div className="modern-trust-grid" aria-label="School trust signals">
-            {trustProofItems.map((item) => (
-              <article key={item.title} className="modern-trust-card">
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
           </div>
         </div>
       </section>
