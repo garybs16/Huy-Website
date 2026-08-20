@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { PageIntro } from "../components/PageIntro";
 
+function formatMoney(cents) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(Number(cents ?? 0) / 100);
+}
+
 function formatDateLabel(value) {
   if (!value) {
     return "Not available";
@@ -75,6 +82,66 @@ function toCohortForm(cohort) {
   };
 }
 
+function ReferralRewardRow({ reward, pending, onConfirmAttendance, onMarkPaid }) {
+  const [checkNumber, setCheckNumber] = useState("");
+  const amountLabel = formatMoney(reward.amountCents);
+
+  return (
+    <div className="admin-row">
+      <div>
+        <strong>{reward.referrerName}</strong>
+        <p>{reward.referrerEmail}</p>
+        <span>Code {reward.referralCode}</span>
+      </div>
+      <div>
+        <p>
+          Referred {reward.referredName} ({reward.referredPaymentStatus})
+        </p>
+        <span>{amountLabel} reward | {reward.status}</span>
+        {reward.paidAt ? (
+          <span>
+            Paid {formatDateLabel(reward.paidAt)}
+            {reward.payoutReference ? ` | ${reward.payoutReference}` : ""}
+          </span>
+        ) : null}
+
+        {reward.status === "pending" ? (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={pending}
+            onClick={() => onConfirmAttendance(reward.id)}
+          >
+            Confirm first-day attendance
+          </button>
+        ) : null}
+
+        {reward.status === "payable" ? (
+          <div className="referral-payout-row">
+            <label>
+              <span>Check number</span>
+              <input
+                value={checkNumber}
+                onChange={(event) => setCheckNumber(event.target.value)}
+                maxLength="60"
+                placeholder="e.g. 10482"
+              />
+            </label>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={pending}
+              onClick={() => onMarkPaid(reward.id, checkNumber.trim())}
+            >
+              Record {amountLabel} check
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function AdminPage({
   adminKey,
   adminUsername,
@@ -91,6 +158,9 @@ export function AdminPage({
   adminWaitlist,
   adminPrograms,
   adminCohorts,
+  adminReferrals = [],
+  onConfirmReferralAttendance,
+  onMarkReferralPaid,
   onAdminKeyChange,
   onAdminUsernameChange,
   onAdminPasswordChange,
@@ -653,6 +723,29 @@ export function AdminPage({
                 </div>
               </article>
             </div>
+
+            <article className="info-card">
+              <h3>Referral rewards</h3>
+              <p className="form-helper">
+                A referred student receives $100 off tuition at enrollment. The referrer is owed a
+                $100 check once that student attends the first day of theory.
+              </p>
+              {adminReferrals.length === 0 ? (
+                <p className="section-note">No referral codes have been used yet.</p>
+              ) : (
+                <div className="admin-list">
+                  {adminReferrals.map((item) => (
+                    <ReferralRewardRow
+                      key={item.id}
+                      reward={item}
+                      pending={adminMutationPending}
+                      onConfirmAttendance={onConfirmReferralAttendance}
+                      onMarkPaid={onMarkReferralPaid}
+                    />
+                  ))}
+                </div>
+              )}
+            </article>
 
             <div className="card-grid two-up">
               <article className="info-card">

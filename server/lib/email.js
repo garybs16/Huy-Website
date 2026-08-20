@@ -190,6 +190,19 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
     ? `Next step: complete your payment checkout for ${amountDue}.`
     : `Admissions will contact you about payment. Amount due now: ${amountDue}.`;
 
+  // The code is useless if the student never learns they have one, and this email is
+  // the thing they keep. The credit line only appears when a code was actually used.
+  const referralCreditLine =
+    Number(enrollment.referralCreditCents ?? 0) > 0
+      ? `Referral credit applied: ${formatMoney(enrollment.referralCreditCents)} off your program total.`
+      : "";
+  const referralCodeLines = enrollment.referralCode
+    ? [
+        `Your referral code: ${enrollment.referralCode}`,
+        "Share it with anyone considering CNA training. They get $100 off their program total, and you receive a $100 check once they attend the first day of theory.",
+      ]
+    : [];
+
   const studentLines = [
     `Hi ${enrollment.studentFullName},`,
     "We received your registration for First Step Healthcare Academy.",
@@ -198,8 +211,10 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
     `Cohort: ${cohortTitle}`,
     schedule,
     paymentLine,
+    referralCreditLine,
     enrollment.balanceDueCents > 0 ? `Remaining tuition balance after registration: ${balanceDue}.` : "",
     checkoutUrl ? `Payment link: ${checkoutUrl}` : "",
+    ...referralCodeLines,
     "Admissions will review your submission and follow up with next steps.",
   ];
 
@@ -222,6 +237,8 @@ export function sendEnrollmentEmails(emailer, { enrollment, program, cohort, pay
     `Payment status: ${enrollment.paymentStatus}`,
     `Amount due now: ${amountDue}`,
     enrollment.balanceDueCents > 0 ? `Remaining balance: ${balanceDue}` : "",
+    enrollment.referredByCode ? `Referred by code: ${enrollment.referredByCode}` : "",
+    referralCreditLine,
   ];
 
   safeSend(emailer, {

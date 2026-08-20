@@ -4,6 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { sendEnrollmentEmails } from "../server/lib/email.js";
 import { EnrollmentDatabase } from "../server/lib/enrollmentDb.js";
 import {
   REFERRAL_CREDIT_CENTS,
@@ -82,6 +83,51 @@ async function createDb(t) {
 
   return db;
 }
+
+test("the registration email tells the student the code they can share", async () => {
+  const messages = [];
+  const emailer = {
+    enabled: true,
+    adminEmail: "admissions@example.com",
+    async send(message) {
+      messages.push(message);
+      return true;
+    },
+  };
+
+  sendEnrollmentEmails(emailer, {
+    enrollment: {
+      id: "enrollment-referral-email",
+      studentFullName: "Jon Diaz",
+      email: "jon@example.com",
+      phone: "949-555-0100",
+      programId: "cna",
+      cohortId: "cna-weekday",
+      paymentStatus: "checkout_pending",
+      paymentAmountCents: 25_000,
+      balanceDueCents: 165_000,
+      referralCode: "FSHA-7K2MA",
+      referredByCode: "FSHA-99XYZ",
+      referralCreditCents: REFERRAL_CREDIT_CENTS,
+    },
+    program: { title: "Certified Nurse Assistant" },
+    cohort: { title: "Weekday Cohort", meetingPattern: "Monday to Friday" },
+    paymentRequired: true,
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+
+  const studentEmail = messages.find((message) => message.to === "jon@example.com");
+  assert.ok(studentEmail, "the student must receive a registration email");
+  // A code nobody is told about cannot be shared.
+  assert.match(studentEmail.text, /Your referral code: FSHA-7K2MA/);
+  assert.match(studentEmail.text, /\$100 check once they attend the first day/);
+  assert.match(studentEmail.text, /Referral credit applied: \$100\.00/);
+
+  const adminEmail = messages.find((message) => message.to === "admissions@example.com");
+  assert.ok(adminEmail, "admissions must be notified");
+  assert.match(adminEmail.text, /Referred by code: FSHA-99XYZ/);
+});
 
 test("referral codes survive however a student retypes them", () => {
   const code = generateReferralCode();

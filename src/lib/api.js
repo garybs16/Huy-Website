@@ -157,6 +157,26 @@ export function getAdminEnrollments(apiKey) {
   return request("/api/enrollments", { headers: adminHeaders(apiKey) });
 }
 
+export async function getAdminReferrals(apiKey) {
+  const data = await request("/api/admin/referrals", { headers: adminHeaders(apiKey) });
+  return Array.isArray(data?.items) ? data.items : [];
+}
+
+export function confirmAdminReferralAttendance(apiKey, rewardId) {
+  return request(`/api/admin/referrals/${rewardId}/confirm-attendance`, {
+    method: "POST",
+    headers: adminHeaders(apiKey),
+  });
+}
+
+export function markAdminReferralPaid(apiKey, rewardId, payoutReference) {
+  return request(`/api/admin/referrals/${rewardId}/mark-paid`, {
+    method: "POST",
+    payload: { payoutReference },
+    headers: adminHeaders(apiKey),
+  });
+}
+
 export function getAdminInquiries(apiKey) {
   return request("/api/inquiries", { headers: adminHeaders(apiKey) });
 }

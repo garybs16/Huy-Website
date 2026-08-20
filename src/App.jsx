@@ -11,6 +11,9 @@ import {
   deleteAdminCohort,
   deleteAdminProgram,
   getAdminCohorts,
+  getAdminReferrals,
+  confirmAdminReferralAttendance,
+  markAdminReferralPaid,
   getAdminEnrollments,
   getAdminExport,
   getAdminInquiries,
@@ -402,6 +405,7 @@ function App() {
   const [adminWaitlist, setAdminWaitlist] = useState([]);
   const [adminPrograms, setAdminPrograms] = useState([]);
   const [adminCohorts, setAdminCohorts] = useState([]);
+  const [adminReferrals, setAdminReferrals] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -678,13 +682,22 @@ function App() {
 
     try {
       const key = adminSession.authenticated ? undefined : adminKey.trim();
-      const [overview, enrollmentsData, inquiriesData, waitlistData, programsData, cohortsData] = await Promise.all([
+      const [
+        overview,
+        enrollmentsData,
+        inquiriesData,
+        waitlistData,
+        programsData,
+        cohortsData,
+        referralsData,
+      ] = await Promise.all([
         getAdminOverview(key),
         getAdminEnrollments(key),
         getAdminInquiries(key),
         getAdminWaitlist(key),
         getAdminPrograms(key),
         getAdminCohorts(key),
+        getAdminReferrals(key),
       ]);
 
       setAdminOverview(overview);
@@ -693,6 +706,7 @@ function App() {
       setAdminWaitlist(waitlistData.items ?? []);
       setAdminPrograms(programsData);
       setAdminCohorts(cohortsData);
+      setAdminReferrals(referralsData);
     } catch (error) {
       setAdminError(error.message || "Could not load the admin dashboard.");
     } finally {
@@ -838,6 +852,43 @@ function App() {
 
   const handleDeleteCohort = (cohortId) =>
     runAdminMutation((key) => deleteAdminCohort(key, cohortId), "Cohort deleted.");
+
+  // Both referral actions reload the list afterwards so the row reflects what the
+  // server actually recorded rather than an optimistic guess.
+  const runReferralAction = async (action, successText) => {
+    const key = adminSession.authenticated ? undefined : adminKey.trim();
+
+    if (!adminSession.authenticated && !key) {
+      setAdminError("Sign in or provide the fallback admin API key before updating referrals.");
+      return;
+    }
+
+    setAdminMutationPending(true);
+    setAdminError("");
+    setAdminNotice("");
+
+    try {
+      await action(key);
+      setAdminReferrals(await getAdminReferrals(key));
+      setAdminNotice(successText);
+    } catch (error) {
+      setAdminError(error.message || "Could not update the referral reward.");
+    } finally {
+      setAdminMutationPending(false);
+    }
+  };
+
+  const handleConfirmReferralAttendance = (rewardId) =>
+    runReferralAction(
+      (key) => confirmAdminReferralAttendance(key, rewardId),
+      "Attendance confirmed. The $100 referral check is now payable."
+    );
+
+  const handleMarkReferralPaid = (rewardId, payoutReference) =>
+    runReferralAction(
+      (key) => markAdminReferralPaid(key, rewardId, payoutReference),
+      "Referral reward recorded as paid."
+    );
 
   const handleAdminExport = async () => {
     const key = adminSession.authenticated ? undefined : adminKey.trim();
@@ -1009,6 +1060,9 @@ function App() {
                   adminWaitlist={adminWaitlist}
                   adminPrograms={adminPrograms}
                   adminCohorts={adminCohorts}
+                  adminReferrals={adminReferrals}
+                  onConfirmReferralAttendance={handleConfirmReferralAttendance}
+                  onMarkReferralPaid={handleMarkReferralPaid}
                   onAdminKeyChange={setAdminKey}
                   onAdminUsernameChange={setAdminUsername}
                   onAdminPasswordChange={setAdminPassword}
